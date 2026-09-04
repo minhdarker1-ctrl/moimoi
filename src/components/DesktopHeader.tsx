@@ -121,14 +121,6 @@ export default function DesktopHeader({
             )}
             <NoticeBell notices={notices} />
             <ThemeToggle />
-            <a
-              href="/admin"
-              className="vthangios-header-admin-btn"
-              title="Trang quản trị"
-              aria-label="Trang quản trị"
-            >
-              <i className="fas fa-gear" aria-hidden="true" />
-            </a>
           </div>
         </div>
       </header>

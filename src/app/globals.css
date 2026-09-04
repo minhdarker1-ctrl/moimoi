@@ -376,27 +376,6 @@ button {
     border-radius: 20px;
     font-variant-numeric: tabular-nums;
   }
-
-  .vthangios-header-admin-btn {
-    width: 42px;
-    height: 42px;
-    display: grid;
-    place-items: center;
-    font-size: 16px;
-    color: var(--vi-muted);
-    background: var(--vi-card);
-    border: 1px solid var(--vi-border);
-    border-radius: 50%;
-    box-shadow: var(--vi-shadow);
-    text-decoration: none;
-    transition: border-color 0.18s, color 0.18s, transform 0.25s;
-  }
-
-  .vthangios-header-admin-btn:hover {
-    color: var(--vi-accent);
-    border-color: var(--vi-accent);
-    transform: rotate(45deg);
-  }
 }
 
 .vthangios-bell-btn,
