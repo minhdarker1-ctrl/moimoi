@@ -90,7 +90,8 @@ export default function AppCard({ app }: { app: AppData }) {
             <a
               className="vthangios-app-getkey"
               href={getKeyHref}
-              {...(app.keyTypeId !== null ? {} : { target: "_blank", rel: "noopener noreferrer" })}
+              target="_blank"
+              rel="noopener noreferrer"
             >
               <i className="fas fa-key" aria-hidden="true" />
               <span>Get Key</span>
