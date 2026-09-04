@@ -75,6 +75,15 @@ export const PROVIDERS: ProviderDef[] = [
     parse: parseIdJson("https://gtraffic.io"),
   },
   {
+    id: "DR_GTRAFFIC",
+    label: "Direct GTraffic",
+    supportsFallback: false,
+    dailyLimit: 1000,
+    build: ({ token, url }) =>
+      `https://dr-manager.gtraffic.io/api/cong-khai/tao-lien-ket?apikey=${token}&url=${enc(url)}`,
+    parse: parseIdJson("https://direct.gtraffic.io"),
+  },
+  {
     id: "VUOTNHANH",
     label: "Vượt Nhanh",
     supportsFallback: false,

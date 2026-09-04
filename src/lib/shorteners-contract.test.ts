@@ -68,6 +68,7 @@ test("mọi cổng parse thành công trả về URL https", () => {
     TRAFFICVN: JSON.stringify({ status: "success", shortenedUrl: "https://trafficvn.com/aB3" }),
     ONTOPS: JSON.stringify({ id: "xY9" }),
     GTRAFFIC: JSON.stringify({ id: "xY9" }),
+    DR_GTRAFFIC: JSON.stringify({ id: "xY9" }),
     VUOTNHANH: "https://vuotnhanh.com/x1",
   };
 
