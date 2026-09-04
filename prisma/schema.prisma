@@ -1,0 +1,226 @@
+// TRƯỚC KHI DEPLOY VERCEL: đổi provider dưới thành "postgresql".
+// Prisma không cho dùng env() ở provider nên phải sửa tay đúng 1 dòng.
+// Vercel không chạy được SQLite (filesystem ephemeral) — dùng Neon hoặc Supabase.
+generator client {
+  provider = "prisma-client-js"
+  // rhel-openssl-3.0.x: runtime của Vercel. Thiếu dòng này thì build xong
+  // nhưng runtime báo "Query engine not found".
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------- Nội dung site ----------
+
+model Site {
+  id             Int      @id @default(1)
+  name           String   @default("Tên Của Bạn")
+  iam            String   @default("Hi, i am")
+  verified       Boolean  @default(true)
+  avatarUrl      String   @default("")
+  avatarFrameUrl String   @default("")
+  // Mảng JSON các dòng chữ chạy typewriter.
+  typedLines     String   @default("[]")
+  seoTitle       String   @default("")
+  seoDescription String   @default("")
+  seoKeywords    String   @default("")
+  ogImageUrl     String   @default("")
+  faviconUrl     String   @default("")
+  ytChannelUrl   String   @default("")
+  ytBannerOn     Boolean  @default(true)
+  snowOn         Boolean  @default(false)
+  footerText     String   @default("")
+  updatedAt      DateTime @updatedAt
+}
+
+model Social {
+  id      Int     @id @default(autoincrement())
+  iconUrl String
+  url     String
+  order   Int     @default(0)
+  visible Boolean @default(true)
+
+  @@index([order])
+}
+
+model LinkBox {
+  id       Int     @id @default(autoincrement())
+  title    String
+  subtitle String  @default("")
+  iconUrl  String  @default("")
+  url      String
+  order    Int     @default(0)
+  visible  Boolean @default(true)
+
+  @@index([order])
+}
+
+model Group {
+  id      Int     @id @default(autoincrement())
+  title   String
+  order   Int     @default(0)
+  visible Boolean @default(true)
+  apps    App[]
+
+  @@index([order])
+}
+
+model App {
+  id      Int    @id @default(autoincrement())
+  groupId Int
+  group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  name    String
+  desc    String @default("")
+  iconUrl String @default("")
+  bannerUrl String @default("")
+  // Mảng JSON URL ảnh preview cho lightbox.
+  previewUrls String @default("[]")
+  // Mảng JSON: ["ios"] | ["android"] | ["ios","android"]
+  platforms   String @default("[]")
+  downloadUrl String @default("")
+  // Link Get Key ngoài (như bản gốc). Bỏ trống nếu dùng keyType.
+  getKeyUrl   String @default("")
+  // Dùng hệ thống key nội bộ. null = không cần key.
+  keyTypeId Int?
+  keyType   KeyType? @relation(fields: [keyTypeId], references: [id], onDelete: SetNull)
+  order     Int      @default(0)
+  visible   Boolean  @default(true)
+  keys      AppKey[]
+  sessions  KeySession[]
+
+  @@index([groupId, order])
+}
+
+model Notice {
+  id        Int      @id @default(autoincrement())
+  title     String
+  body      String   @default("")
+  visible   Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+// ---------- Đếm truy cập ----------
+
+model Counter {
+  id    Int @id @default(1)
+  total Int @default(0)
+}
+
+model DailyHit {
+  // YYYY-MM-DD theo giờ VN.
+  date  String @id
+  count Int    @default(0)
+}
+
+// ---------- Chống lạm dụng ----------
+
+// Rate limit lưu ở DB, không phải RAM: Vercel chạy nhiều serverless instance,
+// mỗi instance có Map riêng nên giới hạn in-memory bị nhân lên theo số instance.
+model RateHit {
+  // "<scope>:<ip>" — scope là tên endpoint.
+  id        String   @id
+  count     Int      @default(1)
+  windowAt  DateTime @default(now())
+
+  @@index([windowAt])
+}
+
+// Khoá đăng nhập theo IP. Sai nhiều lần thì lockedUntil đẩy về tương lai.
+model LoginAttempt {
+  ipHash      String    @id
+  fails       Int       @default(0)
+  lockedUntil DateTime?
+  lastAt      DateTime  @default(now())
+
+  @@index([lastAt])
+}
+
+// ---------- Vượt link + key ----------
+
+model Shortener {
+  id       Int     @id @default(autoincrement())
+  name     String
+  // TRAFFIC4K | TRAFFICVN | ONTOPS | GTRAFFIC | VUOTNHANH
+  provider String
+  // Mã hoá AES-256-GCM bằng SESSION_SECRET. Không bao giờ gửi xuống client.
+  tokenEnc String
+  // 4 ký tự cuối của token, để admin nhận diện mà không cần giải mã.
+  tokenHint String @default("")
+  enabled  Boolean @default(true)
+  order    Int     @default(0)
+  // Quota ngày (Ontops/GTraffic giới hạn 1000/ngày). 0 = không giới hạn.
+  dailyLimit Int    @default(0)
+  dailyUsed  Int    @default(0)
+  // YYYY-MM-DD của lần reset gần nhất.
+  dailyDate  String @default("")
+
+  @@index([order])
+}
+
+model KeyType {
+  id         Int     @id @default(autoincrement())
+  name       String
+  // Số cổng phải vượt.
+  steps      Int     @default(2)
+  // Mảng JSON id Shortener, có thứ tự.
+  providerIds String @default("[]")
+  ttlHours   Int     @default(24)
+  // Giãn cách tối thiểu giữa 2 hop (giây). Nhanh hơn = bot.
+  minSeconds Int     @default(8)
+  // 0 = dùng không giới hạn lần.
+  maxUses    Int     @default(1)
+  enabled    Boolean @default(true)
+  apps       App[]
+  keys       AppKey[]
+  sessions   KeySession[]
+}
+
+model KeySession {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  keyTypeId Int
+  keyType   KeyType  @relation(fields: [keyTypeId], references: [id], onDelete: Cascade)
+  appId     Int?
+  app       App?     @relation(fields: [appId], references: [id], onDelete: SetNull)
+  // Đã vượt xong bao nhiêu cổng.
+  step      Int      @default(0)
+  // Mảng JSON link rút gọn từng lớp, tạo sẵn lúc start.
+  hopUrls   String   @default("[]")
+  // Mảng JSON timestamp mỗi hop, để kiểm minSeconds.
+  stepAt    String   @default("[]")
+  ipHash    String   @default("")
+  uaHash    String   @default("")
+  expiresAt DateTime
+  doneAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([expiresAt])
+}
+
+model AppKey {
+  id        Int      @id @default(autoincrement())
+  // SHA-256 của key. Không lưu plaintext.
+  keyHash   String   @unique
+  // 4 ký tự đầu, để admin nhận diện key trong danh sách.
+  prefix    String
+  keyTypeId Int
+  keyType   KeyType  @relation(fields: [keyTypeId], references: [id], onDelete: Cascade)
+  appId     Int?
+  app       App?     @relation(fields: [appId], references: [id], onDelete: SetNull)
+  expiresAt DateTime
+  maxUses   Int      @default(1)
+  usedCount Int      @default(0)
+  revoked   Boolean  @default(false)
+  // true = admin tự tạo, không qua vượt link.
+  manual    Boolean  @default(false)
+  note      String   @default("")
+  createdAt DateTime @default(now())
+
+  @@index([expiresAt])
+  @@index([appId])
+}

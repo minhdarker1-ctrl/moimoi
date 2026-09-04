@@ -1,0 +1,36 @@
+{
+  "name": "moimoi",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "prisma generate && next build",
+    "start": "next start",
+    "postinstall": "prisma generate",
+    "db:push": "prisma db push",
+    "db:seed": "node --experimental-strip-types prisma/seed.ts",
+    "test": "node --experimental-strip-types --test src/lib/*.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@prisma/client": "6.16.2",
+    "bcryptjs": "3.0.2",
+    "jose": "6.1.0",
+    "next": "15.5.4",
+    "react": "19.1.1",
+    "react-dom": "19.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "22.18.1",
+    "@types/react": "19.1.13",
+    "@types/react-dom": "19.1.9",
+    "prisma": "6.16.2",
+    "typescript": "5.9.2"
+  },
+  "allowScripts": {
+    "prisma@6.16.2": true,
+    "@prisma/client@6.16.2": true,
+    "@prisma/engines@6.16.2": true,
+    "sharp@0.34.5": true
+  }
+}
