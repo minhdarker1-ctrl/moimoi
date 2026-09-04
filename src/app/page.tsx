@@ -59,12 +59,12 @@ export default async function Home() {
       />
 
       <main>
-        <div className="vthangios-hero">
-          <div className="vthangios-avatar-wrap">
+        <div className="mdarker-hero">
+          <div className="mdarker-avatar-wrap">
             {site.avatarUrl && (
               /* eslint-disable-next-line @next/next/no-img-element -- URL do admin dán */
               <img
-                className="vthangios-avatar"
+                className="mdarker-avatar"
                 src={site.avatarUrl}
                 alt={`Ảnh đại diện ${site.name}`}
                 width={120}
@@ -74,29 +74,29 @@ export default async function Home() {
             )}
             {site.avatarFrameUrl && (
               /* eslint-disable-next-line @next/next/no-img-element -- URL do admin dán */
-              <img className="vthangios-avatar-frame" src={site.avatarFrameUrl} alt="" aria-hidden="true" />
+              <img className="mdarker-avatar-frame" src={site.avatarFrameUrl} alt="" aria-hidden="true" />
             )}
           </div>
 
-          <p className="vthangios-iam">{site.iam}</p>
-          <h1 className="vthangios-name">
+          <p className="mdarker-iam">{site.iam}</p>
+          <h1 className="mdarker-name">
             {site.name}
             {site.verified && (
               /* eslint-disable-next-line @next/next/no-img-element -- icon tĩnh nhỏ */
-              <img className="vthangios-verify" src="/verify.svg" alt="Đã xác minh" width={24} height={24} />
+              <img className="mdarker-verify" src="/verify.svg" alt="Đã xác minh" width={24} height={24} />
             )}
           </h1>
-          <p className="vthangios-headline">
+          <p className="mdarker-headline">
             and I&apos;m a <TypedText lines={parseLines(site.typedLines)} />
           </p>
 
           {socials.length > 0 && (
-            <div className="vthangios-socials">
+            <div className="mdarker-socials">
               {socials.map((s) => (
                 <a
                   key={s.id}
                   href={s.url}
-                  className="vthangios-social-item"
+                  className="mdarker-social-item"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Mạng xã hội"
@@ -110,11 +110,11 @@ export default async function Home() {
         </div>
 
         {linkBoxes.length > 0 && (
-          <div className="vthangios-linkbox-section">
+          <div className="mdarker-linkbox-section">
             {linkBoxes.map((b) => (
               <a
                 key={b.id}
-                className="vthangios-linkbox"
+                className="mdarker-linkbox"
                 href={b.url}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -138,26 +138,26 @@ export default async function Home() {
       <LiveClock />
 
       {site.ytBannerOn && site.ytChannelUrl && (
-        <div className="vthangios-yt-banner">
-          <div className="vthangios-yt-info">
-            <i className="fa-solid fa-video vthangios-yt-icon" aria-hidden="true" />
+        <div className="mdarker-yt-banner">
+          <div className="mdarker-yt-info">
+            <i className="fa-solid fa-video mdarker-yt-icon" aria-hidden="true" />
             <div>
-              <p className="vthangios-yt-title">Theo Dõi Kênh YouTube</p>
-              <p className="vthangios-yt-desc">Cập nhật video hướng dẫn mới nhất</p>
+              <p className="mdarker-yt-title">Theo Dõi Kênh YouTube</p>
+              <p className="mdarker-yt-desc">Cập nhật video hướng dẫn mới nhất</p>
             </div>
           </div>
           <a
             href={site.ytChannelUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="vthangios-yt-btn"
+            className="mdarker-yt-btn"
           >
             <i className="fa-brands fa-youtube" aria-hidden="true" /> Subscribe Ngay
           </a>
         </div>
       )}
 
-      <footer className="vthangios-footer">{site.footerText}</footer>
+      <footer className="mdarker-footer">{site.footerText}</footer>
     </main>
   </>
   );

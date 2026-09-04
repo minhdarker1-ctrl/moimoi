@@ -26,7 +26,7 @@ function useCountUp(target: number) {
 
 function Spark({ id }: { id: string }) {
   return (
-    <svg className="vthangios-stat-spark" viewBox="0 0 24 16" fill="none" aria-hidden="true">
+    <svg className="mdarker-stat-spark" viewBox="0 0 24 16" fill="none" aria-hidden="true">
       <path
         d="M1 13L6 8L10 11L15 4L19 7L23 2"
         stroke={`url(#${id})`}
@@ -71,21 +71,21 @@ export default function StatsBar({ total, today }: { total: number; today: numbe
   const fmt = new Intl.NumberFormat("vi-VN");
 
   return (
-    <div className="vthangios-stats">
-      <div className="vthangios-stats-live">
-        <span className="vthangios-live-dot" />
+    <div className="mdarker-stats">
+      <div className="mdarker-stats-live">
+        <span className="mdarker-live-dot" />
         LIVE
       </div>
-      <div className="vthangios-stat-item">
+      <div className="mdarker-stat-item">
         <Spark id="vtStatGrad1" />
-        <span className="vthangios-stat-number">{fmt.format(at)}</span>
-        <span className="vthangios-stat-label">Tổng Truy Cập</span>
+        <span className="mdarker-stat-number">{fmt.format(at)}</span>
+        <span className="mdarker-stat-label">Tổng Truy Cập</span>
       </div>
-      <div className="vthangios-stat-divider" />
-      <div className="vthangios-stat-item">
+      <div className="mdarker-stat-divider" />
+      <div className="mdarker-stat-item">
         <Spark id="vtStatGrad2" />
-        <span className="vthangios-stat-number">+{fmt.format(ad)}</span>
-        <span className="vthangios-stat-label">Hôm Nay</span>
+        <span className="mdarker-stat-number">+{fmt.format(ad)}</span>
+        <span className="mdarker-stat-label">Hôm Nay</span>
       </div>
     </div>
   );

@@ -54,19 +54,19 @@ export default function StarrySky() {
   }, []);
 
   return (
-    <div className="vthangios-starry-sky" aria-hidden="true">
+    <div className="mdarker-starry-sky" aria-hidden="true">
       {/* Lớp tinh vân mờ phát sáng nhẹ */}
-      <div className="vthangios-nebula-glow" />
+      <div className="mdarker-nebula-glow" />
 
       {/* 2 vệt sao băng bay ngang bầu trời */}
-      <div className="vthangios-shooting-star star-1" />
-      <div className="vthangios-shooting-star star-2" />
+      <div className="mdarker-shooting-star star-1" />
+      <div className="mdarker-shooting-star star-2" />
 
       {/* Bầu trời sao lấp lánh */}
       {stars.map((s) => (
         <span
           key={s.id}
-          className={`vthangios-star ${s.size > 2.5 ? "star-bright" : ""}`}
+          className={`mdarker-star ${s.size > 2.5 ? "star-bright" : ""}`}
           style={{
             top: `${s.top}%`,
             left: `${s.left}%`,

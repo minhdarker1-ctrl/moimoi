@@ -23,7 +23,7 @@ export default function ThemeToggle() {
   return (
     <button
       type="button"
-      className="vthangios-theme-btn"
+      className="mdarker-theme-btn"
       onClick={toggle}
       aria-label={dark ? "Chuyển chế độ sáng" : "Chuyển chế độ tối"}
       title={dark ? "Chế độ sáng" : "Chế độ tối"}

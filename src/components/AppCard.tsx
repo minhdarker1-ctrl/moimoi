@@ -33,14 +33,14 @@ export default function AppCard({ app }: { app: AppData }) {
       {/* eslint-disable-next-line @next/next/no-img-element -- URL do admin dán, host tự do */}
       <img src={app.bannerUrl} alt={app.name} loading="lazy" />
       {platforms.length > 0 && (
-        <span className="vthangios-app-banner-badges">
+        <span className="mdarker-app-banner-badges">
           {platforms.includes("ios") && (
-            <span className="vthangios-platform-badge">
+            <span className="mdarker-platform-badge">
               <i className="fab fa-apple" aria-hidden="true" /> iOS
             </span>
           )}
           {platforms.includes("android") && (
-            <span className="vthangios-platform-badge">
+            <span className="mdarker-platform-badge">
               <i className="bi bi-android2" aria-hidden="true" /> Android
             </span>
           )}
@@ -50,34 +50,34 @@ export default function AppCard({ app }: { app: AppData }) {
   );
 
   return (
-    <div className="vthangios-app-item">
+    <div className="mdarker-app-item">
       {banner &&
         (previews.length > 0 ? (
           <PreviewLightbox images={previews} title={app.name}>
             {banner}
           </PreviewLightbox>
         ) : (
-          <div className="vthangios-app-banner">{banner}</div>
+          <div className="mdarker-app-banner">{banner}</div>
         ))}
 
-      <div className="vthangios-app-info">
+      <div className="mdarker-app-info">
         {app.iconUrl && (
-          <div className="vthangios-app-icon-wrap">
+          <div className="mdarker-app-icon-wrap">
             {/* eslint-disable-next-line @next/next/no-img-element -- URL do admin dán */}
             <img src={app.iconUrl} alt="" width={60} height={60} loading="lazy" />
           </div>
         )}
-        <div className="vthangios-app-text">
-          <span className="vthangios-app-name">{app.name}</span>
-          {app.desc && <span className="vthangios-app-desc">{app.desc}</span>}
+        <div className="mdarker-app-text">
+          <span className="mdarker-app-name">{app.name}</span>
+          {app.desc && <span className="mdarker-app-desc">{app.desc}</span>}
         </div>
       </div>
 
       {(app.downloadUrl || getKeyHref) && (
-        <div className="vthangios-app-actions">
+        <div className="mdarker-app-actions">
           {app.downloadUrl && (
             <a
-              className="vthangios-download-btn"
+              className="mdarker-download-btn"
               href={app.downloadUrl}
               target="_blank"
               rel="noopener noreferrer"
@@ -88,7 +88,7 @@ export default function AppCard({ app }: { app: AppData }) {
           )}
           {getKeyHref && (
             <a
-              className="vthangios-app-getkey"
+              className="mdarker-app-getkey"
               href={getKeyHref}
               target="_blank"
               rel="noopener noreferrer"

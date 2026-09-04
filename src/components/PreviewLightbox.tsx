@@ -33,7 +33,7 @@ export default function PreviewLightbox({
     <>
       <button
         type="button"
-        className="vthangios-app-banner"
+        className="mdarker-app-banner"
         onClick={() => {
           setI(0);
           ref.current?.showModal();

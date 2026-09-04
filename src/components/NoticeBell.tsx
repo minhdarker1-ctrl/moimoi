@@ -38,41 +38,41 @@ export default function NoticeBell({ notices }: { notices: NoticeItem[] }) {
 
   return (
     <>
-      <button type="button" className="vthangios-bell-btn" onClick={show} aria-label="Thông báo">
+      <button type="button" className="mdarker-bell-btn" onClick={show} aria-label="Thông báo">
         <i className="fas fa-bell" aria-hidden="true" />
-        {unread > 0 && <span className="vthangios-bell-badge">{unread}</span>}
+        {unread > 0 && <span className="mdarker-bell-badge">{unread}</span>}
       </button>
 
       {open && (
         <>
-          <div className="vthangios-notif-overlay" onClick={() => setOpen(false)} />
-          <div className="vthangios-notif-panel" role="dialog" aria-modal="true" aria-label="Thông báo">
-            <div className="vthangios-notif-header">
+          <div className="mdarker-notif-overlay" onClick={() => setOpen(false)} />
+          <div className="mdarker-notif-panel" role="dialog" aria-modal="true" aria-label="Thông báo">
+            <div className="mdarker-notif-header">
               <span>
                 <i className="fas fa-bell" aria-hidden="true" /> Thông Báo
               </span>
               <button
                 type="button"
-                className="vthangios-notif-close"
+                className="mdarker-notif-close"
                 onClick={() => setOpen(false)}
                 aria-label="Đóng"
               >
                 <i className="fas fa-xmark" aria-hidden="true" />
               </button>
             </div>
-            <div className="vthangios-notif-body">
+            <div className="mdarker-notif-body">
               {notices.length === 0 ? (
-                <div className="vthangios-notif-empty">
+                <div className="mdarker-notif-empty">
                   <i className="fas fa-bell-slash" aria-hidden="true" />
                   <br />
                   Chưa có thông báo
                 </div>
               ) : (
                 notices.map((n) => (
-                  <div key={n.id} className="vthangios-notif-item">
+                  <div key={n.id} className="mdarker-notif-item">
                     <h3>{n.title}</h3>
                     {n.body && <p>{n.body}</p>}
-                    <span className="vthangios-notif-time">
+                    <span className="mdarker-notif-time">
                       {new Date(n.createdAt).toLocaleString("vi-VN", { timeZone: "Asia/Ho_Chi_Minh" })}
                     </span>
                   </div>

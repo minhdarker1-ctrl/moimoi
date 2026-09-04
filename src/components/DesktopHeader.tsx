@@ -55,21 +55,21 @@ export default function DesktopHeader({
   return (
     <>
       {/* Nút điều hướng nổi chỉ dành cho màn hình di động (< 768px) */}
-      <nav className="vthangios-mobile-nav" aria-label="Điều hướng di động">
+      <nav className="mdarker-mobile-nav" aria-label="Điều hướng di động">
         <NoticeBell notices={notices} />
         <ThemeToggle />
       </nav>
 
       {/* Thanh Header kính mờ cố định dành cho máy tính (>= 768px) */}
       <header
-        className={`vthangios-desktop-header ${scrolled ? "vthangios-header-scrolled" : ""}`}
+        className={`mdarker-desktop-header ${scrolled ? "mdarker-header-scrolled" : ""}`}
         aria-label="Thanh điều hướng chính"
       >
-        <div className="vthangios-header-container">
+        <div className="mdarker-header-container">
           {/* Cụm Logo + Tên trang bên trái */}
           <button
             type="button"
-            className="vthangios-header-brand"
+            className="mdarker-header-brand"
             onClick={scrollToTop}
             title="Cuộn lên đầu trang"
           >
@@ -80,10 +80,10 @@ export default function DesktopHeader({
                 alt={siteName}
                 width={36}
                 height={36}
-                className="vthangios-header-avatar"
+                className="mdarker-header-avatar"
               />
             )}
-            <span className="vthangios-header-name">{siteName}</span>
+            <span className="mdarker-header-name">{siteName}</span>
             {verified && (
               /* eslint-disable-next-line @next/next/no-img-element */
               <img
@@ -91,19 +91,19 @@ export default function DesktopHeader({
                 alt="Đã xác minh"
                 width={18}
                 height={18}
-                className="vthangios-header-verify"
+                className="mdarker-header-verify"
               />
             )}
           </button>
 
           {/* Menu liên kết nhanh danh mục ở giữa */}
           {groups.length > 0 && (
-            <nav className="vthangios-header-nav" aria-label="Danh mục ứng dụng">
+            <nav className="mdarker-header-nav" aria-label="Danh mục ứng dụng">
               {groups.slice(0, 5).map((g) => (
                 <a
                   key={g.id}
                   href={`#group-${g.id}`}
-                  className="vthangios-header-nav-link"
+                  className="mdarker-header-nav-link"
                 >
                   {g.title}
                 </a>
@@ -112,9 +112,9 @@ export default function DesktopHeader({
           )}
 
           {/* Cụm công cụ bên phải */}
-          <div className="vthangios-header-actions">
+          <div className="mdarker-header-actions">
             {time && (
-              <div className="vthangios-header-clock" title="Giờ Việt Nam (GMT+7)" suppressHydrationWarning>
+              <div className="mdarker-header-clock" title="Giờ Việt Nam (GMT+7)" suppressHydrationWarning>
                 <i className="bi bi-clock" aria-hidden="true" />
                 <span>{time}</span>
               </div>

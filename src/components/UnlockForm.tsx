@@ -26,8 +26,8 @@ export default function UnlockForm({ appId }: { appId: number }) {
 
   if (url) {
     return (
-      <div className="vthangios-app-actions">
-        <a className="vthangios-download-btn" href={url} target="_blank" rel="noopener noreferrer">
+      <div className="mdarker-app-actions">
+        <a className="mdarker-download-btn" href={url} target="_blank" rel="noopener noreferrer">
           <span>Tải Xuống</span>
           <i className="bi bi-download" aria-hidden="true" />
         </a>

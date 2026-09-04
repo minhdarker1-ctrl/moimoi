@@ -37,5 +37,5 @@ export default function TypedText({ lines }: { lines: string[] }) {
     return () => clearTimeout(timer);
   }, [lines]);
 
-  return <span className="vthangios-gradient-text">{text}</span>;
+  return <span className="mdarker-gradient-text">{text}</span>;
 }

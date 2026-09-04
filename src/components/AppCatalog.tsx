@@ -82,24 +82,24 @@ export default function AppCatalog({ groups }: AppCatalogProps) {
   };
 
   return (
-    <div className="vthangios-catalog-wrapper">
+    <div className="mdarker-catalog-wrapper">
       {/* Thanh công cụ tìm kiếm và lọc */}
-      <div className="vthangios-catalog-bar">
+      <div className="mdarker-catalog-bar">
         {/* Ô tìm kiếm tức thì */}
-        <div className="vthangios-search-box">
-          <i className="bi bi-search vthangios-search-icon" aria-hidden="true" />
+        <div className="mdarker-search-box">
+          <i className="bi bi-search mdarker-search-icon" aria-hidden="true" />
           <input
             type="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Tìm kiếm ứng dụng, game..."
-            className="vthangios-search-input"
+            className="mdarker-search-input"
             aria-label="Tìm kiếm ứng dụng"
           />
           {search && (
             <button
               type="button"
-              className="vthangios-search-clear"
+              className="mdarker-search-clear"
               onClick={() => setSearch("")}
               title="Xoá tìm kiếm"
             >
@@ -109,10 +109,10 @@ export default function AppCatalog({ groups }: AppCatalogProps) {
         </div>
 
         {/* Cụm nút lọc nền tảng */}
-        <div className="vthangios-filter-tabs">
+        <div className="mdarker-filter-tabs">
           <button
             type="button"
-            className={`vthangios-filter-btn ${platform === "all" ? "active" : ""}`}
+            className={`mdarker-filter-btn ${platform === "all" ? "active" : ""}`}
             onClick={() => setPlatform("all")}
           >
             <i className="bi bi-grid-fill" aria-hidden="true" />
@@ -120,7 +120,7 @@ export default function AppCatalog({ groups }: AppCatalogProps) {
           </button>
           <button
             type="button"
-            className={`vthangios-filter-btn ${platform === "ios" ? "active" : ""}`}
+            className={`mdarker-filter-btn ${platform === "ios" ? "active" : ""}`}
             onClick={() => setPlatform("ios")}
           >
             <i className="fab fa-apple" aria-hidden="true" />
@@ -128,7 +128,7 @@ export default function AppCatalog({ groups }: AppCatalogProps) {
           </button>
           <button
             type="button"
-            className={`vthangios-filter-btn ${platform === "android" ? "active" : ""}`}
+            className={`mdarker-filter-btn ${platform === "android" ? "active" : ""}`}
             onClick={() => setPlatform("android")}
           >
             <i className="bi bi-android2" aria-hidden="true" />
@@ -139,10 +139,10 @@ export default function AppCatalog({ groups }: AppCatalogProps) {
 
       {/* Danh sách tab danh mục nếu có nhiều nhóm */}
       {groups.length > 1 && (
-        <div className="vthangios-group-pills">
+        <div className="mdarker-group-pills">
           <button
             type="button"
-            className={`vthangios-pill ${selectedGroupId === "all" ? "active" : ""}`}
+            className={`mdarker-pill ${selectedGroupId === "all" ? "active" : ""}`}
             onClick={() => setSelectedGroupId("all")}
           >
             Tất cả danh mục
@@ -151,7 +151,7 @@ export default function AppCatalog({ groups }: AppCatalogProps) {
             <button
               key={g.id}
               type="button"
-              className={`vthangios-pill ${selectedGroupId === g.id ? "active" : ""}`}
+              className={`mdarker-pill ${selectedGroupId === g.id ? "active" : ""}`}
               onClick={() => setSelectedGroupId(g.id)}
             >
               {g.title} ({g.apps.length})
@@ -162,11 +162,11 @@ export default function AppCatalog({ groups }: AppCatalogProps) {
 
       {/* Thông tin kết quả tìm kiếm khi đang lọc */}
       {isFiltering && (
-        <div className="vthangios-filter-status">
+        <div className="mdarker-filter-status">
           <span>
             Tìm thấy <strong>{totalResults}</strong> ứng dụng phù hợp
           </span>
-          <button type="button" onClick={clearFilters} className="vthangios-clear-btn">
+          <button type="button" onClick={clearFilters} className="mdarker-clear-btn">
             <i className="bi bi-arrow-counterclockwise" aria-hidden="true" />
             Đặt lại bộ lọc
           </button>
@@ -176,12 +176,12 @@ export default function AppCatalog({ groups }: AppCatalogProps) {
       {/* Danh sách ứng dụng theo nhóm */}
       {filteredGroups.length > 0 ? (
         filteredGroups.map((g) => (
-          <section key={g.id} id={`group-${g.id}`} className="vthangios-group-section" aria-label={g.title}>
-            <h2 className="vthangios-section-title">
+          <section key={g.id} id={`group-${g.id}`} className="mdarker-group-section" aria-label={g.title}>
+            <h2 className="mdarker-section-title">
               <span>{g.title}</span>
-              <span className="vthangios-group-count">{g.apps.length}</span>
+              <span className="mdarker-group-count">{g.apps.length}</span>
             </h2>
-            <div className="vthangios-app-list">
+            <div className="mdarker-app-list">
               {g.apps.map((a) => (
                 <AppCard key={a.id} app={a} />
               ))}
@@ -190,8 +190,8 @@ export default function AppCatalog({ groups }: AppCatalogProps) {
         ))
       ) : (
         /* Trạng thái không tìm thấy kết quả */
-        <div className="vthangios-empty-search">
-          <div className="vthangios-empty-icon">
+        <div className="mdarker-empty-search">
+          <div className="mdarker-empty-icon">
             <i className="bi bi-inbox" aria-hidden="true" />
           </div>
           <h3>Không tìm thấy ứng dụng</h3>
