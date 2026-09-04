@@ -67,7 +67,7 @@ export default function AppCard({ app }: { app: AppData }) {
             <img src={app.iconUrl} alt="" width={60} height={60} loading="lazy" />
           </div>
         )}
-        <div>
+        <div className="vthangios-app-text">
           <span className="vthangios-app-name">{app.name}</span>
           {app.desc && <span className="vthangios-app-desc">{app.desc}</span>}
         </div>
