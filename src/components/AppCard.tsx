@@ -26,7 +26,7 @@ export default function AppCard({ app }: { app: AppData }) {
   const previews = parseArr(app.previewUrls);
   const platforms = parseArr(app.platforms);
   const getKeyHref =
-    app.keyTypeId !== null ? `/api/getkey/start?appId=${app.id}` : (app.getKeyUrl || null);
+    app.keyTypeId !== null ? `/getkey/${app.id}` : (app.getKeyUrl || null);
 
   const banner = app.bannerUrl && (
     <>

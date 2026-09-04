@@ -13,25 +13,31 @@ function baseUrl(req: Request): string {
   return `${url.protocol}//${url.host}`;
 }
 
-function fail(req: Request, msg: string) {
+function fail(req: Request, msg: string, isJson: boolean = false) {
+  if (isJson) {
+    return NextResponse.json({ ok: false, error: msg }, { status: 400 });
+  }
   const url = new URL("/key/error", baseUrl(req));
   url.searchParams.set("m", msg);
   return NextResponse.redirect(url, 302);
 }
 
 export async function GET(req: Request) {
+  const reqUrl = new URL(req.url);
+  const isJson = reqUrl.searchParams.get("format") === "json" || req.headers.get("accept")?.includes("application/json") || false;
+
   // Mỗi lần bấm tạo N link thật trên cổng rút gọn, đốt quota.
   // Không giới hạn thì spam F5 là hết 1000 link/ngày của Ontops.
   if (await rateLimit("getkey", clientIp(req), 10, 60_000)) {
-    return fail(req, "Bạn bấm quá nhiều lần. Chờ 1 phút rồi thử lại.");
+    return fail(req, "Bạn bấm quá nhiều lần. Chờ 1 phút rồi thử lại.", isJson);
   }
   await maybeCleanup();
 
-  const appId = Number(new URL(req.url).searchParams.get("appId"));
-  if (!Number.isInteger(appId) || appId <= 0) return fail(req, "Thiếu mã ứng dụng.");
+  const appId = Number(reqUrl.searchParams.get("appId"));
+  if (!Number.isInteger(appId) || appId <= 0) return fail(req, "Thiếu mã ứng dụng.", isJson);
 
   const app = await db.app.findUnique({ where: { id: appId }, include: { keyType: true } });
-  if (!app?.visible || !app.keyType?.enabled) return fail(req, "Ứng dụng không dùng hệ thống key.");
+  if (!app?.visible || !app.keyType?.enabled) return fail(req, "Ứng dụng không dùng hệ thống key.", isJson);
 
   const kt = app.keyType;
   let ids: number[] = [];
@@ -41,10 +47,10 @@ export async function GET(req: Request) {
   } catch {
     ids = [];
   }
-  if (ids.length === 0) return fail(req, "Admin chưa cấu hình cổng vượt link.");
+  if (ids.length === 0) return fail(req, "Admin chưa cấu hình cổng vượt link.", isJson);
 
   const candidates = await usableShorteners(ids);
-  if (candidates.length === 0) return fail(req, "Tất cả cổng vượt link đang không dùng được.");
+  if (candidates.length === 0) return fail(req, "Tất cả cổng vượt link đang không dùng được.", isJson);
 
   const steps = Math.max(1, Math.min(kt.steps, 8));
   const token = sessionToken();
@@ -61,7 +67,7 @@ export async function GET(req: Request) {
   for (const t of targets) {
     // Cổng lỗi thì fallback đưa user về thẳng checkpoint, không bị kẹt.
     const url = await shortenWithFallback(candidates, t, t, used);
-    if (!url) return fail(req, "Không tạo được link vượt. Thử lại sau.");
+    if (!url) return fail(req, "Không tạo được link vượt. Thử lại sau.", isJson);
     hopUrls.push(url);
   }
 
@@ -79,6 +85,10 @@ export async function GET(req: Request) {
       expiresAt: new Date(Date.now() + SESSION_TTL_MIN * 60_000),
     },
   });
+
+  if (isJson) {
+    return NextResponse.json({ ok: true, url: hopUrls[0], steps, appName: app.name });
+  }
 
   return NextResponse.redirect(hopUrls[0], 302);
 }
