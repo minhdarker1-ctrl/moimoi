@@ -7,7 +7,7 @@ import { saveShortener, deleteShortener } from "../actions";
 export const dynamic = "force-dynamic";
 
 export default async function ShortenersPage() {
-  const rows = await db.shortener.findMany({ orderBy: { order: "asc" } });
+  const rows = await db.shortener.findMany({ orderBy: [{ order: "asc" }, { id: "asc" }] });
   const today = vnDate();
 
   return (

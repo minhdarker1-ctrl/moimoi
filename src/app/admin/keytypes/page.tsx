@@ -16,7 +16,7 @@ function ids(json: string): string {
 export default async function KeyTypesPage() {
   const [rows, shorteners] = await Promise.all([
     db.keyType.findMany({ orderBy: { id: "asc" }, include: { _count: { select: { apps: true } } } }),
-    db.shortener.findMany({ orderBy: { order: "asc" } }),
+    db.shortener.findMany({ orderBy: { id: "asc" } }),
   ]);
 
   return (
