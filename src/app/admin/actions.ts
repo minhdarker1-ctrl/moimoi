@@ -115,6 +115,16 @@ export async function saveSite(fd: FormData) {
   };
 
   await db.site.upsert({ where: { id: 1 }, update: data, create: { id: 1, ...data } });
+
+  const counterTotal = num(fd, "counterTotal", -1);
+  if (counterTotal >= 0) {
+    await db.counter.upsert({
+      where: { id: 1 },
+      update: { total: counterTotal },
+      create: { id: 1, total: counterTotal },
+    });
+  }
+
   refresh("/admin/site");
 }
 

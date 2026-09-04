@@ -14,7 +14,10 @@ function lines(json: string): string {
 }
 
 export default async function SitePage() {
-  const s = await db.site.findUnique({ where: { id: 1 } });
+  const [s, counter] = await Promise.all([
+    db.site.findUnique({ where: { id: 1 } }),
+    db.counter.findUnique({ where: { id: 1 } }),
+  ]);
 
   return (
     <div className="vt-admin">
@@ -87,6 +90,10 @@ export default async function SitePage() {
           <label className="vt-field">
             <span>Chữ footer</span>
             <input type="text" name="footerText" defaultValue={s?.footerText ?? ""} />
+          </label>
+          <label className="vt-field">
+            <span>Tổng lượt truy cập (Counter)</span>
+            <input type="number" name="counterTotal" defaultValue={counter?.total ?? 3000} min={0} />
           </label>
         </div>
 

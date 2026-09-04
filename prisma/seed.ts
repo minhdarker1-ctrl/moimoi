@@ -30,7 +30,7 @@ async function main() {
   await db.counter.upsert({
     where: { id: 1 },
     update: {},
-    create: { id: 1, total: 0 },
+    create: { id: 1, total: 3000 },
   });
 
   const socials = [
