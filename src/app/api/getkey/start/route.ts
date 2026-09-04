@@ -5,6 +5,7 @@ import { shortenWithFallback, usableShorteners } from "@/lib/getkey";
 import { clientIp, rateLimit, maybeCleanup } from "@/lib/guard";
 
 const SESSION_TTL_MIN = 30;
+export const maxDuration = 30;
 
 function baseUrl(req: Request): string {
   const env = process.env.NEXT_PUBLIC_SITE_URL;
@@ -66,9 +67,9 @@ export async function GET(req: Request) {
   const hopUrls: string[] = [];
   for (const t of targets) {
     // Cổng lỗi thì fallback đưa user về thẳng checkpoint, không bị kẹt.
-    const url = await shortenWithFallback(candidates, t, t, used);
-    if (!url) return fail(req, "Không tạo được link vượt. Thử lại sau.", isJson);
-    hopUrls.push(url);
+    const res = await shortenWithFallback(candidates, t, t, used);
+    if (!res.ok) return fail(req, `Không tạo được link vượt (${res.error}).`, isJson);
+    hopUrls.push(res.url);
   }
 
   const ip = clientIp(req);

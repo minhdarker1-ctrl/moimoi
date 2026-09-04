@@ -29,8 +29,13 @@ function parseStatusJson(body: string): string {
 /** Cổng chỉ trả mã, phải tự ghép domain — Ontops, GTraffic. */
 function parseIdJson(domain: string) {
   return (body: string): string => {
-    const d = JSON.parse(body) as { id?: string; message?: string };
-    if (!d.id) throw new Error(d.message || "Cổng rút gọn không trả mã");
+    let d: { id?: string; message?: string; err?: string; error?: string };
+    try {
+      d = JSON.parse(body);
+    } catch {
+      throw new Error("Phản hồi không phải JSON: " + body.slice(0, 100));
+    }
+    if (!d.id) throw new Error(d.err || d.message || d.error || "Cổng rút gọn không trả mã");
     return `${domain}/${d.id}`;
   };
 }
@@ -144,8 +149,12 @@ export async function shorten(
   const url = buildApiUrl(provider, token, targetUrl, fallbackUrl);
 
   const res = await fetch(url, {
-    signal: AbortSignal.timeout(10_000),
-    headers: { accept: "application/json, text/plain" },
+    signal: AbortSignal.timeout(15_000),
+    headers: {
+      accept: "application/json, text/plain",
+      "user-agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36",
+    },
     cache: "no-store",
   });
   if (!res.ok) throw new Error(`${provider} HTTP ${res.status}`);

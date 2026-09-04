@@ -28,27 +28,30 @@ async function usableShorteners(ids: number[]) {
  * Rút gọn `target` bằng cổng đầu tiên chạy được, bỏ qua cổng lỗi/hết quota.
  * `used` để không dùng lại cùng 1 cổng cho 2 lớp liền nhau.
  */
+export type ShortenResult = { ok: true; url: string } | { ok: false; error: string };
+
 export async function shortenWithFallback(
   candidates: Awaited<ReturnType<typeof usableShorteners>>,
   target: string,
   fallbackUrl: string,
   used: Set<number>,
-): Promise<string | null> {
+): Promise<ShortenResult> {
   const order = [...candidates.filter((c) => !used.has(c.id)), ...candidates.filter((c) => used.has(c.id))];
 
+  let lastError = "Không có cổng rút gọn nào khả dụng.";
   for (const s of order) {
     if (!isProvider(s.provider)) continue;
     try {
       const url = await shorten(s.provider, decryptToken(s.tokenEnc), target, fallbackUrl);
       used.add(s.id);
       await db.shortener.update({ where: { id: s.id }, data: { dailyUsed: { increment: 1 } } });
-      return url;
+      return { ok: true, url };
     } catch (err) {
-      // Cổng lỗi → thử cổng kế. Không log token.
-      console.error(`Cổng ${s.provider} lỗi:`, err instanceof Error ? err.message : err);
+      lastError = `Cổng ${s.name || s.provider}: ${err instanceof Error ? err.message : String(err)}`;
+      console.error(lastError);
     }
   }
-  return null;
+  return { ok: false, error: lastError };
 }
 
 export { usableShorteners };
