@@ -1,5 +1,4 @@
 import PreviewLightbox from "./PreviewLightbox";
-import UnlockForm from "./UnlockForm";
 
 export type AppData = {
   id: number;
@@ -26,7 +25,8 @@ function parseArr(json: string): string[] {
 export default function AppCard({ app }: { app: AppData }) {
   const previews = parseArr(app.previewUrls);
   const platforms = parseArr(app.platforms);
-  const needsKey = app.keyTypeId !== null;
+  const getKeyHref =
+    app.keyTypeId !== null ? `/api/getkey/start?appId=${app.id}` : (app.getKeyUrl || null);
 
   const banner = app.bannerUrl && (
     <>
@@ -73,17 +73,7 @@ export default function AppCard({ app }: { app: AppData }) {
         </div>
       </div>
 
-      {needsKey ? (
-        <>
-          <div className="vthangios-app-actions">
-            <a className="vthangios-app-getkey" href={`/api/getkey/start?appId=${app.id}`}>
-              <i className="fas fa-key" aria-hidden="true" />
-              <span>Get Key</span>
-            </a>
-          </div>
-          <UnlockForm appId={app.id} />
-        </>
-      ) : (
+      {(app.downloadUrl || getKeyHref) && (
         <div className="vthangios-app-actions">
           {app.downloadUrl && (
             <a
@@ -96,12 +86,11 @@ export default function AppCard({ app }: { app: AppData }) {
               <i className="bi bi-download" aria-hidden="true" />
             </a>
           )}
-          {app.getKeyUrl && (
+          {getKeyHref && (
             <a
               className="vthangios-app-getkey"
-              href={app.getKeyUrl}
-              target="_blank"
-              rel="noopener noreferrer"
+              href={getKeyHref}
+              {...(app.keyTypeId !== null ? {} : { target: "_blank", rel: "noopener noreferrer" })}
             >
               <i className="fas fa-key" aria-hidden="true" />
               <span>Get Key</span>
