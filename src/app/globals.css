@@ -11,12 +11,166 @@
 }
 
 [data-theme="dark"] {
-  --vi-bg: #0c0e16;
-  --vi-card: #151824;
+  --vi-bg: #070913;
+  --vi-card: rgba(21, 24, 36, 0.82);
   --vi-text: #eef0f8;
   --vi-muted: #9aa1b4;
-  --vi-border: #252a3b;
-  --vi-shadow: 0 8px 24px rgb(0 0 0 / 45%);
+  --vi-border: rgba(255, 255, 255, 0.09);
+  --vi-shadow: 0 8px 28px rgb(0 0 0 / 55%);
+}
+
+[data-theme="dark"] body {
+  background-color: #070913;
+  background-image:
+    radial-gradient(ellipse at 15% 15%, rgba(124, 92, 255, 0.14) 0%, transparent 50%),
+    radial-gradient(ellipse at 85% 65%, rgba(0, 212, 255, 0.09) 0%, transparent 50%),
+    radial-gradient(circle at 50% 90%, rgba(90, 40, 180, 0.08) 0%, transparent 60%);
+  background-attachment: fixed;
+}
+
+/* Glassmorphism nhẹ cho thẻ card ở Dark Mode */
+[data-theme="dark"] .vthangios-app-item,
+[data-theme="dark"] .vthangios-linkbox,
+[data-theme="dark"] .vthangios-stats,
+[data-theme="dark"] .vthangios-yt-banner,
+[data-theme="dark"] .vthangios-filter-tabs,
+[data-theme="dark"] .vthangios-pill,
+[data-theme="dark"] .vt-card {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* ---------- STARRY SKY (DARK MODE) ---------- */
+.vthangios-starry-sky {
+  display: none;
+}
+
+[data-theme="dark"] .vthangios-starry-sky {
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+  contain: strict;
+}
+
+.vthangios-nebula-glow {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 40% at 20% 20%, rgba(124, 92, 255, 0.12), transparent),
+    radial-gradient(ellipse 50% 50% at 80% 75%, rgba(0, 212, 255, 0.08), transparent);
+  pointer-events: none;
+}
+
+.vthangios-star {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: vt-twinkle ease-in-out infinite alternate;
+  will-change: opacity, transform;
+}
+
+.vthangios-star.star-bright {
+  animation: vt-twinkle-bright ease-in-out infinite alternate;
+}
+
+@keyframes vt-twinkle {
+  0% {
+    opacity: 0.2;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 0.3;
+    transform: scale(0.9);
+  }
+}
+
+@keyframes vt-twinkle-bright {
+  0% {
+    opacity: 0.35;
+    transform: scale(0.9);
+    filter: drop-shadow(0 0 2px #fff);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.25);
+    filter: drop-shadow(0 0 8px #fff) drop-shadow(0 0 14px rgba(124, 92, 255, 0.8));
+  }
+  100% {
+    opacity: 0.4;
+    transform: scale(0.95);
+    filter: drop-shadow(0 0 3px #fff);
+  }
+}
+
+/* Sao băng (Shooting star) */
+.vthangios-shooting-star {
+  position: absolute;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.95), rgba(124, 92, 255, 0.5), transparent);
+  border-radius: 999px;
+  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.8));
+  transform: rotate(-35deg) translateX(0);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.vthangios-shooting-star.star-1 {
+  top: 10%;
+  left: 65%;
+  width: 140px;
+  animation: vt-shooting-1 11s ease-in-out infinite;
+  animation-delay: 2s;
+}
+
+.vthangios-shooting-star.star-2 {
+  top: 28%;
+  left: 85%;
+  width: 100px;
+  animation: vt-shooting-2 16s ease-in-out infinite;
+  animation-delay: 8s;
+}
+
+@keyframes vt-shooting-1 {
+  0% {
+    transform: rotate(-35deg) translateX(0);
+    opacity: 0;
+  }
+  2% {
+    opacity: 1;
+  }
+  6% {
+    transform: rotate(-35deg) translateX(-450px);
+    opacity: 0;
+  }
+  100% {
+    transform: rotate(-35deg) translateX(-450px);
+    opacity: 0;
+  }
+}
+
+@keyframes vt-shooting-2 {
+  0% {
+    transform: rotate(-40deg) translateX(0);
+    opacity: 0;
+  }
+  2% {
+    opacity: 0.9;
+  }
+  5% {
+    transform: rotate(-40deg) translateX(-380px);
+    opacity: 0;
+  }
+  100% {
+    transform: rotate(-40deg) translateX(-380px);
+    opacity: 0;
+  }
 }
 
 * {

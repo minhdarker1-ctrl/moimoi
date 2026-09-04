@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Quicksand } from "next/font/google";
 import { db } from "@/lib/db";
+import StarrySky from "@/components/StarrySky";
 import "./globals.css";
 
 const quicksand = Quicksand({
@@ -50,7 +51,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body>{children}</body>
+      <body>
+        <StarrySky />
+        {children}
+      </body>
     </html>
   );
 }
