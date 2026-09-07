@@ -1,7 +1,8 @@
 ﻿"use client";
 
 /**
- * MusicPlayer — mini player nổi góc dưới trái, phát nhạc YouTube qua IFrame API.
+ * MusicPlayer — mini player nổi cuối trang, tự phát nhạc YouTube khi vào web.
+ * Luôn hiện đầy đủ, không có nút thu nhỏ.
  * IFrame được đặt ra ngoài viewport (không display:none) để tuân ToS YouTube.
  */
 
@@ -14,7 +15,6 @@ interface Track {
   artist: string;
 }
 
-// Khai báo kiểu global cho YouTube IFrame API
 declare global {
   interface Window {
     YT: {
@@ -31,7 +31,7 @@ declare global {
           };
         },
       ) => YTPlayer;
-      PlayerState: { PLAYING: number; PAUSED: number; ENDED: number };
+      PlayerState: { PLAYING: number; PAUSED: number; ENDED: number; UNSTARTED: number };
     };
     onYouTubeIframeAPIReady: () => void;
   }
@@ -40,21 +40,17 @@ declare global {
 interface YTPlayer {
   playVideo(): void;
   pauseVideo(): void;
-  stopVideo(): void;
   loadVideoById(id: string): void;
   getCurrentTime(): number;
   getDuration(): number;
   seekTo(sec: number, allow: boolean): void;
-  getPlayerState(): number;
-  destroy(): void;
 }
 
 export default function MusicPlayer() {
   const [tracks, setTracks] = useState<Track[]>([]);
   const [index, setIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
-  const [current, setCurrent] = useState(0); // giây hiện tại
+  const [current, setCurrent] = useState(0);
   const [duration, setDuration] = useState(0);
   const [ready, setReady] = useState(false);
 
@@ -70,7 +66,7 @@ export default function MusicPlayer() {
       .catch(() => {});
   }, []);
 
-  // Load YouTube IFrame API script một lần
+  // Tải YouTube IFrame API script một lần
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (document.getElementById("yt-api-script")) return;
@@ -82,14 +78,10 @@ export default function MusicPlayer() {
 
   const track = tracks[index];
 
-  // Khởi tạo hoặc load bài mới khi track thay đổi
-  const loadTrack = useCallback(
-    (yt: YTPlayer, vid: string) => {
-      yt.loadVideoById(vid);
-      setPlaying(true);
-    },
-    [],
-  );
+  const loadTrack = useCallback((yt: YTPlayer, vid: string) => {
+    yt.loadVideoById(vid);
+    setPlaying(true);
+  }, []);
 
   useEffect(() => {
     if (!track || typeof window === "undefined") return;
@@ -97,6 +89,7 @@ export default function MusicPlayer() {
     const initPlayer = () => {
       if (!iframeContainerRef.current) return;
 
+      // Player đã có — chỉ load bài mới
       if (playerRef.current) {
         loadTrack(playerRef.current, track.youtubeId);
         return;
@@ -106,6 +99,7 @@ export default function MusicPlayer() {
         height: "1",
         width: "1",
         videoId: track.youtubeId,
+        // autoplay: 1 — trình duyệt thường cho phép vì YouTube được whitelist
         playerVars: { autoplay: 1, controls: 0, rel: 0, playsinline: 1 },
         events: {
           onReady: (e) => {
@@ -123,8 +117,11 @@ export default function MusicPlayer() {
             } else if (e.data === YT.PlayerState.PAUSED) {
               setPlaying(false);
             } else if (e.data === YT.PlayerState.ENDED) {
-              // Bài kế tiếp
+              // Tự chuyển bài kế tiếp và lặp playlist
               setIndex((i) => (i + 1) % tracks.length);
+            } else if (e.data === YT.PlayerState.UNSTARTED || e.data === -1) {
+              // Một số trình duyệt giữ ở UNSTARTED trước khi cho autoplay — thử lại sau 300ms
+              setTimeout(() => playerRef.current?.playVideo(), 300);
             }
           },
         },
@@ -157,11 +154,8 @@ export default function MusicPlayer() {
 
   const togglePlay = () => {
     if (!playerRef.current) return;
-    if (playing) {
-      playerRef.current.pauseVideo();
-    } else {
-      playerRef.current.playVideo();
-    }
+    if (playing) playerRef.current.pauseVideo();
+    else playerRef.current.playVideo();
   };
 
   const prev = () => setIndex((i) => (i - 1 + tracks.length) % tracks.length);
@@ -179,7 +173,7 @@ export default function MusicPlayer() {
     return `${m}:${sec.toString().padStart(2, "0")}`;
   };
 
-  // Không render gì nếu playlist rỗng
+  // Không render nếu playlist rỗng
   if (tracks.length === 0) return null;
 
   const thumb = track
@@ -196,9 +190,9 @@ export default function MusicPlayer() {
         <div ref={iframeContainerRef} />
       </div>
 
-      {/* Mini player UI */}
-      <div className={`mdarker-music-player${collapsed ? " mdarker-music-collapsed" : ""}`}>
-        {/* Thumbnail */}
+      {/* Mini player — luôn hiện đầy đủ ở cuối trang */}
+      <div className="mdarker-music-player">
+        {/* Thumbnail tròn + ring cam + equalizer khi phát */}
         <div className={`mdarker-music-thumb${playing ? " mdarker-music-playing" : ""}`}>
           {thumb && (
             // eslint-disable-next-line @next/next/no-img-element
@@ -211,57 +205,44 @@ export default function MusicPlayer() {
           )}
         </div>
 
-        {/* Info + controls */}
-        {!collapsed && (
-          <div className="mdarker-music-body">
-            <div className="mdarker-music-info">
-              <p className="mdarker-music-title">{track?.title}</p>
-              <p className="mdarker-music-artist">{track?.artist}</p>
-            </div>
-
-            {/* Progress bar */}
-            <div className="mdarker-music-progress">
-              <span className="mdarker-music-time">{fmt(current)}</span>
-              <input
-                type="range"
-                min={0}
-                max={duration || 100}
-                value={current}
-                onChange={seek}
-                className="mdarker-music-range"
-                aria-label="Tiến độ bài nhạc"
-              />
-              <span className="mdarker-music-time">{fmt(duration)}</span>
-            </div>
-
-            {/* Buttons */}
-            <div className="mdarker-music-controls">
-              <button onClick={prev} aria-label="Bài trước" className="mdarker-music-btn">
-                <i className="bi bi-skip-start-fill" />
-              </button>
-              <button
-                onClick={togglePlay}
-                aria-label={playing ? "Dừng" : "Phát"}
-                className="mdarker-music-btn mdarker-music-btn-main"
-                disabled={!ready}
-              >
-                <i className={playing ? "bi bi-pause-fill" : "bi bi-play-fill"} />
-              </button>
-              <button onClick={next} aria-label="Bài sau" className="mdarker-music-btn">
-                <i className="bi bi-skip-end-fill" />
-              </button>
-            </div>
+        {/* Info + điều khiển — luôn hiện */}
+        <div className="mdarker-music-body">
+          <div className="mdarker-music-info">
+            <p className="mdarker-music-title">{track?.title}</p>
+            <p className="mdarker-music-artist">{track?.artist}</p>
           </div>
-        )}
 
-        {/* Nút ẩn/hiện */}
-        <button
-          className="mdarker-music-toggle"
-          onClick={() => setCollapsed((c) => !c)}
-          aria-label={collapsed ? "Mở player nhạc" : "Thu nhỏ player"}
-        >
-          <i className={collapsed ? "bi bi-music-note-beamed" : "bi bi-chevron-down"} />
-        </button>
+          <div className="mdarker-music-progress">
+            <span className="mdarker-music-time">{fmt(current)}</span>
+            <input
+              type="range"
+              min={0}
+              max={duration || 100}
+              value={current}
+              onChange={seek}
+              className="mdarker-music-range"
+              aria-label="Tiến độ bài nhạc"
+            />
+            <span className="mdarker-music-time">{fmt(duration)}</span>
+          </div>
+
+          <div className="mdarker-music-controls">
+            <button onClick={prev} aria-label="Bài trước" className="mdarker-music-btn">
+              <i className="bi bi-skip-start-fill" />
+            </button>
+            <button
+              onClick={togglePlay}
+              aria-label={playing ? "Dừng" : "Phát"}
+              className="mdarker-music-btn mdarker-music-btn-main"
+              disabled={!ready}
+            >
+              <i className={playing ? "bi bi-pause-fill" : "bi bi-play-fill"} />
+            </button>
+            <button onClick={next} aria-label="Bài sau" className="mdarker-music-btn">
+              <i className="bi bi-skip-end-fill" />
+            </button>
+          </div>
+        </div>
       </div>
     </>
   );
