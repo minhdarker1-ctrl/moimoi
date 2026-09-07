@@ -84,6 +84,8 @@ export default function CategoryMenu({
                 )}
                 {cat.appCount > 0 ? (
                   <span className="mdarker-cat-badge-count">{cat.appCount}</span>
+                ) : cat.title.toLowerCase().includes("free fire") ? (
+                  <span className="mdarker-cat-badge-count mdarker-cat-tool">TOOL</span>
                 ) : (
                   <span className="mdarker-cat-badge-count mdarker-cat-soon">COMING SOON</span>
                 )}

@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import AppCard, { AppData } from "./AppCard";
 import CategoryMenu, { CategoryItem } from "./CategoryMenu";
+import FreeFireHub from "./FreeFireHub";
 
 export interface CatalogGroup {
   id: number;
@@ -207,6 +208,11 @@ export default function AppCatalog({ groups }: AppCatalogProps) {
       {/* 
         3. DANH SÁCH MỤC THEO MẢNG / LĨNH VỰC
       */}
+      {/* Nếu đang chọn mảng Free Fire, hiển thị công cụ Độ Nhạy Free Fire Pro */}
+      {selectedCategory?.title?.toLowerCase().includes("free fire") && !search && (
+        <FreeFireHub />
+      )}
+
       {filteredGroups.length > 0 ? (
         filteredGroups.map((g) => (
           <section
@@ -244,6 +250,8 @@ export default function AppCatalog({ groups }: AppCatalogProps) {
             </div>
           </section>
         ))
+      ) : selectedCategory?.title?.toLowerCase().includes("free fire") && !search ? (
+        null
       ) : (
         /* Trạng thái không có sản phẩm hoặc không tìm thấy */
         <div className="mdarker-empty-search">
