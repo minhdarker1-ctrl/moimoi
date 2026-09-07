@@ -106,17 +106,30 @@ const HUD_PRESETS = {
   hud2: {
     title: "HUD 2 Ngón",
     desc: "Phù hợp mọi người chơi, kéo tâm cực mượt & ổn định",
-    code: "6982-1405-7821-3904-51",
+    codes: [
+      { label: "Mã 1", code: "#FFHUDT6O3jnaeTI9Po7eO" },
+      { label: "Mã 2", code: "#FFHUDT6O3jqljudJPo7eP" },
+      { label: "Mã 3", code: "#FFHUDT6O3ji+xzsRPo7eM" },
+    ],
   },
   hud3: {
     title: "HUD 3 Ngón",
     desc: "Thao tác đặt keo siêu tốc, nhảy bắn lả lướt",
-    code: "7043-9821-4402-1875-92",
+    codes: [
+      { label: "Mã 1", code: "#FFHUDT6O3jqljudJPo7eP" },
+      { label: "Mã 2", code: "#FFHUDT6O3jh982BJPo7eO" },
+      { label: "Mã 3", code: "#FFHUDT6O3jiiaNUpPo7eO" },
+    ],
   },
   hud4: {
     title: "HUD 4 Ngón",
     desc: "Phong cách tuyển thủ chuyên nghiệp, phản xạ tối đa",
-    code: "7128-3390-1284-8841-06",
+    codes: [
+      { label: "Mã 1", code: "#FFHUDT6O3jFQs9ZNPo7eN" },
+      { label: "Mã 2", code: "#FFHUDT6O3jwW3vlFPo7eP" },
+      { label: "Mã 3", code: "#FFHUDT6O3jnaeTI9Po7eO" },
+      { label: "Mã 4", code: "#FFHUDT6O3jiiaNUpPo7eO" },
+    ],
   },
 };
 
@@ -133,7 +146,7 @@ export default function FreeFireHub({ adminNote }: { adminNote?: FreeFireNoteDat
   } | null>(null);
 
   const [activeHud, setActiveHud] = useState<"hud2" | "hud3" | "hud4">("hud3");
-  const [copiedCode, setCopiedCode] = useState(false);
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const resultRef = useRef<HTMLDivElement>(null);
 
   // Autocomplete
@@ -297,8 +310,8 @@ export default function FreeFireHub({ adminNote }: { adminNote?: FreeFireNoteDat
   const handleCopyCode = (code: string) => {
     if (typeof navigator !== "undefined" && navigator.clipboard) {
       navigator.clipboard.writeText(code);
-      setCopiedCode(true);
-      setTimeout(() => setCopiedCode(false), 2200);
+      setCopiedCode(code);
+      setTimeout(() => setCopiedCode(null), 2200);
     }
   };
 
@@ -478,19 +491,36 @@ export default function FreeFireHub({ adminNote }: { adminNote?: FreeFireNoteDat
 
             <div className="mdarker-ff-hud-content">
               <p className="mdarker-ff-hud-desc">{HUD_PRESETS[activeHud].desc}</p>
-              <div className="mdarker-ff-code-wrap">
-                <code className="mdarker-ff-code">{HUD_PRESETS[activeHud].code}</code>
-                <button
-                  type="button"
-                  className="mdarker-ff-copy-btn"
-                  onClick={() => handleCopyCode(HUD_PRESETS[activeHud].code)}
-                >
-                  <i
-                    className={copiedCode ? "fa-solid fa-check" : "fa-solid fa-copy"}
-                    aria-hidden="true"
-                  />
-                  <span>{copiedCode ? "ĐÃ COPY MÃ" : "Sao chép mã HUD"}</span>
-                </button>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {HUD_PRESETS[activeHud].codes.map((item, idx) => (
+                  <div key={item.code + idx} className="mdarker-ff-code-wrap">
+                    <span
+                      style={{
+                        fontSize: 11,
+                        fontWeight: 800,
+                        color: "#ff8c00",
+                        background: "rgba(255, 140, 0, 0.12)",
+                        padding: "4px 8px",
+                        borderRadius: 6,
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {item.label}
+                    </span>
+                    <code className="mdarker-ff-code">{item.code}</code>
+                    <button
+                      type="button"
+                      className="mdarker-ff-copy-btn"
+                      onClick={() => handleCopyCode(item.code)}
+                    >
+                      <i
+                        className={copiedCode === item.code ? "fa-solid fa-check" : "fa-solid fa-copy"}
+                        aria-hidden="true"
+                      />
+                      <span>{copiedCode === item.code ? "ĐÃ COPY" : "Sao chép"}</span>
+                    </button>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
