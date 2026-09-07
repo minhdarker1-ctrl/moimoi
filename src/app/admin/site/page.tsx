@@ -41,12 +41,12 @@ export default async function SitePage() {
 
         <div className="vt-row">
           <label className="vt-field">
-            <span>URL ảnh đại diện</span>
-            <input type="url" name="avatarUrl" defaultValue={s?.avatarUrl ?? ""} />
+            <span>URL ảnh đại diện (link trực tiếp hoặc /avatar.jpg)</span>
+            <input type="text" name="avatarUrl" defaultValue={s?.avatarUrl ?? ""} placeholder="https://... hoặc /avatar.jpg" />
           </label>
           <label className="vt-field">
             <span>URL khung avatar (PNG trong suốt)</span>
-            <input type="url" name="avatarFrameUrl" defaultValue={s?.avatarFrameUrl ?? ""} />
+            <input type="text" name="avatarFrameUrl" defaultValue={s?.avatarFrameUrl ?? ""} placeholder="https://... hoặc /frame.png" />
           </label>
         </div>
 

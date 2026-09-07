@@ -24,10 +24,11 @@ function bool(fd: FormData, k: string): boolean {
   return fd.get(k) === "on" || fd.get(k) === "true";
 }
 
-/** Chỉ nhận http(s) — chặn javascript: và data: lọt vào href. */
+/** Chỉ nhận http(s) hoặc đường dẫn nội bộ (bắt đầu bằng /) — chặn javascript: và data: lọt vào href. */
 function url(fd: FormData, k: string): string {
   const v = str(fd, k, 2000);
   if (!v) return "";
+  if (v.startsWith("/")) return v;
   try {
     const u = new URL(v);
     if (u.protocol !== "http:" && u.protocol !== "https:") return "";
