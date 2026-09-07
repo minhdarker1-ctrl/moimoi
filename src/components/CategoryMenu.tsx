@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useMemo } from "react";
 
@@ -56,7 +56,7 @@ export default function CategoryMenu({
             <span className="mdarker-cat-icon-wrap">
               <i className="fa-solid fa-shapes mdarker-cat-icon" aria-hidden="true" />
             </span>
-            <span className="mdarker-cat-name">Tất Cả Mảng</span>
+            <span className="mdarker-cat-name">ALL</span>
             <span className="mdarker-cat-badge-count">{totalApps}</span>
           </div>
         </button>

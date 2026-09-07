@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useMemo } from "react";
 import AppCard, { AppData } from "./AppCard";
@@ -250,10 +250,18 @@ export default function AppCatalog({ groups }: AppCatalogProps) {
           <div className="mdarker-empty-icon">
             <i className="bi bi-inbox" aria-hidden="true" />
           </div>
-          <h3>Không tìm thấy nội dung</h3>
-          <p>Không có kết quả nào khớp với từ khoá hoặc bộ lọc trong mảng này.</p>
+          <h3>
+            {selectedCategory
+              ? `Mảng ${selectedCategory.title} đang cập nhật`
+              : "Không tìm thấy nội dung"}
+          </h3>
+          <p>
+            {selectedCategory
+              ? "Chưa có sản phẩm trong mảng này. Admin sẽ sớm bổ sung nội dung mới!"
+              : "Không có kết quả nào khớp với từ khoá hoặc bộ lọc."}
+          </p>
           <button type="button" onClick={clearFilters} className="vt-btn-primary">
-            Xoá bộ lọc & Xem tất cả mảng
+            Xem tất cả (ALL)
           </button>
         </div>
       )}
