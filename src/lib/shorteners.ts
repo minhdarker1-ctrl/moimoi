@@ -102,6 +102,16 @@ export const PROVIDERS: ProviderDef[] = [
       return url;
     },
   },
+  {
+    id: "LINKTOP",
+    label: "Linktop.one",
+    supportsFallback: true,
+    dailyLimit: 0,
+    build: ({ token, url, fallback }) =>
+      `https://linktop.one/api?api=${token}&url=${enc(url)}` +
+      (fallback ? `&sub_link=${enc(fallback)}` : ""),
+    parse: parseStatusJson,
+  },
 ];
 
 export type Provider = string;

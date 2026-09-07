@@ -58,3 +58,20 @@ test("isProvider chặn giá trị lạ từ form admin", () => {
   // Không assert số lượng cố định: thêm cổng mới không được làm fail test.
   assert.ok(PROVIDERS.length >= 5);
 });
+
+test("Linktop.one — param token là api=, fallback dùng sub_link", () => {
+  const fb = "https://site.com/fallback";
+  assert.match(buildApiUrl("LINKTOP", "T", TARGET), /[?&]api=T/);
+  assert.ok(buildApiUrl("LINKTOP", "T", TARGET, fb).includes("sub_link="));
+  assert.ok(!buildApiUrl("LINKTOP", "T", TARGET).includes("sub_link="));
+});
+
+test("Linktop.one — parse JSON {status, shortenedUrl}", () => {
+  const body = JSON.stringify({ status: "success", shortenedUrl: "https://linktop.one/aB3" });
+  assert.equal(parseResponse("LINKTOP", body), "https://linktop.one/aB3");
+  assert.throws(
+    () => parseResponse("LINKTOP", JSON.stringify({ status: "error", message: "Token sai" })),
+    /Token sai/,
+  );
+});
+

@@ -42,17 +42,29 @@ test("mọi cổng build ra URL https hợp lệ", () => {
   }
 });
 
-test("cổng có supportsFallback thì thêm fallback_url, cổng không thì bỏ qua", () => {
+test("cổng có supportsFallback thì thêm fallback, cổng không thì bỏ qua", () => {
   const fb = "https://site.com/hop/abc/1";
   for (const p of PROVIDERS) {
     const withFb = p.build({ token: "T", url: TARGET, fallback: fb });
+    const withoutFb = p.build({ token: "T", url: TARGET });
     if (p.supportsFallback) {
-      assert.ok(withFb.includes("fallback_url="), `${p.id} khai supportsFallback mà không gắn`);
+      assert.ok(
+        withFb.includes(encodeURIComponent(fb)),
+        `${p.id} khai supportsFallback mà không gắn fallback vào URL`,
+      );
+      assert.ok(
+        !withoutFb.includes(encodeURIComponent(fb)),
+        `${p.id} gắn fallback dù không truyền`,
+      );
     } else {
-      assert.ok(!withFb.includes("fallback_url="), `${p.id} không hỗ trợ mà vẫn gắn fallback`);
+      assert.ok(
+        !withFb.includes(encodeURIComponent(fb)),
+        `${p.id} không hỗ trợ fallback mà vẫn gắn`,
+      );
     }
   }
 });
+
 
 test("mọi cổng throw khi response rỗng hoặc rác", () => {
   for (const p of PROVIDERS) {
@@ -70,6 +82,7 @@ test("mọi cổng parse thành công trả về URL https", () => {
     GTRAFFIC: JSON.stringify({ id: "xY9" }),
     DR_GTRAFFIC: JSON.stringify({ id: "xY9" }),
     VUOTNHANH: "https://vuotnhanh.com/x1",
+    LINKTOP: JSON.stringify({ status: "success", shortenedUrl: "https://linktop.one/aB3" }),
   };
 
   for (const p of PROVIDERS) {
