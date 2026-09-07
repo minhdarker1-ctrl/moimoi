@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 /**
  * MusicPlayer — phát nhạc nền YouTube qua IFrame API.
@@ -261,8 +261,11 @@ export default function MusicPlayer() {
 
   // 5. Tự động phát khi người dùng tương tác lần đầu (vượt qua Autoplay Policy của trình duyệt)
   useEffect(() => {
+    let played = false;
+
     const handleFirstGesture = () => {
-      if (playerRef.current) {
+      if (played) return;
+      if (playerRef.current && typeof playerRef.current.playVideo === "function") {
         try {
           const state = playerRef.current.getPlayerState?.();
           if (state !== 1) {
@@ -270,19 +273,25 @@ export default function MusicPlayer() {
             playerRef.current.setVolume(100);
             playerRef.current.playVideo();
           }
+          played = true;
+          cleanup();
         } catch {}
       }
     };
 
-    window.addEventListener("click", handleFirstGesture, { once: true, passive: true });
-    window.addEventListener("touchstart", handleFirstGesture, { once: true, passive: true });
-    window.addEventListener("keydown", handleFirstGesture, { once: true, passive: true });
-
-    return () => {
-      window.removeEventListener("click", handleFirstGesture);
+    const cleanup = () => {
+      window.removeEventListener("pointerdown", handleFirstGesture);
       window.removeEventListener("touchstart", handleFirstGesture);
+      window.removeEventListener("click", handleFirstGesture);
       window.removeEventListener("keydown", handleFirstGesture);
     };
+
+    window.addEventListener("pointerdown", handleFirstGesture, { passive: true });
+    window.addEventListener("touchstart", handleFirstGesture, { passive: true });
+    window.addEventListener("click", handleFirstGesture, { passive: true });
+    window.addEventListener("keydown", handleFirstGesture, { passive: true });
+
+    return cleanup;
   }, []);
 
   const togglePlay = () => {
@@ -388,7 +397,10 @@ export default function MusicPlayer() {
                   type="button"
                   onClick={togglePlay}
                   aria-label={playing ? "Dừng" : "Phát"}
-                  className="mdarker-music-btn mdarker-music-btn-main"
+                  className={`mdarker-music-btn mdarker-music-btn-main${
+                    !playing ? " mdarker-music-btn-pulse" : ""
+                  }`}
+                  title={playing ? "Dừng nhạc" : "Bật nhạc (hoặc chạm bất kỳ đâu trên màn hình)"}
                 >
                   <i className={playing ? "bi bi-pause-fill" : "bi bi-play-fill"} />
                 </button>
