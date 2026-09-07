@@ -14,18 +14,13 @@ export interface CategoryItem {
 }
 
 export function getGroupRoute(cat: { title: string; slug?: string; id?: number }) {
-  const lower = cat.title.toLowerCase();
-  if (lower.includes("free fire") || cat.slug === "free-fire") return "/freefire";
-  if (
-    lower.includes("liên quân") ||
-    lower.includes("lien quan") ||
-    cat.slug === "lien-quan-mobile" ||
-    cat.slug === "lienquan"
-  ) {
-    return "/lienquan";
+  if (cat.slug && cat.slug.trim()) {
+    return `/${cat.slug.trim().replace(/^\//, "")}`;
   }
-  if (lower.includes("other") || cat.slug === "other") return "/other";
-  if (cat.slug) return `/${cat.slug}`;
+  const lower = cat.title.toLowerCase();
+  if (lower.includes("free fire")) return "/freefire";
+  if (lower.includes("liên quân") || lower.includes("lien quan")) return "/lienquan";
+  if (lower.includes("other")) return "/other";
   return `/#group-${cat.id}`;
 }
 

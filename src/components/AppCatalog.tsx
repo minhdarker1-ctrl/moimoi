@@ -116,6 +116,16 @@ export default function AppCatalog({
     return groups.find((g) => g.id === selectedGroupId) || null;
   }, [groups, selectedGroupId]);
 
+  const isFreeFire = useMemo(() => {
+    if (!selectedCategory) return false;
+    const lower = selectedCategory.title.toLowerCase();
+    return (
+      lower.includes("free fire") ||
+      selectedCategory.slug === "free-fire" ||
+      selectedCategory.slug === "freefire"
+    );
+  }, [selectedCategory]);
+
   // Helper render icon cho header section
   const renderGroupIcon = (icon?: string) => {
     if (!icon) return <i className="fa-solid fa-gamepad" aria-hidden="true" />;
@@ -146,61 +156,64 @@ export default function AppCatalog({
 
       {/* 
         2. THANH CÔNG CỤ: TÌM KIẾM & LỌC NỀN TẢNG (iOS / Android)
+        ẨN HOÀN TOÀN KHI Ở MẢNG FREE FIRE (theo yêu cầu không cần các phần tử này)
       */}
-      <div className="mdarker-catalog-bar">
-        <div className="mdarker-search-box">
-          <i className="bi bi-search mdarker-search-icon" aria-hidden="true" />
-          <input
-            type="search"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Tìm kiếm mod, menu, file config..."
-            className="mdarker-search-input"
-            aria-label="Tìm kiếm nội dung"
-          />
-          {search && (
+      {!isFreeFire && (
+        <div className="mdarker-catalog-bar">
+          <div className="mdarker-search-box">
+            <i className="bi bi-search mdarker-search-icon" aria-hidden="true" />
+            <input
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Tìm kiếm mod, menu, file config..."
+              className="mdarker-search-input"
+              aria-label="Tìm kiếm nội dung"
+            />
+            {search && (
+              <button
+                type="button"
+                className="mdarker-search-clear"
+                onClick={() => setSearch("")}
+                title="Xoá tìm kiếm"
+              >
+                <i className="bi bi-x-circle-fill" aria-hidden="true" />
+              </button>
+            )}
+          </div>
+
+          {/* Nút lọc nền tảng */}
+          <div className="mdarker-filter-tabs">
             <button
               type="button"
-              className="mdarker-search-clear"
-              onClick={() => setSearch("")}
-              title="Xoá tìm kiếm"
+              className={`mdarker-filter-btn ${platform === "all" ? "active" : ""}`}
+              onClick={() => setPlatform("all")}
             >
-              <i className="bi bi-x-circle-fill" aria-hidden="true" />
+              <i className="bi bi-grid-fill" aria-hidden="true" />
+              <span>Tất cả</span>
             </button>
-          )}
+            <button
+              type="button"
+              className={`mdarker-filter-btn ${platform === "ios" ? "active" : ""}`}
+              onClick={() => setPlatform("ios")}
+            >
+              <i className="fab fa-apple" aria-hidden="true" />
+              <span>iOS</span>
+            </button>
+            <button
+              type="button"
+              className={`mdarker-filter-btn ${platform === "android" ? "active" : ""}`}
+              onClick={() => setPlatform("android")}
+            >
+              <i className="bi bi-android2" aria-hidden="true" />
+              <span>Android</span>
+            </button>
+          </div>
         </div>
+      )}
 
-        {/* Nút lọc nền tảng */}
-        <div className="mdarker-filter-tabs">
-          <button
-            type="button"
-            className={`mdarker-filter-btn ${platform === "all" ? "active" : ""}`}
-            onClick={() => setPlatform("all")}
-          >
-            <i className="bi bi-grid-fill" aria-hidden="true" />
-            <span>Tất cả</span>
-          </button>
-          <button
-            type="button"
-            className={`mdarker-filter-btn ${platform === "ios" ? "active" : ""}`}
-            onClick={() => setPlatform("ios")}
-          >
-            <i className="fab fa-apple" aria-hidden="true" />
-            <span>iOS</span>
-          </button>
-          <button
-            type="button"
-            className={`mdarker-filter-btn ${platform === "android" ? "active" : ""}`}
-            onClick={() => setPlatform("android")}
-          >
-            <i className="bi bi-android2" aria-hidden="true" />
-            <span>Android</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Thông tin trạng thái khi đang lọc */}
-      {isFiltering && (
+      {/* Thông tin trạng thái khi đang lọc (ẨN KHI Ở MẢNG FREE FIRE) */}
+      {!isFreeFire && isFiltering && (
         <div className="mdarker-filter-status">
           <span>
             {selectedCategory && (
@@ -221,7 +234,7 @@ export default function AppCatalog({
         3. DANH SÁCH MỤC THEO MẢNG / LĨNH VỰC
       */}
       {/* Nếu đang chọn mảng Free Fire, hiển thị công cụ Độ Nhạy Free Fire Pro */}
-      {selectedCategory?.title?.toLowerCase().includes("free fire") && !search && (
+      {isFreeFire && (
         <FreeFireHub adminNote={freeFireNote} />
       )}
 
@@ -262,7 +275,7 @@ export default function AppCatalog({
             </div>
           </section>
         ))
-      ) : selectedCategory?.title?.toLowerCase().includes("free fire") && !search ? (
+      ) : isFreeFire ? (
         null
       ) : (
         /* Trạng thái không có sản phẩm hoặc không tìm thấy */

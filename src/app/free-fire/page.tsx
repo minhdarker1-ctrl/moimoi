@@ -1,5 +1,1 @@
-import { redirect } from "next/navigation";
-
-export default function FreeFireRedirect() {
-  redirect("/freefire");
-}
+export { default, generateMetadata, revalidate } from "../freefire/page";

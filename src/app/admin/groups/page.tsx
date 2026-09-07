@@ -33,7 +33,7 @@ export default async function GroupsPage() {
               <input type="text" name="badge" placeholder="HOT, NEW, UPDATE..." />
             </label>
             <label className="vt-field">
-              <span>Slug (Đường dẫn)</span>
+              <span>Slug (Đường dẫn trang web - VD: free-fire, lienquan...)</span>
               <input type="text" name="slug" placeholder="free-fire (để trống tự tạo)" />
             </label>
             <label className="vt-field">
@@ -91,11 +91,31 @@ export default async function GroupsPage() {
               <input type="checkbox" name="visible" defaultChecked={r.visible} />
               Hiện mảng này trên trang chủ
             </label>
-            <div className="vt-actions">
+            <div className="vt-actions" style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
               <button className="vt-btn-sm" type="submit">
                 Lưu thay đổi
               </button>
               <span className="vt-tag">{r._count.apps} mục bên trong</span>
+              {r.slug && (
+                <a
+                  href={`/${r.slug}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="vt-btn-sm"
+                  style={{
+                    textDecoration: "none",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 6,
+                    background: "rgba(99, 102, 241, 0.12)",
+                    color: "var(--vi-accent)",
+                    fontWeight: 700,
+                  }}
+                >
+                  <span>🔗 Mở trang: /{r.slug}</span>
+                  <i className="fa-solid fa-arrow-up-right-from-square" />
+                </a>
+              )}
             </div>
           </form>
           <form action={deleteGroup} style={{ marginTop: 8 }}>

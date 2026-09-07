@@ -1,5 +1,1 @@
-import { redirect } from "next/navigation";
-
-export default function LienQuanMobileRedirect() {
-  redirect("/lienquan");
-}
+export { default, generateMetadata, revalidate } from "../lienquan/page";
