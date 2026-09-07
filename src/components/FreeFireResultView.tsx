@@ -70,27 +70,64 @@ export default function FreeFireResultView({
   type: "ios" | "android" | "pc";
   config: FreeFireConfigProps;
 }) {
-  const [isUnlocked, setIsUnlocked] = useState(!config.requireKey);
-  const [checkingAuth, setCheckingAuth] = useState(config.requireKey);
+  const hasKey = Boolean(
+    (config.keyTypeId && config.keyTypeId > 0) ||
+    (config.getKeyUrl && config.getKeyUrl.trim().length > 0) ||
+    (config.requireKey && (config.staticKey || config.keyTypeId || config.getKeyUrl))
+  );
+
+  const [isUnlocked, setIsUnlocked] = useState(!hasKey);
+  const [checkingAuth, setCheckingAuth] = useState(hasKey);
   const [inputKey, setInputKey] = useState("");
   const [keyError, setKeyError] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
   const [activeHud, setActiveHud] = useState<"hud2" | "hud3" | "hud4">("hud3");
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [activeDevice, setActiveDevice] = useState(device);
+  const [activeType, setActiveType] = useState(type);
 
-  // Kiểm tra trạng thái mở khóa từ localStorage khi trang load
   useEffect(() => {
-    if (!config.requireKey) {
+    try {
+      const pendingDev = localStorage.getItem("ff_pending_device");
+      const pendingTyp = localStorage.getItem("ff_pending_type") as "ios" | "android" | "pc" | null;
+      if (pendingDev && (device === "Điện thoại" || !device)) {
+        setActiveDevice(pendingDev);
+        if (pendingTyp) setActiveType(pendingTyp);
+      }
+    } catch {}
+  }, [device]);
+
+  // Kiểm tra trạng thái mở khóa từ localStorage hoặc param URL khi trang load
+  useEffect(() => {
+    if (!hasKey) {
       setIsUnlocked(true);
       setCheckingAuth(false);
       return;
     }
 
+    // 1. Nếu có param unlockedKey trên URL (vừa vượt link thành công)
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      const keyParam = urlParams.get("unlockedKey");
+      if (keyParam) {
+        verifyFreeFireKey(keyParam).then((res) => {
+          if (res.ok) {
+            setIsUnlocked(true);
+            try {
+              localStorage.setItem("ff_unlocked_key", keyParam);
+            } catch {}
+          }
+          setCheckingAuth(false);
+        });
+        return;
+      }
+    }
+
+    // 2. Kiểm tra key đã lưu trước đó trong localStorage
     try {
       const savedKey = localStorage.getItem("ff_unlocked_key");
       if (savedKey) {
-        // Tự động kiểm tra lại key đã lưu
         verifyFreeFireKey(savedKey).then((res) => {
           if (res.ok) {
             setIsUnlocked(true);
@@ -100,13 +137,12 @@ export default function FreeFireResultView({
           }
           setCheckingAuth(false);
         });
-      } else {
-        setCheckingAuth(false);
+        return;
       }
-    } catch {
-      setCheckingAuth(false);
-    }
-  }, [config.requireKey]);
+    } catch {}
+
+    setCheckingAuth(false);
+  }, [hasKey]);
 
   // Xử lý mở khóa
   const handleUnlock = async (e: React.FormEvent) => {
@@ -149,15 +185,15 @@ export default function FreeFireResultView({
   // Tính toán thông số độ nhạy
   const settings = useMemo(() => {
     const generalMin =
-      type === "ios"
+      activeType === "ios"
         ? config.iosGeneralMin
-        : type === "pc"
+        : activeType === "pc"
         ? config.pcGeneralMin
         : config.androidGeneralMin;
     const generalMax =
-      type === "ios"
+      activeType === "ios"
         ? config.iosGeneralMax
-        : type === "pc"
+        : activeType === "pc"
         ? config.pcGeneralMax
         : config.androidGeneralMax;
 
@@ -208,7 +244,7 @@ export default function FreeFireResultView({
     ];
 
     return list.map((item, idx) => {
-      const value = calcInRange(item.min, item.max, device, idx);
+      const value = calcInRange(item.min, item.max, activeDevice, idx);
       const percent = item.unit === "%" ? value : Math.min(Math.round((value / 200) * 100), 100);
       return {
         name: item.name,
@@ -218,7 +254,7 @@ export default function FreeFireResultView({
         icon: item.icon,
       };
     });
-  }, [device, type, config]);
+  }, [activeDevice, activeType, config]);
 
   // Danh sách mã HUD
   const hudCodes = useMemo(() => {
@@ -261,7 +297,7 @@ export default function FreeFireResultView({
   const getKeyHref = config.getKeyUrl
     ? config.getKeyUrl
     : config.keyTypeId
-    ? "/getkey/freefire"
+    ? `/getkey/freefire?device=${encodeURIComponent(activeDevice)}&type=${activeType}`
     : "#";
 
   if (checkingAuth) {
@@ -302,7 +338,7 @@ export default function FreeFireResultView({
           </div>
 
           <h2 style={{ fontSize: 22, fontWeight: 800, margin: "0 0 10px", color: "var(--vi-text)" }}>
-            Mở Khóa Độ Nhạy: <span style={{ color: "#ff6b00" }}>{device}</span>
+            Mở Khóa Độ Nhạy: <span style={{ color: "#ff6b00" }}>{activeDevice}</span>
           </h2>
           <p style={{ fontSize: 14, color: "var(--vi-muted)", margin: "0 auto 24px", maxWidth: 460, lineHeight: 1.6 }}>
             Bảng thông số độ nhạy kéo tâm và mã setting HUD cho dòng máy này đang được bảo vệ. Bạn vui lòng lấy Key miễn phí để mở khóa.
@@ -432,9 +468,9 @@ export default function FreeFireResultView({
             </div>
 
             <h1 className="mdarker-ff-device-title" style={{ fontSize: 24, margin: "10px 0" }}>
-              {device}
+              {activeDevice}
               <span className="mdarker-ff-type-pill">
-                {type === "ios" ? "Hệ điều hành iOS" : type === "pc" ? "PC / Giả Lập" : "Hệ điều hành Android"}
+                {activeType === "ios" ? "Hệ điều hành iOS" : activeType === "pc" ? "PC / Giả Lập" : "Hệ điều hành Android"}
               </span>
             </h1>
 
@@ -487,7 +523,7 @@ export default function FreeFireResultView({
                 DPI ĐỀ XUẤT
               </span>
               <strong style={{ fontSize: 13, color: "var(--vi-text)" }}>
-                {type === "ios" ? "Mặc định (120Hz)" : type === "pc" ? "800 - 1200 DPI" : "480 - 550 DPI"}
+                {activeType === "ios" ? "Mặc định (120Hz)" : activeType === "pc" ? "800 - 1200 DPI" : "480 - 550 DPI"}
               </strong>
             </div>
 
@@ -504,7 +540,7 @@ export default function FreeFireResultView({
                 TỐC ĐỘ CON TRỎ
               </span>
               <strong style={{ fontSize: 13, color: "var(--vi-text)" }}>
-                {type === "ios" ? "Mức 7/10" : type === "pc" ? "Mức 6/11 Windows" : "Gần tối đa (90%)"}
+                {activeType === "ios" ? "Mức 7/10" : activeType === "pc" ? "Mức 6/11 Windows" : "Gần tối đa (90%)"}
               </strong>
             </div>
           </div>

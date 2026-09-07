@@ -8,6 +8,10 @@ export interface FreeFireNoteData {
   imageUrl?: string;
   videoUrl?: string;
   visible?: boolean;
+  requireKey?: boolean;
+  keyTypeId?: number | null;
+  getKeyUrl?: string;
+  staticKey?: string;
 }
 
 function getYouTubeEmbedUrl(url?: string): string | null {

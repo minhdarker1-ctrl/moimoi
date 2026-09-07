@@ -43,7 +43,13 @@ export async function GET(req: Request) {
 
   if (scope === "freefire") {
     const ffConfig = await db.freeFireConfig.findUnique({ where: { id: 1 }, include: { keyType: true } });
-    if (!ffConfig?.keyType?.enabled) return fail(req, "Chưa cấu hình loại key cho Free Fire.", isJson);
+    if (ffConfig?.getKeyUrl && (!ffConfig.keyTypeId || ffConfig.keyTypeId <= 0)) {
+      if (isJson) {
+        return NextResponse.json({ ok: true, url: ffConfig.getKeyUrl, appName: "Độ Nhạy Free Fire" });
+      }
+      return NextResponse.redirect(ffConfig.getKeyUrl, 302);
+    }
+    if (!ffConfig?.keyType?.enabled) return fail(req, "Chưa cấu hình cổng vượt link API bên thứ 3 cho Free Fire.", isJson);
     kt = ffConfig.keyType;
   } else if (keyTypeIdParam && Number.isInteger(Number(keyTypeIdParam))) {
     kt = await db.keyType.findUnique({ where: { id: Number(keyTypeIdParam) } });

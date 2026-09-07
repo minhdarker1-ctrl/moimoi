@@ -144,7 +144,7 @@ export async function saveFreeFireConfig(fd: FormData) {
     visible: bool(fd, "visible"),
 
     // Key settings
-    requireKey: bool(fd, "requireKey"),
+    requireKey: keyTypeIdRaw > 0 || Boolean(url(fd, "getKeyUrl")) || Boolean(str(fd, "staticKey", 100)) || bool(fd, "requireKey"),
     keyTypeId: keyTypeIdRaw > 0 ? keyTypeIdRaw : null,
     getKeyUrl: url(fd, "getKeyUrl"),
     staticKey: str(fd, "staticKey", 100),

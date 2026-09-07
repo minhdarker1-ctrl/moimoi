@@ -79,9 +79,24 @@ export default async function KeyPage({ params }: { params: Promise<{ token: str
           <strong>Key chỉ hiện 1 lần — hãy lưu lại.</strong>
         </p>
 
-        <Link className="vt-btn-primary" href="/" style={{ marginTop: 8 }}>
-          Về trang chính nhập key
-        </Link>
+        {s.app ? (
+          <Link className="vt-btn-primary" href="/" style={{ marginTop: 8 }}>
+            Về trang chính nhập key
+          </Link>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 12 }}>
+            <Link
+              className="vt-btn-primary"
+              href={`/freefire/result?unlockedKey=${encodeURIComponent(plain)}`}
+              style={{ textDecoration: "none", padding: "12px 18px", textAlign: "center" }}
+            >
+              👉 Mở Khóa & Xem Độ Nhạy Free Fire Ngay
+            </Link>
+            <Link className="vt-btn-ghost" href="/freefire" style={{ textAlign: "center" }}>
+              Về trang tra cứu Free Fire
+            </Link>
+          </div>
+        )}
       </div>
     </main>
   );

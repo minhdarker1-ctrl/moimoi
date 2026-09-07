@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import FreeFireAdminNote, { FreeFireNoteData } from "./FreeFireAdminNote";
 
@@ -142,7 +142,21 @@ export default function FreeFireHub({ adminNote }: { adminNote?: FreeFireNoteDat
     }
   };
 
-  // Điều hướng sang trang kết quả riêng biệt
+  const hasKey = Boolean(
+    (adminNote?.keyTypeId && adminNote.keyTypeId > 0) ||
+    (adminNote?.getKeyUrl && adminNote.getKeyUrl.trim().length > 0) ||
+    (adminNote?.requireKey && (adminNote?.staticKey || adminNote?.keyTypeId || adminNote?.getKeyUrl))
+  );
+
+  const [alreadyUnlocked, setAlreadyUnlocked] = useState(false);
+
+  useEffect(() => {
+    try {
+      setAlreadyUnlocked(Boolean(localStorage.getItem("ff_unlocked_key")));
+    } catch {}
+  }, []);
+
+  // Điều hướng: nếu không có key thì vào thẳng trang kết quả, có key thì phải vượt link
   const handleSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     const clean = device.trim();
@@ -167,7 +181,24 @@ export default function FreeFireHub({ adminNote }: { adminNote?: FreeFireNoteDat
     setWarning("");
 
     const type = detectDeviceType(clean);
-    router.push(`/freefire/result?device=${encodeURIComponent(clean)}&type=${type}`);
+
+    try {
+      localStorage.setItem("ff_pending_device", clean);
+      localStorage.setItem("ff_pending_type", type);
+    } catch {}
+
+    // 1. Không có key hoặc người dùng đã mở khóa trước đó: chuyển thẳng đến trang chứa độ nhạy
+    if (!hasKey || alreadyUnlocked) {
+      router.push(`/freefire/result?device=${encodeURIComponent(clean)}&type=${type}`);
+      return;
+    }
+
+    // 2. Có key: người dùng sẽ phải vượt link giống phần lấy key ở app other
+    if (adminNote?.getKeyUrl && adminNote.getKeyUrl.trim().length > 0) {
+      window.location.href = adminNote.getKeyUrl;
+    } else {
+      router.push(`/getkey/freefire?device=${encodeURIComponent(clean)}&type=${type}`);
+    }
   };
 
   return (
@@ -269,10 +300,48 @@ export default function FreeFireHub({ adminNote }: { adminNote?: FreeFireNoteDat
               disabled={loading}
               className="mdarker-ff-submit-btn"
             >
-              <i className="fa-solid fa-fire-flame-curved" aria-hidden="true" />
-              <span>{loading ? "Đang xử lý..." : "Lấy Độ Nhạy Ngay"}</span>
+              <i
+                className={hasKey && !alreadyUnlocked ? "fa-solid fa-key" : "fa-solid fa-fire-flame-curved"}
+                aria-hidden="true"
+              />
+              <span>
+                {loading
+                  ? "Đang xử lý..."
+                  : hasKey && !alreadyUnlocked
+                  ? "Vượt Link Nhận Độ Nhạy"
+                  : "Lấy Độ Nhạy Ngay"}
+              </span>
             </button>
           </div>
+
+          {/* Nếu có Key và chưa mở khóa, cho phép bấm vào nhập key trực tiếp */}
+          {hasKey && !alreadyUnlocked && (
+            <div style={{ textAlign: "center", marginTop: 12 }}>
+              <button
+                type="button"
+                onClick={() => {
+                  const targetDevice = device.trim() || "Điện thoại";
+                  const targetType = detectDeviceType(targetDevice);
+                  router.push(`/freefire/result?device=${encodeURIComponent(targetDevice)}&type=${targetType}`);
+                }}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  color: "var(--vi-muted)",
+                  fontSize: 13,
+                  cursor: "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "4px 8px",
+                  textDecoration: "underline",
+                }}
+              >
+                <i className="fa-solid fa-unlock-keyhole" />
+                <span>Đã có Key sẵn? Nhập Key để xem ngay</span>
+              </button>
+            </div>
+          )}
 
           {warning && <p className="mdarker-ff-warning">{warning}</p>}
         </form>

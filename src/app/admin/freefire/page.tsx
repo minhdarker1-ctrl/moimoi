@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import Link from "next/link";
 import AdminNav from "../AdminNav";
 import { saveFreeFireConfig } from "../actions";
 
@@ -25,9 +26,10 @@ function getYouTubeEmbedUrl(url: string): string | null {
 }
 
 export default async function AdminFreeFirePage() {
-  const [config, keyTypes] = await Promise.all([
+  const [config, keyTypes, shorteners] = await Promise.all([
     db.freeFireConfig.findUnique({ where: { id: 1 } }),
     db.keyType.findMany({ where: { enabled: true }, orderBy: { id: "asc" } }),
+    db.shortener.findMany({ orderBy: { order: "asc" } }),
   ]);
 
   const embedUrl = config?.videoUrl ? getYouTubeEmbedUrl(config.videoUrl) : null;
@@ -37,62 +39,109 @@ export default async function AdminFreeFirePage() {
       <AdminNav current="/admin/freefire" />
 
       <form action={saveFreeFireConfig} className="vt-form">
-        {/* CARD 1: CÀI ĐẶT BẢO VỆ BẰNG KEY */}
+        {/* CARD 1: CÀI ĐẶT BẢO VỆ BẰNG KEY & CỔNG VƯỢT LINK API BÊN THỨ 3 */}
         <div className="vt-card" style={{ marginBottom: 20 }}>
           <h2 style={{ fontSize: 17, marginTop: 0, display: "flex", alignItems: "center", gap: 8, color: "#f59e0b" }}>
             <i className="fa-solid fa-key" />
-            <span>1. Cài Đặt Khóa Key Trang Kết Quả Độ Nhạy</span>
+            <span>1. Cài Đặt Khóa Key & Cổng Vượt Link API Bên Thứ 3</span>
           </h2>
           <p className="vt-hint" style={{ marginBottom: 16 }}>
-            Bật tính năng này để yêu cầu người dùng phải nhập Key mới xem được kết quả độ nhạy và mã HUD.
-            Dễ dàng gắn link rút gọn để kiếm tiền hoặc cấp mật khẩu riêng.
+            - Nếu chọn <strong>&quot;Không cần key&quot;</strong>: người dùng bấm &quot;Lấy độ nhạy ngay&quot; sẽ chuyển thẳng đến trang chứa kết quả độ nhạy.
+            <br />
+            - Nếu chọn <strong>&quot;Loại key vượt link&quot;</strong> hoặc <strong>&quot;Link get key ngoài&quot;</strong>: người dùng sẽ phải vượt link qua các cổng rút gọn bên thứ 3 để nhận key (giống phần lấy key ở các app khác).
           </p>
-
-          <label className="vt-check" style={{ marginBottom: 14, padding: "10px 14px", background: "rgba(245, 158, 11, 0.1)", borderRadius: 8 }}>
-            <input
-              type="checkbox"
-              name="requireKey"
-              defaultChecked={config?.requireKey ?? false}
-            />
-            <strong style={{ color: "#d97706" }}>Bật yêu cầu nhập Key để xem kết quả độ nhạy (/freefire/result)</strong>
-          </label>
 
           <div className="vt-row">
             <label className="vt-field">
-              <span>Loại Key Vượt Link Nội Bộ</span>
+              <span>Loại key (Cổng Vượt Link API Bên Thứ 3)</span>
               <select name="keyTypeId" defaultValue={config?.keyTypeId ?? 0}>
-                <option value={0}>-- Không dùng / Hoặc dùng link ngoài --</option>
+                <option value={0}>Không cần key (truy cập trực tiếp, không bắt vượt link)</option>
                 {keyTypes.map((kt) => (
                   <option key={kt.id} value={kt.id}>
-                    {kt.name} ({kt.steps} bước vượt, sống {kt.ttlHours}h)
+                    {kt.name} ({kt.steps} bước vượt link qua API, sống {kt.ttlHours}h)
                   </option>
                 ))}
               </select>
-              <small className="vt-hint">Nếu chọn, nút "Lấy Key" sẽ kích hoạt hệ thống vượt link tích hợp trên web.</small>
             </label>
 
             <label className="vt-field">
-              <span>Key tĩnh dự phòng / Mật khẩu nhanh</span>
+              <span>Key tĩnh dự phòng / Mật khẩu nhanh (Tùy chọn)</span>
               <input
                 type="text"
                 name="staticKey"
                 defaultValue={config?.staticKey ?? ""}
                 placeholder="VD: FREEFIRE2026 hoặc VIPKEY"
               />
-              <small className="vt-hint">Người dùng nhập đúng chữ này là mở khóa được ngay (không cần vượt link).</small>
+              <small className="vt-hint">Mật khẩu admin tự đặt để mở khóa nhanh mà không cần vượt link.</small>
             </label>
           </div>
 
-          <label className="vt-field" style={{ marginTop: 8 }}>
-            <span>Link Get Key bên ngoài (Tùy chọn)</span>
+          <label className="vt-field" style={{ marginTop: 10 }}>
+            <span>Link Get Key bên ngoài — chỉ dùng nếu vượt link ngoài (Linkvertise, Link4m...)</span>
             <input
               type="text"
               name="getKeyUrl"
               defaultValue={config?.getKeyUrl ?? ""}
-              placeholder="https://linkvertise.com/... hoặc link rút gọn của bạn"
+              placeholder="https://linkvertise.com/... hoặc link rút gọn bên ngoài của bạn"
             />
-            <small className="vt-hint">Nếu điền, nút "Lấy Key Miễn Phí" sẽ dẫn người dùng trực tiếp sang link này.</small>
           </label>
+
+          {/* Hộp thông tin Cổng Vượt Link API Bên Thứ 3 đã cài đặt trong hệ thống */}
+          <div style={{ marginTop: 16, padding: "14px 16px", borderRadius: 10, background: "rgba(59, 130, 246, 0.05)", border: "1px solid rgba(59, 130, 246, 0.2)" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8, marginBottom: 10 }}>
+              <strong style={{ fontSize: 13, color: "var(--vi-text)", display: "flex", alignItems: "center", gap: 6 }}>
+                <i className="fa-solid fa-server" style={{ color: "#3b82f6" }} />
+                <span>Các cổng vượt link API bên thứ 3 hiện có trong hệ thống:</span>
+              </strong>
+              <div style={{ display: "flex", gap: 8 }}>
+                <Link
+                  href="/admin/shorteners"
+                  className="vt-btn-sm"
+                  style={{ textDecoration: "none", fontSize: 12, padding: "4px 10px" }}
+                >
+                  <i className="fa-solid fa-plus" style={{ marginRight: 4 }} />
+                  Cài đặt API Key / Token
+                </Link>
+                <Link
+                  href="/admin/keytypes"
+                  className="vt-btn-sm"
+                  style={{ textDecoration: "none", fontSize: 12, padding: "4px 10px" }}
+                >
+                  <i className="fa-solid fa-gear" style={{ marginRight: 4 }} />
+                  Quản lý Loại Key
+                </Link>
+              </div>
+            </div>
+
+            {shorteners.length === 0 ? (
+              <p style={{ margin: 0, fontSize: 13, color: "#ef4444" }}>
+                ⚠️ Chưa có cổng rút gọn link bên thứ 3 nào. Hãy bấm vào &quot;Cài đặt API Key / Token&quot; để thêm cổng (Ontops, Traffic4K, Linktop...).
+              </p>
+            ) : (
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {shorteners.map((s) => (
+                  <span
+                    key={s.id}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 6,
+                      fontSize: 12,
+                      padding: "4px 10px",
+                      borderRadius: 6,
+                      background: s.enabled ? "rgba(16, 185, 129, 0.12)" : "rgba(239, 68, 68, 0.1)",
+                      border: `1px solid ${s.enabled ? "rgba(16, 185, 129, 0.3)" : "rgba(239, 68, 68, 0.3)"}`,
+                      color: s.enabled ? "#10b981" : "#ef4444",
+                    }}
+                  >
+                    <i className={s.enabled ? "fa-solid fa-circle-check" : "fa-solid fa-circle-xmark"} />
+                    <strong>{s.name}</strong> ({s.provider})
+                    <span style={{ fontSize: 11, opacity: 0.8 }}>...{s.tokenHint}</span>
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* CARD 2: QUẢN LÝ MÃ SETTING HUD */}
