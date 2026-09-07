@@ -15,24 +15,42 @@ export default async function GroupsPage() {
       <AdminNav current="/admin/groups" />
 
       <div className="vt-card">
-        <h2 style={{ fontSize: 15, marginTop: 0 }}>Thêm nhóm</h2>
+        <h2 style={{ fontSize: 15, marginTop: 0 }}>Thêm mảng / lĩnh vực</h2>
         <form action={saveGroup} className="vt-form">
           <div className="vt-row">
             <label className="vt-field">
-              <span>Tên nhóm</span>
-              <input type="text" name="title" required placeholder="APP" />
+              <span>Tên mảng / lĩnh vực</span>
+              <input type="text" name="title" required placeholder="Liên Quân Mobile, Free Fire, App..." />
+            </label>
+            <label className="vt-field">
+              <span>Icon (Class hoặc URL ảnh)</span>
+              <input type="text" name="icon" placeholder="fa-solid fa-fire hoặc https://..." />
+            </label>
+          </div>
+          <div className="vt-row">
+            <label className="vt-field">
+              <span>Huy hiệu (Badge)</span>
+              <input type="text" name="badge" placeholder="HOT, NEW, UPDATE..." />
+            </label>
+            <label className="vt-field">
+              <span>Slug (Đường dẫn)</span>
+              <input type="text" name="slug" placeholder="free-fire (để trống tự tạo)" />
             </label>
             <label className="vt-field">
               <span>Thứ tự</span>
               <input type="number" name="order" defaultValue={rows.length} />
             </label>
           </div>
+          <label className="vt-field">
+            <span>Mô tả ngắn</span>
+            <input type="text" name="desc" placeholder="Tóm tắt ngắn về mảng này..." />
+          </label>
           <label className="vt-check">
             <input type="checkbox" name="visible" defaultChecked />
-            Hiện
+            Hiện mảng này trên trang chủ
           </label>
           <button className="vt-btn-primary" type="submit">
-            Thêm
+            Thêm mảng
           </button>
         </form>
       </div>
@@ -43,29 +61,47 @@ export default async function GroupsPage() {
             <input type="hidden" name="id" value={r.id} />
             <div className="vt-row">
               <label className="vt-field">
-                <span>Tên nhóm</span>
+                <span>Tên mảng</span>
                 <input type="text" name="title" defaultValue={r.title} required />
+              </label>
+              <label className="vt-field">
+                <span>Icon</span>
+                <input type="text" name="icon" defaultValue={r.icon} placeholder="fa-solid fa-fire" />
+              </label>
+            </div>
+            <div className="vt-row">
+              <label className="vt-field">
+                <span>Huy hiệu (Badge)</span>
+                <input type="text" name="badge" defaultValue={r.badge} placeholder="HOT, NEW..." />
+              </label>
+              <label className="vt-field">
+                <span>Slug</span>
+                <input type="text" name="slug" defaultValue={r.slug} />
               </label>
               <label className="vt-field">
                 <span>Thứ tự</span>
                 <input type="number" name="order" defaultValue={r.order} />
               </label>
             </div>
+            <label className="vt-field">
+              <span>Mô tả ngắn</span>
+              <input type="text" name="desc" defaultValue={r.desc} />
+            </label>
             <label className="vt-check">
               <input type="checkbox" name="visible" defaultChecked={r.visible} />
-              Hiện
+              Hiện mảng này trên trang chủ
             </label>
             <div className="vt-actions">
               <button className="vt-btn-sm" type="submit">
-                Lưu
+                Lưu thay đổi
               </button>
-              <span className="vt-tag">{r._count.apps} ứng dụng</span>
+              <span className="vt-tag">{r._count.apps} mục bên trong</span>
             </div>
           </form>
           <form action={deleteGroup} style={{ marginTop: 8 }}>
             <input type="hidden" name="id" value={r.id} />
             <button className="vt-btn-sm vt-btn-danger" type="submit">
-              Xoá nhóm (xoá cả {r._count.apps} ứng dụng)
+              Xoá mảng này (xoá cả {r._count.apps} mục)
             </button>
           </form>
         </div>

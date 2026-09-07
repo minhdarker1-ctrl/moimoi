@@ -61,6 +61,10 @@ model LinkBox {
 model Group {
   id      Int     @id @default(autoincrement())
   title   String
+  slug    String  @default("")
+  icon    String  @default("")
+  badge   String  @default("")
+  desc    String  @default("")
   order   Int     @default(0)
   visible Boolean @default(true)
   apps    App[]

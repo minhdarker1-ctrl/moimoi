@@ -181,8 +181,14 @@ export async function deleteLinkBox(fd: FormData) {
 export async function saveGroup(fd: FormData) {
   await requireAdmin();
   const id = num(fd, "id");
+  const title = str(fd, "title", 60);
+  const slug = str(fd, "slug", 60);
   const data = {
-    title: str(fd, "title", 60),
+    title,
+    slug,
+    icon: str(fd, "icon", 200),
+    badge: str(fd, "badge", 30),
+    desc: str(fd, "desc", 200),
     order: num(fd, "order"),
     visible: bool(fd, "visible"),
   };

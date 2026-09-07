@@ -55,7 +55,13 @@ export default async function Home() {
           body: n.body,
           createdAt: n.createdAt.toISOString(),
         }))}
-        groups={groups.map((g) => ({ id: g.id, title: g.title }))}
+        groups={groups.map((g) => ({
+          id: g.id,
+          title: g.title,
+          slug: g.slug,
+          icon: g.icon,
+          badge: g.badge,
+        }))}
       />
 
       <main>

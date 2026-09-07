@@ -1,11 +1,16 @@
-"use client";
+﻿"use client";
 
 import { useState, useMemo } from "react";
 import AppCard, { AppData } from "./AppCard";
+import CategoryMenu, { CategoryItem } from "./CategoryMenu";
 
 export interface CatalogGroup {
   id: number;
   title: string;
+  slug?: string;
+  icon?: string;
+  badge?: string;
+  desc?: string;
   apps: AppData[];
 }
 
@@ -39,13 +44,26 @@ export default function AppCatalog({ groups }: AppCatalogProps) {
 
   const normalizedSearch = useMemo(() => removeVietnameseTones(search), [search]);
 
-  // Lọc từng app theo điều kiện tìm kiếm và nền tảng
+  // Chuẩn bị danh sách categories cho CategoryMenu
+  const categoryItems: CategoryItem[] = useMemo(() => {
+    return groups.map((g) => ({
+      id: g.id,
+      title: g.title,
+      slug: g.slug,
+      icon: g.icon,
+      badge: g.badge,
+      desc: g.desc,
+      appCount: g.apps.length,
+    }));
+  }, [groups]);
+
+  // Lọc từng app theo điều kiện tìm kiếm, nền tảng và mảng đã chọn
   const filteredGroups = useMemo(() => {
     return groups
       .filter((g) => selectedGroupId === "all" || g.id === selectedGroupId)
       .map((g) => {
         const matchingApps = g.apps.filter((app) => {
-          // Lọc theo nền tảng
+          // Lọc theo nền tảng (iOS / Android)
           if (platform !== "all") {
             const platforms = parsePlatforms(app.platforms);
             if (!platforms.includes(platform)) return false;
@@ -81,20 +99,51 @@ export default function AppCatalog({ groups }: AppCatalogProps) {
     setSelectedGroupId("all");
   };
 
+  const selectedCategory = useMemo(() => {
+    if (selectedGroupId === "all") return null;
+    return groups.find((g) => g.id === selectedGroupId) || null;
+  }, [groups, selectedGroupId]);
+
+  // Helper render icon cho header section
+  const renderGroupIcon = (icon?: string) => {
+    if (!icon) return <i className="fa-solid fa-gamepad" aria-hidden="true" />;
+    if (icon.startsWith("http://") || icon.startsWith("https://")) {
+      // eslint-disable-next-line @next/next/no-img-element
+      return <img src={icon} alt="" className="mdarker-group-icon-img" aria-hidden="true" />;
+    }
+    if (icon.startsWith("bi-")) return <i className={`bi ${icon}`} aria-hidden="true" />;
+    return <i className={icon} aria-hidden="true" />;
+  };
+
   return (
     <div className="mdarker-catalog-wrapper">
-      {/* Thanh công cụ tìm kiếm và lọc */}
+      {/* 
+        1. MENU CÁC MẢNG CHUNG (Category Hub)
+        Hiển thị danh sách các mảng (Free Fire, Liên Quân, App, Game Khác...)
+      */}
+      {groups.length > 0 && (
+        <div className="mdarker-category-hub-container">
+          <CategoryMenu
+            categories={categoryItems}
+            selectedId={selectedGroupId}
+            onSelect={setSelectedGroupId}
+          />
+        </div>
+      )}
+
+      {/* 
+        2. THANH CÔNG CỤ: TÌM KIẾM & LỌC NỀN TẢNG (iOS / Android)
+      */}
       <div className="mdarker-catalog-bar">
-        {/* Ô tìm kiếm tức thì */}
         <div className="mdarker-search-box">
           <i className="bi bi-search mdarker-search-icon" aria-hidden="true" />
           <input
             type="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Tìm kiếm ứng dụng, game..."
+            placeholder="Tìm kiếm mod, menu, file config..."
             className="mdarker-search-input"
-            aria-label="Tìm kiếm ứng dụng"
+            aria-label="Tìm kiếm nội dung"
           />
           {search && (
             <button
@@ -108,7 +157,7 @@ export default function AppCatalog({ groups }: AppCatalogProps) {
           )}
         </div>
 
-        {/* Cụm nút lọc nền tảng */}
+        {/* Nút lọc nền tảng */}
         <div className="mdarker-filter-tabs">
           <button
             type="button"
@@ -137,50 +186,57 @@ export default function AppCatalog({ groups }: AppCatalogProps) {
         </div>
       </div>
 
-      {/* Danh sách tab danh mục nếu có nhiều nhóm */}
-      {groups.length > 1 && (
-        <div className="mdarker-group-pills">
-          <button
-            type="button"
-            className={`mdarker-pill ${selectedGroupId === "all" ? "active" : ""}`}
-            onClick={() => setSelectedGroupId("all")}
-          >
-            Tất cả danh mục
-          </button>
-          {groups.map((g) => (
-            <button
-              key={g.id}
-              type="button"
-              className={`mdarker-pill ${selectedGroupId === g.id ? "active" : ""}`}
-              onClick={() => setSelectedGroupId(g.id)}
-            >
-              {g.title} ({g.apps.length})
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* Thông tin kết quả tìm kiếm khi đang lọc */}
+      {/* Thông tin trạng thái khi đang lọc */}
       {isFiltering && (
         <div className="mdarker-filter-status">
           <span>
-            Tìm thấy <strong>{totalResults}</strong> ứng dụng phù hợp
+            {selectedCategory && (
+              <span className="mdarker-status-badge">
+                Mảng: <strong>{selectedCategory.title}</strong>
+              </span>
+            )}
+            {" "}Tìm thấy <strong>{totalResults}</strong> mục phù hợp
           </span>
           <button type="button" onClick={clearFilters} className="mdarker-clear-btn">
             <i className="bi bi-arrow-counterclockwise" aria-hidden="true" />
-            Đặt lại bộ lọc
+            Đặt lại tất cả
           </button>
         </div>
       )}
 
-      {/* Danh sách ứng dụng theo nhóm */}
+      {/* 
+        3. DANH SÁCH MỤC THEO MẢNG / LĨNH VỰC
+      */}
       {filteredGroups.length > 0 ? (
         filteredGroups.map((g) => (
-          <section key={g.id} id={`group-${g.id}`} className="mdarker-group-section" aria-label={g.title}>
-            <h2 className="mdarker-section-title">
-              <span>{g.title}</span>
-              <span className="mdarker-group-count">{g.apps.length}</span>
-            </h2>
+          <section
+            key={g.id}
+            id={`group-${g.slug || g.id}`}
+            className="mdarker-group-section"
+            aria-label={g.title}
+          >
+            {/* Tiêu đề mảng với Icon, Badge và Mô tả */}
+            <div className="mdarker-section-header">
+              <div className="mdarker-section-header-left">
+                <span className="mdarker-section-icon">
+                  {renderGroupIcon(g.icon)}
+                </span>
+                <div>
+                  <h2 className="mdarker-section-title">
+                    <span>{g.title}</span>
+                    {g.badge && (
+                      <span className={`mdarker-group-badge mdarker-badge-${g.badge.toLowerCase()}`}>
+                        {g.badge}
+                      </span>
+                    )}
+                    <span className="mdarker-group-count">{g.apps.length}</span>
+                  </h2>
+                  {g.desc && <p className="mdarker-section-desc">{g.desc}</p>}
+                </div>
+              </div>
+            </div>
+
+            {/* Lưới các thẻ card trong mảng */}
             <div className="mdarker-app-list">
               {g.apps.map((a) => (
                 <AppCard key={a.id} app={a} />
@@ -189,15 +245,15 @@ export default function AppCatalog({ groups }: AppCatalogProps) {
           </section>
         ))
       ) : (
-        /* Trạng thái không tìm thấy kết quả */
+        /* Trạng thái không tìm thấy */
         <div className="mdarker-empty-search">
           <div className="mdarker-empty-icon">
             <i className="bi bi-inbox" aria-hidden="true" />
           </div>
-          <h3>Không tìm thấy ứng dụng</h3>
-          <p>Không có kết quả nào khớp với từ khoá hoặc bộ lọc của bạn.</p>
+          <h3>Không tìm thấy nội dung</h3>
+          <p>Không có kết quả nào khớp với từ khoá hoặc bộ lọc trong mảng này.</p>
           <button type="button" onClick={clearFilters} className="vt-btn-primary">
-            Xoá bộ lọc & Xem tất cả
+            Xoá bộ lọc & Xem tất cả mảng
           </button>
         </div>
       )}

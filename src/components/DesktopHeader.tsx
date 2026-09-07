@@ -9,7 +9,7 @@ interface DesktopHeaderProps {
   avatarUrl: string;
   verified: boolean;
   notices: NoticeItem[];
-  groups: { id: number; title: string }[];
+  groups: { id: number; title: string; slug?: string; icon?: string; badge?: string }[];
 }
 
 const timeFormatter = new Intl.DateTimeFormat("vi-VN", {
@@ -96,16 +96,28 @@ export default function DesktopHeader({
             )}
           </button>
 
-          {/* Menu liên kết nhanh danh mục ở giữa */}
+          {/* Menu liên kết nhanh mảng ở giữa */}
           {groups.length > 0 && (
-            <nav className="mdarker-header-nav" aria-label="Danh mục ứng dụng">
-              {groups.slice(0, 5).map((g) => (
+            <nav className="mdarker-header-nav" aria-label="Danh mục mảng">
+              {groups.slice(0, 6).map((g) => (
                 <a
                   key={g.id}
-                  href={`#group-${g.id}`}
+                  href={`#group-${g.slug || g.id}`}
                   className="mdarker-header-nav-link"
                 >
-                  {g.title}
+                  {g.icon && (
+                    <span className="mdarker-header-nav-icon" aria-hidden="true">
+                      {g.icon.startsWith("http") ? (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img src={g.icon} alt="" width={15} height={15} />
+                      ) : g.icon.startsWith("bi-") ? (
+                        <i className={`bi ${g.icon}`} />
+                      ) : (
+                        <i className={g.icon} />
+                      )}
+                    </span>
+                  )}
+                  <span>{g.title}</span>
                 </a>
               ))}
             </nav>
