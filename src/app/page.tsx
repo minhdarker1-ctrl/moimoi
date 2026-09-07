@@ -18,7 +18,7 @@ function parseLines(json: string): string[] {
 }
 
 export default async function Home() {
-  const [site, socials, linkBoxes, groups, notices, counter, daily] = await Promise.all([
+  const [site, socials, linkBoxes, groups, notices, counter, daily, ffConfig] = await Promise.all([
     db.site.findUnique({ where: { id: 1 } }),
     db.social.findMany({ where: { visible: true }, orderBy: { order: "asc" } }),
     db.linkBox.findMany({ where: { visible: true }, orderBy: { order: "asc" } }),
@@ -30,6 +30,7 @@ export default async function Home() {
     db.notice.findMany({ where: { visible: true }, orderBy: { createdAt: "desc" }, take: 20 }),
     db.counter.findUnique({ where: { id: 1 } }),
     db.dailyHit.findUnique({ where: { date: vnDate() } }),
+    db.freeFireConfig.findUnique({ where: { id: 1 } }),
   ]);
 
   if (!site) {
@@ -138,7 +139,7 @@ export default async function Home() {
           </div>
         )}
 
-        <AppCatalog groups={groups} />
+        <AppCatalog groups={groups} freeFireNote={ffConfig} />
 
       <StatsBar total={counter?.total ?? 0} today={daily?.count ?? 0} />
       <LiveClock />

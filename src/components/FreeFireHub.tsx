@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, useRef } from "react";
+import FreeFireAdminNote, { FreeFireNoteData } from "./FreeFireAdminNote";
 
 interface SettingItem {
   name: string;
@@ -119,7 +120,7 @@ const HUD_PRESETS = {
   },
 };
 
-export default function FreeFireHub() {
+export default function FreeFireHub({ adminNote }: { adminNote?: FreeFireNoteData | null } = {}) {
   const [device, setDevice] = useState("");
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -318,6 +319,9 @@ export default function FreeFireHub() {
           Bộ phân tích thông số độ nhạy & mã HUD chuẩn xác theo từng dòng máy (iOS, Android & PC)
         </p>
       </div>
+
+      {/* Phần chú thích / hướng dẫn từ Admin (nếu có) */}
+      <FreeFireAdminNote note={adminNote} />
 
       {/* Form tra cứu thiết bị */}
       <div className="mdarker-ff-card">

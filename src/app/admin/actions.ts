@@ -129,6 +129,31 @@ export async function saveSite(fd: FormData) {
   refresh("/admin/site");
 }
 
+/* ---------- freefire config ---------- */
+
+export async function saveFreeFireConfig(fd: FormData) {
+  await requireAdmin();
+  const data = {
+    title: str(fd, "title", 120),
+    content: str(fd, "content", 3000),
+    linkUrl: url(fd, "linkUrl"),
+    linkText: str(fd, "linkText", 60),
+    imageUrl: url(fd, "imageUrl"),
+    videoUrl: url(fd, "videoUrl"),
+    visible: bool(fd, "visible"),
+  };
+
+  await db.freeFireConfig.upsert({
+    where: { id: 1 },
+    update: data,
+    create: { id: 1, ...data },
+  });
+
+  refresh("/admin/freefire");
+  revalidatePath("/freefire");
+  revalidatePath("/free-fire");
+}
+
 /* ---------- social ---------- */
 
 export async function saveSocial(fd: FormData) {

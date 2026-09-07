@@ -72,6 +72,18 @@ model Group {
   @@index([order])
 }
 
+model FreeFireConfig {
+  id        Int      @id @default(1)
+  title     String   @default("Lưu ý & Hướng dẫn cài đặt")
+  content   String   @default("")
+  linkUrl   String   @default("")
+  linkText  String   @default("")
+  imageUrl  String   @default("")
+  videoUrl  String   @default("")
+  visible   Boolean  @default(true)
+  updatedAt DateTime @updatedAt
+}
+
 model App {
   id      Int    @id @default(autoincrement())
   groupId Int

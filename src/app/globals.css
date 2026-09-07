@@ -377,15 +377,21 @@ button {
   cursor: pointer;
 }
 
-/* ---------- NAVIGATION ---------- */
+/* ---------- NAVIGATION & FIXED ACTIONS ---------- */
 .mdarker-nav,
-.mdarker-mobile-nav {
+.mdarker-mobile-nav,
+.mdarker-fixed-actions {
   position: fixed;
   top: 14px;
   right: 14px;
-  z-index: 40;
+  z-index: 55;
   display: flex;
-  gap: 10px;
+  align-items: center;
+  gap: 8px;
+}
+
+.mdarker-fixed-actions .mdarker-header-clock {
+  display: none;
 }
 
 .mdarker-desktop-header {
@@ -397,35 +403,75 @@ button {
     display: none !important;
   }
 
+  .mdarker-fixed-actions {
+    top: 10px;
+    right: 24px;
+    gap: 10px;
+  }
+
+  .mdarker-fixed-actions .mdarker-header-clock {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--vi-muted);
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--vi-border);
+    border-radius: 20px;
+    font-variant-numeric: tabular-nums;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  }
+
+  [data-theme="dark"] .mdarker-fixed-actions .mdarker-header-clock {
+    background: rgba(18, 22, 34, 0.75);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+
   .mdarker-desktop-header {
-    position: sticky;
+    position: fixed;
     top: 0;
+    left: 0;
+    right: 0;
     z-index: 45;
     display: block;
     width: 100%;
-    background: rgba(234, 242, 248, 0.85);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+    background: rgba(234, 242, 248, 0.88);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border-bottom: 1px solid var(--vi-border);
-    transition: background 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    transform: translateY(-100%);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.42s cubic-bezier(0.16, 1, 0.3, 1),
+                opacity 0.32s ease,
+                background 0.25s ease,
+                box-shadow 0.25s ease;
   }
 
   [data-theme="dark"] .mdarker-desktop-header {
-    background: rgb(12 14 22 / 85%);
+    background: rgb(12 14 22 / 88%);
   }
 
-  .mdarker-header-scrolled {
+  /* Khi cuộn xuống: Taskbar trượt xuống từ từ và mượt mà */
+  .mdarker-desktop-header.mdarker-header-visible {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
     box-shadow: 0 4px 20px rgb(0 0 0 / 8%);
   }
 
-  [data-theme="dark"] .mdarker-header-scrolled {
+  [data-theme="dark"] .mdarker-desktop-header.mdarker-header-visible {
     box-shadow: 0 4px 20px rgb(0 0 0 / 45%);
   }
 
   .mdarker-header-container {
     max-width: 1240px;
     margin: 0 auto;
-    padding: 10px 24px;
+    padding: 8px 24px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -443,11 +489,13 @@ button {
     font-family: inherit;
     cursor: pointer;
     text-align: left;
-    transition: opacity 0.18s;
+    text-decoration: none;
+    transition: opacity 0.18s, transform 0.18s;
   }
 
   .mdarker-header-brand:hover {
     opacity: 0.85;
+    transform: translateY(-1px);
   }
 
   .mdarker-header-avatar {
@@ -471,9 +519,9 @@ button {
   .mdarker-header-nav {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     overflow-x: auto;
-    max-width: 45%;
+    max-width: 55%;
     scrollbar-width: none;
   }
 
@@ -482,6 +530,9 @@ button {
   }
 
   .mdarker-header-nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     padding: 6px 12px;
     font-size: 13px;
     font-weight: 700;
@@ -489,32 +540,34 @@ button {
     text-decoration: none;
     border-radius: 8px;
     white-space: nowrap;
-    transition: color 0.18s, background 0.18s;
+    transition: color 0.18s, background 0.18s, transform 0.18s;
   }
 
   .mdarker-header-nav-link:hover {
     color: var(--vi-accent);
     background: var(--vi-card);
+    transform: translateY(-1px);
   }
 
-  .mdarker-header-actions {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+  .mdarker-header-nav-link.active {
+    color: #fff;
+    background: var(--vi-accent);
   }
 
-  .mdarker-header-clock {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--vi-muted);
-    background: var(--vi-card);
-    border: 1px solid var(--vi-border);
-    border-radius: 20px;
-    font-variant-numeric: tabular-nums;
+  .mdarker-nav-all {
+    background: rgba(99, 102, 241, 0.08);
+    border: 1px dashed rgba(99, 102, 241, 0.25);
+  }
+
+  .mdarker-nav-all:hover {
+    background: rgba(99, 102, 241, 0.18);
+  }
+
+  .mdarker-header-actions-spacer {
+    display: block;
+    width: 220px;
+    height: 36px;
+    flex-shrink: 0;
   }
 }
 
@@ -2845,6 +2898,213 @@ button {
   border-color: #ff8c00;
   color: #ff8c00;
   background: rgba(255, 140, 0, 0.08);
+}
+
+/* =====================================================
+   FREE FIRE ADMIN NOTE (CHÚ THÍCH TỪ ADMIN)
+   ===================================================== */
+.mdarker-ff-note-box {
+  background: var(--vi-card);
+  border: 1.5px solid rgba(255, 107, 0, 0.35);
+  border-radius: 16px;
+  padding: 20px;
+  margin: 0 auto 24px;
+  max-width: 100%;
+  text-align: left;
+  box-shadow: 0 8px 30px rgba(255, 107, 0, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  animation: fadeIn 0.4s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+[data-theme="dark"] .mdarker-ff-note-box {
+  background: rgba(22, 16, 20, 0.75);
+  border-color: rgba(255, 107, 0, 0.45);
+  box-shadow: 0 8px 30px rgba(255, 107, 0, 0.18);
+}
+
+.mdarker-ff-note-box::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, #ff4500, #ff8c00);
+}
+
+.mdarker-ff-note-header {
+  margin-bottom: 12px;
+}
+
+.mdarker-ff-note-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  color: #ff6b00;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.mdarker-ff-note-fire {
+  font-size: 12px;
+  color: #ff4500;
+}
+
+.mdarker-ff-note-title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--vi-text);
+  line-height: 1.4;
+}
+
+.mdarker-ff-note-body {
+  font-size: 13.5px;
+  color: var(--vi-text);
+  opacity: 0.92;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  margin-bottom: 14px;
+}
+
+.mdarker-ff-note-media {
+  margin: 14px 0;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--vi-border);
+}
+
+.mdarker-ff-note-img {
+  width: 100%;
+  max-height: 380px;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.mdarker-ff-note-img:hover {
+  transform: scale(1.015);
+}
+
+.mdarker-ff-note-video-wrap {
+  position: relative;
+  padding-bottom: 56.25%;
+  height: 0;
+  overflow: hidden;
+  border-radius: 12px;
+  margin: 14px 0;
+  border: 1px solid var(--vi-border);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.mdarker-ff-note-iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.mdarker-ff-note-footer {
+  margin-top: 14px;
+}
+
+.mdarker-ff-note-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, #ff4500, #ff8c00);
+  text-decoration: none;
+  box-shadow: 0 4px 15px rgba(255, 69, 0, 0.3);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.mdarker-ff-note-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 69, 0, 0.45);
+}
+
+/* =====================================================
+   LIÊN QUÂN MOBILE CUSTOM STYLING
+   ===================================================== */
+.mdarker-lq-hero {
+  text-align: center;
+  padding: 30px 16px 20px;
+  margin-bottom: 30px;
+  background: radial-gradient(circle at center, rgba(139, 92, 246, 0.12), transparent 70%);
+  border-radius: 24px;
+  position: relative;
+}
+
+.mdarker-lq-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: #fff;
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.35);
+  margin-bottom: 12px;
+}
+
+.mdarker-lq-title {
+  font-size: 26px;
+  font-weight: 900;
+  color: var(--vi-text);
+  margin: 0 0 10px;
+}
+
+.mdarker-lq-title span {
+  background: linear-gradient(135deg, #6366f1, #a855f7, #ec4899);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+
+.mdarker-lq-desc {
+  max-width: 540px;
+  margin: 0 auto;
+  font-size: 13.5px;
+  color: var(--vi-muted);
+  line-height: 1.6;
+}
+
+.mdarker-lq-comingsoon {
+  background: var(--vi-card);
+  border: 1.5px dashed rgba(99, 102, 241, 0.4);
+  border-radius: 20px;
+  padding: 40px 20px;
+  text-align: center;
+  margin-top: 20px;
+}
+
+.mdarker-lq-shield-icon {
+  font-size: 42px;
+  color: #8b5cf6;
+  margin-bottom: 16px;
+  display: inline-block;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
 }
 
 

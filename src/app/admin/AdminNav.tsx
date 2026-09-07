@@ -7,6 +7,7 @@ const LINKS = [
   ["/admin/socials", "Social"],
   ["/admin/linkboxes", "Link box"],
   ["/admin/groups", "Nhóm"],
+  ["/admin/freefire", "🔥 Free Fire"],
   ["/admin/apps", "Ứng dụng"],
   ["/admin/notices", "Thông báo"],
   ["/admin/music", "🎵 Nhạc"],

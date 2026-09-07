@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import AppCard, { AppData } from "./AppCard";
 import CategoryMenu, { CategoryItem } from "./CategoryMenu";
 import FreeFireHub from "./FreeFireHub";
+import { FreeFireNoteData } from "./FreeFireAdminNote";
 
 export interface CatalogGroup {
   id: number;
@@ -17,6 +18,10 @@ export interface CatalogGroup {
 
 interface AppCatalogProps {
   groups: CatalogGroup[];
+  freeFireNote?: FreeFireNoteData | null;
+  defaultGroupId?: number | "all";
+  hideCategoryMenu?: boolean;
+  useLinks?: boolean;
 }
 
 function removeVietnameseTones(str: string): string {
@@ -38,10 +43,16 @@ function parsePlatforms(json: string): string[] {
   }
 }
 
-export default function AppCatalog({ groups }: AppCatalogProps) {
+export default function AppCatalog({
+  groups,
+  freeFireNote,
+  defaultGroupId = "all",
+  hideCategoryMenu = false,
+  useLinks = true,
+}: AppCatalogProps) {
   const [search, setSearch] = useState("");
   const [platform, setPlatform] = useState<"all" | "ios" | "android">("all");
-  const [selectedGroupId, setSelectedGroupId] = useState<number | "all">("all");
+  const [selectedGroupId, setSelectedGroupId] = useState<number | "all">(defaultGroupId);
 
   const normalizedSearch = useMemo(() => removeVietnameseTones(search), [search]);
 
@@ -122,12 +133,13 @@ export default function AppCatalog({ groups }: AppCatalogProps) {
         1. MENU CÁC MẢNG CHUNG (Category Hub)
         Hiển thị danh sách các mảng (Free Fire, Liên Quân, App, Game Khác...)
       */}
-      {groups.length > 0 && (
+      {!hideCategoryMenu && groups.length > 0 && (
         <div className="mdarker-category-hub-container">
           <CategoryMenu
             categories={categoryItems}
             selectedId={selectedGroupId}
             onSelect={setSelectedGroupId}
+            useLinks={useLinks}
           />
         </div>
       )}
@@ -210,7 +222,7 @@ export default function AppCatalog({ groups }: AppCatalogProps) {
       */}
       {/* Nếu đang chọn mảng Free Fire, hiển thị công cụ Độ Nhạy Free Fire Pro */}
       {selectedCategory?.title?.toLowerCase().includes("free fire") && !search && (
-        <FreeFireHub />
+        <FreeFireHub adminNote={freeFireNote} />
       )}
 
       {filteredGroups.length > 0 ? (
