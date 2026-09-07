@@ -245,23 +245,34 @@ export default function AppCatalog({ groups }: AppCatalogProps) {
           </section>
         ))
       ) : (
-        /* Trạng thái không tìm thấy */
+        /* Trạng thái không có sản phẩm hoặc không tìm thấy */
         <div className="mdarker-empty-search">
           <div className="mdarker-empty-icon">
-            <i className="bi bi-inbox" aria-hidden="true" />
+            {search ? (
+              <i className="bi bi-search" aria-hidden="true" />
+            ) : (
+              <i className="fa-solid fa-rocket mdarker-rocket-icon" aria-hidden="true" />
+            )}
           </div>
-          <h3>
-            {selectedCategory
-              ? `Mảng ${selectedCategory.title} đang cập nhật`
-              : "Không tìm thấy nội dung"}
+          <h3 className="mdarker-empty-title">
+            {search
+              ? "Không tìm thấy kết quả"
+              : "COMING SOON"}
           </h3>
-          <p>
-            {selectedCategory
-              ? "Chưa có sản phẩm trong mảng này. Admin sẽ sớm bổ sung nội dung mới!"
-              : "Không có kết quả nào khớp với từ khoá hoặc bộ lọc."}
+          <p className="mdarker-empty-desc">
+            {search
+              ? `Không có kết quả nào khớp với từ khoá "${search}".`
+              : selectedCategory
+              ? `Mảng ${selectedCategory.title} đang được cập nhật sản phẩm mới. Hãy quay lại sau nhé!`
+              : "Nội dung đang được chuẩn bị và sẽ sớm ra mắt!"}
           </p>
-          <button type="button" onClick={clearFilters} className="vt-btn-primary">
-            Xem tất cả (ALL)
+          <button
+            type="button"
+            onClick={clearFilters}
+            className="vt-btn-primary mdarker-empty-btn"
+          >
+            <i className="fa-solid fa-shapes" aria-hidden="true" />
+            <span>Khám phá mục ALL</span>
           </button>
         </div>
       )}

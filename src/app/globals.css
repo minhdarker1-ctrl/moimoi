@@ -902,6 +902,28 @@ button {
   color: var(--vi-muted);
 }
 
+.mdarker-cat-badge-count.mdarker-cat-soon {
+  font-size: 9.5px;
+  font-weight: 800;
+  padding: 2px 7px;
+  letter-spacing: 0.4px;
+  background: rgba(245, 158, 11, 0.15);
+  color: #d97706;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+[data-theme="dark"] .mdarker-cat-badge-count.mdarker-cat-soon {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
+.mdarker-category-tab.active .mdarker-cat-badge-count.mdarker-cat-soon {
+  background: rgba(255, 255, 255, 0.25);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
 /* Hover & Active states */
 .mdarker-category-tab:hover {
   transform: translateY(-2px);
@@ -978,29 +1000,57 @@ button {
 }
 
 .mdarker-empty-search {
-  padding: 48px 16px;
+  padding: 56px 20px;
   background: var(--vi-card);
-  border: 1px dashed var(--vi-border);
-  border-radius: var(--vi-radius);
+  border: 1px solid var(--vi-border);
+  border-radius: 24px;
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 36px;
+  box-shadow: var(--vi-shadow);
 }
 
 .mdarker-empty-icon {
-  font-size: 40px;
+  font-size: 44px;
+  margin-bottom: 14px;
+  display: inline-flex;
   color: var(--vi-muted);
-  margin-bottom: 12px;
 }
 
-.mdarker-empty-search h3 {
-  margin: 0 0 6px;
-  font-size: 17px;
+.mdarker-rocket-icon {
+  color: #f59e0b;
+  filter: drop-shadow(0 4px 14px rgba(245, 158, 11, 0.45));
+  animation: mdarker-rocket-float 3s ease-in-out infinite alternate;
 }
 
-.mdarker-empty-search p {
-  margin: 0 0 16px;
+@keyframes mdarker-rocket-float {
+  0% { transform: translateY(0) rotate(0deg); }
+  100% { transform: translateY(-8px) rotate(6deg); }
+}
+
+.mdarker-empty-title {
+  margin: 0 0 8px;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: var(--vi-text);
+}
+
+.mdarker-empty-desc {
+  margin: 0 auto 22px;
   font-size: 14px;
   color: var(--vi-muted);
+  max-width: 440px;
+  line-height: 1.5;
+}
+
+.mdarker-empty-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 24px;
+  border-radius: 999px;
+  font-size: 14px;
+  box-shadow: 0 6px 18px rgba(124, 92, 255, 0.35);
 }
 
 /* ---------- APPS & GROUPS ---------- */

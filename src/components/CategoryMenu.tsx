@@ -82,7 +82,11 @@ export default function CategoryMenu({
                     {cat.badge}
                   </span>
                 )}
-                <span className="mdarker-cat-badge-count">{cat.appCount}</span>
+                {cat.appCount > 0 ? (
+                  <span className="mdarker-cat-badge-count">{cat.appCount}</span>
+                ) : (
+                  <span className="mdarker-cat-badge-count mdarker-cat-soon">COMING SOON</span>
+                )}
               </div>
             </button>
           );
