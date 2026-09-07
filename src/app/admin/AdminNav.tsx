@@ -9,6 +9,7 @@ const LINKS = [
   ["/admin/groups", "Nhóm"],
   ["/admin/apps", "Ứng dụng"],
   ["/admin/notices", "Thông báo"],
+  ["/admin/music", "🎵 Nhạc"],
   ["/admin/shorteners", "Cổng vượt link"],
   ["/admin/keytypes", "Loại key"],
   ["/admin/keys", "Key đã phát"],

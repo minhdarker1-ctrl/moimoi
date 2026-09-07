@@ -1557,3 +1557,257 @@ button {
     animation-iteration-count: 1 !important;
   }
 }
+
+/* ======================================================
+   MUSIC PLAYER — mini player nổi góc dưới trái
+   ====================================================== */
+
+.mdarker-music-player {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px 10px 10px;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  width: 320px;
+  transition: width 0.3s ease;
+}
+
+[data-theme="dark"] .mdarker-music-player {
+  background: rgba(21, 24, 40, 0.90);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+/* Thu nhỏ */
+.mdarker-music-collapsed {
+  width: auto;
+  padding-right: 10px;
+}
+
+/* ---- Thumbnail ---- */
+.mdarker-music-thumb {
+  position: relative;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid transparent;
+  transition: border-color 0.3s;
+}
+
+.mdarker-music-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+/* Ring cam khi đang phát */
+.mdarker-music-playing {
+  border-color: #ff6b35;
+  animation: mdarker-music-spin 8s linear infinite;
+}
+
+@keyframes mdarker-music-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Equalizer bars — hiện đè lên thumb khi playing */
+.mdarker-music-eq {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 3px;
+  padding-bottom: 8px;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 50%;
+}
+
+.mdarker-music-eq span {
+  display: block;
+  width: 3px;
+  border-radius: 2px;
+  background: #fff;
+  animation: mdarker-eq-bounce 0.9s ease-in-out infinite;
+}
+.mdarker-music-eq span:nth-child(1) { animation-delay: 0s;    height: 12px; }
+.mdarker-music-eq span:nth-child(2) { animation-delay: 0.2s;  height: 18px; }
+.mdarker-music-eq span:nth-child(3) { animation-delay: 0.1s;  height: 10px; }
+
+@keyframes mdarker-eq-bounce {
+  0%, 100% { transform: scaleY(0.4); }
+  50%       { transform: scaleY(1); }
+}
+
+/* ---- Body (thông tin + điều khiển) ---- */
+.mdarker-music-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* ---- Tên bài + nghệ sĩ ---- */
+.mdarker-music-info {
+  min-width: 0;
+}
+
+.mdarker-music-title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--vi-text);
+}
+
+.mdarker-music-artist {
+  margin: 0;
+  font-size: 11px;
+  color: var(--vi-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---- Progress bar ---- */
+.mdarker-music-progress {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.mdarker-music-time {
+  font-size: 10px;
+  color: var(--vi-muted);
+  flex-shrink: 0;
+  min-width: 28px;
+}
+.mdarker-music-time:last-child {
+  text-align: right;
+}
+
+.mdarker-music-range {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 3px;
+  border-radius: 99px;
+  background: var(--vi-border);
+  outline: none;
+  cursor: pointer;
+}
+.mdarker-music-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--vi-accent);
+  cursor: pointer;
+}
+.mdarker-music-range::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--vi-accent);
+  border: none;
+  cursor: pointer;
+}
+
+/* ---- Buttons ---- */
+.mdarker-music-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mdarker-music-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  background: var(--vi-border);
+  color: var(--vi-text);
+  font-size: 14px;
+  transition: background 0.2s, transform 0.15s;
+}
+.mdarker-music-btn:hover {
+  background: var(--vi-accent);
+  color: #fff;
+  transform: scale(1.08);
+}
+.mdarker-music-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.mdarker-music-btn:disabled:hover {
+  background: var(--vi-border);
+  color: var(--vi-text);
+  transform: none;
+}
+
+/* Nút play/pause to hơn */
+.mdarker-music-btn-main {
+  width: 34px;
+  height: 34px;
+  font-size: 16px;
+  background: var(--vi-accent);
+  color: #fff;
+}
+.mdarker-music-btn-main:hover {
+  background: var(--vi-accent2);
+}
+
+/* ---- Nút ẩn/hiện player ---- */
+.mdarker-music-toggle {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid var(--vi-border);
+  background: transparent;
+  color: var(--vi-muted);
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+  align-self: flex-start;
+  margin-top: 2px;
+}
+.mdarker-music-toggle:hover {
+  background: var(--vi-border);
+  color: var(--vi-text);
+}
+
+/* ---- Mobile ---- */
+@media (max-width: 480px) {
+  .mdarker-music-player {
+    width: calc(100vw - 32px);
+    bottom: 12px;
+    left: 16px;
+  }
+  .mdarker-music-collapsed {
+    width: auto;
+  }
+}
+

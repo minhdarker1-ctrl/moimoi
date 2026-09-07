@@ -117,6 +117,20 @@ model DailyHit {
   count Int    @default(0)
 }
 
+// ---------- Nhạc ----------
+
+model MusicTrack {
+  id        Int     @id @default(autoincrement())
+  // Video ID YouTube (phần sau v= hoặc youtu.be/).
+  youtubeId String
+  title     String
+  artist    String  @default("")
+  order     Int     @default(0)
+  visible   Boolean @default(true)
+
+  @@index([order])
+}
+
 // ---------- Chống lạm dụng ----------
 
 // Rate limit lưu ở DB, không phải RAM: Vercel chạy nhiều serverless instance,

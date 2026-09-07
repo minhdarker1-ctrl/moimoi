@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Quicksand } from "next/font/google";
 import { db } from "@/lib/db";
 import StarrySky from "@/components/StarrySky";
+import MusicPlayer from "@/components/MusicPlayer";
 import "./globals.css";
 
 const quicksand = Quicksand({
@@ -53,6 +54,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <StarrySky />
+        <MusicPlayer />
         {children}
       </body>
     </html>

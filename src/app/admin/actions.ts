@@ -378,3 +378,68 @@ export async function purgeExpiredKeys() {
   await db.appKey.deleteMany({ where: { expiresAt: { lt: new Date() } } });
   revalidatePath("/admin/keys");
 }
+
+/* ---------- music ---------- */
+
+/** Parse YouTube URL hoặc video ID thuần thành video ID 11 ký tự. */
+function parseYoutubeId(raw: string): string | null {
+  const s = raw.trim();
+  // Đã là ID thuần (11 ký tự chữ-số-dash-underscore)
+  if (/^[\w-]{11}$/.test(s)) return s;
+  try {
+    const u = new URL(s);
+    // youtu.be/ID
+    if (u.hostname === "youtu.be") return u.pathname.slice(1, 12) || null;
+    // youtube.com/watch?v=ID hoặc /embed/ID hoặc /shorts/ID
+    const v = u.searchParams.get("v") || u.pathname.split("/").pop();
+    if (v && /^[\w-]{11}$/.test(v)) return v;
+  } catch {
+    // Không phải URL hợp lệ
+  }
+  return null;
+}
+
+export async function addMusicTrack(fd: FormData) {
+  await requireAdmin();
+  const raw = str(fd, "youtubeId", 200);
+  const youtubeId = parseYoutubeId(raw);
+  if (!youtubeId) return;
+  const title = str(fd, "title", 200);
+  if (!title) return;
+  const artist = str(fd, "artist", 200);
+  const last = await db.musicTrack.findFirst({ orderBy: { order: "desc" } });
+  await db.musicTrack.create({ data: { youtubeId, title, artist, order: (last?.order ?? 0) + 1 } });
+  refresh("/admin/music");
+}
+
+export async function deleteMusicTrack(fd: FormData) {
+  await requireAdmin();
+  await db.musicTrack.delete({ where: { id: num(fd, "id") } });
+  refresh("/admin/music");
+}
+
+export async function toggleMusicTrack(fd: FormData) {
+  await requireAdmin();
+  const id = num(fd, "id");
+  const t = await db.musicTrack.findUnique({ where: { id } });
+  if (!t) return;
+  await db.musicTrack.update({ where: { id }, data: { visible: !t.visible } });
+  refresh("/admin/music");
+}
+
+export async function moveMusicTrack(fd: FormData) {
+  await requireAdmin();
+  const id = num(fd, "id");
+  const dir = str(fd, "dir") as "up" | "down";
+  const all = await db.musicTrack.findMany({ orderBy: { order: "asc" } });
+  const idx = all.findIndex((t) => t.id === id);
+  if (idx < 0) return;
+  const swapIdx = dir === "up" ? idx - 1 : idx + 1;
+  if (swapIdx < 0 || swapIdx >= all.length) return;
+  const a = all[idx];
+  const b = all[swapIdx];
+  await db.musicTrack.update({ where: { id: a.id }, data: { order: b.order } });
+  await db.musicTrack.update({ where: { id: b.id }, data: { order: a.order } });
+  refresh("/admin/music");
+}
+
