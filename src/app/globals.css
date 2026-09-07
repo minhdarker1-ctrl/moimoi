@@ -1,12 +1,12 @@
 :root {
-  --vi-accent: #7c5cff;
-  --vi-accent2: #00d4ff;
-  --vi-bg: #f4f5fb;
-  --vi-card: #ffffff;
-  --vi-text: #14161f;
-  --vi-muted: #6b7180;
-  --vi-border: #e4e6ef;
-  --vi-shadow: 0 8px 24px rgb(20 22 31 / 8%);
+  --vi-accent: #3b82f6;
+  --vi-accent2: #06b6d4;
+  --vi-bg: #eaf2f8;
+  --vi-card: rgba(255, 255, 255, 0.88);
+  --vi-text: #0e1e36;
+  --vi-muted: #57708e;
+  --vi-border: rgba(186, 215, 245, 0.65);
+  --vi-shadow: 0 10px 32px rgba(140, 185, 230, 0.16);
   --vi-radius: 18px;
 }
 
@@ -28,16 +28,17 @@
   background-attachment: fixed;
 }
 
-/* Glassmorphism nhẹ cho thẻ card ở Dark Mode */
-[data-theme="dark"] .mdarker-app-item,
-[data-theme="dark"] .mdarker-linkbox,
-[data-theme="dark"] .mdarker-stats,
-[data-theme="dark"] .mdarker-yt-banner,
-[data-theme="dark"] .mdarker-filter-tabs,
-[data-theme="dark"] .mdarker-pill,
-[data-theme="dark"] .vt-card {
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+/* Glassmorphism hiệu ứng màng sương tuyết nhẹ cho thẻ card ở cả Light & Dark Mode */
+.mdarker-app-item,
+.mdarker-linkbox,
+.mdarker-stats,
+.mdarker-yt-banner,
+.mdarker-filter-tabs,
+.mdarker-pill,
+.mdarker-empty-search,
+.vt-card {
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
 /* ---------- STARRY SKY (DARK MODE) ---------- */
@@ -173,6 +174,139 @@
   }
 }
 
+/* ---------- BÔNG TUYẾT RƠI MÙA ĐÔNG (SNOW EFFECT) ---------- */
+.mdarker-snow-container {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+  overflow: hidden;
+  contain: strict;
+}
+
+.mdarker-snow-flake {
+  position: absolute;
+  top: -24px;
+  will-change: transform;
+  pointer-events: none;
+  animation-name: mdarker-snow-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.mdarker-snow-sway {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  will-change: transform;
+  animation-name: mdarker-snow-sway;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+/* Hạt tuyết tròn (dot) */
+.mdarker-snow-particle.particle-dot {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 6px rgba(186, 220, 255, 0.85), 0 1px 3px rgba(90, 140, 205, 0.45);
+}
+
+/* Hạt tuyết tinh thể lấp lánh (crystal) */
+.mdarker-snow-particle.particle-crystal {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #ffffff;
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  box-shadow: 0 0 8px rgba(147, 197, 253, 0.9), 0 1px 4px rgba(70, 130, 200, 0.5);
+}
+
+/* Bông tuyết 6 cánh (flake SVG) */
+.mdarker-snow-svg {
+  width: 100%;
+  height: 100%;
+  color: #ffffff;
+  filter: drop-shadow(0 0 4px rgba(186, 220, 255, 0.95)) drop-shadow(0 1px 3px rgba(80, 130, 200, 0.5));
+  animation: mdarker-snow-spin linear infinite;
+}
+
+@keyframes mdarker-snow-fall {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(106vh);
+  }
+}
+
+@keyframes mdarker-snow-sway {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(var(--snow-sway, 24px));
+  }
+}
+
+@keyframes mdarker-snow-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Dark Mode - Bông tuyết nhẹ nhàng phát sáng trên bầu trời đêm sao */
+[data-theme="dark"] .mdarker-snow-flake:nth-child(3n) {
+  /* Giảm bớt 1/3 hạt tuyết ở dark mode để đúng nghĩa "chút tuyết rơi" */
+  display: none;
+}
+
+[data-theme="dark"] .mdarker-snow-particle.particle-dot {
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.85), 0 0 12px rgba(147, 197, 253, 0.6);
+}
+
+[data-theme="dark"] .mdarker-snow-particle.particle-crystal {
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.9), 0 0 14px rgba(147, 197, 253, 0.65);
+}
+
+[data-theme="dark"] .mdarker-snow-svg {
+  color: rgba(255, 255, 255, 0.95);
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.9)) drop-shadow(0 0 12px rgba(147, 197, 253, 0.65));
+}
+
+/* Quầng hào quang sương băng nhẹ quanh Avatar */
+.mdarker-avatar-wrap::before {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(147, 197, 253, 0.55) 0%, rgba(56, 189, 248, 0.18) 60%, transparent 75%);
+  z-index: 0;
+  pointer-events: none;
+  animation: mdarker-frost-pulse 4s ease-in-out infinite alternate;
+}
+
+@keyframes mdarker-frost-pulse {
+  0% {
+    transform: scale(0.96);
+    opacity: 0.55;
+  }
+  100% {
+    transform: scale(1.06);
+    opacity: 0.95;
+  }
+}
+
 * {
   box-sizing: border-box;
 }
@@ -196,7 +330,13 @@ body {
 }
 
 body {
-  background: var(--vi-bg);
+  background-color: var(--vi-bg);
+  background-image:
+    radial-gradient(ellipse 75% 55% at 20% 8%, rgba(195, 230, 255, 0.65) 0%, transparent 60%),
+    radial-gradient(ellipse 70% 50% at 85% 30%, rgba(224, 242, 254, 0.75) 0%, transparent 60%),
+    radial-gradient(circle 600px at 50% 90%, rgba(200, 235, 255, 0.5) 0%, transparent 70%),
+    linear-gradient(180deg, #f3f8fc 0%, #eaf2f8 100%);
+  background-attachment: fixed;
   color: var(--vi-text);
   font-family: var(--font-quicksand), system-ui, -apple-system, "Segoe UI", sans-serif;
   font-weight: 600;
@@ -263,7 +403,7 @@ button {
     z-index: 45;
     display: block;
     width: 100%;
-    background: rgb(244 245 251 / 82%);
+    background: rgba(234, 242, 248, 0.85);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
     border-bottom: 1px solid var(--vi-border);

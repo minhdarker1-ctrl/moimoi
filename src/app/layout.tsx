@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Quicksand } from "next/font/google";
 import { db } from "@/lib/db";
 import StarrySky from "@/components/StarrySky";
+import SnowEffect from "@/components/SnowEffect";
 import MusicPlayer from "@/components/MusicPlayer";
 import "./globals.css";
 
@@ -54,6 +55,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <StarrySky />
+        <SnowEffect />
         <MusicPlayer />
         {children}
       </body>
