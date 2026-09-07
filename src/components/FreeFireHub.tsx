@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useMemo, useEffect, useRef } from "react";
 
@@ -155,45 +155,43 @@ export default function FreeFireHub() {
     setWarning("");
   };
 
-  // Tự nhận diện thiết bị người dùng
+  // Tự nhận diện hãng thiết bị của người dùng
   const handleAutoDetect = () => {
     if (typeof window === "undefined") return;
     const ua = navigator.userAgent;
-    let detected = "";
+    let brand = "";
 
-    if (/iPhone/.test(ua)) {
-      detected = "iPhone 13";
-    } else if (/iPad/.test(ua)) {
-      detected = "iPad Pro";
-    } else if (/Android/.test(ua)) {
-      const match = ua.match(/;\s*([^;)]+)\s*Build\//);
-      if (match && match[1]) {
-        const raw = match[1].trim();
-        for (const [code, name] of Object.entries(MODEL_MAP)) {
-          if (raw.startsWith(code)) {
-            detected = name;
-            break;
-          }
-        }
-        if (!detected) {
-          if (raw.startsWith("SM-")) detected = "Samsung " + raw;
-          else if (raw.startsWith("Redmi") || raw.startsWith("Mi ")) detected = "Xiaomi " + raw;
-          else if (raw.startsWith("RMX")) detected = "Realme " + raw;
-          else if (raw.startsWith("CPH")) detected = "Oppo " + raw;
-          else detected = raw;
-        }
-      } else {
-        detected = "Samsung Galaxy S24";
-      }
-    } else if (/Windows/.test(ua) || /Macintosh/.test(ua)) {
-      detected = "PC Giả Lập";
+    if (/iPhone/i.test(ua)) {
+      brand = "iPhone";
+    } else if (/iPad/i.test(ua)) {
+      brand = "iPad";
+    } else if (/samsung|SM-|GT-|SCH-/i.test(ua)) {
+      brand = "Samsung";
+    } else if (/xiaomi|redmi|poco/i.test(ua)) {
+      brand = "Xiaomi";
+    } else if (/oppo|cph/i.test(ua)) {
+      brand = "Oppo";
+    } else if (/vivo|iqoo|v20|v21|v22|v23/i.test(ua)) {
+      brand = "Vivo";
+    } else if (/realme|rmx/i.test(ua)) {
+      brand = "Realme";
+    } else if (/huawei|honor/i.test(ua)) {
+      brand = "Huawei";
+    } else if (/rog|asus/i.test(ua)) {
+      brand = "ROG Phone";
+    } else if (/tecno|infinix/i.test(ua)) {
+      brand = "Tecno";
+    } else if (/windows|macintosh/i.test(ua)) {
+      brand = "PC Giả Lập";
+    } else if (/android/i.test(ua)) {
+      brand = "Android";
     }
 
-    if (detected) {
-      setDevice(detected);
-      setWarning("✨ Đã nhận diện máy của bạn. Bạn có thể sửa lại tên chính xác nếu muốn!");
+    if (brand) {
+      setDevice(brand);
+      setWarning(`✨ Đã nhận diện hãng máy của bạn: ${brand}`);
     } else {
-      setWarning("Không thể tự nhận diện, bạn hãy gõ tên máy nhé!");
+      setWarning("Không thể tự nhận diện, bạn hãy bấm chọn nhanh hãng ở phía trên nhé!");
     }
   };
 
