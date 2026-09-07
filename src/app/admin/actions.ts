@@ -133,6 +133,7 @@ export async function saveSite(fd: FormData) {
 
 export async function saveFreeFireConfig(fd: FormData) {
   await requireAdmin();
+  const keyTypeIdRaw = num(fd, "keyTypeId", 0);
   const data = {
     title: str(fd, "title", 120),
     content: str(fd, "content", 3000),
@@ -141,6 +142,38 @@ export async function saveFreeFireConfig(fd: FormData) {
     imageUrl: url(fd, "imageUrl"),
     videoUrl: url(fd, "videoUrl"),
     visible: bool(fd, "visible"),
+
+    // Key settings
+    requireKey: bool(fd, "requireKey"),
+    keyTypeId: keyTypeIdRaw > 0 ? keyTypeIdRaw : null,
+    getKeyUrl: url(fd, "getKeyUrl"),
+    staticKey: str(fd, "staticKey", 100),
+
+    // HUD codes
+    hud2Codes: str(fd, "hud2Codes", 2000),
+    hud3Codes: str(fd, "hud3Codes", 2000),
+    hud4Codes: str(fd, "hud4Codes", 2000),
+
+    // Sensitivity ranges
+    iosGeneralMin: num(fd, "iosGeneralMin", 85),
+    iosGeneralMax: num(fd, "iosGeneralMax", 155),
+    androidGeneralMin: num(fd, "androidGeneralMin", 110),
+    androidGeneralMax: num(fd, "androidGeneralMax", 200),
+    pcGeneralMin: num(fd, "pcGeneralMin", 80),
+    pcGeneralMax: num(fd, "pcGeneralMax", 135),
+    redDotMin: num(fd, "redDotMin", 65),
+    redDotMax: num(fd, "redDotMax", 95),
+    scope2xMin: num(fd, "scope2xMin", 65),
+    scope2xMax: num(fd, "scope2xMax", 92),
+    scope4xMin: num(fd, "scope4xMin", 60),
+    scope4xMax: num(fd, "scope4xMax", 90),
+    sniperMin: num(fd, "sniperMin", 30),
+    sniperMax: num(fd, "sniperMax", 48),
+    freeLookMin: num(fd, "freeLookMin", 40),
+    freeLookMax: num(fd, "freeLookMax", 65),
+    fireButtonMin: num(fd, "fireButtonMin", 35),
+    fireButtonMax: num(fd, "fireButtonMax", 55),
+    tipsText: str(fd, "tipsText", 2000),
   };
 
   await db.freeFireConfig.upsert({
@@ -152,6 +185,8 @@ export async function saveFreeFireConfig(fd: FormData) {
   refresh("/admin/freefire");
   revalidatePath("/freefire");
   revalidatePath("/free-fire");
+  revalidatePath("/freefire/result");
+  revalidatePath("/free-fire/result");
 }
 
 /* ---------- social ---------- */

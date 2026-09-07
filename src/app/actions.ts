@@ -30,3 +30,51 @@ export async function unlockApp(appId: number, rawKey: string): Promise<UnlockRe
   await db.appKey.update({ where: { id: found.id }, data: { usedCount: { increment: 1 } } });
   return { ok: true, url: app.downloadUrl };
 }
+
+export type VerifyFreeFireResult = { ok: true } | { ok: false; error: string };
+
+/**
+ * Kiểm tra mã Key mở khóa kết quả Free Fire.
+ * Hỗ trợ cả Key tĩnh (Admin đặt) và Key sinh ra từ hệ thống vượt link (KeyType).
+ */
+export async function verifyFreeFireKey(rawKey: string): Promise<VerifyFreeFireResult> {
+  const key = String(rawKey ?? "").trim();
+  if (!key) return { ok: false, error: "Vui lòng nhập mã Key." };
+
+  const config = await db.freeFireConfig.findUnique({ where: { id: 1 } });
+  if (!config || !config.requireKey) {
+    return { ok: true };
+  }
+
+  // 1. Kiểm tra Key tĩnh / Mật khẩu truy cập nhanh nếu admin có cấu hình
+  if (config.staticKey && config.staticKey.trim()) {
+    if (key.toLowerCase() === config.staticKey.trim().toLowerCase()) {
+      return { ok: true };
+    }
+  }
+
+  // 2. Kiểm tra trong hệ thống AppKey nếu admin chọn KeyType
+  if (config.keyTypeId) {
+    const found = await db.appKey.findUnique({ where: { keyHash: hashKey(key) } });
+    if (found) {
+      if (found.revoked) return { ok: false, error: "Key này đã bị thu hồi." };
+      if (found.keyTypeId !== config.keyTypeId) {
+        return { ok: false, error: "Key này không hợp lệ cho phần Free Fire." };
+      }
+      if (found.expiresAt < new Date()) {
+        return { ok: false, error: "Key này đã hết hạn sử dụng." };
+      }
+      if (found.maxUses > 0 && found.usedCount >= found.maxUses) {
+        return { ok: false, error: "Key này đã hết số lượt sử dụng." };
+      }
+
+      await db.appKey.update({
+        where: { id: found.id },
+        data: { usedCount: { increment: 1 } },
+      });
+      return { ok: true };
+    }
+  }
+
+  return { ok: false, error: "Mã Key không chính xác hoặc không tồn tại." };
+}

@@ -81,6 +81,40 @@ model FreeFireConfig {
   imageUrl  String   @default("")
   videoUrl  String   @default("")
   visible   Boolean  @default(true)
+
+  // Cấu hình Key mở khóa kết quả
+  requireKey Boolean  @default(false)
+  keyTypeId  Int?
+  keyType    KeyType? @relation(fields: [keyTypeId], references: [id], onDelete: SetNull)
+  getKeyUrl  String   @default("")
+  staticKey  String   @default("")
+
+  // Mã HUD
+  hud2Codes  String   @default("#FFHUDT6O3jnaeTI9Po7eO\n#FFHUDT6O3jqljudJPo7eP\n#FFHUDT6O3ji+xzsRPo7eM")
+  hud3Codes  String   @default("#FFHUDT6O3jqljudJPo7eP\n#FFHUDT6O3jh982BJPo7eO\n#FFHUDT6O3jiiaNUpPo7eO")
+  hud4Codes  String   @default("#FFHUDT6O3jFQs9ZNPo7eN\n#FFHUDT6O3jwW3vlFPo7eP\n#FFHUDT6O3jnaeTI9Po7eO\n#FFHUDT6O3jiiaNUpPo7eO")
+
+  // Tùy chỉnh khoảng độ nhạy
+  iosGeneralMin      Int      @default(85)
+  iosGeneralMax      Int      @default(155)
+  androidGeneralMin  Int      @default(110)
+  androidGeneralMax  Int      @default(200)
+  pcGeneralMin       Int      @default(80)
+  pcGeneralMax       Int      @default(135)
+  redDotMin          Int      @default(65)
+  redDotMax          Int      @default(95)
+  scope2xMin         Int      @default(65)
+  scope2xMax         Int      @default(92)
+  scope4xMin         Int      @default(60)
+  scope4xMax         Int      @default(90)
+  sniperMin          Int      @default(30)
+  sniperMax          Int      @default(48)
+  freeLookMin        Int      @default(40)
+  freeLookMax        Int      @default(65)
+  fireButtonMin      Int      @default(35)
+  fireButtonMax      Int      @default(55)
+  tipsText           String   @default("Kéo tâm chữ J cho cận chiến và kéo thẳng lên khi bắn tầm trung/xa. Chỉnh nút bắn vừa ngón tay cái.")
+
   updatedAt DateTime @updatedAt
 }
 
@@ -208,6 +242,7 @@ model KeyType {
   apps       App[]
   keys       AppKey[]
   sessions   KeySession[]
+  freeFireConfigs FreeFireConfig[]
 }
 
 model KeySession {

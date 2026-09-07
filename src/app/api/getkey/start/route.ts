@@ -34,13 +34,27 @@ export async function GET(req: Request) {
   }
   await maybeCleanup();
 
-  const appId = Number(reqUrl.searchParams.get("appId"));
-  if (!Number.isInteger(appId) || appId <= 0) return fail(req, "Thiếu mã ứng dụng.", isJson);
+  const appIdParam = reqUrl.searchParams.get("appId");
+  const keyTypeIdParam = reqUrl.searchParams.get("keyTypeId");
+  const scope = reqUrl.searchParams.get("scope");
 
-  const app = await db.app.findUnique({ where: { id: appId }, include: { keyType: true } });
-  if (!app?.visible || !app.keyType?.enabled) return fail(req, "Ứng dụng không dùng hệ thống key.", isJson);
+  let kt = null;
+  let app = null;
 
-  const kt = app.keyType;
+  if (scope === "freefire") {
+    const ffConfig = await db.freeFireConfig.findUnique({ where: { id: 1 }, include: { keyType: true } });
+    if (!ffConfig?.keyType?.enabled) return fail(req, "Chưa cấu hình loại key cho Free Fire.", isJson);
+    kt = ffConfig.keyType;
+  } else if (keyTypeIdParam && Number.isInteger(Number(keyTypeIdParam))) {
+    kt = await db.keyType.findUnique({ where: { id: Number(keyTypeIdParam) } });
+    if (!kt?.enabled) return fail(req, "Loại key không hợp lệ hoặc đã bị tắt.", isJson);
+  } else {
+    const appId = Number(appIdParam);
+    if (!Number.isInteger(appId) || appId <= 0) return fail(req, "Thiếu mã ứng dụng.", isJson);
+    app = await db.app.findUnique({ where: { id: appId }, include: { keyType: true } });
+    if (!app?.visible || !app.keyType?.enabled) return fail(req, "Ứng dụng không dùng hệ thống key.", isJson);
+    kt = app.keyType;
+  }
   let ids: number[] = [];
   try {
     const parsed = JSON.parse(kt.providerIds);
@@ -77,7 +91,7 @@ export async function GET(req: Request) {
     data: {
       token,
       keyTypeId: kt.id,
-      appId: app.id,
+      appId: app ? app.id : null,
       step: 0,
       hopUrls: JSON.stringify(hopUrls),
       stepAt: JSON.stringify([Date.now()]),
@@ -88,7 +102,12 @@ export async function GET(req: Request) {
   });
 
   if (isJson) {
-    return NextResponse.json({ ok: true, url: hopUrls[0], steps, appName: app.name });
+    return NextResponse.json({
+      ok: true,
+      url: hopUrls[0],
+      steps,
+      appName: app ? app.name : (scope === "freefire" ? "Độ Nhạy Free Fire" : kt.name),
+    });
   }
 
   return NextResponse.redirect(hopUrls[0], 302);

@@ -1,15 +1,8 @@
 "use client";
 
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import FreeFireAdminNote, { FreeFireNoteData } from "./FreeFireAdminNote";
-
-interface SettingItem {
-  name: string;
-  min: number;
-  max: number;
-  unit?: string;
-  icon: string;
-}
 
 const BRAND_TAGS = [
   "iPhone",
@@ -50,19 +43,6 @@ const VALID_DEVICES = [
   "PC Giả Lập", "LDPlayer", "BlueStacks", "NoxPlayer",
 ];
 
-const MODEL_MAP: Record<string, string> = {
-  "SM-S928": "Samsung Galaxy S25 Ultra",
-  "SM-S918": "Samsung Galaxy S24 Ultra",
-  "SM-S908": "Samsung Galaxy S23 Ultra",
-  "SM-A556": "Samsung Galaxy A55",
-  "SM-A546": "Samsung Galaxy A54",
-  "SM-A155": "Samsung Galaxy A15",
-  "23049PCD8G": "Poco F5",
-  "24069PC21G": "Poco F6",
-  "RMX3630": "Realme C55",
-  "CPH2505": "Oppo Reno 11",
-};
-
 const KEYPAD_BLACKLIST = [
   "1280", "1202", "1110", "105", "110", "215", "225", "3310", "6300",
   "bàn phím", "ban phim", "cục gạch", "cuc gach", "nokia 360", "360",
@@ -75,79 +55,32 @@ const VALID_BRANDS = [
   "pc", "giả lập", "gia lap", "ldplayer", "bluestack", "memu", "nox",
 ];
 
-function seededHash(str: string, seedIndex: number): number {
-  let hash = 0;
-  const s = `${str.toLowerCase().trim()}_${seedIndex}`;
-  for (let i = 0; i < s.length; i++) {
-    const char = s.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash = hash & hash;
-  }
-  return Math.abs(hash);
-}
-
-function calcInRange(min: number, max: number, device: string, idx: number): number {
-  const hash = seededHash(device, idx);
-  return min + (hash % (max - min + 1));
-}
-
 function detectDeviceType(name: string): "ios" | "android" | "pc" {
   const n = name.toLowerCase();
   if (n.includes("iphone") || n.includes("ipad") || n.includes("ios") || n.includes("apple")) {
     return "ios";
   }
-  if (n.includes("pc") || n.includes("giả lập") || n.includes("gia lap") || n.includes("ldplayer") || n.includes("bluestack") || n.includes("memu") || n.includes("nox")) {
+  if (
+    n.includes("pc") ||
+    n.includes("giả lập") ||
+    n.includes("gia lap") ||
+    n.includes("ldplayer") ||
+    n.includes("bluestack") ||
+    n.includes("memu") ||
+    n.includes("nox")
+  ) {
     return "pc";
   }
   return "android";
 }
 
-const HUD_PRESETS = {
-  hud2: {
-    title: "HUD 2 Ngón",
-    desc: "Phù hợp mọi người chơi, kéo tâm cực mượt & ổn định",
-    codes: [
-      { label: "Mã 1", code: "#FFHUDT6O3jnaeTI9Po7eO" },
-      { label: "Mã 2", code: "#FFHUDT6O3jqljudJPo7eP" },
-      { label: "Mã 3", code: "#FFHUDT6O3ji+xzsRPo7eM" },
-    ],
-  },
-  hud3: {
-    title: "HUD 3 Ngón",
-    desc: "Thao tác đặt keo siêu tốc, nhảy bắn lả lướt",
-    codes: [
-      { label: "Mã 1", code: "#FFHUDT6O3jqljudJPo7eP" },
-      { label: "Mã 2", code: "#FFHUDT6O3jh982BJPo7eO" },
-      { label: "Mã 3", code: "#FFHUDT6O3jiiaNUpPo7eO" },
-    ],
-  },
-  hud4: {
-    title: "HUD 4 Ngón",
-    desc: "Phong cách tuyển thủ chuyên nghiệp, phản xạ tối đa",
-    codes: [
-      { label: "Mã 1", code: "#FFHUDT6O3jFQs9ZNPo7eN" },
-      { label: "Mã 2", code: "#FFHUDT6O3jwW3vlFPo7eP" },
-      { label: "Mã 3", code: "#FFHUDT6O3jnaeTI9Po7eO" },
-      { label: "Mã 4", code: "#FFHUDT6O3jiiaNUpPo7eO" },
-    ],
-  },
-};
-
 export default function FreeFireHub({ adminNote }: { adminNote?: FreeFireNoteData | null } = {}) {
+  const router = useRouter();
   const [device, setDevice] = useState("");
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [warning, setWarning] = useState("");
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<{
-    deviceName: string;
-    deviceType: "ios" | "android" | "pc";
-    settings: { name: string; value: number; unit?: string; percent: number; icon: string }[];
-  } | null>(null);
-
-  const [activeHud, setActiveHud] = useState<"hud2" | "hud3" | "hud4">("hud3");
-  const [copiedCode, setCopiedCode] = useState<string | null>(null);
-  const resultRef = useRef<HTMLDivElement>(null);
 
   // Autocomplete
   const handleInputChange = (val: string) => {
@@ -209,7 +142,7 @@ export default function FreeFireHub({ adminNote }: { adminNote?: FreeFireNoteDat
     }
   };
 
-  // Tính toán kết quả độ nhạy
+  // Điều hướng sang trang kết quả riêng biệt
   const handleSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     const clean = device.trim();
@@ -233,86 +166,8 @@ export default function FreeFireHub({ adminNote }: { adminNote?: FreeFireNoteDat
     setLoading(true);
     setWarning("");
 
-    setTimeout(() => {
-      const type = detectDeviceType(clean);
-
-      const baseSettings: SettingItem[] = [
-        {
-          name: "Nhìn xung quanh",
-          min: type === "ios" ? 85 : type === "pc" ? 80 : 110,
-          max: type === "ios" ? 155 : type === "pc" ? 135 : 200,
-          icon: "fa-solid fa-arrows-to-eye",
-        },
-        {
-          name: "Ống ngắm hồng tâm (Red Dot)",
-          min: 65,
-          max: 95,
-          icon: "fa-solid fa-bullseye",
-        },
-        {
-          name: "Ống ngắm 2X",
-          min: 65,
-          max: 92,
-          icon: "fa-solid fa-crosshairs",
-        },
-        {
-          name: "Ống ngắm 4X",
-          min: 60,
-          max: 90,
-          icon: "fa-solid fa-circle-notch",
-        },
-        {
-          name: "Ống ngắm súng ngắm (AWM/Sniper)",
-          min: 30,
-          max: 48,
-          icon: "fa-solid fa-bolt",
-        },
-        {
-          name: "Nút camera tự do (Góc nhìn)",
-          min: 40,
-          max: 65,
-          icon: "fa-solid fa-eye",
-        },
-        {
-          name: "Kích thước nút bắn",
-          min: type === "ios" ? 32 : 40,
-          max: type === "ios" ? 52 : 60,
-          unit: "%",
-          icon: "fa-solid fa-hand-pointer",
-        },
-      ];
-
-      const computed = baseSettings.map((item, idx) => {
-        const value = calcInRange(item.min, item.max, clean, idx);
-        const percent = item.unit === "%" ? value : Math.min(Math.round((value / 200) * 100), 100);
-        return {
-          name: item.name,
-          value,
-          unit: item.unit,
-          percent,
-          icon: item.icon,
-        };
-      });
-
-      setResult({
-        deviceName: clean,
-        deviceType: type,
-        settings: computed,
-      });
-      setLoading(false);
-
-      setTimeout(() => {
-        resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-      }, 100);
-    }, 450);
-  };
-
-  const handleCopyCode = (code: string) => {
-    if (typeof navigator !== "undefined" && navigator.clipboard) {
-      navigator.clipboard.writeText(code);
-      setCopiedCode(code);
-      setTimeout(() => setCopiedCode(null), 2200);
-    }
+    const type = detectDeviceType(clean);
+    router.push(`/freefire/result?device=${encodeURIComponent(clean)}&type=${type}`);
   };
 
   return (
@@ -415,148 +270,13 @@ export default function FreeFireHub({ adminNote }: { adminNote?: FreeFireNoteDat
               className="mdarker-ff-submit-btn"
             >
               <i className="fa-solid fa-fire-flame-curved" aria-hidden="true" />
-              <span>{loading ? "Đang phân tích..." : "Lấy Độ Nhạy Ngay"}</span>
+              <span>{loading ? "Đang xử lý..." : "Lấy Độ Nhạy Ngay"}</span>
             </button>
           </div>
 
           {warning && <p className="mdarker-ff-warning">{warning}</p>}
         </form>
       </div>
-
-      {/* Bảng kết quả Độ Nhạy */}
-      {result && (
-        <div ref={resultRef} className="mdarker-ff-result-card">
-          <div className="mdarker-ff-result-header">
-            <div className="mdarker-ff-result-badge">
-              <i className="fa-solid fa-circle-check" aria-hidden="true" />
-              <span>ĐÃ TỐI ƯU CHO</span>
-            </div>
-            <h3 className="mdarker-ff-device-title">
-              {result.deviceName}
-              <span className="mdarker-ff-type-pill">
-                {result.deviceType === "ios" ? "Hệ điều hành iOS" : result.deviceType === "pc" ? "PC / Giả Lập" : "Hệ điều hành Android"}
-              </span>
-            </h3>
-            <p className="mdarker-ff-note">
-              🎯 Bảng cài đặt kéo tâm dành riêng cho máy này. Vào <b>Cài đặt Free Fire &gt; Độ nhạy</b> để chỉnh theo:
-            </p>
-          </div>
-
-          {/* Danh sách thông số */}
-          <div className="mdarker-ff-sliders-list">
-            {result.settings.map((s) => (
-              <div key={s.name} className="mdarker-ff-slider-item">
-                <div className="mdarker-ff-slider-top">
-                  <span className="mdarker-ff-slider-name">
-                    <i className={`${s.icon} mdarker-ff-slider-icon`} aria-hidden="true" />
-                    {s.name}
-                  </span>
-                  <span className="mdarker-ff-slider-val">
-                    {s.value}
-                    {s.unit || ""}
-                  </span>
-                </div>
-                <div className="mdarker-ff-bar-track">
-                  <div
-                    className="mdarker-ff-bar-fill"
-                    style={{ width: `${s.percent}%` }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Mã HUD 2 - 3 - 4 Ngón */}
-          <div className="mdarker-ff-hud-box">
-            <div className="mdarker-ff-hud-header">
-              <h4>
-                <i className="fa-solid fa-gamepad" aria-hidden="true" />
-                MÃ SETTING HUD NÚT BẮN
-              </h4>
-              <p>Chọn kiểu chơi của bạn để nhận mã nhập tự động trong game:</p>
-            </div>
-
-            <div className="mdarker-ff-hud-tabs">
-              {(["hud2", "hud3", "hud4"] as const).map((key) => (
-                <button
-                  key={key}
-                  type="button"
-                  className={`mdarker-ff-hud-tab ${activeHud === key ? "active" : ""}`}
-                  onClick={() => setActiveHud(key)}
-                >
-                  {HUD_PRESETS[key].title}
-                </button>
-              ))}
-            </div>
-
-            <div className="mdarker-ff-hud-content">
-              <p className="mdarker-ff-hud-desc">{HUD_PRESETS[activeHud].desc}</p>
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                {HUD_PRESETS[activeHud].codes.map((item, idx) => (
-                  <div key={item.code + idx} className="mdarker-ff-code-wrap">
-                    <span
-                      style={{
-                        fontSize: 11,
-                        fontWeight: 800,
-                        color: "#ff8c00",
-                        background: "rgba(255, 140, 0, 0.12)",
-                        padding: "4px 8px",
-                        borderRadius: 6,
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {item.label}
-                    </span>
-                    <code className="mdarker-ff-code">{item.code}</code>
-                    <button
-                      type="button"
-                      className="mdarker-ff-copy-btn"
-                      onClick={() => handleCopyCode(item.code)}
-                    >
-                      <i
-                        className={copiedCode === item.code ? "fa-solid fa-check" : "fa-solid fa-copy"}
-                        aria-hidden="true"
-                      />
-                      <span>{copiedCode === item.code ? "ĐÃ COPY" : "Sao chép"}</span>
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Mẹo kéo tâm Full Đỏ */}
-          <div className="mdarker-ff-tips">
-            <h5>
-              <i className="fa-solid fa-lightbulb" aria-hidden="true" />
-              Mẹo Kéo Tâm Full Đỏ Cho Máy Này
-            </h5>
-            <ul>
-              <li>
-                <b>Khoảng cách gần (Shotgun/MP40):</b> Vuốt nút bắn hình chữ <b>J</b> hoặc chữ <b>V</b> thật dứt khoát từ dưới lên trên.
-              </li>
-              <li>
-                <b>Khoảng cách xa (AR/Súng trường):</b> Đặt hồng tâm ngang ngực đối thủ rồi vuốt nhẹ thẳng lên đỉnh đầu để ghim tâm đỏ.
-              </li>
-              <li>
-                <b>Kích thước nút bắn:</b> Đặt đúng <b>{result.settings.find((s) => s.unit === "%")?.value || 45}%</b> và đặt sát mép dưới màn hình để có nhiều không gian vuốt ngón tay.
-              </li>
-            </ul>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => {
-              setResult(null);
-              setDevice("");
-            }}
-            className="mdarker-ff-reset-btn"
-          >
-            <i className="fa-solid fa-rotate-left" aria-hidden="true" />
-            <span>Tìm độ nhạy cho thiết bị khác</span>
-          </button>
-        </div>
-      )}
     </section>
   );
 }
