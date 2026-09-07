@@ -81,6 +81,12 @@ export default function FreeFireResultView({
   const [inputKey, setInputKey] = useState("");
   const [keyError, setKeyError] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
+  const [keyInfo, setKeyInfo] = useState<{
+    remainingUses?: number | null;
+    maxUses?: number;
+    usedCount?: number;
+    expiresAt?: string;
+  } | null>(null);
   const [activeHud, setActiveHud] = useState<"hud2" | "hud3" | "hud4">("hud3");
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
@@ -98,7 +104,7 @@ export default function FreeFireResultView({
     } catch {}
   }, [device]);
 
-  // Kiểm tra trạng thái mở khóa từ localStorage hoặc param URL khi trang load
+  // Kiểm tra trạng thái mở khóa khi trang load (KHÔNG lưu key ở localStorage)
   useEffect(() => {
     if (!hasKey) {
       setIsUnlocked(true);
@@ -106,7 +112,7 @@ export default function FreeFireResultView({
       return;
     }
 
-    // 1. Nếu có param unlockedKey trên URL (vừa vượt link thành công)
+    // 1. Nếu có param unlockedKey trên URL (vừa vượt link thành công bấm Mở Khóa)
     if (typeof window !== "undefined") {
       const urlParams = new URLSearchParams(window.location.search);
       const keyParam = urlParams.get("unlockedKey");
@@ -114,9 +120,21 @@ export default function FreeFireResultView({
         verifyFreeFireKey(keyParam).then((res) => {
           if (res.ok) {
             setIsUnlocked(true);
+            setKeyInfo({
+              remainingUses: res.remainingUses,
+              maxUses: res.maxUses,
+              usedCount: res.usedCount,
+              expiresAt: res.expiresAt,
+            });
+            // Xóa param unlockedKey khỏi URL để tránh F5 bị trừ lượt oan
             try {
-              localStorage.setItem("ff_unlocked_key", keyParam);
+              const newUrl = new URL(window.location.href);
+              newUrl.searchParams.delete("unlockedKey");
+              window.history.replaceState({}, document.title, newUrl.toString());
             } catch {}
+          } else {
+            setIsUnlocked(false);
+            setKeyError(res.error || "Key không hợp lệ hoặc đã hết hạn/hết lượt.");
           }
           setCheckingAuth(false);
         });
@@ -124,23 +142,8 @@ export default function FreeFireResultView({
       }
     }
 
-    // 2. Kiểm tra key đã lưu trước đó trong localStorage
-    try {
-      const savedKey = localStorage.getItem("ff_unlocked_key");
-      if (savedKey) {
-        verifyFreeFireKey(savedKey).then((res) => {
-          if (res.ok) {
-            setIsUnlocked(true);
-          } else {
-            localStorage.removeItem("ff_unlocked_key");
-            setIsUnlocked(false);
-          }
-          setCheckingAuth(false);
-        });
-        return;
-      }
-    } catch {}
-
+    // 2. Không lưu key trong localStorage: yêu cầu người dùng nhập key hoặc vượt link
+    setIsUnlocked(false);
     setCheckingAuth(false);
   }, [hasKey]);
 
@@ -160,11 +163,15 @@ export default function FreeFireResultView({
       const res = await verifyFreeFireKey(cleanKey);
       if (res.ok) {
         setIsUnlocked(true);
-        try {
-          localStorage.setItem("ff_unlocked_key", cleanKey);
-        } catch {}
+        setKeyInfo({
+          remainingUses: res.remainingUses,
+          maxUses: res.maxUses,
+          usedCount: res.usedCount,
+          expiresAt: res.expiresAt,
+        });
+        setInputKey("");
       } else {
-        setKeyError(res.error || "Mã Key không chính xác hoặc đã hết hạn!");
+        setKeyError(res.error || "Mã Key không chính xác, đã hết hạn hoặc hết lượt!");
       }
     } catch {
       setKeyError("Lỗi kết nối máy chủ, vui lòng thử lại!");
@@ -174,10 +181,8 @@ export default function FreeFireResultView({
   };
 
   const handleRelock = () => {
-    try {
-      localStorage.removeItem("ff_unlocked_key");
-    } catch {}
     setIsUnlocked(false);
+    setKeyInfo(null);
     setInputKey("");
     setKeyError("");
   };
@@ -340,8 +345,10 @@ export default function FreeFireResultView({
           <h2 style={{ fontSize: 22, fontWeight: 800, margin: "0 0 10px", color: "var(--vi-text)" }}>
             Mở Khóa Độ Nhạy: <span style={{ color: "#ff6b00" }}>{activeDevice}</span>
           </h2>
-          <p style={{ fontSize: 14, color: "var(--vi-muted)", margin: "0 auto 24px", maxWidth: 460, lineHeight: 1.6 }}>
-            Bảng thông số độ nhạy kéo tâm và mã setting HUD cho dòng máy này đang được bảo vệ. Bạn vui lòng lấy Key miễn phí để mở khóa.
+          <p style={{ fontSize: 13, color: "var(--vi-muted)", margin: "0 auto 20px", maxWidth: 480, lineHeight: 1.6 }}>
+            Bảng thông số độ nhạy kéo tâm và mã setting HUD cho dòng máy này đang được bảo vệ.
+            <br />
+            Mã Key áp dụng cơ chế <b>số lượt sử dụng</b> và <b>thời hạn sống (TTL)</b> chạy song song. Hết thời hạn hoặc dùng đủ số lượt thì Key sẽ tự động vô hiệu hóa (die). Web không lưu Key trên trình duyệt.
           </p>
 
           {/* Nút Lấy Key */}
@@ -460,6 +467,40 @@ export default function FreeFireResultView({
       ) : (
         /* 2. GIAO DIỆN KẾT QUẢ ĐỘ NHẠY KHI ĐÃ MỞ KHÓA */
         <div className="mdarker-ff-result-card">
+          {/* Badge hiển thị thông tin lượt dùng và hạn TTL */}
+          {keyInfo && (
+            <div
+              style={{
+                background: "rgba(16, 185, 129, 0.1)",
+                border: "1px solid rgba(16, 185, 129, 0.3)",
+                borderRadius: 10,
+                padding: "8px 14px",
+                marginBottom: 16,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                flexWrap: "wrap",
+                gap: 8,
+                fontSize: 13,
+                color: "#10b981",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 600 }}>
+                <i className="fa-solid fa-circle-check" />
+                <span>
+                  {keyInfo.maxUses && keyInfo.maxUses > 0
+                    ? `Đã mở khóa • Lượt dùng: ${keyInfo.usedCount}/${keyInfo.maxUses} (còn ${keyInfo.remainingUses ?? 0} lượt)`
+                    : `Đã mở khóa • Lượt dùng: ${keyInfo.usedCount ?? 1} (Không giới hạn số lượt)`}
+                </span>
+              </div>
+              {keyInfo.expiresAt && (
+                <div style={{ color: "var(--vi-muted)", fontSize: 12 }}>
+                  Hạn dùng: {new Date(keyInfo.expiresAt).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })} ngày {new Date(keyInfo.expiresAt).toLocaleDateString("vi-VN")}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Header kết quả */}
           <div className="mdarker-ff-result-header">
             <div className="mdarker-ff-result-badge">

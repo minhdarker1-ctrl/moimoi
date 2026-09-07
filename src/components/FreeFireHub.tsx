@@ -148,15 +148,7 @@ export default function FreeFireHub({ adminNote }: { adminNote?: FreeFireNoteDat
     (adminNote?.requireKey && (adminNote?.staticKey || adminNote?.keyTypeId || adminNote?.getKeyUrl))
   );
 
-  const [alreadyUnlocked, setAlreadyUnlocked] = useState(false);
-
-  useEffect(() => {
-    try {
-      setAlreadyUnlocked(Boolean(localStorage.getItem("ff_unlocked_key")));
-    } catch {}
-  }, []);
-
-  // Điều hướng: nếu không có key thì vào thẳng trang kết quả, có key thì phải vượt link
+  // Điều hướng: nếu không có key thì vào thẳng trang kết quả, có key thì chuyển đến vượt link lấy key
   const handleSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     const clean = device.trim();
@@ -187,13 +179,13 @@ export default function FreeFireHub({ adminNote }: { adminNote?: FreeFireNoteDat
       localStorage.setItem("ff_pending_type", type);
     } catch {}
 
-    // 1. Không có key hoặc người dùng đã mở khóa trước đó: chuyển thẳng đến trang chứa độ nhạy
-    if (!hasKey || alreadyUnlocked) {
+    // 1. Không có key: chuyển thẳng đến trang chứa độ nhạy
+    if (!hasKey) {
       router.push(`/freefire/result?device=${encodeURIComponent(clean)}&type=${type}`);
       return;
     }
 
-    // 2. Có key: người dùng sẽ phải vượt link giống phần lấy key ở app other
+    // 2. Có key: chuyển đến vượt link lấy key qua API bên thứ 3
     if (adminNote?.getKeyUrl && adminNote.getKeyUrl.trim().length > 0) {
       window.location.href = adminNote.getKeyUrl;
     } else {
@@ -301,21 +293,21 @@ export default function FreeFireHub({ adminNote }: { adminNote?: FreeFireNoteDat
               className="mdarker-ff-submit-btn"
             >
               <i
-                className={hasKey && !alreadyUnlocked ? "fa-solid fa-key" : "fa-solid fa-fire-flame-curved"}
+                className={hasKey ? "fa-solid fa-key" : "fa-solid fa-fire-flame-curved"}
                 aria-hidden="true"
               />
               <span>
                 {loading
                   ? "Đang xử lý..."
-                  : hasKey && !alreadyUnlocked
-                  ? "Vượt Link Nhận Độ Nhạy"
+                  : hasKey
+                  ? "Vượt Link Nhận Key"
                   : "Lấy Độ Nhạy Ngay"}
               </span>
             </button>
           </div>
 
-          {/* Nếu có Key và chưa mở khóa, cho phép bấm vào nhập key trực tiếp */}
-          {hasKey && !alreadyUnlocked && (
+          {/* Nếu có Key, cho phép bấm vào nhập key trực tiếp nếu đã có key sẵn */}
+          {hasKey && (
             <div style={{ textAlign: "center", marginTop: 12 }}>
               <button
                 type="button"
@@ -338,7 +330,7 @@ export default function FreeFireHub({ adminNote }: { adminNote?: FreeFireNoteDat
                 }}
               >
                 <i className="fa-solid fa-unlock-keyhole" />
-                <span>Đã có Key sẵn? Nhập Key để xem ngay</span>
+                <span>Đã có mã Key sẵn? Nhập Key để xem ngay</span>
               </button>
             </div>
           )}

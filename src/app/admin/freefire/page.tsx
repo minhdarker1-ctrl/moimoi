@@ -48,7 +48,7 @@ export default async function AdminFreeFirePage() {
           <p className="vt-hint" style={{ marginBottom: 16 }}>
             - Nếu chọn <strong>&quot;Không cần key&quot;</strong>: người dùng bấm &quot;Lấy độ nhạy ngay&quot; sẽ chuyển thẳng đến trang chứa kết quả độ nhạy.
             <br />
-            - Nếu chọn <strong>&quot;Loại key vượt link&quot;</strong> hoặc <strong>&quot;Link get key ngoài&quot;</strong>: người dùng sẽ phải vượt link qua các cổng rút gọn bên thứ 3 để nhận key (giống phần lấy key ở các app khác).
+            - Nếu chọn <strong>&quot;Loại key vượt link&quot;</strong> hoặc <strong>&quot;Link get key ngoài&quot;</strong>: người dùng sẽ phải vượt link qua các cổng rút gọn bên thứ 3 để nhận key. Cơ chế: <strong>Hạn sống (TTL) và Số lượt dùng (maxUses) chạy song song</strong> (hết thời hạn hoặc dùng đủ số lượt là Key die, không lưu key trên browser).
           </p>
 
           <div className="vt-row">
@@ -58,7 +58,7 @@ export default async function AdminFreeFirePage() {
                 <option value={0}>Không cần key (truy cập trực tiếp, không bắt vượt link)</option>
                 {keyTypes.map((kt) => (
                   <option key={kt.id} value={kt.id}>
-                    {kt.name} ({kt.steps} bước vượt link qua API, sống {kt.ttlHours}h)
+                    {kt.name} ({kt.steps} bước, sống {kt.ttlHours}h, {kt.maxUses > 0 ? `${kt.maxUses} lượt dùng` : "vô hạn lượt"})
                   </option>
                 ))}
               </select>

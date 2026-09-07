@@ -7,6 +7,7 @@ export default function UnlockForm({ appId }: { appId: number }) {
   const [key, setKey] = useState("");
   const [msg, setMsg] = useState("");
   const [url, setUrl] = useState("");
+  const [info, setInfo] = useState("");
   const [pending, start] = useTransition();
 
   function submit(e: React.FormEvent) {
@@ -17,8 +18,12 @@ export default function UnlockForm({ appId }: { appId: number }) {
       if (r.ok) {
         setUrl(r.url);
         setMsg("");
+        if (r.maxUses && r.maxUses > 0) {
+          setInfo(`Lượt dùng: ${r.usedCount}/${r.maxUses} (còn ${r.remainingUses ?? 0} lượt)`);
+        }
       } else {
         setUrl("");
+        setInfo("");
         setMsg(r.error);
       }
     });
@@ -31,6 +36,11 @@ export default function UnlockForm({ appId }: { appId: number }) {
           <span>Tải Xuống</span>
           <i className="bi bi-download" aria-hidden="true" />
         </a>
+        {info && (
+          <div style={{ marginTop: 6, fontSize: 12, color: "var(--vi-muted)", textAlign: "center" }}>
+            {info}
+          </div>
+        )}
       </div>
     );
   }

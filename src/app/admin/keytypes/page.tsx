@@ -30,6 +30,8 @@ export default async function KeyTypesPage() {
           <br />
           <strong>Số cổng phải vượt</strong> nhỏ hơn số ID trong danh sách thì chỉ lấy các cổng đầu.
           Cổng đang tắt hoặc hết quota sẽ bị bỏ qua, hệ thống lấy cổng kế tiếp.
+          <br />
+          <strong>Cơ chế Hạn key (TTL) &amp; Số lần dùng (maxUses) chạy song song</strong>: Ví dụ sống 24h và 2 lượt dùng thì sau 2 lần sử dụng HOẶC sau 24h key sẽ tự động vô hiệu (die). Điều kiện nào đến trước áp dụng trước. Web không lưu key trên trình duyệt để kiểm soát chính xác từng lượt dùng.
         </p>
         {shorteners.length === 0 ? (
           <p className="vt-msg vt-msg-err" style={{ padding: 0 }}>

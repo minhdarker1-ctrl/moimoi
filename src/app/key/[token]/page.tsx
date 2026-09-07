@@ -72,11 +72,13 @@ export default async function KeyPage({ params }: { params: Promise<{ token: str
         <CopyKey value={plain} />
 
         <p className="vt-hint">
-          Hết hạn: {expiresAt.toLocaleString("vi-VN", { timeZone: "Asia/Ho_Chi_Minh" })}
+          Hạn sống (TTL): {expiresAt.toLocaleString("vi-VN", { timeZone: "Asia/Ho_Chi_Minh" })}
           <br />
-          {s.keyType.maxUses > 0 ? `Dùng được ${s.keyType.maxUses} lần.` : "Dùng không giới hạn số lần."}
+          {s.keyType.maxUses > 0
+            ? `Số lượt dùng: Tối đa ${s.keyType.maxUses} lần (chạy song song với TTL, hết hạn hoặc hết lượt là Key die).`
+            : "Số lượt dùng: Không giới hạn (trong thời hạn TTL)."}
           <br />
-          <strong>Key chỉ hiện 1 lần — hãy lưu lại.</strong>
+          <strong>Lưu ý: Hệ thống không lưu Key trên trình duyệt — Bạn hãy sao chép lại mã Key để sử dụng!</strong>
         </p>
 
         {s.app ? (
