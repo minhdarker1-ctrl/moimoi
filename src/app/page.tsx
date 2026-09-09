@@ -2,7 +2,8 @@ import { db } from "@/lib/db";
 import { vnDate } from "@/lib/crypto";
 import DesktopHeader from "@/components/DesktopHeader";
 import TypedText from "@/components/TypedText";
-import AppCatalog from "@/components/AppCatalog";
+import CategoryMenu from "@/components/CategoryMenu";
+import MdarkerBlog from "@/components/MdarkerBlog";
 import StatsBar from "@/components/StatsBar";
 import LiveClock from "@/components/LiveClock";
 
@@ -18,7 +19,7 @@ function parseLines(json: string): string[] {
 }
 
 export default async function Home() {
-  const [site, socials, linkBoxes, groups, notices, counter, daily, ffConfig] = await Promise.all([
+  const [site, socials, linkBoxes, groups, notices, counter, daily, posts] = await Promise.all([
     db.site.findUnique({ where: { id: 1 } }),
     db.social.findMany({ where: { visible: true }, orderBy: { order: "asc" } }),
     db.linkBox.findMany({ where: { visible: true }, orderBy: { order: "asc" } }),
@@ -30,7 +31,10 @@ export default async function Home() {
     db.notice.findMany({ where: { visible: true }, orderBy: { createdAt: "desc" }, take: 20 }),
     db.counter.findUnique({ where: { id: 1 } }),
     db.dailyHit.findUnique({ where: { date: vnDate() } }),
-    db.freeFireConfig.findUnique({ where: { id: 1 } }),
+    db.blogPost.findMany({
+      where: { visible: true },
+      orderBy: [{ pinned: "desc" }, { order: "asc" }, { createdAt: "desc" }],
+    }),
   ]);
 
   if (!site) {
@@ -63,6 +67,7 @@ export default async function Home() {
           icon: g.icon,
           badge: g.badge,
         }))}
+        hideAllNav={true}
       />
 
       <main>
@@ -139,7 +144,46 @@ export default async function Home() {
           </div>
         )}
 
-        <AppCatalog groups={groups} freeFireNote={ffConfig} />
+        {/* Menu danh mục các mảng (Không còn nút ALL trên trang chủ) */}
+        {groups.length > 0 && (
+          <div className="mdarker-category-hub-container" style={{ marginBottom: 24 }}>
+            <CategoryMenu
+              categories={groups.map((g) => ({
+                id: g.id,
+                title: g.title,
+                slug: g.slug,
+                icon: g.icon,
+                badge: g.badge,
+                desc: g.desc,
+                appCount: g.apps.length,
+              }))}
+              selectedId={-1}
+              useLinks={true}
+              hideAllTab={true}
+            />
+          </div>
+        )}
+
+        {/* Chuyên trang Blog về mdarker thay cho menu ALL */}
+        <MdarkerBlog
+          posts={posts.map((p) => ({
+            id: p.id,
+            title: p.title,
+            slug: p.slug,
+            summary: p.summary,
+            content: p.content,
+            coverUrl: p.coverUrl,
+            category: p.category,
+            tags: p.tags,
+            views: p.views,
+            pinned: p.pinned,
+            visible: p.visible,
+            order: p.order,
+            createdAt: p.createdAt.toISOString(),
+          }))}
+          authorName={site.name}
+          authorAvatar={site.avatarUrl}
+        />
 
       <StatsBar total={counter?.total ?? 0} today={daily?.count ?? 0} />
       <LiveClock />

@@ -13,6 +13,7 @@ interface DesktopHeaderProps {
   verified: boolean;
   notices: NoticeItem[];
   groups: { id: number; title: string; slug?: string; icon?: string; badge?: string }[];
+  hideAllNav?: boolean;
 }
 
 const timeFormatter = new Intl.DateTimeFormat("vi-VN", {
@@ -32,6 +33,7 @@ export default function DesktopHeader({
   verified,
   notices,
   groups,
+  hideAllNav = false,
 }: DesktopHeaderProps) {
   const [time, setTime] = useState("");
   const [scrolled, setScrolled] = useState(false);
@@ -176,16 +178,18 @@ export default function DesktopHeader({
               );
             })}
 
-            {/* Nút ALL để ở cuối cùng */}
-            <Link
-              href="/all"
-              className={`mdarker-header-nav-link mdarker-nav-all ${pathname === "/all" ? "active" : ""}`}
-            >
-              <span className="mdarker-header-nav-icon" aria-hidden="true">
-                <i className="fa-solid fa-shapes" />
-              </span>
-              <span>ALL</span>
-            </Link>
+            {/* Nút ALL để ở cuối cùng - Chỉ hiển thị khi không bật hideAllNav */}
+            {!hideAllNav && (
+              <Link
+                href="/all"
+                className={`mdarker-header-nav-link mdarker-nav-all ${pathname === "/all" ? "active" : ""}`}
+              >
+                <span className="mdarker-header-nav-icon" aria-hidden="true">
+                  <i className="fa-solid fa-shapes" />
+                </span>
+                <span>ALL</span>
+              </Link>
+            )}
           </nav>
 
           {/* Khoảng đệm bên phải để cân xứng với cụm fixed actions */}

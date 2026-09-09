@@ -29,6 +29,7 @@ interface CategoryMenuProps {
   selectedId: number | "all";
   onSelect?: (id: number | "all") => void;
   useLinks?: boolean;
+  hideAllTab?: boolean;
 }
 
 export default function CategoryMenu({
@@ -36,6 +37,7 @@ export default function CategoryMenu({
   selectedId,
   onSelect,
   useLinks = false,
+  hideAllTab = false,
 }: CategoryMenuProps) {
   const totalApps = useMemo(() => {
     return categories.reduce((sum, c) => sum + c.appCount, 0);
@@ -122,25 +124,27 @@ export default function CategoryMenu({
           );
         })}
 
-        {/* 2. NÚT XEM TẤT CẢ (ALL) - ĐẶT Ở VỊ TRÍ CUỐI CÙNG THEO YÊU CẦU */}
-        {useLinks ? (
-          <Link
-            href="/all"
-            className={`mdarker-category-tab ${selectedId === "all" ? "active" : ""}`}
-            aria-current={selectedId === "all" ? "page" : undefined}
-            style={{ textDecoration: "none" }}
-          >
-            {renderAllContent()}
-          </Link>
-        ) : (
-          <button
-            type="button"
-            className={`mdarker-category-tab ${selectedId === "all" ? "active" : ""}`}
-            onClick={() => onSelect?.("all")}
-            aria-pressed={selectedId === "all"}
-          >
-            {renderAllContent()}
-          </button>
+        {/* 2. NÚT XEM TẤT CẢ (ALL) - CHỈ HIỂN THỊ KHI KHÔNG BẬT hideAllTab */}
+        {!hideAllTab && (
+          useLinks ? (
+            <Link
+              href="/all"
+              className={`mdarker-category-tab ${selectedId === "all" ? "active" : ""}`}
+              aria-current={selectedId === "all" ? "page" : undefined}
+              style={{ textDecoration: "none" }}
+            >
+              {renderAllContent()}
+            </Link>
+          ) : (
+            <button
+              type="button"
+              className={`mdarker-category-tab ${selectedId === "all" ? "active" : ""}`}
+              onClick={() => onSelect?.("all")}
+              aria-pressed={selectedId === "all"}
+            >
+              {renderAllContent()}
+            </button>
+          )
         )}
       </div>
     </nav>

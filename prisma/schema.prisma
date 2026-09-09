@@ -289,3 +289,26 @@ model AppKey {
   @@index([expiresAt])
   @@index([appId])
 }
+
+// ---------- Blog mdarker ----------
+
+model BlogPost {
+  id        Int      @id @default(autoincrement())
+  title     String
+  slug      String   @unique
+  summary   String   @default("")
+  content   String   @default("")
+  coverUrl  String   @default("")
+  category  String   @default("Chia sẻ")
+  tags      String   @default("[]")
+  views     Int      @default(0)
+  pinned    Boolean  @default(false)
+  visible   Boolean  @default(true)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([pinned, createdAt])
+  @@index([visible, order])
+}
+
