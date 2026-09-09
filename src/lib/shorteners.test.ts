@@ -17,6 +17,8 @@ test("mỗi cổng dùng đúng tên param token", () => {
   assert.match(buildApiUrl("ONTOPS", "T", TARGET), /[?&]apikey=T/);
   assert.match(buildApiUrl("GTRAFFIC", "T", TARGET), /[?&]apikey=T/);
   assert.match(buildApiUrl("VUOTNHANH", "T", TARGET), /[?&]api=T/);
+  assert.match(buildApiUrl("LINKTOP", "T", TARGET), /[?&]api=T/);
+  assert.match(buildApiUrl("LINK4M", "T", TARGET), /[?&]api=T/);
 });
 
 test("fallback_url chỉ gắn khi được truyền", () => {
@@ -74,4 +76,20 @@ test("Linktop.one — parse JSON {status, shortenedUrl}", () => {
     /Token sai/,
   );
 });
+
+test("Link4m.co — param token là api=, URL endpoint v2", () => {
+  const url = buildApiUrl("LINK4M", "6a8d8fc134f5105d421db008", TARGET);
+  assert.ok(url.startsWith("https://link4m.co/api-shorten/v2?api=6a8d8fc134f5105d421db008"));
+  assert.match(url, /[?&]url=https%3A%2F%2Fsite\.com/);
+});
+
+test("Link4m.co — parse JSON {status, shortenedUrl}", () => {
+  const body = JSON.stringify({ status: "success", shortenedUrl: "https://link4m.co/abc123" });
+  assert.equal(parseResponse("LINK4M", body), "https://link4m.co/abc123");
+  assert.throws(
+    () => parseResponse("LINK4M", JSON.stringify({ status: "error", message: "API token invalid" })),
+    /API token invalid/,
+  );
+});
+
 

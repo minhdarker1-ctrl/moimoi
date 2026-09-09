@@ -112,6 +112,15 @@ export const PROVIDERS: ProviderDef[] = [
       (fallback ? `&sub_link=${enc(fallback)}` : ""),
     parse: parseStatusJson,
   },
+  {
+    id: "LINK4M",
+    label: "Link4m (link4m.co)",
+    supportsFallback: false,
+    dailyLimit: 0,
+    build: ({ token, url }) =>
+      `https://link4m.co/api-shorten/v2?api=${token}&url=${enc(url)}`,
+    parse: parseStatusJson,
+  },
 ];
 
 export type Provider = string;
