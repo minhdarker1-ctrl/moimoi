@@ -25,7 +25,14 @@ function getYouTubeEmbedUrl(url: string): string | null {
   return null;
 }
 
-export default async function AdminFreeFirePage() {
+export default async function AdminFreeFirePage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ saved?: string }>;
+}) {
+  const sp = searchParams ? await searchParams : {};
+  const isSaved = sp.saved === "1";
+
   const [config, keyTypes, shorteners] = await Promise.all([
     db.freeFireConfig.findUnique({ where: { id: 1 } }),
     db.keyType.findMany({ where: { enabled: true }, orderBy: { id: "asc" } }),
@@ -33,18 +40,59 @@ export default async function AdminFreeFirePage() {
   ]);
 
   const embedUrl = config?.videoUrl ? getYouTubeEmbedUrl(config.videoUrl) : null;
+  const currentKeyType = keyTypes.find((kt) => kt.id === config?.keyTypeId);
 
   return (
     <div className="vt-admin">
       <AdminNav current="/admin/freefire" />
 
+      {isSaved && (
+        <div
+          style={{
+            padding: "14px 18px",
+            borderRadius: 10,
+            background: "rgba(34, 197, 94, 0.15)",
+            border: "1px solid rgba(34, 197, 94, 0.4)",
+            color: "#4ade80",
+            marginBottom: 20,
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            fontSize: 14,
+            fontWeight: 600,
+          }}
+        >
+          <i className="fa-solid fa-circle-check" style={{ fontSize: 18 }} />
+          <span>Đã lưu thành công cấu hình Free Fire vào cơ sở dữ liệu!</span>
+        </div>
+      )}
+
       <form action={saveFreeFireConfig} className="vt-form">
         {/* CARD 1: CÀI ĐẶT BẢO VỆ BẰNG KEY & CỔNG VƯỢT LINK API BÊN THỨ 3 */}
         <div className="vt-card" style={{ marginBottom: 20 }}>
-          <h2 style={{ fontSize: 17, marginTop: 0, display: "flex", alignItems: "center", gap: 8, color: "#f59e0b" }}>
-            <i className="fa-solid fa-key" />
-            <span>1. Cài Đặt Khóa Key & Cổng Vượt Link API Bên Thứ 3</span>
-          </h2>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10, marginBottom: 8 }}>
+            <h2 style={{ fontSize: 17, margin: 0, display: "flex", alignItems: "center", gap: 8, color: "#f59e0b" }}>
+              <i className="fa-solid fa-key" />
+              <span>1. Cài Đặt Khóa Key & Cổng Vượt Link API Bên Thứ 3</span>
+            </h2>
+            <span
+              style={{
+                fontSize: 12,
+                padding: "4px 10px",
+                borderRadius: 20,
+                background: currentKeyType ? "rgba(16, 185, 129, 0.15)" : "rgba(245, 158, 11, 0.15)",
+                color: currentKeyType ? "#10b981" : "#f59e0b",
+                border: `1px solid ${currentKeyType ? "rgba(16, 185, 129, 0.3)" : "rgba(245, 158, 11, 0.3)"}`,
+                fontWeight: 600,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
+              <i className={currentKeyType ? "fa-solid fa-lock" : "fa-solid fa-lock-open"} />
+              Đang chọn trong DB: {currentKeyType ? `${currentKeyType.name} (${currentKeyType.steps} bước)` : "Không cần key"}
+            </span>
+          </div>
           <p className="vt-hint" style={{ marginBottom: 16 }}>
             - Nếu chọn <strong>&quot;Không cần key&quot;</strong>: người dùng bấm &quot;Lấy độ nhạy ngay&quot; sẽ chuyển thẳng đến trang chứa kết quả độ nhạy.
             <br />
@@ -54,7 +102,7 @@ export default async function AdminFreeFirePage() {
           <div className="vt-row">
             <label className="vt-field">
               <span>Loại key (Cổng Vượt Link API Bên Thứ 3)</span>
-              <select name="keyTypeId" defaultValue={config?.keyTypeId ?? 0}>
+              <select key={String(config?.keyTypeId ?? 0)} name="keyTypeId" defaultValue={config?.keyTypeId ?? 0}>
                 <option value={0}>Không cần key (truy cập trực tiếp, không bắt vượt link)</option>
                 {keyTypes.map((kt) => (
                   <option key={kt.id} value={kt.id}>
@@ -141,6 +189,39 @@ export default async function AdminFreeFirePage() {
                 ))}
               </div>
             )}
+          </div>
+
+          {/* Nút lưu nhanh ngay trong Card 1 */}
+          <div
+            style={{
+              marginTop: 18,
+              paddingTop: 14,
+              borderTop: "1px solid rgba(255, 255, 255, 0.08)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              flexWrap: "wrap",
+              gap: 12,
+            }}
+          >
+            <div style={{ fontSize: 13, color: "var(--vi-muted)" }}>
+              💡 Chọn xong Loại key hoặc Mật khẩu, bấm nút này để hệ thống lưu ngay lập tức (không cần cuộn xuống cuối trang).
+            </div>
+            <button
+              type="submit"
+              className="vt-btn-primary"
+              style={{
+                padding: "8px 20px",
+                fontSize: 13,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                background: "linear-gradient(135deg, #f59e0b, #d97706)",
+              }}
+            >
+              <i className="fa-solid fa-floppy-disk" />
+              <span>Lưu Cài Đặt Khóa Key Này</span>
+            </button>
           </div>
         </div>
 

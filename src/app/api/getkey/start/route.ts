@@ -6,6 +6,7 @@ import { clientIp, rateLimit, maybeCleanup } from "@/lib/guard";
 
 const SESSION_TTL_MIN = 30;
 export const maxDuration = 30;
+export const dynamic = "force-dynamic";
 
 function baseUrl(req: Request): string {
   const env = process.env.NEXT_PUBLIC_SITE_URL;

@@ -1,1 +1,1 @@
-export { default, generateMetadata, revalidate } from "../freefire/page";
+export { default, generateMetadata, dynamic } from "../freefire/page";
