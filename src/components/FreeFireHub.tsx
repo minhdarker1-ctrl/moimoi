@@ -325,8 +325,10 @@ export default function FreeFireHub({ adminNote }: { adminNote?: FreeFireNoteDat
                   display: "inline-flex",
                   alignItems: "center",
                   gap: 6,
-                  padding: "4px 8px",
-                  textDecoration: "underline",
+                  padding: "6px 12px",
+                  borderRadius: "8px",
+                  textDecoration: "none",
+                  transition: "all 0.2s ease",
                 }}
               >
                 <i className="fa-solid fa-unlock-keyhole" />

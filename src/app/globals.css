@@ -311,6 +311,11 @@
   box-sizing: border-box;
 }
 
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
 .vt-sr-only {
   position: absolute;
   width: 1px;
@@ -1018,7 +1023,19 @@ button {
   box-shadow: var(--vi-shadow);
   cursor: pointer;
   outline: none;
+  text-decoration: none !important;
+  color: inherit;
   transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mdarker-category-tab,
+.mdarker-category-tab:hover,
+.mdarker-category-tab:focus,
+.mdarker-category-tab:active,
+.mdarker-category-tab.active,
+.mdarker-category-tab-inner,
+.mdarker-cat-name {
+  text-decoration: none !important;
 }
 
 .mdarker-category-tab-inner {
@@ -1265,6 +1282,7 @@ button {
   padding: 11px 24px;
   border-radius: 999px;
   font-size: 14px;
+  text-decoration: none !important;
   box-shadow: 0 6px 18px rgba(124, 92, 255, 0.35);
 }
 
@@ -2434,6 +2452,7 @@ button {
   background: rgba(140, 160, 190, 0.1);
   border: 1px solid var(--vi-border);
   cursor: pointer;
+  text-decoration: none !important;
   transition: all 0.2s ease;
 }
 
@@ -2442,6 +2461,27 @@ button {
   border-color: #ff8c00;
   background: rgba(255, 140, 0, 0.12);
   transform: translateY(-1px);
+  text-decoration: none !important;
+}
+
+/* Đảm bảo tất cả các thẻ, nút bấm, nhãn trong Free Fire không bao giờ bị gạch chân */
+.mdarker-ff-hub a,
+.mdarker-ff-hub button,
+.mdarker-ff-card a,
+.mdarker-ff-card button,
+.mdarker-ff-tags,
+.mdarker-ff-tags a,
+.mdarker-ff-tags button,
+.mdarker-ff-badge,
+.mdarker-ff-badge-wrap,
+.mdarker-ff-note-tag,
+.mdarker-ff-note-btn,
+.mdarker-ff-sug-item,
+.mdarker-ff-autodetect-btn,
+.mdarker-ff-submit-btn,
+.mdarker-ff-reset-btn,
+.mdarker-ff-hud-tab {
+  text-decoration: none !important;
 }
 
 /* Input wrap */

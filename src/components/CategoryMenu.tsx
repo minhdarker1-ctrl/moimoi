@@ -102,6 +102,7 @@ export default function CategoryMenu({
                 href={href}
                 className={`mdarker-category-tab ${isSelected ? "active" : ""}`}
                 aria-current={isSelected ? "page" : undefined}
+                style={{ textDecoration: "none" }}
               >
                 {renderGroupContent(cat)}
               </Link>
@@ -127,6 +128,7 @@ export default function CategoryMenu({
             href="/all"
             className={`mdarker-category-tab ${selectedId === "all" ? "active" : ""}`}
             aria-current={selectedId === "all" ? "page" : undefined}
+            style={{ textDecoration: "none" }}
           >
             {renderAllContent()}
           </Link>
