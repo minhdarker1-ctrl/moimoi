@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { db } from "@/lib/db";
 import { requireAdmin, createSession, destroySession, verifyPassword } from "@/lib/auth";
-import { encryptToken, generateKey, hashKey } from "@/lib/crypto";
+import { encryptToken, generateKey, hashKey, vnDate } from "@/lib/crypto";
 import { clientIp, loginLockedFor, recordLoginFail, clearLoginFails } from "@/lib/guard";
 import { isProvider } from "@/lib/shorteners";
 
@@ -126,7 +126,47 @@ export async function saveSite(fd: FormData) {
     });
   }
 
+  const counterToday = num(fd, "counterToday", -1);
+  if (counterToday >= 0) {
+    const date = vnDate();
+    await db.dailyHit.upsert({
+      where: { date },
+      update: { count: counterToday },
+      create: { date, count: counterToday },
+    });
+  }
+
   refresh("/admin/site");
+}
+
+/* ---------- counter / traffic stats ---------- */
+
+export async function updateCounter(fd: FormData) {
+  await requireAdmin();
+  const total = num(fd, "total", -1);
+  const today = num(fd, "today", -1);
+
+  if (total >= 0) {
+    await db.counter.upsert({
+      where: { id: 1 },
+      update: { total },
+      create: { id: 1, total },
+    });
+  }
+
+  if (today >= 0) {
+    const date = vnDate();
+    await db.dailyHit.upsert({
+      where: { date },
+      update: { count: today },
+      create: { date, count: today },
+    });
+  }
+
+  revalidatePath("/");
+  revalidatePath("/admin");
+  revalidatePath("/admin/site");
+  redirect("/admin?counter_saved=1");
 }
 
 /* ---------- freefire config ---------- */
