@@ -84,6 +84,7 @@ test("mọi cổng parse thành công trả về URL https", () => {
     VUOTNHANH: "https://vuotnhanh.com/x1",
     LINKTOP: JSON.stringify({ status: "success", shortenedUrl: "https://linktop.one/aB3" }),
     LINK4M: JSON.stringify({ status: "success", shortenedUrl: "https://link4m.co/aB3" }),
+    TRAFFICHUB: JSON.stringify({ status: "success", msg: "", shortenedUrl: "https://system.traffichub.vn/s/abc123" }),
   };
 
   for (const p of PROVIDERS) {

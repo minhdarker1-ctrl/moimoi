@@ -19,6 +19,7 @@ test("mỗi cổng dùng đúng tên param token", () => {
   assert.match(buildApiUrl("VUOTNHANH", "T", TARGET), /[?&]api=T/);
   assert.match(buildApiUrl("LINKTOP", "T", TARGET), /[?&]api=T/);
   assert.match(buildApiUrl("LINK4M", "T", TARGET), /[?&]api=T/);
+  assert.match(buildApiUrl("TRAFFICHUB", "T", TARGET), /[?&]api_key=T/);
 });
 
 test("fallback_url chỉ gắn khi được truyền", () => {
@@ -91,5 +92,27 @@ test("Link4m.co — parse JSON {status, shortenedUrl}", () => {
     /API token invalid/,
   );
 });
+
+test("Traffic HUB — param token là api_key=, type=url, hỗ trợ fallback_url", () => {
+  const fb = "https://site.com/fallback";
+  const url = buildApiUrl("TRAFFICHUB", "KEY123", TARGET);
+  assert.ok(url.startsWith("https://system.traffichub.vn/api/api?api_key=KEY123&type=url"));
+  assert.match(url, /[?&]url=https%3A%2F%2Fsite\.com/);
+  assert.ok(!url.includes("fallback_url="));
+
+  const urlWithFb = buildApiUrl("TRAFFICHUB", "KEY123", TARGET, fb);
+  assert.ok(urlWithFb.includes("&fallback_type=direct&fallback_url="));
+  assert.ok(urlWithFb.includes(encodeURIComponent(fb)));
+});
+
+test("Traffic HUB — parse JSON {status, msg, shortenedUrl}", () => {
+  const body = JSON.stringify({ status: "success", msg: "", shortenedUrl: "https://system.traffichub.vn/s/abc123" });
+  assert.equal(parseResponse("TRAFFICHUB", body), "https://system.traffichub.vn/s/abc123");
+  assert.throws(
+    () => parseResponse("TRAFFICHUB", JSON.stringify({ status: "error", msg: "API key không hợp lệ." })),
+    /API key không hợp lệ/,
+  );
+});
+
 
 

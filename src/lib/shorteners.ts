@@ -19,11 +19,11 @@ export type ProviderDef = {
 
 const enc = encodeURIComponent;
 
-/** Cổng trả JSON {status, shortenedUrl, message} — Traffic4K, TrafficVN. */
+/** Cổng trả JSON {status, shortenedUrl, message/msg} — Traffic4K, TrafficVN, Traffic HUB, Linktop, Link4m. */
 function parseStatusJson(body: string): string {
-  const d = JSON.parse(body) as { status?: string; shortenedUrl?: string; message?: string };
+  const d = JSON.parse(body) as { status?: string; shortenedUrl?: string; message?: string; msg?: string };
   if (d.status === "success" && d.shortenedUrl) return d.shortenedUrl;
-  throw new Error(d.message || "Cổng rút gọn trả lỗi");
+  throw new Error(d.message || d.msg || "Cổng rút gọn trả lỗi");
 }
 
 /** Cổng chỉ trả mã, phải tự ghép domain — Ontops, GTraffic. */
@@ -119,6 +119,16 @@ export const PROVIDERS: ProviderDef[] = [
     dailyLimit: 0,
     build: ({ token, url }) =>
       `https://link4m.co/api-shorten/v2?api=${token}&url=${enc(url)}`,
+    parse: parseStatusJson,
+  },
+  {
+    id: "TRAFFICHUB",
+    label: "Traffic HUB (system.traffichub.vn)",
+    supportsFallback: true,
+    dailyLimit: 0,
+    build: ({ token, url, fallback }) =>
+      `https://system.traffichub.vn/api/api?api_key=${token}&type=url&url=${enc(url)}` +
+      (fallback ? `&fallback_type=direct&fallback_url=${enc(fallback)}` : ""),
     parse: parseStatusJson,
   },
 ];
