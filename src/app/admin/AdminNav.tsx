@@ -8,6 +8,7 @@ const LINKS = [
   ["/admin/linkboxes", "Link box"],
   ["/admin/groups", "Nhóm"],
   ["/admin/freefire", "🔥 Free Fire"],
+  ["/admin/freefire/logs", "📊 Logs FF"],
   ["/admin/blogs", "📝 Blog mdarker"],
   ["/admin/apps", "Ứng dụng"],
   ["/admin/notices", "Thông báo"],

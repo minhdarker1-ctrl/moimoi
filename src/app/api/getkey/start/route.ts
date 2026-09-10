@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { fingerprint, sessionToken } from "@/lib/crypto";
 import { shortenWithFallback, usableShorteners } from "@/lib/getkey";
 import { clientIp, rateLimit, maybeCleanup } from "@/lib/guard";
+import { parseUserAgent, extractLocation } from "@/lib/user-agent";
 
 const SESSION_TTL_MIN = 30;
 export const maxDuration = 30;
@@ -38,6 +39,9 @@ export async function GET(req: Request) {
   const appIdParam = reqUrl.searchParams.get("appId");
   const keyTypeIdParam = reqUrl.searchParams.get("keyTypeId");
   const scope = reqUrl.searchParams.get("scope");
+  const vid = reqUrl.searchParams.get("vid") || reqUrl.searchParams.get("visitorId") || "";
+  const deviceInput = reqUrl.searchParams.get("device") || "";
+  const deviceType = reqUrl.searchParams.get("type") || "";
 
   let kt = null;
   let app = null;
@@ -45,6 +49,28 @@ export async function GET(req: Request) {
   if (scope === "freefire") {
     const ffConfig = await db.freeFireConfig.findUnique({ where: { id: 1 }, include: { keyType: true } });
     if (ffConfig?.getKeyUrl && (!ffConfig.keyTypeId || ffConfig.keyTypeId <= 0)) {
+      try {
+        const ua = req.headers.get("user-agent") || "";
+        const parsedUa = parseUserAgent(ua);
+        const loc = extractLocation(req.headers);
+        await db.freeFireKeyLog.create({
+          data: {
+            visitorId: vid || "unknown",
+            ip: clientIp(req),
+            device: parsedUa.device,
+            deviceInput,
+            deviceType,
+            browser: parsedUa.browser,
+            os: parsedUa.os,
+            location: loc,
+            userAgent: ua,
+            keyTypeName: "Link Ngoài",
+            status: "started",
+          },
+        });
+      } catch (e) {
+        console.error("Lỗi ghi log Free Fire external:", e);
+      }
       if (isJson) {
         return NextResponse.json({ ok: true, url: ffConfig.getKeyUrl, appName: "Độ Nhạy Free Fire" });
       }
@@ -107,6 +133,32 @@ export async function GET(req: Request) {
       expiresAt: new Date(Date.now() + SESSION_TTL_MIN * 60_000),
     },
   });
+
+  if (scope === "freefire") {
+    try {
+      const ua = req.headers.get("user-agent") || "";
+      const parsedUa = parseUserAgent(ua);
+      const loc = extractLocation(req.headers);
+      await db.freeFireKeyLog.create({
+        data: {
+          visitorId: vid || "unknown",
+          ip,
+          device: parsedUa.device,
+          deviceInput,
+          deviceType,
+          browser: parsedUa.browser,
+          os: parsedUa.os,
+          location: loc,
+          userAgent: ua,
+          keyTypeName: kt.name,
+          token,
+          status: "started",
+        },
+      });
+    } catch (e) {
+      console.error("Lỗi ghi log Free Fire session:", e);
+    }
+  }
 
   if (isJson) {
     return NextResponse.json({

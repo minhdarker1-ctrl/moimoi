@@ -312,3 +312,26 @@ model BlogPost {
   @@index([visible, order])
 }
 
+// ---------- Nhật ký khách lấy key Free Fire ----------
+
+model FreeFireKeyLog {
+  id          Int      @id @default(autoincrement())
+  visitorId   String   // UUID của visitor
+  ip          String   // IP thật của client
+  device      String   @default("Desktop") // Desktop | Mobile | Tablet
+  deviceInput String   @default("")        // Tên máy user nhập (iPhone 15, Samsung S23...)
+  deviceType  String   @default("")        // ios | android | pc
+  browser     String   @default("")        // Chrome 130, Safari 17...
+  os          String   @default("")        // Windows 11, iOS 17, Android 14...
+  location    String   @default("—")       // Thành phố, Quốc gia (Hà Nội, VN)
+  userAgent   String   @default("")        // Full User-Agent
+  keyTypeName String   @default("")        // freefire, Key 24h...
+  token       String   @default("")        // Token phiên lấy key
+  status      String   @default("started") // started | completed | unlocked
+  createdAt   DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([visitorId])
+  @@index([ip])
+}
+

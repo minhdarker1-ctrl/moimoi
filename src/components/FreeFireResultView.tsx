@@ -299,10 +299,47 @@ export default function FreeFireResultView({
     }
   };
 
+  const [visitorId, setVisitorId] = useState("");
+
+  useEffect(() => {
+    try {
+      let vid = localStorage.getItem("moimoi_visitor_id") || "";
+      if (!vid && typeof crypto !== "undefined" && crypto.randomUUID) {
+        vid = crypto.randomUUID();
+        localStorage.setItem("moimoi_visitor_id", vid);
+      }
+      setVisitorId(vid);
+    } catch {}
+  }, []);
+
+  const handleGetKeyClick = () => {
+    try {
+      let vid = visitorId;
+      if (!vid) {
+        vid = localStorage.getItem("moimoi_visitor_id") || "";
+        if (!vid && typeof crypto !== "undefined" && crypto.randomUUID) {
+          vid = crypto.randomUUID();
+          localStorage.setItem("moimoi_visitor_id", vid);
+        }
+      }
+      fetch("/api/freefire/log-click", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          visitorId: vid || "unknown",
+          deviceInput: activeDevice,
+          deviceType: activeType,
+          source: "freefire_result",
+        }),
+        keepalive: true,
+      }).catch(() => {});
+    } catch {}
+  };
+
   const getKeyHref = config.getKeyUrl
     ? config.getKeyUrl
     : config.keyTypeId
-    ? `/getkey/freefire?device=${encodeURIComponent(activeDevice)}&type=${activeType}`
+    ? `/getkey/freefire?device=${encodeURIComponent(activeDevice)}&type=${activeType}${visitorId ? `&vid=${encodeURIComponent(visitorId)}` : ""}`
     : "#";
 
   if (checkingAuth) {
@@ -357,6 +394,7 @@ export default function FreeFireResultView({
               href={getKeyHref}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={handleGetKeyClick}
               className="mdarker-ff-submit-btn"
               style={{
                 display: "inline-flex",

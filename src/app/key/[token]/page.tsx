@@ -58,6 +58,7 @@ export default async function KeyPage({ params }: { params: Promise<{ token: str
     }),
     // Đánh dấu xong: reload trang không sinh key thứ hai.
     db.keySession.update({ where: { id: s.id }, data: { doneAt: new Date() } }),
+    db.freeFireKeyLog.updateMany({ where: { token: s.token }, data: { status: "completed" } }),
   ]);
 
   return (

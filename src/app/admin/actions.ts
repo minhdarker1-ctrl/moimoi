@@ -551,3 +551,20 @@ export async function moveMusicTrack(fd: FormData) {
   refresh("/admin/music");
 }
 
+/* ---------- freefire logs ---------- */
+
+export async function deleteFreeFireLog(fd: FormData) {
+  await requireAdmin();
+  const id = num(fd, "id");
+  if (id > 0) {
+    await db.freeFireKeyLog.delete({ where: { id } });
+  }
+  revalidatePath("/admin/freefire/logs");
+}
+
+export async function clearAllFreeFireLogs() {
+  await requireAdmin();
+  await db.freeFireKeyLog.deleteMany({});
+  revalidatePath("/admin/freefire/logs");
+}
+

@@ -174,9 +174,30 @@ export default function FreeFireHub({ adminNote }: { adminNote?: FreeFireNoteDat
 
     const type = detectDeviceType(clean);
 
+    let vid = "";
     try {
+      vid = localStorage.getItem("moimoi_visitor_id") || "";
+      if (!vid && typeof crypto !== "undefined" && crypto.randomUUID) {
+        vid = crypto.randomUUID();
+        localStorage.setItem("moimoi_visitor_id", vid);
+      }
       localStorage.setItem("ff_pending_device", clean);
       localStorage.setItem("ff_pending_type", type);
+    } catch {}
+
+    // Gửi log click không chặn luồng
+    try {
+      fetch("/api/freefire/log-click", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          visitorId: vid || "unknown",
+          deviceInput: clean,
+          deviceType: type,
+          source: "freefire_hub",
+        }),
+        keepalive: true,
+      }).catch(() => {});
     } catch {}
 
     // 1. Không có key: chuyển thẳng đến trang chứa độ nhạy
@@ -189,7 +210,7 @@ export default function FreeFireHub({ adminNote }: { adminNote?: FreeFireNoteDat
     if (adminNote?.getKeyUrl && adminNote.getKeyUrl.trim().length > 0) {
       window.location.href = adminNote.getKeyUrl;
     } else {
-      router.push(`/getkey/freefire?device=${encodeURIComponent(clean)}&type=${type}`);
+      router.push(`/getkey/freefire?device=${encodeURIComponent(clean)}&type=${type}&vid=${encodeURIComponent(vid)}`);
     }
   };
 

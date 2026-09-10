@@ -33,10 +33,11 @@ export default async function AdminFreeFirePage({
   const sp = searchParams ? await searchParams : {};
   const isSaved = sp.saved === "1";
 
-  const [config, keyTypes, shorteners] = await Promise.all([
+  const [config, keyTypes, shorteners, totalLogs] = await Promise.all([
     db.freeFireConfig.findUnique({ where: { id: 1 } }),
     db.keyType.findMany({ where: { enabled: true }, orderBy: { id: "asc" } }),
     db.shortener.findMany({ orderBy: { order: "asc" } }),
+    db.freeFireKeyLog.count(),
   ]);
 
   const embedUrl = config?.videoUrl ? getYouTubeEmbedUrl(config.videoUrl) : null;
@@ -45,6 +46,46 @@ export default async function AdminFreeFirePage({
   return (
     <div className="vt-admin">
       <AdminNav current="/admin/freefire" />
+
+      {/* THANH CHUYỂN TAB CỦA FREE FIRE */}
+      <div style={{ display: "flex", gap: 10, marginBottom: 20, borderBottom: "1px solid var(--vi-border)", paddingBottom: 12 }}>
+        <Link
+          href="/admin/freefire"
+          className="vt-btn-sm"
+          style={{
+            textDecoration: "none",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
+            padding: "8px 16px",
+            fontSize: 13,
+            background: "rgba(245, 158, 11, 0.15)",
+            border: "1px solid rgba(245, 158, 11, 0.4)",
+            color: "#f59e0b",
+            fontWeight: 700,
+          }}
+        >
+          <i className="fa-solid fa-sliders" />
+          <span>Cấu Hình & Cài Đặt Khóa Key</span>
+        </Link>
+        <Link
+          href="/admin/freefire/logs"
+          className="vt-btn-sm"
+          style={{
+            textDecoration: "none",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
+            padding: "8px 16px",
+            fontSize: 13,
+            background: "transparent",
+            color: "var(--vi-muted)",
+          }}
+        >
+          <i className="fa-solid fa-chart-simple" />
+          <span>Nhật Ký Khách Lấy Key ({totalLogs})</span>
+        </Link>
+      </div>
 
       {isSaved && (
         <div
@@ -157,6 +198,22 @@ export default async function AdminFreeFirePage({
                 >
                   <i className="fa-solid fa-gear" style={{ marginRight: 4 }} />
                   Quản lý Loại Key
+                </Link>
+                <Link
+                  href="/admin/freefire/logs"
+                  className="vt-btn-sm"
+                  style={{
+                    textDecoration: "none",
+                    fontSize: 12,
+                    padding: "4px 10px",
+                    background: "rgba(245, 158, 11, 0.15)",
+                    color: "#f59e0b",
+                    border: "1px solid rgba(245, 158, 11, 0.4)",
+                    fontWeight: 600,
+                  }}
+                >
+                  <i className="fa-solid fa-chart-simple" style={{ marginRight: 4 }} />
+                  Xem Nhật Ký ({totalLogs})
                 </Link>
               </div>
             </div>

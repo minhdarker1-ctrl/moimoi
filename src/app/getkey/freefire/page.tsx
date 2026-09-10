@@ -17,7 +17,37 @@ export default function GetKeyFreeFirePage() {
   const startFlow = async () => {
     setState({ status: "loading", stepText: "Đang kết nối cổng lấy Key an toàn..." });
     try {
-      const res = await fetch(`/api/getkey/start?scope=freefire&format=json`, {
+      let vid = "";
+      let dev = "";
+      let dt = "";
+      if (typeof window !== "undefined") {
+        const urlParams = new URLSearchParams(window.location.search);
+        vid = urlParams.get("vid") || "";
+        dev = urlParams.get("device") || "";
+        dt = urlParams.get("type") || "";
+
+        try {
+          if (!vid) {
+            vid = localStorage.getItem("moimoi_visitor_id") || "";
+            if (!vid && typeof crypto !== "undefined" && crypto.randomUUID) {
+              vid = crypto.randomUUID();
+              localStorage.setItem("moimoi_visitor_id", vid);
+            }
+          }
+          if (!dev) dev = localStorage.getItem("ff_pending_device") || "";
+          if (!dt) dt = localStorage.getItem("ff_pending_type") || "";
+        } catch {}
+      }
+
+      const q = new URLSearchParams({
+        scope: "freefire",
+        format: "json",
+        vid,
+        device: dev,
+        type: dt,
+      });
+
+      const res = await fetch(`/api/getkey/start?${q.toString()}`, {
         headers: { Accept: "application/json" },
       });
       const data = await res.json();
