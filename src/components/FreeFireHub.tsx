@@ -185,33 +185,14 @@ export default function FreeFireHub({ adminNote }: { adminNote?: FreeFireNoteDat
       localStorage.setItem("ff_pending_type", type);
     } catch {}
 
-    // Gửi log click không chặn luồng
-    try {
-      fetch("/api/freefire/log-click", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          visitorId: vid || "unknown",
-          deviceInput: clean,
-          deviceType: type,
-          source: "freefire_hub",
-        }),
-        keepalive: true,
-      }).catch(() => {});
-    } catch {}
-
     // 1. Không có key: chuyển thẳng đến trang chứa độ nhạy
     if (!hasKey) {
       router.push(`/freefire/result?device=${encodeURIComponent(clean)}&type=${type}`);
       return;
     }
 
-    // 2. Có key: chuyển đến vượt link lấy key qua API bên thứ 3
-    if (adminNote?.getKeyUrl && adminNote.getKeyUrl.trim().length > 0) {
-      window.location.href = adminNote.getKeyUrl;
-    } else {
-      router.push(`/getkey/freefire?device=${encodeURIComponent(clean)}&type=${type}&vid=${encodeURIComponent(vid)}`);
-    }
+    // 2. Có key: chuyển đến vượt link lấy key qua cổng getkey Free Fire
+    router.push(`/getkey/freefire?device=${encodeURIComponent(clean)}&type=${type}&vid=${encodeURIComponent(vid)}`);
   };
 
   return (

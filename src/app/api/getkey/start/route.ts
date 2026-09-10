@@ -53,21 +53,46 @@ export async function GET(req: Request) {
         const ua = req.headers.get("user-agent") || "";
         const parsedUa = parseUserAgent(ua);
         const loc = extractLocation(req.headers);
-        await db.freeFireKeyLog.create({
-          data: {
-            visitorId: vid || "unknown",
-            ip: clientIp(req),
-            device: parsedUa.device,
-            deviceInput,
-            deviceType,
-            browser: parsedUa.browser,
-            os: parsedUa.os,
-            location: loc,
-            userAgent: ua,
-            keyTypeName: "Link Ngoài",
-            status: "started",
+        const client_ip = clientIp(req);
+        const fifteenSecondsAgo = new Date(Date.now() - 15_000);
+
+        const recent = await db.freeFireKeyLog.findFirst({
+          where: {
+            OR: [
+              ...(vid && vid !== "unknown" ? [{ visitorId: vid, createdAt: { gte: fifteenSecondsAgo } }] : []),
+              ...(client_ip ? [{ ip: client_ip, createdAt: { gte: fifteenSecondsAgo } }] : []),
+            ],
           },
+          orderBy: { createdAt: "desc" },
         });
+
+        if (recent) {
+          await db.freeFireKeyLog.update({
+            where: { id: recent.id },
+            data: {
+              deviceInput: deviceInput || recent.deviceInput,
+              deviceType: deviceType || recent.deviceType,
+              keyTypeName: "Link Ngoài",
+              status: "started",
+            },
+          });
+        } else {
+          await db.freeFireKeyLog.create({
+            data: {
+              visitorId: vid || "unknown",
+              ip: client_ip,
+              device: parsedUa.device,
+              deviceInput,
+              deviceType,
+              browser: parsedUa.browser,
+              os: parsedUa.os,
+              location: loc,
+              userAgent: ua,
+              keyTypeName: "Link Ngoài",
+              status: "started",
+            },
+          });
+        }
       } catch (e) {
         console.error("Lỗi ghi log Free Fire external:", e);
       }
@@ -139,22 +164,47 @@ export async function GET(req: Request) {
       const ua = req.headers.get("user-agent") || "";
       const parsedUa = parseUserAgent(ua);
       const loc = extractLocation(req.headers);
-      await db.freeFireKeyLog.create({
-        data: {
-          visitorId: vid || "unknown",
-          ip,
-          device: parsedUa.device,
-          deviceInput,
-          deviceType,
-          browser: parsedUa.browser,
-          os: parsedUa.os,
-          location: loc,
-          userAgent: ua,
-          keyTypeName: kt.name,
-          token,
-          status: "started",
+      const fifteenSecondsAgo = new Date(Date.now() - 15_000);
+
+      const recent = await db.freeFireKeyLog.findFirst({
+        where: {
+          OR: [
+            ...(vid && vid !== "unknown" ? [{ visitorId: vid, createdAt: { gte: fifteenSecondsAgo } }] : []),
+            ...(ip ? [{ ip, createdAt: { gte: fifteenSecondsAgo } }] : []),
+          ],
         },
+        orderBy: { createdAt: "desc" },
       });
+
+      if (recent) {
+        await db.freeFireKeyLog.update({
+          where: { id: recent.id },
+          data: {
+            token: token || recent.token,
+            keyTypeName: kt.name || recent.keyTypeName,
+            deviceInput: deviceInput || recent.deviceInput,
+            deviceType: deviceType || recent.deviceType,
+            status: "started",
+          },
+        });
+      } else {
+        await db.freeFireKeyLog.create({
+          data: {
+            visitorId: vid || "unknown",
+            ip,
+            device: parsedUa.device,
+            deviceInput,
+            deviceType,
+            browser: parsedUa.browser,
+            os: parsedUa.os,
+            location: loc,
+            userAgent: ua,
+            keyTypeName: kt.name,
+            token,
+            status: "started",
+          },
+        });
+      }
     } catch (e) {
       console.error("Lỗi ghi log Free Fire session:", e);
     }

@@ -178,7 +178,7 @@ export default function MusicPlayer() {
           height: "240",
           videoId: track.youtubeId,
           playerVars: {
-            autoplay: 1,
+            autoplay: 0,
             controls: 0,
             disablekb: 1,
             fs: 0,
@@ -196,9 +196,7 @@ export default function MusicPlayer() {
               const dur = e.target.getDuration();
               if (dur > 0) setDuration(dur);
               try {
-                e.target.unMute();
                 e.target.setVolume(100);
-                e.target.playVideo();
               } catch {}
             },
             onStateChange: (e) => {
@@ -233,13 +231,16 @@ export default function MusicPlayer() {
     const currentTrack = tracks[index];
     if (!currentTrack) return;
     try {
-      playerRef.current.loadVideoById(currentTrack.youtubeId);
-      playerRef.current.unMute();
-      playerRef.current.setVolume(100);
-      playerRef.current.playVideo();
-      setPlaying(true);
+      if (playing) {
+        playerRef.current.loadVideoById(currentTrack.youtubeId);
+        playerRef.current.unMute();
+        playerRef.current.setVolume(100);
+        playerRef.current.playVideo();
+      } else {
+        playerRef.current.cueVideoById(currentTrack.youtubeId);
+      }
     } catch {}
-  }, [index, tracks]);
+  }, [index, tracks, playing]);
 
   // 4. Timer cập nhật progress bar mỗi giây
   useEffect(() => {
@@ -258,41 +259,6 @@ export default function MusicPlayer() {
       if (tickRef.current) clearInterval(tickRef.current);
     };
   }, [playing]);
-
-  // 5. Tự động phát khi người dùng tương tác lần đầu (vượt qua Autoplay Policy của trình duyệt)
-  useEffect(() => {
-    let played = false;
-
-    const handleFirstGesture = () => {
-      if (played) return;
-      if (playerRef.current && typeof playerRef.current.playVideo === "function") {
-        try {
-          const state = playerRef.current.getPlayerState?.();
-          if (state !== 1) {
-            playerRef.current.unMute();
-            playerRef.current.setVolume(100);
-            playerRef.current.playVideo();
-          }
-          played = true;
-          cleanup();
-        } catch {}
-      }
-    };
-
-    const cleanup = () => {
-      window.removeEventListener("pointerdown", handleFirstGesture);
-      window.removeEventListener("touchstart", handleFirstGesture);
-      window.removeEventListener("click", handleFirstGesture);
-      window.removeEventListener("keydown", handleFirstGesture);
-    };
-
-    window.addEventListener("pointerdown", handleFirstGesture, { passive: true });
-    window.addEventListener("touchstart", handleFirstGesture, { passive: true });
-    window.addEventListener("click", handleFirstGesture, { passive: true });
-    window.addEventListener("keydown", handleFirstGesture, { passive: true });
-
-    return cleanup;
-  }, []);
 
   const togglePlay = () => {
     if (!playerRef.current) return;
@@ -400,7 +366,7 @@ export default function MusicPlayer() {
                   className={`mdarker-music-btn mdarker-music-btn-main${
                     !playing ? " mdarker-music-btn-pulse" : ""
                   }`}
-                  title={playing ? "Dừng nhạc" : "Bật nhạc (hoặc chạm bất kỳ đâu trên màn hình)"}
+                  title={playing ? "Dừng nhạc" : "Bật nhạc"}
                 >
                   <i className={playing ? "bi bi-pause-fill" : "bi bi-play-fill"} />
                 </button>

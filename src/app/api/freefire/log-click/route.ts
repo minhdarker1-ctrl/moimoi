@@ -39,6 +39,31 @@ export async function POST(req: Request) {
 
     const keyTypeName = ffConfig?.keyType?.name || (ffConfig?.getKeyUrl ? "Link Ngoài" : "Không có key");
 
+    // Deduplication: kiểm tra xem trong vòng 15 giây qua đã có bản ghi nào từ visitorId này hoặc IP này chưa
+    const fifteenSecondsAgo = new Date(Date.now() - 15_000);
+    const recent = await db.freeFireKeyLog.findFirst({
+      where: {
+        OR: [
+          ...(visitorId && visitorId !== "unknown" ? [{ visitorId, createdAt: { gte: fifteenSecondsAgo } }] : []),
+          ...(ip ? [{ ip, createdAt: { gte: fifteenSecondsAgo } }] : []),
+        ],
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    if (recent) {
+      // Đã có bản ghi vừa tạo, cập nhật nếu thiếu thông tin, không tạo trùng lặp
+      const updated = await db.freeFireKeyLog.update({
+        where: { id: recent.id },
+        data: {
+          deviceInput: deviceInput || recent.deviceInput,
+          deviceType: deviceType || recent.deviceType,
+          keyTypeName: recent.keyTypeName || keyTypeName,
+        },
+      });
+      return NextResponse.json({ ok: true, id: updated.id, deduplicated: true });
+    }
+
     const log = await db.freeFireKeyLog.create({
       data: {
         visitorId,
