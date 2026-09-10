@@ -2,13 +2,15 @@
 
 import { useState, useEffect } from "react";
 import { performSecurityAudit, SecurityViolation } from "@/lib/anti-bot-engine";
+import { detectAccurateDevice } from "@/lib/device-detector";
 
 interface AntiBotOverlayProps {
   scope?: string;
   deviceInput?: string;
   deviceType?: string;
-  onSuccess: (antiBotToken: string) => void;
+  onSuccess: (antiBotToken: string, detectedDevice?: string) => void;
   onError?: (err: string) => void;
+  onClose?: () => void;
   cfSiteKey?: string;
   turnstileEnabled?: boolean;
 }
@@ -21,6 +23,7 @@ export default function AntiBotOverlay({
   deviceType = "",
   onSuccess,
   onError,
+  onClose,
 }: AntiBotOverlayProps) {
   const [state, setState] = useState<StepState>("precheck");
   const [elapsed, setElapsed] = useState(0);
@@ -52,8 +55,19 @@ export default function AntiBotOverlay({
 
     const startTime = Date.now();
     let scan;
+    let detectedName = deviceInput;
+    let detectedType = deviceType;
+
     try {
-      scan = performSecurityAudit();
+      const [auditRes, devRes] = await Promise.all([
+        Promise.resolve(performSecurityAudit()),
+        detectAccurateDevice().catch(() => null),
+      ]);
+      scan = auditRes;
+      if (devRes && devRes.deviceName) {
+        detectedName = devRes.deviceName;
+        detectedType = devRes.deviceType;
+      }
     } catch {
       scan = {
         passed: true,
@@ -91,8 +105,8 @@ export default function AntiBotOverlay({
           body: JSON.stringify({
             scanResult: scan,
             visitorId: vid,
-            deviceInput,
-            deviceType,
+            deviceInput: detectedName || deviceInput,
+            deviceType: detectedType || deviceType,
             scope,
           }),
         });
@@ -109,8 +123,8 @@ export default function AntiBotOverlay({
         body: JSON.stringify({
           scanResult: scan,
           visitorId: vid,
-          deviceInput,
-          deviceType,
+          deviceInput: detectedName || deviceInput,
+          deviceType: detectedType || deviceType,
           scope,
         }),
       });
@@ -124,7 +138,13 @@ export default function AntiBotOverlay({
 
       if (data.ok && data.token) {
         setState("passed");
-        onSuccess(data.token);
+        try {
+          sessionStorage.setItem("ff_anti_bot_token", data.token);
+          if (detectedName) {
+            sessionStorage.setItem("ff_verified_device", detectedName);
+          }
+        } catch {}
+        onSuccess(data.token, detectedName);
       } else {
         throw new Error(data.error || "Xác minh không thành công");
       }
@@ -174,34 +194,57 @@ export default function AntiBotOverlay({
               padding: "16px 20px 14px",
               display: "flex",
               alignItems: "center",
+              justifyContent: "space-between",
               gap: 12,
               borderBottom: "1px solid #f1f5f9",
             }}
           >
-            <div
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: 10,
-                backgroundColor: "#ecfdf5",
-                color: "#059669",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: 20,
-                flexShrink: 0,
-              }}
-            >
-              <i className="fa-solid fa-shield-halved" />
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <div
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 10,
+                  backgroundColor: "#ecfdf5",
+                  color: "#059669",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 20,
+                  flexShrink: 0,
+                }}
+              >
+                <i className="fa-solid fa-shield-halved" />
+              </div>
+              <div>
+                <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#0f172a" }}>
+                  Xác minh thiết bị
+                </h3>
+                <p style={{ margin: "2px 0 0", fontSize: 12, color: "#64748b" }}>
+                  Chỉ mất 1-2 giây để tự nhận diện & bảo vệ phiên lấy Key
+                </p>
+              </div>
             </div>
-            <div>
-              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#0f172a" }}>
-                Xác minh & Tự nhận diện máy
-              </h3>
-              <p style={{ margin: "2px 0 0", fontSize: 12, color: "#64748b" }}>
-                Quét phần cứng bảo vệ phiên lấy Key
-              </p>
-            </div>
+
+            {onClose && (
+              <button
+                type="button"
+                onClick={onClose}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  color: "#94a3b8",
+                  fontSize: 18,
+                  cursor: "pointer",
+                  padding: "4px 8px",
+                  borderRadius: 6,
+                }}
+                title="Đóng cửa sổ"
+                aria-label="Đóng"
+              >
+                <i className="fa-solid fa-xmark" />
+              </button>
+            )}
           </div>
 
           <div style={{ padding: "16px 20px" }}>
@@ -221,7 +264,7 @@ export default function AntiBotOverlay({
             >
               <i className="fa-solid fa-circle-info" style={{ marginTop: 2, flexShrink: 0 }} />
               <div>
-                Bấm nút bên dưới để hệ thống quét phần cứng WebGL, nhận diện thiết bị và xác minh tính toàn vẹn.
+                Nhấn nút bên dưới để hệ thống quét phần cứng WebGL, tự nhận diện thiết bị và xác minh tính toàn vẹn.
               </div>
             </div>
 
@@ -253,8 +296,8 @@ export default function AntiBotOverlay({
                 transition: "all 0.15s ease",
               }}
             >
-              <i className="fa-solid fa-microchip" />
-              <span>XÁC MINH & TỰ NHẬN DIỆN MÁY</span>
+              <i className="fa-solid fa-play" />
+              <span>Xác minh ngay</span>
             </button>
           </div>
         </div>
@@ -412,12 +455,12 @@ export default function AntiBotOverlay({
             </div>
           </div>
 
-          <div style={{ padding: "0 20px 20px" }}>
+          <div style={{ padding: "0 20px 20px", display: "flex", gap: 10 }}>
             <button
               type="button"
               onClick={() => window.location.reload()}
               style={{
-                width: "100%",
+                flex: 1,
                 height: 42,
                 backgroundColor: "#dc2626",
                 color: "#ffffff",
@@ -434,8 +477,27 @@ export default function AntiBotOverlay({
               }}
             >
               <i className="fa-solid fa-rotate-right" />
-              <span>Tải lại trang ngay</span>
+              <span>Tải lại trang</span>
             </button>
+            {onClose && (
+              <button
+                type="button"
+                onClick={onClose}
+                style={{
+                  height: 42,
+                  padding: "0 16px",
+                  backgroundColor: "#f1f5f9",
+                  color: "#475569",
+                  border: "none",
+                  borderRadius: 10,
+                  fontWeight: 600,
+                  fontSize: 13,
+                  cursor: "pointer",
+                }}
+              >
+                Đóng
+              </button>
+            )}
           </div>
         </div>
       )}

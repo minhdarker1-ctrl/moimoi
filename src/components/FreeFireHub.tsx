@@ -3,8 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import FreeFireAdminNote, { FreeFireNoteData } from "./FreeFireAdminNote";
-import { detectAccurateDevice } from "@/lib/device-detector";
-import { performSecurityAudit } from "@/lib/anti-bot-engine";
+import AntiBotOverlay from "./AntiBotOverlay";
 
 const BRAND_TAGS = [
   "iPhone",
@@ -83,30 +82,17 @@ export default function FreeFireHub({ adminNote }: { adminNote?: FreeFireNoteDat
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [warning, setWarning] = useState("");
   const [loading, setLoading] = useState(false);
-  const [isVerifying, setIsVerifying] = useState(false);
+  const [showVerifyModal, setShowVerifyModal] = useState(false);
   const [verifiedToken, setVerifiedToken] = useState<string | null>(null);
-  const [verifiedData, setVerifiedData] = useState<{
-    deviceName: string;
-    gpu: string;
-    isEmulator: boolean;
-    passed: boolean;
-  } | null>(null);
+  const [verifiedDevice, setVerifiedDevice] = useState("");
 
   // Khôi phục trạng thái đã xác minh trước đó nếu còn trong phiên
   useEffect(() => {
     try {
       const savedToken = sessionStorage.getItem("ff_anti_bot_token");
       const savedDevice = sessionStorage.getItem("ff_verified_device");
-      const savedGpu = sessionStorage.getItem("ff_verified_gpu");
-      if (savedToken && savedDevice) {
-        setVerifiedToken(savedToken);
-        setVerifiedData({
-          deviceName: savedDevice,
-          gpu: savedGpu || "",
-          isEmulator: false,
-          passed: true,
-        });
-      }
+      if (savedToken) setVerifiedToken(savedToken);
+      if (savedDevice) setVerifiedDevice(savedDevice);
     } catch {}
   }, []);
 
@@ -130,106 +116,18 @@ export default function FreeFireHub({ adminNote }: { adminNote?: FreeFireNoteDat
     setWarning("");
   };
 
-  // Nâng cấp: Tự nhận diện chính xác máy & Chạy kiểm tra xác minh thiết bị (Anti-Bot / Giả Lập)
-  const handleVerifyAndAutoDetect = async (e?: React.MouseEvent): Promise<string | null> => {
-    if (e && !e.isTrusted) {
-      alert("Phát hiện thao tác tự động không hợp lệ!");
-      return null;
-    }
-
-    setIsVerifying(true);
-    setWarning("");
-
-    try {
-      // 1. Quét sâu phần cứng nhận diện chuẩn xác dòng máy & GPU
-      const detected = await detectAccurateDevice();
-
-      // 2. Chạy kiểm tra bảo mật & chống giả lập (CreepJS & WebGL Mismatch)
-      const audit = performSecurityAudit();
-
-      // Hiệu ứng quét mô phỏng ~750ms để người dùng thấy rõ tiến trình quét phần cứng
-      await new Promise((r) => setTimeout(r, 750));
-
-      let vid = "";
-      try {
-        vid = localStorage.getItem("moimoi_visitor_id") || "";
-        if (!vid && typeof crypto !== "undefined" && crypto.randomUUID) {
-          vid = crypto.randomUUID();
-          localStorage.setItem("moimoi_visitor_id", vid);
-        }
-      } catch {}
-
-      // 3. Gửi lên server xác minh và ký token
-      const res = await fetch("/api/anti-bot/verify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          scanResult: audit,
-          visitorId: vid,
-          deviceInput: detected.deviceName,
-          deviceType: detected.deviceType,
-          scope: "freefire",
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok || data.blocked) {
-        setVerifiedData({
-          deviceName: detected.deviceName,
-          gpu: detected.gpu,
-          isEmulator: detected.isEmulator || Boolean(data.isEmulator),
-          passed: false,
-        });
-        setDevice(detected.deviceName);
-        setWarning(
-          `⛔ BẢO VỆ HỆ THỐNG: ${
-            data.message ||
-            "Phát hiện giả lập Android trên máy tính! Hệ thống yêu cầu dùng điện thoại thật để lấy mã độ nhạy."
-          }`
-        );
-        return null;
-      }
-
-      // Xác minh thành công
-      const token = data.antiBotToken || "";
-      setVerifiedToken(token);
-      setVerifiedData({
-        deviceName: detected.deviceName,
-        gpu: detected.gpu,
-        isEmulator: false,
-        passed: true,
-      });
-
-      setDevice(detected.deviceName);
-      try {
-        sessionStorage.setItem("ff_anti_bot_token", token);
-        sessionStorage.setItem("ff_verified_device", detected.deviceName);
-        sessionStorage.setItem("ff_verified_gpu", detected.gpu);
-      } catch {}
-
-      return token;
-    } catch (err: any) {
-      console.error("Lỗi xác minh thiết bị:", err);
-      setWarning("Không thể kết nối máy chủ xác minh. Vui lòng thử lại!");
-      return null;
-    } finally {
-      setIsVerifying(false);
-    }
-  };
-
   const hasKey = Boolean(
     (adminNote?.keyTypeId && adminNote.keyTypeId > 0) ||
     (adminNote?.getKeyUrl && adminNote.getKeyUrl.trim().length > 0) ||
     (adminNote?.requireKey && (adminNote?.staticKey || adminNote?.keyTypeId || adminNote?.getKeyUrl))
   );
 
-  // Điều hướng: nếu không có key thì vào thẳng trang kết quả, có key thì chuyển đến vượt link lấy key
-  const handleSubmit = async (e?: React.FormEvent) => {
+  // Điều hướng: nếu có thiết bị thì chuyển đến trang lấy key luôn
+  const handleSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     const clean = device.trim();
     if (!clean) {
-      setWarning("Vui lòng nhập tên thiết bị hoặc bấm nút Nhận diện & Xác minh máy!");
+      setWarning("Vui lòng nhập tên thiết bị hoặc bấm nút Tự nhận diện máy!");
       return;
     }
 
@@ -267,7 +165,7 @@ export default function FreeFireHub({ adminNote }: { adminNote?: FreeFireNoteDat
       return;
     }
 
-    // 2. Có key: kiểm tra xem đã xác minh thiết bị chưa
+    // 2. Có key: chuyển thẳng đến trang get key luôn
     let token = verifiedToken;
     if (!token) {
       try {
@@ -275,21 +173,14 @@ export default function FreeFireHub({ adminNote }: { adminNote?: FreeFireNoteDat
       } catch {}
     }
 
-    // Nếu chưa xác minh qua nút, chạy xác minh tự động ngay tại đây
-    if (!token) {
-      token = await handleVerifyAndAutoDetect();
-      if (!token) {
-        setLoading(false);
-        return; // Bị chặn hoặc lỗi xác minh
-      }
-    }
+    const q = new URLSearchParams({
+      device: clean,
+      type,
+      vid,
+      ...(token ? { botToken: token } : {}),
+    });
 
-    // Chuyển đến vượt link lấy key qua cổng getkey Free Fire kèm token đã xác minh
-    router.push(
-      `/getkey/freefire?device=${encodeURIComponent(clean)}&type=${type}&vid=${encodeURIComponent(
-        vid
-      )}&botToken=${encodeURIComponent(token)}`
-    );
+    router.push(`/getkey/freefire?${q.toString()}`);
   };
 
   return (
@@ -379,54 +270,16 @@ export default function FreeFireHub({ adminNote }: { adminNote?: FreeFireNoteDat
           <div className="mdarker-ff-actions">
             <button
               type="button"
-              onClick={(e) => handleVerifyAndAutoDetect(e)}
-              disabled={isVerifying}
-              className={`mdarker-ff-autodetect-btn ${isVerifying ? "scanning" : ""}`}
-              style={{
-                border: verifiedData?.passed
-                  ? "1px solid rgba(16, 185, 129, 0.6)"
-                  : verifiedData && !verifiedData.passed
-                  ? "1px solid rgba(239, 68, 68, 0.6)"
-                  : undefined,
-                background: verifiedData?.passed
-                  ? "rgba(16, 185, 129, 0.12)"
-                  : verifiedData && !verifiedData.passed
-                  ? "rgba(239, 68, 68, 0.12)"
-                  : undefined,
-                color: verifiedData?.passed
-                  ? "#10b981"
-                  : verifiedData && !verifiedData.passed
-                  ? "#ef4444"
-                  : undefined,
-              }}
-              title="Quét chữ ký WebGL, kiểm tra chống giả lập và tự động nhận diện chính xác cấu hình máy"
+              onClick={() => setShowVerifyModal(true)}
+              className="mdarker-ff-autodetect-btn"
             >
-              {isVerifying ? (
-                <>
-                  <i className="fa-solid fa-circle-notch fa-spin" />
-                  <span>Đang quét phần cứng & xác minh...</span>
-                </>
-              ) : verifiedData?.passed ? (
-                <>
-                  <i className="fa-solid fa-circle-check" />
-                  <span>Đã xác minh: {verifiedData.deviceName}</span>
-                </>
-              ) : verifiedData && !verifiedData.passed ? (
-                <>
-                  <i className="fa-solid fa-triangle-exclamation" />
-                  <span>Phát hiện Giả lập / Bị Chặn</span>
-                </>
-              ) : (
-                <>
-                  <i className="fa-solid fa-microchip" />
-                  <span>Tự nhận diện & Xác minh máy</span>
-                </>
-              )}
+              <i className="fa-solid fa-wand-magic-sparkles" aria-hidden="true" />
+              <span>{verifiedDevice ? `Đã nhận diện: ${verifiedDevice}` : "Tự nhận diện máy"}</span>
             </button>
 
             <button
               type="submit"
-              disabled={loading || isVerifying || Boolean(verifiedData && !verifiedData.passed)}
+              disabled={loading}
               className="mdarker-ff-submit-btn"
             >
               <i
@@ -442,58 +295,6 @@ export default function FreeFireHub({ adminNote }: { adminNote?: FreeFireNoteDat
               </span>
             </button>
           </div>
-
-          {/* Hộp thông tin thiết bị đã quét & xác minh */}
-          {verifiedData && (
-            <div
-              style={{
-                marginTop: 12,
-                padding: "10px 14px",
-                borderRadius: 10,
-                fontSize: 12.5,
-                lineHeight: 1.5,
-                background: verifiedData.passed
-                  ? "rgba(16, 185, 129, 0.08)"
-                  : "rgba(239, 68, 68, 0.08)",
-                border: verifiedData.passed
-                  ? "1px solid rgba(16, 185, 129, 0.25)"
-                  : "1px solid rgba(239, 68, 68, 0.25)",
-                display: "flex",
-                flexWrap: "wrap",
-                alignItems: "center",
-                justifyContent: "space-between",
-                gap: 8,
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                <span style={{ fontWeight: 700, color: verifiedData.passed ? "#10b981" : "#ef4444" }}>
-                  <i
-                    className={verifiedData.passed ? "fa-solid fa-shield-check" : "fa-solid fa-ban"}
-                    style={{ marginRight: 5 }}
-                  />
-                  {verifiedData.passed ? "Thiết bị hợp lệ" : "Không đủ điều kiện"}:
-                </span>
-                <span style={{ color: "var(--vi-text)", fontWeight: 600 }}>{verifiedData.deviceName}</span>
-                {verifiedData.gpu && (
-                  <span style={{ color: "var(--vi-muted)", fontSize: 11.5 }}>
-                    (GPU: {verifiedData.gpu})
-                  </span>
-                )}
-              </div>
-              <span
-                style={{
-                  fontSize: 11,
-                  padding: "2px 8px",
-                  borderRadius: 6,
-                  fontWeight: 700,
-                  background: verifiedData.passed ? "rgba(16, 185, 129, 0.2)" : "rgba(239, 68, 68, 0.2)",
-                  color: verifiedData.passed ? "#10b981" : "#ef4444",
-                }}
-              >
-                {verifiedData.passed ? "ĐÃ XÁC MINH" : "BỊ CHẶN GIẢ LẬP"}
-              </span>
-            </div>
-          )}
 
           {/* Nếu có Key, cho phép bấm vào nhập key trực tiếp nếu đã có key sẵn */}
           {hasKey && (
@@ -529,6 +330,27 @@ export default function FreeFireHub({ adminNote }: { adminNote?: FreeFireNoteDat
           {warning && <p className="mdarker-ff-warning">{warning}</p>}
         </form>
       </div>
+
+      {/* Modal Popup Xác minh & Tự nhận diện thiết bị */}
+      {showVerifyModal && (
+        <AntiBotOverlay
+          scope="freefire"
+          deviceInput={device}
+          onClose={() => setShowVerifyModal(false)}
+          onSuccess={(token, detectedName) => {
+            setVerifiedToken(token);
+            if (detectedName) {
+              setDevice(detectedName);
+              setVerifiedDevice(detectedName);
+              setWarning(`✨ Đã nhận diện & xác minh thiết bị: ${detectedName}`);
+            }
+            setShowVerifyModal(false);
+          }}
+          onError={(err) => {
+            setWarning(err || "Lỗi xác minh thiết bị.");
+          }}
+        />
+      )}
     </section>
   );
 }
