@@ -113,6 +113,11 @@ export async function saveSite(fd: FormData) {
     ytChannelUrl: url(fd, "ytChannelUrl"),
     ytBannerOn: bool(fd, "ytBannerOn"),
     footerText: str(fd, "footerText", 200),
+    antiBotEnabled: bool(fd, "antiBotEnabled"),
+    blockEmulators: bool(fd, "blockEmulators"),
+    cfTurnstileEnabled: bool(fd, "cfTurnstileEnabled"),
+    cfTurnstileSiteKey: str(fd, "cfTurnstileSiteKey", 120),
+    cfTurnstileSecretKey: str(fd, "cfTurnstileSecretKey", 120),
   };
 
   await db.site.upsert({ where: { id: 1 }, update: data, create: { id: 1, ...data } });

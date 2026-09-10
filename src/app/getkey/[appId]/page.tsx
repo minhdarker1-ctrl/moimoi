@@ -3,6 +3,8 @@
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
 
+import AntiBotOverlay from "@/components/AntiBotOverlay";
+
 type InitState =
   | { status: "loading"; stepText: string }
   | { status: "redirecting"; url: string; appName: string; countdown: number }
@@ -16,13 +18,15 @@ export default function GetKeyLoadingPage({
   const { appId } = use(params);
   const [state, setState] = useState<InitState>({
     status: "loading",
-    stepText: "Đang khởi tạo phiên làm việc...",
+    stepText: "Đang chờ xác minh bảo mật môi trường thiết bị...",
   });
+  const [antiBotToken, setAntiBotToken] = useState<string | null>(null);
 
-  const startFlow = async () => {
+  const startFlow = async (verifiedToken?: string) => {
+    const tokenToUse = verifiedToken || antiBotToken || "";
     setState({ status: "loading", stepText: "Đang kết nối cổng vượt link an toàn..." });
     try {
-      const res = await fetch(`/api/getkey/start?appId=${appId}&format=json`, {
+      const res = await fetch(`/api/getkey/start?appId=${appId}&format=json&botToken=${tokenToUse}`, {
         headers: { Accept: "application/json" },
       });
       const data = await res.json();
@@ -50,10 +54,6 @@ export default function GetKeyLoadingPage({
   };
 
   useEffect(() => {
-    startFlow();
-  }, [appId]);
-
-  useEffect(() => {
     if (state.status !== "redirecting") return;
 
     if (state.countdown <= 0) {
@@ -72,6 +72,20 @@ export default function GetKeyLoadingPage({
 
   return (
     <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 20 }}>
+      {/* Lớp bảo mật Anti-Bot & Phát hiện giả lập */}
+      {!antiBotToken && (
+        <AntiBotOverlay
+          scope="getkey"
+          onSuccess={(token) => {
+            setAntiBotToken(token);
+            startFlow(token);
+          }}
+          onError={(err) => {
+            setState({ status: "error", error: err });
+          }}
+        />
+      )}
+
       <div className="vt-key-card" style={{ textAlign: "center", position: "relative", overflow: "hidden" }}>
         {state.status === "loading" && (
           <div>
@@ -138,7 +152,7 @@ export default function GetKeyLoadingPage({
             <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
               <button
                 type="button"
-                onClick={startFlow}
+                onClick={() => startFlow()}
                 className="vt-btn-primary"
                 style={{ cursor: "pointer" }}
               >

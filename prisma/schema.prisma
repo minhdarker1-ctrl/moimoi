@@ -33,6 +33,12 @@ model Site {
   ytBannerOn     Boolean  @default(true)
   snowOn         Boolean  @default(false)
   footerText     String   @default("")
+  // Cấu hình Anti-Bot & Giả Lập
+  antiBotEnabled     Boolean  @default(true)
+  blockEmulators     Boolean  @default(true)
+  cfTurnstileEnabled Boolean  @default(false)
+  cfTurnstileSiteKey String   @default("")
+  cfTurnstileSecretKey String @default("")
   updatedAt      DateTime @updatedAt
 }
 
@@ -328,6 +334,9 @@ model FreeFireKeyLog {
   keyTypeName String   @default("")        // freefire, Key 24h...
   token       String   @default("")        // Token phiên lấy key
   status      String   @default("started") // started | completed | unlocked
+  isEmulator  Boolean  @default(false)     // Phát hiện giả lập PC
+  botScore    Int      @default(0)         // Điểm nghi vấn bot (0 = người thật, >50 = nghi vấn)
+  violations  String   @default("[]")      // Mảng JSON các vi phạm bảo mật
   createdAt   DateTime @default(now())
 
   @@index([createdAt])

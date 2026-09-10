@@ -31,10 +31,14 @@ export default async function FreeFireLogsPage({
     ];
   }
   if (deviceFilter) {
-    where.device = deviceFilter;
+    if (deviceFilter === "Emulator") {
+      where.isEmulator = true;
+    } else {
+      where.device = deviceFilter;
+    }
   }
 
-  const [totalLogs, logs, totalAll, mobileCount, desktopCount] = await Promise.all([
+  const [totalLogs, logs, totalAll, mobileCount, desktopCount, emulatorCount] = await Promise.all([
     db.freeFireKeyLog.count({ where }),
     db.freeFireKeyLog.findMany({
       where,
@@ -43,8 +47,9 @@ export default async function FreeFireLogsPage({
       take: pageSize,
     }),
     db.freeFireKeyLog.count(),
-    db.freeFireKeyLog.count({ where: { device: "Mobile" } }),
+    db.freeFireKeyLog.count({ where: { device: "Mobile", isEmulator: false } }),
     db.freeFireKeyLog.count({ where: { device: "Desktop" } }),
+    db.freeFireKeyLog.count({ where: { isEmulator: true } }),
   ]);
 
   const totalPages = Math.ceil(totalLogs / pageSize) || 1;
@@ -124,13 +129,19 @@ export default async function FreeFireLogsPage({
           <div style={{ fontSize: 24, fontWeight: 800, color: "#3b82f6" }}>
             {new Intl.NumberFormat("vi-VN").format(uniqueVisitors)}
           </div>
-          <div className="vt-hint">Khách Duy Nhất (Unique Visitor ID)</div>
+          <div className="vt-hint">Khách Duy Nhất (Unique ID)</div>
         </div>
         <div className="vt-card">
           <div style={{ fontSize: 24, fontWeight: 800, color: "#10b981" }}>
             {new Intl.NumberFormat("vi-VN").format(mobileCount)}
           </div>
-          <div className="vt-hint">Thiết Bị Mobile ({totalAll > 0 ? Math.round((mobileCount / totalAll) * 100) : 0}%)</div>
+          <div className="vt-hint">Điện Thoại Thật ({totalAll > 0 ? Math.round((mobileCount / totalAll) * 100) : 0}%)</div>
+        </div>
+        <div className="vt-card">
+          <div style={{ fontSize: 24, fontWeight: 800, color: "#ef4444" }}>
+            {new Intl.NumberFormat("vi-VN").format(emulatorCount)}
+          </div>
+          <div className="vt-hint">Giả Lập / Bot Bị Bắt ({totalAll > 0 ? Math.round((emulatorCount / totalAll) * 100) : 0}%)</div>
         </div>
         <div className="vt-card">
           <div style={{ fontSize: 24, fontWeight: 800, color: "#a855f7" }}>
@@ -179,8 +190,9 @@ export default async function FreeFireLogsPage({
                 }}
               >
                 <option value="">Tất cả thiết bị</option>
-                <option value="Mobile">Mobile</option>
-                <option value="Desktop">Desktop</option>
+                <option value="Mobile">Mobile (Điện thoại thật)</option>
+                <option value="Desktop">Desktop (Máy tính)</option>
+                <option value="Emulator">Giả Lập Android (Bị bắt)</option>
                 <option value="Tablet">Tablet</option>
               </select>
               <button type="submit" className="vt-btn-sm">
@@ -215,62 +227,143 @@ export default async function FreeFireLogsPage({
           </div>
         ) : (
           <div style={{ overflowX: "auto" }}>
-            <table className="vt-table" style={{ minWidth: 780 }}>
+            <table className="vt-table" style={{ minWidth: 840 }}>
               <thead>
                 <tr>
                   <th style={{ width: 140 }}>VISITOR ID</th>
-                  <th style={{ width: 155 }}>THỜI GIAN</th>
-                  <th style={{ width: 130 }}>IP</th>
-                  <th style={{ minWidth: 140 }}>THIẾT BỊ</th>
-                  <th style={{ minWidth: 160 }}>BROWSER / OS</th>
-                  <th style={{ width: 120 }}>VỊ TRÍ</th>
+                  <th style={{ width: 150 }}>THỜI GIAN</th>
+                  <th style={{ width: 125 }}>IP</th>
+                  <th style={{ minWidth: 150 }}>THIẾT BỊ</th>
+                  <th style={{ minWidth: 180 }}>BROWSER / OS & ANTI-BOT</th>
+                  <th style={{ width: 110 }}>VỊ TRÍ</th>
                   <th style={{ width: 60, textAlign: "right" }}>XOÁ</th>
                 </tr>
               </thead>
               <tbody>
-                {logs.map((log) => (
-                  <tr key={log.id}>
-                    <td>
-                      <LogVisitorCell visitorId={log.visitorId} />
-                    </td>
-                    <td style={{ fontSize: 12, whiteSpace: "nowrap" }}>
-                      {fmt(log.createdAt)}
-                    </td>
-                    <td className="vt-mono" style={{ fontSize: 12 }}>
-                      {log.ip}
-                    </td>
-                    <td>
-                      <span
-                        style={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          gap: 6,
-                          fontSize: 12,
-                          fontWeight: 600,
-                          color: log.device === "Mobile" ? "#10b981" : "#3b82f6",
-                        }}
-                      >
-                        <i className={log.device === "Mobile" ? "fa-solid fa-mobile-screen" : "fa-solid fa-desktop"} />
-                        <span>{log.device}</span>
-                      </span>
-                      {log.deviceInput && (
-                        <div style={{ fontSize: 11, color: "var(--vi-muted)", marginTop: 2 }}>
-                          {log.deviceInput}
+                {logs.map((log) => {
+                  let violationList: any[] = [];
+                  if (log.violations && log.violations !== "[]") {
+                    try {
+                      violationList = JSON.parse(log.violations);
+                    } catch {
+                      violationList = [];
+                    }
+                  }
+
+                  return (
+                    <tr key={log.id}>
+                      <td>
+                        <LogVisitorCell visitorId={log.visitorId} />
+                      </td>
+                      <td style={{ fontSize: 12, whiteSpace: "nowrap" }}>
+                        {fmt(log.createdAt)}
+                      </td>
+                      <td className="vt-mono" style={{ fontSize: 12 }}>
+                        {log.ip}
+                      </td>
+                      <td>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                          <span
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: 6,
+                              fontSize: 12,
+                              fontWeight: 600,
+                              color: log.isEmulator ? "#ef4444" : log.device === "Mobile" ? "#10b981" : "#3b82f6",
+                            }}
+                          >
+                            <i className={log.isEmulator ? "fa-solid fa-robot" : log.device === "Mobile" ? "fa-solid fa-mobile-screen" : "fa-solid fa-desktop"} />
+                            <span>{log.isEmulator ? "Giả Lập" : log.device}</span>
+                          </span>
+
+                          {log.isEmulator && (
+                            <span
+                              style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: 3,
+                                fontSize: 10,
+                                fontWeight: 700,
+                                padding: "2px 6px",
+                                borderRadius: 4,
+                                background: "rgba(239, 68, 68, 0.15)",
+                                color: "#ef4444",
+                                border: "1px solid rgba(239, 68, 68, 0.3)",
+                              }}
+                            >
+                              <i className="fa-solid fa-triangle-exclamation" />
+                              EMU
+                            </span>
+                          )}
+
+                          {log.status === "blocked" && (
+                            <span
+                              style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: 3,
+                                fontSize: 10,
+                                fontWeight: 700,
+                                padding: "2px 6px",
+                                borderRadius: 4,
+                                background: "rgba(220, 38, 38, 0.25)",
+                                color: "#fca5a5",
+                                border: "1px solid rgba(220, 38, 38, 0.4)",
+                              }}
+                            >
+                              <i className="fa-solid fa-ban" />
+                              BLOCKED
+                            </span>
+                          )}
                         </div>
-                      )}
-                    </td>
-                    <td style={{ fontSize: 12 }}>
-                      <span style={{ color: "var(--vi-text)" }}>
-                        {log.browser || "Browser"}
-                      </span>{" "}
-                      /{" "}
-                      <span style={{ color: "var(--vi-muted)" }}>
-                        {log.os?.toLowerCase() || "os"}
-                      </span>
-                    </td>
-                    <td style={{ fontSize: 12, color: log.location !== "—" ? "#10b981" : "var(--vi-muted)" }}>
-                      {log.location}
-                    </td>
+
+                        {log.deviceInput && (
+                          <div style={{ fontSize: 11, color: "var(--vi-muted)", marginTop: 2 }}>
+                            {log.deviceInput}
+                          </div>
+                        )}
+                      </td>
+                      <td style={{ fontSize: 12 }}>
+                        <div>
+                          <span style={{ color: "var(--vi-text)" }}>
+                            {log.browser || "Browser"}
+                          </span>{" "}
+                          /{" "}
+                          <span style={{ color: "var(--vi-muted)" }}>
+                            {log.os?.toLowerCase() || "os"}
+                          </span>
+                        </div>
+
+                        {violationList.length > 0 && (
+                          <div style={{ marginTop: 4, display: "flex", flexWrap: "wrap", gap: 4 }}>
+                            {violationList.map((v, vIdx) => (
+                              <span
+                                key={vIdx}
+                                title={`${v.title || v.code}: ${v.desc || ""}`}
+                                style={{
+                                  fontSize: 10,
+                                  padding: "2px 6px",
+                                  borderRadius: 4,
+                                  background: "rgba(239, 68, 68, 0.12)",
+                                  color: "#f87171",
+                                  border: "1px solid rgba(239, 68, 68, 0.25)",
+                                  cursor: "help",
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  gap: 4,
+                                }}
+                              >
+                                <i className="fa-solid fa-shield-halved" style={{ fontSize: 9 }} />
+                                {v.title || v.code}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </td>
+                      <td style={{ fontSize: 12, color: log.location !== "—" ? "#10b981" : "var(--vi-muted)" }}>
+                        {log.location}
+                      </td>
                     <td style={{ textAlign: "right" }}>
                       <form action={deleteFreeFireLog}>
                         <input type="hidden" name="id" value={log.id} />
@@ -285,7 +378,8 @@ export default async function FreeFireLogsPage({
                       </form>
                     </td>
                   </tr>
-                ))}
+                );
+              })}
               </tbody>
             </table>
           </div>

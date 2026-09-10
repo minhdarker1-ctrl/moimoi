@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { fingerprint, sessionToken } from "@/lib/crypto";
+import { fingerprint, sessionToken, verifyAntiBotToken } from "@/lib/crypto";
 import { shortenWithFallback, usableShorteners } from "@/lib/getkey";
 import { clientIp, rateLimit, maybeCleanup } from "@/lib/guard";
 import { parseUserAgent, extractLocation } from "@/lib/user-agent";
@@ -35,6 +35,23 @@ export async function GET(req: Request) {
     return fail(req, "Bạn bấm quá nhiều lần. Chờ 1 phút rồi thử lại.", isJson);
   }
   await maybeCleanup();
+
+  // Kiểm tra xác minh Anti-Bot & Giả lập nếu hệ thống đang bật bảo mật
+  const site = await db.site.findUnique({ where: { id: 1 } });
+  if (site?.antiBotEnabled) {
+    const botToken =
+      reqUrl.searchParams.get("botToken") ||
+      req.headers.get("x-antibot-token") ||
+      "";
+    const verified = verifyAntiBotToken(botToken);
+    if (!verified.valid) {
+      return fail(
+        req,
+        `Yêu cầu xác minh bảo mật chống bot / giả lập (${verified.error || "Mã không hợp lệ"}).`,
+        isJson
+      );
+    }
+  }
 
   const appIdParam = reqUrl.searchParams.get("appId");
   const keyTypeIdParam = reqUrl.searchParams.get("keyTypeId");

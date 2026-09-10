@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
+import AntiBotOverlay from "@/components/AntiBotOverlay";
+
 type InitState =
   | { status: "loading"; stepText: string }
   | { status: "redirecting"; url: string; appName: string; countdown: number }
@@ -11,32 +13,38 @@ type InitState =
 export default function GetKeyFreeFirePage() {
   const [state, setState] = useState<InitState>({
     status: "loading",
-    stepText: "Đang khởi tạo phiên lấy Key cho Free Fire...",
+    stepText: "Đang chờ xác minh bảo mật môi trường thiết bị...",
   });
+  const [antiBotToken, setAntiBotToken] = useState<string | null>(null);
+  const [deviceInfo, setDeviceInfo] = useState({ dev: "", dt: "", vid: "" });
 
-  const startFlow = async () => {
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      let vid = urlParams.get("vid") || "";
+      let dev = urlParams.get("device") || "";
+      let dt = urlParams.get("type") || "";
+      try {
+        if (!vid) vid = localStorage.getItem("moimoi_visitor_id") || "";
+        if (!dev) dev = localStorage.getItem("ff_pending_device") || "";
+        if (!dt) dt = localStorage.getItem("ff_pending_type") || "";
+      } catch {}
+      setDeviceInfo({ dev, dt, vid });
+    }
+  }, []);
+
+  const startFlow = async (verifiedToken?: string) => {
+    const tokenToUse = verifiedToken || antiBotToken || "";
     setState({ status: "loading", stepText: "Đang kết nối cổng lấy Key an toàn..." });
     try {
-      let vid = "";
-      let dev = "";
-      let dt = "";
+      let vid = deviceInfo.vid;
+      let dev = deviceInfo.dev;
+      let dt = deviceInfo.dt;
       if (typeof window !== "undefined") {
         const urlParams = new URLSearchParams(window.location.search);
-        vid = urlParams.get("vid") || "";
-        dev = urlParams.get("device") || "";
-        dt = urlParams.get("type") || "";
-
-        try {
-          if (!vid) {
-            vid = localStorage.getItem("moimoi_visitor_id") || "";
-            if (!vid && typeof crypto !== "undefined" && crypto.randomUUID) {
-              vid = crypto.randomUUID();
-              localStorage.setItem("moimoi_visitor_id", vid);
-            }
-          }
-          if (!dev) dev = localStorage.getItem("ff_pending_device") || "";
-          if (!dt) dt = localStorage.getItem("ff_pending_type") || "";
-        } catch {}
+        if (!vid) vid = urlParams.get("vid") || localStorage.getItem("moimoi_visitor_id") || "";
+        if (!dev) dev = urlParams.get("device") || localStorage.getItem("ff_pending_device") || "";
+        if (!dt) dt = urlParams.get("type") || localStorage.getItem("ff_pending_type") || "";
       }
 
       const q = new URLSearchParams({
@@ -45,6 +53,7 @@ export default function GetKeyFreeFirePage() {
         vid,
         device: dev,
         type: dt,
+        botToken: tokenToUse,
       });
 
       const res = await fetch(`/api/getkey/start?${q.toString()}`, {
@@ -75,10 +84,6 @@ export default function GetKeyFreeFirePage() {
   };
 
   useEffect(() => {
-    startFlow();
-  }, []);
-
-  useEffect(() => {
     if (state.status !== "redirecting") return;
 
     if (state.countdown <= 0) {
@@ -97,6 +102,22 @@ export default function GetKeyFreeFirePage() {
 
   return (
     <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 20 }}>
+      {/* Lớp bảo mật Anti-Bot & Phát hiện giả lập */}
+      {!antiBotToken && (
+        <AntiBotOverlay
+          scope="freefire"
+          deviceInput={deviceInfo.dev}
+          deviceType={deviceInfo.dt}
+          onSuccess={(token) => {
+            setAntiBotToken(token);
+            startFlow(token);
+          }}
+          onError={(err) => {
+            setState({ status: "error", error: err });
+          }}
+        />
+      )}
+
       <div className="vt-key-card" style={{ textAlign: "center", position: "relative", overflow: "hidden" }}>
         {state.status === "loading" && (
           <div>
@@ -163,7 +184,7 @@ export default function GetKeyFreeFirePage() {
             <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
               <button
                 type="button"
-                onClick={startFlow}
+                onClick={() => startFlow()}
                 className="vt-btn-primary"
                 style={{ cursor: "pointer" }}
               >

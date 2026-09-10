@@ -115,6 +115,38 @@ export default async function SitePage() {
           </div>
         </div>
 
+        <div style={{ marginTop: 14, paddingTop: 14, borderTop: "1px solid rgba(255,255,255,0.08)", marginBottom: 14 }}>
+          <strong style={{ fontSize: 14, color: "#10b981", display: "flex", alignItems: "center", gap: 6, marginBottom: 12 }}>
+            <i className="fa-solid fa-shield-halved" />
+            <span>Hệ Thống Bảo Mật Anti-Bot & Phát Hiện Giả Lập (CreepJS & TrafficVN Pattern)</span>
+          </strong>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 14 }}>
+            <label className="vt-check">
+              <input type="checkbox" name="antiBotEnabled" defaultChecked={s?.antiBotEnabled ?? true} />
+              Bật hệ thống bảo vệ Anti-Bot (Pre-check Barrier & Quét phần cứng trình duyệt)
+            </label>
+            <label className="vt-check">
+              <input type="checkbox" name="blockEmulators" defaultChecked={s?.blockEmulators ?? true} />
+              Chặn triệt để máy giả lập Android trên PC (LDPlayer, NoxPlayer, BlueStacks, MEmu, F12 DevTools Responsive)
+            </label>
+            <label className="vt-check">
+              <input type="checkbox" name="cfTurnstileEnabled" defaultChecked={s?.cfTurnstileEnabled ?? false} />
+              Bật xác minh Cloudflare Turnstile Captcha (Tùy chọn nâng cao)
+            </label>
+          </div>
+
+          <div className="vt-row">
+            <label className="vt-field">
+              <span>Cloudflare Turnstile Site Key</span>
+              <input type="text" name="cfTurnstileSiteKey" defaultValue={s?.cfTurnstileSiteKey ?? ""} placeholder="0x4AAAAAA..." />
+            </label>
+            <label className="vt-field">
+              <span>Cloudflare Turnstile Secret Key</span>
+              <input type="password" name="cfTurnstileSecretKey" defaultValue={s?.cfTurnstileSecretKey ?? ""} placeholder="0x4AAAAAA..." />
+            </label>
+          </div>
+        </div>
+
         <label className="vt-check">
           <input type="checkbox" name="ytBannerOn" defaultChecked={s?.ytBannerOn ?? true} />
           Hiện banner Subscribe YouTube

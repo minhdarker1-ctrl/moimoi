@@ -2,6 +2,7 @@ import {
   createCipheriv,
   createDecipheriv,
   createHash,
+  createHmac,
   randomBytes,
   scryptSync,
   timingSafeEqual,
@@ -75,4 +76,38 @@ export function vnDate(at: Date = new Date()): string {
     month: "2-digit",
     day: "2-digit",
   }).format(at);
+}
+
+/** Ký token bảo mật xác minh thiết bị (Anti-Bot) */
+export function signAntiBotToken(data: { vid: string; ip: string; exp: number }): string {
+  const secretKey = process.env.SESSION_SECRET || "moimoi-default-secret-key-min-32-chars";
+  const body = Buffer.from(JSON.stringify(data)).toString("base64url");
+  const sig = createHmac("sha256", secretKey).update(body).digest("base64url");
+  return `${body}.${sig}`;
+}
+
+/** Xác thực chữ ký token bảo mật xác minh thiết bị */
+export function verifyAntiBotToken(
+  token: string
+): { valid: boolean; vid?: string; ip?: string; error?: string } {
+  if (!token) return { valid: false, error: "Thiếu mã xác minh" };
+  const secretKey = process.env.SESSION_SECRET || "moimoi-default-secret-key-min-32-chars";
+  const parts = token.split(".");
+  if (parts.length !== 2) return { valid: false, error: "Token sai định dạng" };
+  const [body, sig] = parts;
+
+  const expectedSig = createHmac("sha256", secretKey).update(body).digest("base64url");
+  if (!safeEqual(sig, expectedSig)) {
+    return { valid: false, error: "Chữ ký mã xác minh không hợp lệ" };
+  }
+
+  try {
+    const data = JSON.parse(Buffer.from(body, "base64url").toString("utf8"));
+    if (Date.now() > data.exp) {
+      return { valid: false, error: "Mã xác minh đã hết hạn" };
+    }
+    return { valid: true, vid: data.vid, ip: data.ip };
+  } catch {
+    return { valid: false, error: "Không giải mã được dữ liệu" };
+  }
 }
