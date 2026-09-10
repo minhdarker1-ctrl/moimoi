@@ -24,12 +24,19 @@ export default function GetKeyFreeFirePage() {
       let vid = urlParams.get("vid") || "";
       let dev = urlParams.get("device") || "";
       let dt = urlParams.get("type") || "";
+      let botToken = urlParams.get("botToken") || "";
       try {
         if (!vid) vid = localStorage.getItem("moimoi_visitor_id") || "";
         if (!dev) dev = localStorage.getItem("ff_pending_device") || "";
         if (!dt) dt = localStorage.getItem("ff_pending_type") || "";
+        if (!botToken) botToken = sessionStorage.getItem("ff_anti_bot_token") || "";
       } catch {}
       setDeviceInfo({ dev, dt, vid });
+
+      if (botToken) {
+        setAntiBotToken(botToken);
+        startFlow(botToken);
+      }
     }
   }, []);
 

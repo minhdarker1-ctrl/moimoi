@@ -195,11 +195,11 @@ export default function AntiBotOverlay({
               <i className="fa-solid fa-shield-halved" />
             </div>
             <div>
-              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: "#0f172a" }}>
-                Xác minh thiết bị
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#0f172a" }}>
+                Xác minh & Tự nhận diện máy
               </h3>
               <p style={{ margin: "2px 0 0", fontSize: 12, color: "#64748b" }}>
-                Chỉ mất 1-2 giây để bảo vệ phiên lấy Key
+                Quét phần cứng bảo vệ phiên lấy Key
               </p>
             </div>
           </div>
@@ -221,7 +221,7 @@ export default function AntiBotOverlay({
             >
               <i className="fa-solid fa-circle-info" style={{ marginTop: 2, flexShrink: 0 }} />
               <div>
-                Nhấn nút bên dưới để hệ thống kiểm tra nhanh tính toàn vẹn của trình duyệt trước khi tiếp tục.
+                Bấm nút bên dưới để hệ thống quét phần cứng WebGL, nhận diện thiết bị và xác minh tính toàn vẹn.
               </div>
             </div>
 
@@ -253,8 +253,8 @@ export default function AntiBotOverlay({
                 transition: "all 0.15s ease",
               }}
             >
-              <i className="fa-solid fa-play" />
-              <span>Kiểm tra ngay</span>
+              <i className="fa-solid fa-microchip" />
+              <span>XÁC MINH & TỰ NHẬN DIỆN MÁY</span>
             </button>
           </div>
         </div>
