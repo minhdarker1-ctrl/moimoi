@@ -5,6 +5,7 @@ import { clientIp } from "@/lib/guard";
 import { signAntiBotToken } from "@/lib/crypto";
 import { parseUserAgent, extractLocation } from "@/lib/user-agent";
 import { SecurityScanResult } from "@/lib/anti-bot-engine";
+import { cleanGpuName } from "@/lib/device-detector";
 
 export const dynamic = "force-dynamic";
 
@@ -99,44 +100,87 @@ export async function POST(req: Request) {
       detectedWebdriver ||
       (blockEmulators && isEmulatorDetected);
 
-    // 4. Nếu bị phát hiện vi phạm: Chặn và ghi log chi tiết
-    if (shouldBlock) {
-      const violations = [...(scan.violations || [])];
-      if (detectedDesktopGpuOnMobile && !violations.some((v) => v.code === "EMU_DESKTOP_GPU")) {
-        violations.unshift({
-          type: "EMULATOR",
-          code: "EMU_DESKTOP_GPU",
-          title: "Phát hiện máy giả lập Android trên PC",
-          desc: "Thiết bị di động sử dụng card đồ họa máy tính (NVIDIA/AMD/Intel).",
-          severity: "CRITICAL",
-        });
-      }
+    // 4. Xử lý vi phạm & thông tin phần cứng GPU
+    const violations = [...(scan.violations || [])];
+    if (detectedDesktopGpuOnMobile && !violations.some((v) => v.code === "EMU_DESKTOP_GPU")) {
+      violations.unshift({
+        type: "EMULATOR",
+        code: "EMU_DESKTOP_GPU",
+        title: "Phát hiện máy giả lập Android trên PC",
+        desc: "Thiết bị di động sử dụng card đồ họa máy tính (NVIDIA/AMD/Intel).",
+        severity: "CRITICAL",
+      });
+    }
 
-      if (body.scope === "freefire") {
-        try {
+    // Ghi lại thông tin chip đồ họa GPU để Admin tiện theo dõi cấu hình máy
+    if (scan.details?.webglRenderer && !violations.some((v) => v.code === "GPU_INFO")) {
+      violations.push({
+        type: "HARDWARE",
+        code: "GPU_INFO",
+        title: "GPU",
+        desc: cleanGpuName(scan.details.webglRenderer),
+        severity: "LOW",
+      });
+    }
+
+    // 5. GHI NHẬN TẤT CẢ THIẾT BỊ BẤM XÁC MINH VÀO NHẬT KÝ ADMIN (Cả thiết bị Hợp Lệ lẫn Bị Chặn)
+    const isFreeFireScope = body.scope === "freefire" || !body.scope;
+    if (isFreeFireScope) {
+      try {
+        const fifteenSecondsAgo = new Date(Date.now() - 15_000);
+        const status = shouldBlock ? "blocked" : "verified";
+        const keyTypeName = shouldBlock ? "Bị Chặn Anti-Bot" : "Đã Xác Minh";
+
+        // Deduplication: nếu cùng visitorId hoặc IP vừa xác minh trong vòng 15 giây thì cập nhật thay vì tạo dòng trùng lặp
+        const recent = await db.freeFireKeyLog.findFirst({
+          where: {
+            OR: [
+              ...(body.visitorId && body.visitorId !== "unknown"
+                ? [{ visitorId: body.visitorId, createdAt: { gte: fifteenSecondsAgo } }]
+                : []),
+              ...(ip ? [{ ip, createdAt: { gte: fifteenSecondsAgo } }] : []),
+            ],
+            status,
+          },
+          orderBy: { createdAt: "desc" },
+        });
+
+        if (recent) {
+          await db.freeFireKeyLog.update({
+            where: { id: recent.id },
+            data: {
+              deviceInput: body.deviceInput || recent.deviceInput,
+              deviceType: body.deviceType || recent.deviceType,
+              botScore: scan.botScore ?? recent.botScore,
+              violations: JSON.stringify(violations),
+            },
+          });
+        } else {
           await db.freeFireKeyLog.create({
             data: {
               visitorId: body.visitorId || "unknown",
               ip,
               device: isEmulatorDetected ? "Emulator" : parsedUa.device,
-              deviceInput: body.deviceInput || "",
-              deviceType: body.deviceType || "",
+              deviceInput: body.deviceInput || (isEmulatorDetected ? "Giả lập Android" : ""),
+              deviceType: body.deviceType || (isEmulatorDetected ? "pc" : ""),
               browser: parsedUa.browser,
               os: parsedUa.os,
               location,
               userAgent: ua,
-              keyTypeName: "Bị Chặn Anti-Bot",
-              status: "blocked",
+              keyTypeName,
+              status,
               isEmulator: isEmulatorDetected,
-              botScore: scan.botScore || 80,
+              botScore: scan.botScore ?? (shouldBlock ? 80 : 0),
               violations: JSON.stringify(violations),
             },
           });
-        } catch (dbErr) {
-          console.error("Lỗi ghi log block:", dbErr);
         }
+      } catch (dbErr) {
+        console.error("Lỗi ghi log verify:", dbErr);
       }
+    }
 
+    if (shouldBlock) {
       return NextResponse.json({
         ok: false,
         blocked: true,
@@ -147,7 +191,7 @@ export async function POST(req: Request) {
       });
     }
 
-    // 5. Nếu vượt qua kiểm tra an toàn: Ký token bảo mật xác minh (hạn dùng 5 phút)
+    // 6. Nếu vượt qua kiểm tra an toàn: Ký token bảo mật xác minh (hạn dùng 5 phút)
     const verificationToken = signAntiBotToken({
       vid: body.visitorId || "unknown",
       ip,

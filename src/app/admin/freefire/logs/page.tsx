@@ -33,12 +33,14 @@ export default async function FreeFireLogsPage({
   if (deviceFilter) {
     if (deviceFilter === "Emulator") {
       where.isEmulator = true;
+    } else if (deviceFilter === "verified" || deviceFilter === "blocked" || deviceFilter === "started") {
+      where.status = deviceFilter;
     } else {
       where.device = deviceFilter;
     }
   }
 
-  const [totalLogs, logs, totalAll, mobileCount, desktopCount, emulatorCount] = await Promise.all([
+  const [totalLogs, logs, totalAll, mobileCount, desktopCount, emulatorCount, verifiedCount] = await Promise.all([
     db.freeFireKeyLog.count({ where }),
     db.freeFireKeyLog.findMany({
       where,
@@ -50,6 +52,7 @@ export default async function FreeFireLogsPage({
     db.freeFireKeyLog.count({ where: { device: "Mobile", isEmulator: false } }),
     db.freeFireKeyLog.count({ where: { device: "Desktop" } }),
     db.freeFireKeyLog.count({ where: { isEmulator: true } }),
+    db.freeFireKeyLog.count({ where: { status: "verified" } }),
   ]);
 
   const totalPages = Math.ceil(totalLogs / pageSize) || 1;
@@ -123,7 +126,19 @@ export default async function FreeFireLogsPage({
           <div style={{ fontSize: 24, fontWeight: 800, color: "#f59e0b" }}>
             {new Intl.NumberFormat("vi-VN").format(totalAll)}
           </div>
-          <div className="vt-hint">Tổng Lượt Bấm Lấy Key</div>
+          <div className="vt-hint">Tổng Lượt Ghi Nhận</div>
+        </div>
+        <div className="vt-card">
+          <div style={{ fontSize: 24, fontWeight: 800, color: "#10b981" }}>
+            {new Intl.NumberFormat("vi-VN").format(verifiedCount)}
+          </div>
+          <div className="vt-hint">Đã Xác Minh ({totalAll > 0 ? Math.round((verifiedCount / totalAll) * 100) : 0}%)</div>
+        </div>
+        <div className="vt-card">
+          <div style={{ fontSize: 24, fontWeight: 800, color: "#ef4444" }}>
+            {new Intl.NumberFormat("vi-VN").format(emulatorCount)}
+          </div>
+          <div className="vt-hint">Giả Lập / Bot Bị Chặn ({totalAll > 0 ? Math.round((emulatorCount / totalAll) * 100) : 0}%)</div>
         </div>
         <div className="vt-card">
           <div style={{ fontSize: 24, fontWeight: 800, color: "#3b82f6" }}>
@@ -132,22 +147,10 @@ export default async function FreeFireLogsPage({
           <div className="vt-hint">Khách Duy Nhất (Unique ID)</div>
         </div>
         <div className="vt-card">
-          <div style={{ fontSize: 24, fontWeight: 800, color: "#10b981" }}>
+          <div style={{ fontSize: 24, fontWeight: 800, color: "#a855f7" }}>
             {new Intl.NumberFormat("vi-VN").format(mobileCount)}
           </div>
           <div className="vt-hint">Điện Thoại Thật ({totalAll > 0 ? Math.round((mobileCount / totalAll) * 100) : 0}%)</div>
-        </div>
-        <div className="vt-card">
-          <div style={{ fontSize: 24, fontWeight: 800, color: "#ef4444" }}>
-            {new Intl.NumberFormat("vi-VN").format(emulatorCount)}
-          </div>
-          <div className="vt-hint">Giả Lập / Bot Bị Bắt ({totalAll > 0 ? Math.round((emulatorCount / totalAll) * 100) : 0}%)</div>
-        </div>
-        <div className="vt-card">
-          <div style={{ fontSize: 24, fontWeight: 800, color: "#a855f7" }}>
-            {new Intl.NumberFormat("vi-VN").format(desktopCount)}
-          </div>
-          <div className="vt-hint">Thiết Bị Desktop ({totalAll > 0 ? Math.round((desktopCount / totalAll) * 100) : 0}%)</div>
         </div>
       </div>
 
@@ -156,7 +159,7 @@ export default async function FreeFireLogsPage({
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12, marginBottom: 16 }}>
           <h2 style={{ fontSize: 16, margin: 0, display: "flex", alignItems: "center", gap: 8 }}>
             <i className="fa-solid fa-list" style={{ color: "#f59e0b" }} />
-            <span>Lịch Sử Lấy Key Free Fire ({totalLogs} kết quả)</span>
+            <span>Lịch Sử Lấy Key & Xác Minh Free Fire ({totalLogs} kết quả)</span>
           </h2>
 
           <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
@@ -189,11 +192,14 @@ export default async function FreeFireLogsPage({
                   color: "var(--vi-text)",
                 }}
               >
-                <option value="">Tất cả thiết bị</option>
-                <option value="Mobile">Mobile (Điện thoại thật)</option>
-                <option value="Desktop">Desktop (Máy tính)</option>
-                <option value="Emulator">Giả Lập Android (Bị bắt)</option>
-                <option value="Tablet">Tablet</option>
+                <option value="">Tất cả thiết bị & trạng thái</option>
+                <option value="verified">Trạng thái: Đã xác minh</option>
+                <option value="blocked">Trạng thái: Bị chặn (Bot/Giả lập)</option>
+                <option value="started">Trạng thái: Đang lấy key</option>
+                <option value="Mobile">Thiết bị: Điện thoại (Mobile)</option>
+                <option value="Desktop">Thiết bị: Desktop / PC</option>
+                <option value="Emulator">Thiết bị: Giả Lập Android</option>
+                <option value="Tablet">Thiết bị: Tablet</option>
               </select>
               <button type="submit" className="vt-btn-sm">
                 <i className="fa-solid fa-magnifying-glass" />
@@ -316,6 +322,66 @@ export default async function FreeFireLogsPage({
                               BLOCKED
                             </span>
                           )}
+
+                          {log.status === "verified" && (
+                            <span
+                              style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: 3,
+                                fontSize: 10,
+                                fontWeight: 700,
+                                padding: "2px 6px",
+                                borderRadius: 4,
+                                background: "rgba(16, 185, 129, 0.15)",
+                                color: "#10b981",
+                                border: "1px solid rgba(16, 185, 129, 0.3)",
+                              }}
+                            >
+                              <i className="fa-solid fa-circle-check" />
+                              ĐÃ XÁC MINH
+                            </span>
+                          )}
+
+                          {log.status === "started" && (
+                            <span
+                              style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: 3,
+                                fontSize: 10,
+                                fontWeight: 700,
+                                padding: "2px 6px",
+                                borderRadius: 4,
+                                background: "rgba(59, 130, 246, 0.15)",
+                                color: "#60a5fa",
+                                border: "1px solid rgba(59, 130, 246, 0.3)",
+                              }}
+                            >
+                              <i className="fa-solid fa-paper-plane" />
+                              LẤY KEY
+                            </span>
+                          )}
+
+                          {(log.status === "unlocked" || log.status === "completed") && (
+                            <span
+                              style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: 3,
+                                fontSize: 10,
+                                fontWeight: 700,
+                                padding: "2px 6px",
+                                borderRadius: 4,
+                                background: "rgba(168, 85, 247, 0.15)",
+                                color: "#c084fc",
+                                border: "1px solid rgba(168, 85, 247, 0.3)",
+                              }}
+                            >
+                              <i className="fa-solid fa-key" />
+                              ĐÃ MỞ KHÓA
+                            </span>
+                          )}
                         </div>
 
                         {log.deviceInput && (
@@ -337,27 +403,30 @@ export default async function FreeFireLogsPage({
 
                         {violationList.length > 0 && (
                           <div style={{ marginTop: 4, display: "flex", flexWrap: "wrap", gap: 4 }}>
-                            {violationList.map((v, vIdx) => (
-                              <span
-                                key={vIdx}
-                                title={`${v.title || v.code}: ${v.desc || ""}`}
-                                style={{
-                                  fontSize: 10,
-                                  padding: "2px 6px",
-                                  borderRadius: 4,
-                                  background: "rgba(239, 68, 68, 0.12)",
-                                  color: "#f87171",
-                                  border: "1px solid rgba(239, 68, 68, 0.25)",
-                                  cursor: "help",
-                                  display: "inline-flex",
-                                  alignItems: "center",
-                                  gap: 4,
-                                }}
-                              >
-                                <i className="fa-solid fa-shield-halved" style={{ fontSize: 9 }} />
-                                {v.title || v.code}
-                              </span>
-                            ))}
+                            {violationList.map((v, vIdx) => {
+                              const isHw = v.type === "HARDWARE" || v.code === "GPU_INFO";
+                              return (
+                                <span
+                                  key={vIdx}
+                                  title={`${v.title || v.code}: ${v.desc || ""}`}
+                                  style={{
+                                    fontSize: 10,
+                                    padding: "2px 6px",
+                                    borderRadius: 4,
+                                    background: isHw ? "rgba(59, 130, 246, 0.12)" : "rgba(239, 68, 68, 0.12)",
+                                    color: isHw ? "#60a5fa" : "#f87171",
+                                    border: isHw ? "1px solid rgba(59, 130, 246, 0.25)" : "1px solid rgba(239, 68, 68, 0.25)",
+                                    cursor: "help",
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    gap: 4,
+                                  }}
+                                >
+                                  <i className={isHw ? "fa-solid fa-microchip" : "fa-solid fa-shield-halved"} style={{ fontSize: 9 }} />
+                                  {isHw && v.desc ? v.desc.slice(0, 32) : (v.title || v.code)}
+                                </span>
+                              );
+                            })}
                           </div>
                         )}
                       </td>

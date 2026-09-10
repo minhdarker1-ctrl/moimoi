@@ -79,6 +79,7 @@ export async function GET(req: Request) {
               ...(vid && vid !== "unknown" ? [{ visitorId: vid, createdAt: { gte: fifteenSecondsAgo } }] : []),
               ...(client_ip ? [{ ip: client_ip, createdAt: { gte: fifteenSecondsAgo } }] : []),
             ],
+            status: "started",
           },
           orderBy: { createdAt: "desc" },
         });
@@ -189,6 +190,7 @@ export async function GET(req: Request) {
             ...(vid && vid !== "unknown" ? [{ visitorId: vid, createdAt: { gte: fifteenSecondsAgo } }] : []),
             ...(ip ? [{ ip, createdAt: { gte: fifteenSecondsAgo } }] : []),
           ],
+          status: "started",
         },
         orderBy: { createdAt: "desc" },
       });

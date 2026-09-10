@@ -9,11 +9,11 @@
  */
 
 export interface SecurityViolation {
-  type: "EMULATOR" | "AUTOMATION" | "LIE" | "DEVICE_MISMATCH";
+  type: "EMULATOR" | "AUTOMATION" | "LIE" | "DEVICE_MISMATCH" | "HARDWARE";
   code: string;
   title: string;
   desc: string;
-  severity: "CRITICAL" | "WARNING";
+  severity: "CRITICAL" | "WARNING" | "INFO" | "LOW";
 }
 
 export interface SecurityScanResult {
