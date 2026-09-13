@@ -87,6 +87,13 @@ function ensureYouTubeApi(callback: () => void) {
     return;
   }
 
+  let called = false;
+  const safeCallback = () => {
+    if (called) return;
+    called = true;
+    callback();
+  };
+
   // 3. Hook vào onYouTubeIframeAPIReady
   const prev = window.onYouTubeIframeAPIReady;
   window.onYouTubeIframeAPIReady = () => {
@@ -95,7 +102,7 @@ function ensureYouTubeApi(callback: () => void) {
         prev();
       } catch {}
     }
-    callback();
+    safeCallback();
   };
 
   // 4. Chèn script nếu chưa có
@@ -115,7 +122,7 @@ function ensureYouTubeApi(callback: () => void) {
   const timer = setInterval(() => {
     if (window.YT && typeof window.YT.Player === "function") {
       clearInterval(timer);
-      callback();
+      safeCallback();
     }
   }, 250);
   setTimeout(() => clearInterval(timer), 10000);
@@ -129,53 +136,59 @@ export default function MusicPlayer() {
   const [duration, setDuration] = useState(0);
 
   const playerRef = useRef<YTPlayer | null>(null);
+  const isPlayerReadyRef = useRef(false);
+  const userPausedRef = useRef(false);
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const tracksRef = useRef<Track[]>([]);
   tracksRef.current = tracks;
   const indexRef = useRef(index);
   indexRef.current = index;
+  const prevIndexRef = useRef<number | null>(null);
+  const consecutiveErrorsRef = useRef(0);
 
   // 1. Lấy danh sách bài hát từ API
   useEffect(() => {
+    let active = true;
     fetch("/api/music")
       .then((r) => r.json())
       .then((data: Track[]) => {
-        if (Array.isArray(data) && data.length > 0) {
+        if (active && Array.isArray(data) && data.length > 0) {
           setTracks(data);
         }
       })
       .catch(() => {});
+    return () => {
+      active = false;
+    };
   }, []);
 
   const nextTrack = useCallback(() => {
     if (tracksRef.current.length === 0) return;
-    const nextIdx = (indexRef.current + 1) % tracksRef.current.length;
-    setIndex(nextIdx);
+    setIndex((prev) => (prev + 1) % tracksRef.current.length);
   }, []);
 
   const prevTrack = useCallback(() => {
     if (tracksRef.current.length === 0) return;
-    const prevIdx =
-      (indexRef.current - 1 + tracksRef.current.length) %
-      tracksRef.current.length;
-    setIndex(prevIdx);
+    setIndex((prev) => (prev - 1 + tracksRef.current.length) % tracksRef.current.length);
   }, []);
 
   // 2. Khởi tạo YouTube Player khi có danh sách bài
   useEffect(() => {
     if (tracks.length === 0) return;
+    let isMounted = true;
 
     ensureYouTubeApi(() => {
-      const container = document.getElementById("youtube-audio-host");
-      if (!container || playerRef.current) return;
+      if (!isMounted) return;
+      const host = document.getElementById("youtube-audio-host");
+      if (!host || playerRef.current) return;
 
-      const track = tracksRef.current[indexRef.current];
+      const track = tracksRef.current[indexRef.current] || tracksRef.current[0];
       if (!track) return;
 
       try {
         playerRef.current = new window.YT.Player("youtube-audio-host", {
-          width: "320",
-          height: "240",
+          width: "200",
+          height: "200",
           videoId: track.youtubeId,
           playerVars: {
             autoplay: 0,
@@ -186,24 +199,53 @@ export default function MusicPlayer() {
             rel: 0,
             playsinline: 1,
             enablejsapi: 1,
-            origin:
-              typeof window !== "undefined"
-                ? window.location.origin
-                : undefined,
           },
           events: {
             onReady: (e) => {
-              const dur = e.target.getDuration();
-              if (dur > 0) setDuration(dur);
+              if (!isMounted) return;
+              isPlayerReadyRef.current = true;
               try {
+                e.target.unMute();
                 e.target.setVolume(100);
+                const dur = e.target.getDuration();
+                if (dur > 0) setDuration(dur);
               } catch {}
+
+              // Tự động phát nếu trình duyệt cho phép
+              try {
+                e.target.playVideo();
+              } catch {}
+
+              // Lắng nghe tương tác đầu tiên để kích hoạt phát nhạc nếu browser chặn autoplay
+              const triggerPlayOnGesture = () => {
+                if (userPausedRef.current) return;
+                try {
+                  playerRef.current?.unMute();
+                  playerRef.current?.setVolume(100);
+                  playerRef.current?.playVideo();
+                } catch {}
+                cleanupGesture();
+              };
+
+              const cleanupGesture = () => {
+                window.removeEventListener("pointerdown", triggerPlayOnGesture);
+                window.removeEventListener("touchstart", triggerPlayOnGesture);
+                window.removeEventListener("click", triggerPlayOnGesture);
+                window.removeEventListener("keydown", triggerPlayOnGesture);
+              };
+
+              window.addEventListener("pointerdown", triggerPlayOnGesture, { once: true, passive: true });
+              window.addEventListener("touchstart", triggerPlayOnGesture, { once: true, passive: true });
+              window.addEventListener("click", triggerPlayOnGesture, { once: true, passive: true });
+              window.addEventListener("keydown", triggerPlayOnGesture, { once: true, passive: true });
             },
             onStateChange: (e) => {
+              if (!isMounted) return;
               const YT = window.YT;
               if (!YT) return;
               if (e.data === YT.PlayerState.PLAYING) {
                 setPlaying(true);
+                consecutiveErrorsRef.current = 0;
                 const dur = playerRef.current?.getDuration() || 0;
                 if (dur > 0) setDuration(dur);
               } else if (e.data === YT.PlayerState.PAUSED) {
@@ -213,9 +255,14 @@ export default function MusicPlayer() {
               }
             },
             onError: (e) => {
+              if (!isMounted) return;
               console.warn("YouTube player error code:", e.data);
-              // Lỗi bản quyền / video không cho embed -> tự chuyển bài tiếp theo
-              nextTrack();
+              consecutiveErrorsRef.current += 1;
+              if (consecutiveErrorsRef.current < tracksRef.current.length) {
+                nextTrack();
+              } else {
+                setPlaying(false);
+              }
             },
           },
         });
@@ -223,26 +270,36 @@ export default function MusicPlayer() {
         console.error("Lỗi khởi tạo YT.Player:", err);
       }
     });
+
+    return () => {
+      isMounted = false;
+    };
   }, [tracks.length, nextTrack]);
 
-  // 3. Đổi bài khi index thay đổi
+  // 3. Đổi bài khi index thay đổi (Next/Prev hoặc hết bài)
   useEffect(() => {
-    if (!playerRef.current || tracks.length === 0) return;
+    if (prevIndexRef.current === null) {
+      prevIndexRef.current = index;
+      return;
+    }
+    if (prevIndexRef.current === index) return;
+    prevIndexRef.current = index;
+
+    if (!playerRef.current || !isPlayerReadyRef.current || tracks.length === 0) return;
     const currentTrack = tracks[index];
     if (!currentTrack) return;
-    try {
-      if (playing) {
-        playerRef.current.loadVideoById(currentTrack.youtubeId);
-        playerRef.current.unMute();
-        playerRef.current.setVolume(100);
-        playerRef.current.playVideo();
-      } else {
-        playerRef.current.cueVideoById(currentTrack.youtubeId);
-      }
-    } catch {}
-  }, [index, tracks, playing]);
 
-  // 4. Timer cập nhật progress bar mỗi giây
+    try {
+      playerRef.current.unMute();
+      playerRef.current.setVolume(100);
+      playerRef.current.loadVideoById(currentTrack.youtubeId);
+      playerRef.current.playVideo();
+      setPlaying(true);
+      userPausedRef.current = false;
+    } catch {}
+  }, [index, tracks]);
+
+  // 4. Timer cập nhật progress bar
   useEffect(() => {
     if (tickRef.current) clearInterval(tickRef.current);
     if (playing && playerRef.current) {
@@ -253,7 +310,7 @@ export default function MusicPlayer() {
           setCurrent(t);
           if (d > 0) setDuration(d);
         } catch {}
-      }, 1000);
+      }, 800);
     }
     return () => {
       if (tickRef.current) clearInterval(tickRef.current);
@@ -261,13 +318,15 @@ export default function MusicPlayer() {
   }, [playing]);
 
   const togglePlay = () => {
-    if (!playerRef.current) return;
+    if (!playerRef.current || !isPlayerReadyRef.current) return;
     try {
       playerRef.current.unMute();
       playerRef.current.setVolume(100);
       if (playing) {
+        userPausedRef.current = true;
         playerRef.current.pauseVideo();
       } else {
+        userPausedRef.current = false;
         playerRef.current.playVideo();
       }
     } catch {}
@@ -275,11 +334,14 @@ export default function MusicPlayer() {
 
   const seek = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = Number(e.target.value);
-    playerRef.current?.seekTo(val, true);
+    try {
+      playerRef.current?.seekTo(val, true);
+    } catch {}
     setCurrent(val);
   };
 
   const fmt = (s: number) => {
+    if (!Number.isFinite(s) || s < 0) return "0:00";
     const m = Math.floor(s / 60);
     const sec = Math.floor(s % 60);
     return `${m}:${sec.toString().padStart(2, "0")}`;
@@ -293,18 +355,19 @@ export default function MusicPlayer() {
   return (
     <>
       {/* 
-        Container YouTube Player kích thước chuẩn (320x240) đặt ngoài màn hình.
-        Không dùng display:none / visibility:hidden vì YouTube API yêu cầu player hiển thị để phát.
+        Container YouTube Player kích thước 200x200 đặt trong viewport nhưng vô hình,
+        để Chrome/Safari không suspend/pause âm thanh do coi là hidden/offscreen.
       */}
       <div
         style={{
           position: "fixed",
-          top: "-9999px",
-          left: "-9999px",
-          width: "320px",
-          height: "240px",
+          bottom: "0px",
+          right: "0px",
+          width: "200px",
+          height: "200px",
+          opacity: 0.001,
           pointerEvents: "none",
-          zIndex: -9999,
+          zIndex: -1,
         }}
         aria-hidden="true"
       >
