@@ -1,17 +1,19 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { jwtVerify } from "jose";
 
-const COOKIE = "moimoi_admin";
+const SESSION_COOKIE = "moimoi_session";
+const LEGACY_COOKIE = "moimoi_admin";
 
-async function isAdmin(token: string | undefined): Promise<boolean> {
-  if (!token) return false;
+async function verifyAuth(token: string | undefined): Promise<{ role: string } | null> {
+  if (!token) return null;
   const s = process.env.SESSION_SECRET;
-  if (!s) return false;
+  if (!s) return null;
   try {
     const { payload } = await jwtVerify(token, new TextEncoder().encode(s));
-    return payload.role === "admin";
+    const role = (payload.role === "ADMIN" || payload.role === "admin") ? "ADMIN" : "USER";
+    return { role };
   } catch {
-    return false;
+    return null;
   }
 }
 
@@ -23,15 +25,34 @@ export async function middleware(req: NextRequest) {
   }
 
   const { pathname } = req.nextUrl;
-  if (pathname === "/admin/login") return NextResponse.next();
+  const token = req.cookies.get(SESSION_COOKIE)?.value || req.cookies.get(LEGACY_COOKIE)?.value;
+  const auth = await verifyAuth(token);
 
-  if (pathname.startsWith("/admin")) {
-    if (!(await isAdmin(req.cookies.get(COOKIE)?.value))) {
+  // Bảo vệ route /admin
+  if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
+    if (auth?.role !== "ADMIN") {
       const url = req.nextUrl.clone();
-      url.pathname = "/admin/login";
-      url.search = "";
+      url.pathname = "/login";
+      url.searchParams.set("redirect", pathname);
       return NextResponse.redirect(url);
     }
+  }
+
+  // Bảo vệ route /dashboard
+  if (pathname.startsWith("/dashboard")) {
+    if (!auth) {
+      const url = req.nextUrl.clone();
+      url.pathname = "/login";
+      url.searchParams.set("redirect", pathname);
+      return NextResponse.redirect(url);
+    }
+  }
+
+  // Nếu đã đăng nhập mà cố vào /login, /register hoặc /admin/login
+  if ((pathname === "/login" || pathname === "/register" || pathname === "/admin/login") && auth) {
+    const url = req.nextUrl.clone();
+    url.pathname = auth.role === "ADMIN" ? "/admin" : "/dashboard";
+    return NextResponse.redirect(url);
   }
 
   return NextResponse.next();

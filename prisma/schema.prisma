@@ -344,3 +344,32 @@ model FreeFireKeyLog {
   @@index([ip])
 }
 
+// ---------- Người dùng & Thành viên ----------
+
+model User {
+  id           Int            @id @default(autoincrement())
+  username     String         @unique
+  email        String?        @unique
+  passwordHash String
+  name         String?
+  avatar       String         @default("")
+  role         String         @default("USER") // "USER" | "ADMIN"
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  savedKeys    UserSavedKey[]
+
+  @@index([role])
+}
+
+model UserSavedKey {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  appName   String
+  key       String
+  expiresAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+

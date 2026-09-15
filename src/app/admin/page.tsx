@@ -2,6 +2,19 @@ import { db } from "@/lib/db";
 import { vnDate } from "@/lib/crypto";
 import AdminNav from "./AdminNav";
 import { updateCounter } from "./actions";
+import {
+  Eye,
+  Calendar,
+  Users,
+  AppWindow,
+  ShieldCheck,
+  KeyRound,
+  Network,
+  TrendingUp,
+  CheckCircle2,
+  Save,
+  Activity,
+} from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -14,9 +27,10 @@ export default async function AdminHome({
   const isSaved = sp.counter_saved === "1";
   const today = vnDate();
 
-  const [counter, daily, apps, keys, active, shorteners] = await Promise.all([
+  const [counter, daily, users, apps, keys, active, shorteners] = await Promise.all([
     db.counter.findUnique({ where: { id: 1 } }),
     db.dailyHit.findUnique({ where: { date: today } }),
+    db.user.count(),
     db.app.count(),
     db.appKey.count(),
     db.appKey.count({ where: { revoked: false, expiresAt: { gt: new Date() } } }),
@@ -24,55 +38,50 @@ export default async function AdminHome({
   ]);
 
   const stats = [
-    ["Tổng truy cập", counter?.total ?? 0],
-    ["Hôm nay", daily?.count ?? 0],
-    ["Ứng dụng", apps],
-    ["Key còn hiệu lực", active],
-    ["Tổng key đã phát", keys],
-    ["Cổng đang bật", shorteners],
-  ] as const;
+    { label: "Tổng lượt truy cập", value: counter?.total ?? 0, icon: Eye, color: "stat-purple" },
+    { label: "Truy cập hôm nay", value: daily?.count ?? 0, icon: Calendar, color: "stat-blue" },
+    { label: "Thành viên đăng ký", value: users, icon: Users, color: "stat-green" },
+    { label: "Ứng dụng & Mod", value: apps, icon: AppWindow, color: "stat-orange" },
+    { label: "Key còn hiệu lực", value: active, icon: ShieldCheck, color: "stat-pink" },
+    { label: "Tổng key đã phát", value: keys, icon: KeyRound, color: "stat-cyan" },
+    { label: "Cổng vượt link đang bật", value: shorteners, icon: Network, color: "stat-yellow" },
+  ];
 
   return (
     <div className="vt-admin">
       <AdminNav current="/admin" />
 
       {isSaved && (
-        <div
-          style={{
-            padding: "14px 18px",
-            borderRadius: 10,
-            background: "rgba(34, 197, 94, 0.15)",
-            border: "1px solid rgba(34, 197, 94, 0.4)",
-            color: "#4ade80",
-            marginBottom: 20,
-            display: "flex",
-            alignItems: "center",
-            gap: 12,
-            fontSize: 14,
-            fontWeight: 600,
-          }}
-        >
-          <i className="fa-solid fa-circle-check" style={{ fontSize: 18 }} />
+        <div className="dash-alert dash-alert-success" style={{ marginBottom: 20 }}>
+          <CheckCircle2 size={18} />
           <span>Đã lưu thành công thông số lượt truy cập! Hệ thống đã áp dụng ra ngoài trang chủ.</span>
         </div>
       )}
 
-      {/* THẺ THỐNG KÊ TỔNG QUAN */}
-      <div className="vt-row">
-        {stats.map(([label, value]) => (
-          <div key={label} className="vt-card">
-            <div style={{ fontSize: 26, fontWeight: 800 }}>
-              {new Intl.NumberFormat("vi-VN").format(value)}
+      {/* THẺ THỐNG KÊ TỔNG QUAN HIỆN ĐẠI */}
+      <div className="admin-stats-grid">
+        {stats.map((s) => {
+          const Icon = s.icon;
+          return (
+            <div key={s.label} className="admin-stat-card">
+              <div className={`admin-stat-icon ${s.color}`}>
+                <Icon size={22} />
+              </div>
+              <div className="admin-stat-content">
+                <span className="admin-stat-val">
+                  {new Intl.NumberFormat("vi-VN").format(s.value)}
+                </span>
+                <span className="admin-stat-lbl">{s.label}</span>
+              </div>
             </div>
-            <div className="vt-hint">{label}</div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* FORM TÙY CHỈNH THÔNG SỐ LƯỢT TRUY CẬP */}
       <div className="vt-card" style={{ marginTop: 24 }}>
-        <h2 style={{ fontSize: 18, marginTop: 0, marginBottom: 8, display: "flex", alignItems: "center", gap: 10, color: "#3b82f6" }}>
-          <i className="fa-solid fa-chart-line" />
+        <h2 style={{ fontSize: 17, marginTop: 0, marginBottom: 8, display: "flex", alignItems: "center", gap: 10, color: "#3b82f6" }}>
+          <TrendingUp size={20} />
           <span>Tùy Chỉnh Thông Số Lượt Truy Cập (StatsBar Live)</span>
         </h2>
         <p className="vt-hint" style={{ marginBottom: 18 }}>
@@ -108,7 +117,7 @@ export default async function AdminHome({
             </label>
           </div>
 
-          <div style={{ marginTop: 14, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+          <div style={{ marginTop: 16, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
             <div style={{ fontSize: 13, color: "var(--vi-muted)" }}>
               💡 Lưu ý: Cài đặt này có hiệu lực ngay tức thì trên giao diện trang chủ mà không cần khởi động lại web.
             </div>
@@ -121,10 +130,9 @@ export default async function AdminHome({
                 display: "inline-flex",
                 alignItems: "center",
                 gap: 8,
-                background: "linear-gradient(135deg, #3b82f6, #2563eb)",
               }}
             >
-              <i className="fa-solid fa-floppy-disk" />
+              <Save size={16} />
               <span>Lưu Thông Số Lượt Truy Cập</span>
             </button>
           </div>

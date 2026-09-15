@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import NoticeBell, { NoticeItem } from "./NoticeBell";
 import ThemeToggle from "./ThemeToggle";
+import UserNavButton from "./UserNavButton";
 import { getGroupRoute } from "./CategoryMenu";
 
 interface DesktopHeaderProps {
@@ -77,6 +78,7 @@ export default function DesktopHeader({
         )}
         <NoticeBell notices={notices} />
         <ThemeToggle />
+        <UserNavButton />
       </aside>
 
       {/* 
@@ -192,8 +194,10 @@ export default function DesktopHeader({
             )}
           </nav>
 
-          {/* Khoảng đệm bên phải để cân xứng với cụm fixed actions */}
-          <div className="mdarker-header-actions-spacer" aria-hidden="true" />
+          {/* Cụm tài khoản bên phải khi taskbar trượt xuống */}
+          <div className="mdarker-header-right-user">
+            <UserNavButton />
+          </div>
         </div>
       </header>
     </>

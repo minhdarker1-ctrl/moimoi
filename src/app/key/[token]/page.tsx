@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { fingerprint, generateKey, hashKey } from "@/lib/crypto";
 import { clientIp } from "@/lib/guard";
 import CopyKey from "@/components/CopyKey";
+import { getCurrentUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -61,6 +62,18 @@ export default async function KeyPage({ params }: { params: Promise<{ token: str
     db.freeFireKeyLog.updateMany({ where: { token: s.token }, data: { status: "completed" } }),
   ]);
 
+  const currentUser = await getCurrentUser();
+  if (currentUser) {
+    await db.userSavedKey.create({
+      data: {
+        userId: currentUser.id,
+        appName: s.app ? s.app.name : (s.keyType ? s.keyType.name : "Free Fire"),
+        key: plain,
+        expiresAt,
+      },
+    }).catch(() => {});
+  }
+
   return (
     <main>
       <div className="vt-key-card">
@@ -72,6 +85,16 @@ export default async function KeyPage({ params }: { params: Promise<{ token: str
 
         <CopyKey value={plain} />
 
+        {currentUser ? (
+          <div className="dash-alert dash-alert-success" style={{ margin: "14px 0 6px", fontSize: 13 }}>
+            <span>✅ Mã key này đã được tự động lưu vào <Link href="/dashboard/keys" style={{ color: "inherit", textDecoration: "underline" }}>Dashboard của bạn</Link>!</span>
+          </div>
+        ) : (
+          <p className="vt-hint" style={{ marginTop: 10 }}>
+            💡 <Link href="/login" style={{ color: "#6366f1", fontWeight: 700 }}>Đăng nhập</Link> để tự động lưu các mã key vào tài khoản của bạn.
+          </p>
+        )}
+
         <p className="vt-hint">
           Hạn sống (TTL): {expiresAt.toLocaleString("vi-VN", { timeZone: "Asia/Ho_Chi_Minh" })}
           <br />
@@ -79,7 +102,7 @@ export default async function KeyPage({ params }: { params: Promise<{ token: str
             ? `Số lượt dùng: Tối đa ${s.keyType.maxUses} lần (chạy song song với TTL, hết hạn hoặc hết lượt là Key die).`
             : "Số lượt dùng: Không giới hạn (trong thời hạn TTL)."}
           <br />
-          <strong>Lưu ý: Hệ thống không lưu Key trên trình duyệt — Bạn hãy sao chép lại mã Key để sử dụng!</strong>
+          <strong>Lưu ý: Bạn hãy sao chép lại mã Key để sử dụng!</strong>
         </p>
 
         {s.app ? (
