@@ -354,9 +354,14 @@ model User {
   name         String?
   avatar       String         @default("")
   role         String         @default("USER") // "USER" | "ADMIN"
+  coins        Int            @default(100)    // Điểm thưởng / Coins
+  spinTickets  Int            @default(1)      // Lượt quay may mắn
+  tasksToday   Int            @default(0)      // Nhiệm vụ hôm nay
+  referralCode String         @default("")     // Mã giới thiệu
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
   savedKeys    UserSavedKey[]
+  notifications Notification[]
 
   @@index([role])
 }
@@ -372,4 +377,20 @@ model UserSavedKey {
 
   @@index([userId])
 }
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  userId    Int?     // null = thông báo chung toàn hệ thống
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category  String   @default("system") // "system" | "key" | "reward" | "account"
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+  linkUrl   String   @default("")
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
 

@@ -13,6 +13,10 @@ export interface AuthUser {
   name?: string | null;
   avatar?: string;
   role: "USER" | "ADMIN";
+  coins?: number;
+  spinTickets?: number;
+  tasksToday?: number;
+  referralCode?: string;
 }
 
 function key(): Uint8Array {
