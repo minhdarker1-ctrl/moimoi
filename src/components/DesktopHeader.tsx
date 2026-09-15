@@ -180,6 +180,17 @@ export default function DesktopHeader({
               );
             })}
 
+            {/* Lối tắt nhanh vào Dashboard */}
+            <Link
+              href="/dashboard"
+              className={`mdarker-header-nav-link ${pathname.startsWith("/dashboard") ? "active" : ""}`}
+            >
+              <span className="mdarker-header-nav-icon" aria-hidden="true">
+                <i className="fa-solid fa-gauge-high" />
+              </span>
+              <span>DASHBOARD</span>
+            </Link>
+
             {/* Nút ALL để ở cuối cùng - Chỉ hiển thị khi không bật hideAllNav */}
             {!hideAllNav && (
               <Link

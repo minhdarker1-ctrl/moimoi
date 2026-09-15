@@ -6,6 +6,7 @@ import CategoryMenu from "@/components/CategoryMenu";
 import MdarkerBlog from "@/components/MdarkerBlog";
 import StatsBar from "@/components/StatsBar";
 import LiveClock from "@/components/LiveClock";
+import HomeMemberBanner from "@/components/HomeMemberBanner";
 
 export const revalidate = 60;
 
@@ -120,6 +121,9 @@ export default async function Home() {
             </div>
           )}
         </div>
+        
+        {/* Banner Cổng Thành Viên & Dashboard */}
+        <HomeMemberBanner />
 
         {linkBoxes.length > 0 && (
           <div className="mdarker-linkbox-section">
