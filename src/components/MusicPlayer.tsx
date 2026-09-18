@@ -217,6 +217,7 @@ export default function MusicPlayer() {
             rel: 0,
             playsinline: 1,
             enablejsapi: 1,
+            origin: typeof window !== "undefined" ? window.location.origin : undefined,
           },
           events: {
             onReady: (e) => {
