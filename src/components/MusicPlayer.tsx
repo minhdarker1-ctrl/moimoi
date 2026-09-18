@@ -135,33 +135,27 @@ export default function MusicPlayer() {
   const [current, setCurrent] = useState(0);
   const [duration, setDuration] = useState(0);
   const [minimized, setMinimized] = useState(false);
-  const manualOverrideRef = useRef(false);
+  const manualExpandScrollYRef = useRef<number | null>(null);
 
-  // Tự động thu nhỏ khi cuộn trang xuống & tự mở rộng lại khi ở đỉnh trang
+  // Khi kéo cuộn xuống quá 80px: tự động thu nhỏ lại ở góc
+  // Thu nhỏ là thu nhỏ luôn, KHÔNG tự động phóng to lại khi cuộn lên đỉnh trang.
+  // Chỉ phóng to khi user tự bấm vào widget thu nhỏ để mở rộng.
   useEffect(() => {
-    let lastY = typeof window !== "undefined" ? window.scrollY : 0;
-
     const onScroll = () => {
       const y = window.scrollY;
-      const delta = Math.abs(y - lastY);
 
-      // Kéo xuống quá 100px: tự động thu nhỏ lại ở góc
-      if (y > 100) {
-        if (manualOverrideRef.current) {
-          if (delta > 80) {
-            manualOverrideRef.current = false;
+      if (y > 80) {
+        // Nếu user vừa bấm phóng to thủ công, chỉ tự thu nhỏ nếu cuộn xa vị trí đó > 120px
+        if (manualExpandScrollYRef.current !== null) {
+          if (Math.abs(y - manualExpandScrollYRef.current) > 120) {
+            manualExpandScrollYRef.current = null;
             setMinimized(true);
           }
         } else {
           setMinimized(true);
         }
-      } else if (y <= 40) {
-        // Cuộn lại lên đầu trang: tự động mở rộng trở lại
-        manualOverrideRef.current = false;
-        setMinimized(false);
       }
-
-      lastY = y;
+      // Không bao giờ tự động mở rộng khi cuộn lên đầu trang (giữ thu nhỏ luôn đến khi user bấm phóng to)
     };
 
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -172,9 +166,10 @@ export default function MusicPlayer() {
     setMinimized((prev) => {
       const next = !prev;
       if (!next) {
-        manualOverrideRef.current = true;
+        // User vừa bấm phóng to bằng tay
+        manualExpandScrollYRef.current = typeof window !== "undefined" ? window.scrollY : 0;
       } else {
-        manualOverrideRef.current = false;
+        manualExpandScrollYRef.current = null;
       }
       return next;
     });
