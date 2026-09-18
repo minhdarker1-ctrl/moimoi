@@ -135,20 +135,47 @@ export default function MusicPlayer() {
   const [current, setCurrent] = useState(0);
   const [duration, setDuration] = useState(0);
   const [minimized, setMinimized] = useState(false);
+  const manualOverrideRef = useRef(false);
 
+  // Tự động thu nhỏ khi cuộn trang xuống & tự mở rộng lại khi ở đỉnh trang
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem("vt-music-minimized");
-      if (saved === "true") setMinimized(true);
-    } catch {}
+    let lastY = typeof window !== "undefined" ? window.scrollY : 0;
+
+    const onScroll = () => {
+      const y = window.scrollY;
+      const delta = Math.abs(y - lastY);
+
+      // Kéo xuống quá 100px: tự động thu nhỏ lại ở góc
+      if (y > 100) {
+        if (manualOverrideRef.current) {
+          if (delta > 80) {
+            manualOverrideRef.current = false;
+            setMinimized(true);
+          }
+        } else {
+          setMinimized(true);
+        }
+      } else if (y <= 40) {
+        // Cuộn lại lên đầu trang: tự động mở rộng trở lại
+        manualOverrideRef.current = false;
+        setMinimized(false);
+      }
+
+      lastY = y;
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   const toggleMinimize = () => {
     setMinimized((prev) => {
       const next = !prev;
-      try {
-        localStorage.setItem("vt-music-minimized", String(next));
-      } catch {}
+      if (!next) {
+        manualOverrideRef.current = true;
+      } else {
+        manualOverrideRef.current = false;
+      }
       return next;
     });
   };
