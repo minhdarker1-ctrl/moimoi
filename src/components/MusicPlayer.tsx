@@ -134,6 +134,24 @@ export default function MusicPlayer() {
   const [playing, setPlaying] = useState(false);
   const [current, setCurrent] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [minimized, setMinimized] = useState(false);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("vt-music-minimized");
+      if (saved === "true") setMinimized(true);
+    } catch {}
+  }, []);
+
+  const toggleMinimize = () => {
+    setMinimized((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem("vt-music-minimized", String(next));
+      } catch {}
+      return next;
+    });
+  };
 
   const playerRef = useRef<YTPlayer | null>(null);
   const isPlayerReadyRef = useRef(false);
@@ -375,100 +393,165 @@ export default function MusicPlayer() {
       </div>
 
       {/* Giao diện Music Player nổi ở cuối trang */}
-      {tracks.length > 0 && (
-        <div className="mdarker-music-player">
-          {/* Thumbnail tròn viền cam */}
-          <div className={`mdarker-music-thumb${playing ? " mdarker-music-playing" : ""}`}>
-            {thumb ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={thumb} alt={track?.title || "Music"} />
-            ) : (
-              <div className="mdarker-music-thumb-placeholder">🎵</div>
-            )}
-          </div>
+      {tracks.length > 0 &&
+        (minimized ? (
+          <div
+            className={`mdarker-music-minimized${playing ? " playing" : ""}`}
+            title="Nhấp để mở rộng trình phát nhạc"
+          >
+            {/* Thumbnail đĩa xoay có thể click mở rộng */}
+            <div
+              className={`mdarker-music-mini-thumb${playing ? " mdarker-music-playing" : ""}`}
+              onClick={toggleMinimize}
+              role="button"
+              tabIndex={0}
+              aria-label="Mở rộng trình phát nhạc"
+            >
+              {thumb ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={thumb} alt={track?.title || "Music"} />
+              ) : (
+                <div className="mdarker-music-thumb-placeholder">🎵</div>
+              )}
+              {playing && <span className="mdarker-music-mini-dot" />}
+            </div>
 
-          {/* Nội dung thông tin + thanh điều khiển */}
-          <div className="mdarker-music-content">
-            {/* Hàng trên: Tiêu đề + Nghệ sĩ bên trái, Nút điều khiển bên phải */}
-            <div className="mdarker-music-top-row">
-              <div className="mdarker-music-info">
-                <div className="mdarker-music-title-wrap">
-                  <span
-                    className={`mdarker-music-eq-icon${
-                      playing ? " mdarker-music-eq-active" : ""
-                    }`}
-                    aria-hidden="true"
-                  >
-                    <span />
-                    <span />
-                    <span />
-                  </span>
-                  <span className="mdarker-music-title" title={track?.title}>
-                    {track?.title}
-                  </span>
+            {/* Thông tin bài hát ngắn gọn */}
+            <div
+              className="mdarker-music-mini-info"
+              onClick={toggleMinimize}
+              role="button"
+              tabIndex={0}
+            >
+              <div className="mdarker-music-mini-title">{track?.title}</div>
+              <div className="mdarker-music-mini-artist">{track?.artist || "Đang phát"}</div>
+            </div>
+
+            {/* Nút Play/Pause trực tiếp & Nút Phóng to */}
+            <div className="mdarker-music-mini-actions">
+              <button
+                type="button"
+                onClick={togglePlay}
+                className="mdarker-music-mini-btn"
+                aria-label={playing ? "Dừng" : "Phát"}
+                title={playing ? "Dừng nhạc" : "Bật nhạc"}
+              >
+                <i className={playing ? "bi bi-pause-fill" : "bi bi-play-fill"} />
+              </button>
+              <button
+                type="button"
+                onClick={toggleMinimize}
+                className="mdarker-music-mini-btn mdarker-music-expand-btn"
+                aria-label="Mở rộng trình phát"
+                title="Mở rộng"
+              >
+                <i className="bi bi-arrows-angle-expand" />
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="mdarker-music-player">
+            {/* Thumbnail tròn viền cam */}
+            <div className={`mdarker-music-thumb${playing ? " mdarker-music-playing" : ""}`}>
+              {thumb ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={thumb} alt={track?.title || "Music"} />
+              ) : (
+                <div className="mdarker-music-thumb-placeholder">🎵</div>
+              )}
+            </div>
+
+            {/* Nội dung thông tin + thanh điều khiển */}
+            <div className="mdarker-music-content">
+              {/* Hàng trên: Tiêu đề + Nghệ sĩ bên trái, Nút điều khiển bên phải */}
+              <div className="mdarker-music-top-row">
+                <div className="mdarker-music-info">
+                  <div className="mdarker-music-title-wrap">
+                    <span
+                      className={`mdarker-music-eq-icon${
+                        playing ? " mdarker-music-eq-active" : ""
+                      }`}
+                      aria-hidden="true"
+                    >
+                      <span />
+                      <span />
+                      <span />
+                    </span>
+                    <span className="mdarker-music-title" title={track?.title}>
+                      {track?.title}
+                    </span>
+                  </div>
+                  {track?.artist && (
+                    <p className="mdarker-music-artist">{track.artist}</p>
+                  )}
                 </div>
-                {track?.artist && (
-                  <p className="mdarker-music-artist">{track.artist}</p>
-                )}
+
+                {/* Cụm nút: Bài trước - Phát/Dừng - Bài sau - Thu nhỏ */}
+                <div className="mdarker-music-controls">
+                  <button
+                    type="button"
+                    onClick={prevTrack}
+                    aria-label="Bài trước"
+                    className="mdarker-music-btn"
+                  >
+                    <i className="bi bi-skip-start-fill" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={togglePlay}
+                    aria-label={playing ? "Dừng" : "Phát"}
+                    className={`mdarker-music-btn mdarker-music-btn-main${
+                      !playing ? " mdarker-music-btn-pulse" : ""
+                    }`}
+                    title={playing ? "Dừng nhạc" : "Bật nhạc"}
+                  >
+                    <i className={playing ? "bi bi-pause-fill" : "bi bi-play-fill"} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={nextTrack}
+                    aria-label="Bài sau"
+                    className="mdarker-music-btn"
+                  >
+                    <i className="bi bi-skip-end-fill" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={toggleMinimize}
+                    aria-label="Thu nhỏ vào góc"
+                    className="mdarker-music-btn mdarker-music-minimize-btn"
+                    title="Thu nhỏ vào góc"
+                  >
+                    <i className="bi bi-chevron-down" />
+                  </button>
+                </div>
               </div>
 
-              {/* Cụm nút: Bài trước - Phát/Dừng - Bài sau */}
-              <div className="mdarker-music-controls">
-                <button
-                  type="button"
-                  onClick={prevTrack}
-                  aria-label="Bài trước"
-                  className="mdarker-music-btn"
-                >
-                  <i className="bi bi-skip-start-fill" />
-                </button>
-                <button
-                  type="button"
-                  onClick={togglePlay}
-                  aria-label={playing ? "Dừng" : "Phát"}
-                  className={`mdarker-music-btn mdarker-music-btn-main${
-                    !playing ? " mdarker-music-btn-pulse" : ""
-                  }`}
-                  title={playing ? "Dừng nhạc" : "Bật nhạc"}
-                >
-                  <i className={playing ? "bi bi-pause-fill" : "bi bi-play-fill"} />
-                </button>
-                <button
-                  type="button"
-                  onClick={nextTrack}
-                  aria-label="Bài sau"
-                  className="mdarker-music-btn"
-                >
-                  <i className="bi bi-skip-end-fill" />
-                </button>
+              {/* Hàng dưới: Thanh tiến độ phát nhạc */}
+              <div className="mdarker-music-progress">
+                <span className="mdarker-music-time">{fmt(current)}</span>
+                <input
+                  type="range"
+                  min={0}
+                  max={duration || 100}
+                  value={current}
+                  onChange={seek}
+                  className="mdarker-music-range"
+                  aria-label="Tiến độ bài nhạc"
+                  style={{
+                    background:
+                      duration > 0
+                        ? `linear-gradient(to right, #6366f1 ${
+                            (current / duration) * 100
+                          }%, rgba(0,0,0,0.1) ${(current / duration) * 100}%)`
+                        : undefined,
+                  }}
+                />
+                <span className="mdarker-music-time">{fmt(duration)}</span>
               </div>
-            </div>
-
-            {/* Hàng dưới: Thanh tiến độ phát nhạc */}
-            <div className="mdarker-music-progress">
-              <span className="mdarker-music-time">{fmt(current)}</span>
-              <input
-                type="range"
-                min={0}
-                max={duration || 100}
-                value={current}
-                onChange={seek}
-                className="mdarker-music-range"
-                aria-label="Tiến độ bài nhạc"
-                style={{
-                  background:
-                    duration > 0
-                      ? `linear-gradient(to right, #6366f1 ${
-                          (current / duration) * 100
-                        }%, rgba(0,0,0,0.1) ${(current / duration) * 100}%)`
-                      : undefined,
-                }}
-              />
-              <span className="mdarker-music-time">{fmt(duration)}</span>
             </div>
           </div>
-        </div>
-      )}
+        ))}
     </>
   );
 }
