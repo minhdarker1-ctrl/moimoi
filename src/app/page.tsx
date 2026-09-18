@@ -1,12 +1,7 @@
 import { db } from "@/lib/db";
-import { vnDate } from "@/lib/crypto";
-import DesktopHeader from "@/components/DesktopHeader";
+import VthangNav from "@/components/VthangNav";
 import TypedText from "@/components/TypedText";
-import CategoryMenu from "@/components/CategoryMenu";
-import MdarkerBlog from "@/components/MdarkerBlog";
-import StatsBar from "@/components/StatsBar";
-import LiveClock from "@/components/LiveClock";
-import HomeMemberBanner from "@/components/HomeMemberBanner";
+import AppCard from "@/components/AppCard";
 
 export const revalidate = 60;
 
@@ -20,7 +15,7 @@ function parseLines(json: string): string[] {
 }
 
 export default async function Home() {
-  const [site, socials, linkBoxes, groups, notices, counter, daily, posts] = await Promise.all([
+  const [site, socials, linkBoxes, groups, notices] = await Promise.all([
     db.site.findUnique({ where: { id: 1 } }),
     db.social.findMany({ where: { visible: true }, orderBy: { order: "asc" } }),
     db.linkBox.findMany({ where: { visible: true }, orderBy: { order: "asc" } }),
@@ -30,12 +25,6 @@ export default async function Home() {
       include: { apps: { where: { visible: true }, orderBy: { order: "asc" } } },
     }),
     db.notice.findMany({ where: { visible: true }, orderBy: { createdAt: "desc" }, take: 20 }),
-    db.counter.findUnique({ where: { id: 1 } }),
-    db.dailyHit.findUnique({ where: { date: vnDate() } }),
-    db.blogPost.findMany({
-      where: { visible: true },
-      orderBy: [{ pinned: "desc" }, { order: "asc" }, { createdAt: "desc" }],
-    }),
   ]);
 
   if (!site) {
@@ -49,171 +38,176 @@ export default async function Home() {
     );
   }
 
+  const allApps = groups.flatMap((g) => g.apps);
+
   return (
     <>
-      <DesktopHeader
-        siteName={site.name}
-        avatarUrl={site.avatarUrl}
-        verified={site.verified}
+      <VthangNav
         notices={notices.map((n) => ({
           id: n.id,
           title: n.title,
           body: n.body,
           createdAt: n.createdAt.toISOString(),
         }))}
-        groups={groups.map((g) => ({
-          id: g.id,
-          title: g.title,
-          slug: g.slug,
-          icon: g.icon,
-          badge: g.badge,
-        }))}
-        hideAllNav={true}
       />
 
-      <main>
-        <div className="mdarker-hero">
-          <div className="mdarker-avatar-wrap">
-            {site.avatarUrl && (
-              /* eslint-disable-next-line @next/next/no-img-element -- URL do admin dán */
-              <img
-                className="mdarker-avatar"
-                src={site.avatarUrl}
-                alt={`Ảnh đại diện ${site.name}`}
-                width={120}
-                height={120}
-                fetchPriority="high"
-              />
-            )}
-            {site.avatarFrameUrl && (
-              /* eslint-disable-next-line @next/next/no-img-element -- URL do admin dán */
-              <img className="mdarker-avatar-frame" src={site.avatarFrameUrl} alt="" aria-hidden="true" />
-            )}
-          </div>
-
-          <p className="mdarker-iam">{site.iam}</p>
-          <h1 className="mdarker-name">
-            {site.name}
-            {site.verified && (
-              /* eslint-disable-next-line @next/next/no-img-element -- icon tĩnh nhỏ */
-              <img className="mdarker-verify" src="/verify.svg" alt="Đã xác minh" width={24} height={24} />
-            )}
-          </h1>
-          <p className="mdarker-headline">
-            and I&apos;m a <TypedText lines={parseLines(site.typedLines)} />
-          </p>
-
-          {socials.length > 0 && (
-            <div className="mdarker-socials">
-              {socials.map((s) => (
-                <a
-                  key={s.id}
-                  href={s.url}
-                  className="mdarker-social-item"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Mạng xã hội"
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element -- URL do admin dán */}
-                  <img src={s.iconUrl} alt="" width={40} height={40} />
-                </a>
-              ))}
-            </div>
+      <main role="main">
+        {/* AVATAR */}
+        <div className={`vthangios-avatar-wrap${site.avatarFrameUrl ? " has-frame" : ""}`}>
+          {site.avatarUrl && (
+            /* eslint-disable-next-line @next/next/no-img-element -- URL do admin dán */
+            <img
+              className="vthangios-avatar"
+              src={site.avatarUrl}
+              alt={`Ảnh đại diện ${site.name}`}
+              fetchPriority="high"
+              width={120}
+              height={120}
+            />
+          )}
+          {site.avatarFrameUrl && (
+            /* eslint-disable-next-line @next/next/no-img-element -- URL do admin dán */
+            <img className="vthangios-avatar-frame" src={site.avatarFrameUrl} alt="" aria-hidden="true" />
           )}
         </div>
-        
-        {/* Banner Cổng Thành Viên & Dashboard */}
-        <HomeMemberBanner />
 
-        {linkBoxes.length > 0 && (
-          <div className="mdarker-linkbox-section">
-            {linkBoxes.map((b) => (
+        {/* NAME & HEADLINE */}
+        <p className="vthangios-iam">{site.iam || "Hi, i am"}</p>
+        <h1 className="vthangios-name">
+          {site.name}
+          {site.verified && (
+            /* eslint-disable-next-line @next/next/no-img-element -- icon tĩnh nhỏ */
+            <img className="vthangios-verify" src="/verify.svg" alt="verified" width={27} height={27} />
+          )}
+        </h1>
+        <p className="vthangios-headline">
+          and I&apos;m a{" "}
+          <span className="vthangios-gradient-text">
+            <TypedText lines={parseLines(site.typedLines)} />
+          </span>
+        </p>
+
+        {/* SOCIALS */}
+        {socials.length > 0 && (
+          <div className="vthangios-socials">
+            {socials.map((s) => (
               <a
-                key={b.id}
-                className="mdarker-linkbox"
-                href={b.url}
+                key={s.id}
+                href={s.url}
+                className="vthangios-social-item"
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="Mạng xã hội"
               >
-                {b.iconUrl && (
-                  /* eslint-disable-next-line @next/next/no-img-element -- URL do admin dán */
-                  <img src={b.iconUrl} alt="" width={34} height={34} />
-                )}
-                <span>
-                  <strong>{b.title}</strong>
-                  {b.subtitle && <span>{b.subtitle}</span>}
-                </span>
+                {/* eslint-disable-next-line @next/next/no-img-element -- URL do admin dán */}
+                <img src={s.iconUrl} alt="Social" width={40} height={40} />
               </a>
             ))}
           </div>
         )}
 
-        {/* Menu danh mục các mảng (Không còn nút ALL trên trang chủ) */}
-        {groups.length > 0 && (
-          <div className="mdarker-category-hub-container" style={{ marginBottom: 24 }}>
-            <CategoryMenu
-              categories={groups.map((g) => ({
-                id: g.id,
-                title: g.title,
-                slug: g.slug,
-                icon: g.icon,
-                badge: g.badge,
-                desc: g.desc,
-                appCount: g.apps.length,
-              }))}
-              selectedId={-1}
-              useLinks={true}
-              hideAllTab={true}
-            />
+        {/* LINK BOXES */}
+        {linkBoxes.length > 0 && (
+          <div className="vthangios-linkbox-section">
+            {linkBoxes.map((b) => (
+              <div key={b.id}>
+                <div className="vthangios-linkbox">
+                  <div className="vthangios-linkbox-item">
+                    <p className="vthangios-linkbox-title">{b.title}</p>
+                    <a href={b.url} className="vthangios-link-btn" target="_blank" rel="noopener noreferrer">
+                      {b.iconUrl ? (
+                        /* eslint-disable-next-line @next/next/no-img-element -- URL do admin dán */
+                        <img src={b.iconUrl} width={34} height={34} alt="" />
+                      ) : (
+                        <i className="fas fa-link" aria-hidden="true" />
+                      )}
+                    </a>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         )}
 
-        {/* Chuyên trang Blog về mdarker thay cho menu ALL */}
-        <MdarkerBlog
-          posts={posts.map((p) => ({
-            id: p.id,
-            title: p.title,
-            slug: p.slug,
-            summary: p.summary,
-            content: p.content,
-            coverUrl: p.coverUrl,
-            category: p.category,
-            tags: p.tags,
-            views: p.views,
-            pinned: p.pinned,
-            visible: p.visible,
-            order: p.order,
-            createdAt: p.createdAt.toISOString(),
-          }))}
-          authorName={site.name}
-          authorAvatar={site.avatarUrl}
-        />
+        {/* APP GROUPS */}
+        <section className="vthangios-app-section" aria-label="Danh sách ứng dụng">
+          {groups.map((group) => {
+            if (group.apps.length === 0) return null;
+            return (
+              <div key={group.id} className="vthangios-group-block" id={`group-${group.id}`}>
+                {groups.length > 1 && (
+                  <h2 className="vthangios-section-title">
+                    {group.title}
+                  </h2>
+                )}
+                <div className="vthangios-app-list">
+                  {group.apps.map((app) => (
+                    <div key={app.id} className="vthangios-app-entry">
+                      <AppCard app={app} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
 
-      <StatsBar total={counter?.total ?? 0} today={daily?.count ?? 0} />
-      <LiveClock />
-
-      {site.ytBannerOn && site.ytChannelUrl && (
-        <div className="mdarker-yt-banner">
-          <div className="mdarker-yt-info">
-            <i className="fa-solid fa-video mdarker-yt-icon" aria-hidden="true" />
-            <div>
-              <p className="mdarker-yt-title">Theo Dõi Kênh YouTube</p>
-              <p className="mdarker-yt-desc">Cập nhật video hướng dẫn mới nhất</p>
+          {allApps.length === 0 && (
+            <div style={{ textAlign: "center", padding: "40px 16px", color: "var(--vi-text-muted)" }}>
+              Chưa có ứng dụng nào được hiển thị.
             </div>
-          </div>
-          <a
-            href={site.ytChannelUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mdarker-yt-btn"
-          >
-            <i className="fa-brands fa-youtube" aria-hidden="true" /> Subscribe Ngay
-          </a>
-        </div>
-      )}
+          )}
+        </section>
 
-      <footer className="mdarker-footer">{site.footerText}</footer>
-    </main>
-  </>
+        {/* WIDGETS */}
+        <div className="vthangios-widgets">
+          {/* YOUTUBE SUBSCRIBE BANNER */}
+          {site.ytBannerOn && site.ytChannelUrl && (
+            <div className="vthangios-yt-banner">
+              <div className="vthangios-yt-main">
+                <div className="vthangios-yt-head">
+                  {site.avatarUrl ? (
+                    /* eslint-disable-next-line @next/next/no-img-element -- URL do admin dán */
+                    <img
+                      className="vthangios-yt-avatar"
+                      src={site.avatarUrl}
+                      alt={site.name}
+                      width={80}
+                      height={80}
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="vthangios-yt-icon">
+                      <i className="fa-brands fa-youtube" aria-hidden="true" />
+                    </div>
+                  )}
+                  <div className="vthangios-yt-text">
+                    <p className="vthangios-yt-title">{site.name}</p>
+                    <p className="vthangios-yt-handle">
+                      @{site.name.toLowerCase().replace(/[^a-z0-9]/g, "")}
+                    </p>
+                    <p className="vthangios-yt-meta">
+                      <span>Kênh YouTube chính thức</span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <a
+                href={site.ytChannelUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="vthangios-yt-btn"
+              >
+                Đăng ký
+              </a>
+            </div>
+          )}
+        </div>
+
+        {/* FOOTER */}
+        <footer className="vthangios-footer">
+          &copy; Designer by {site.footerText || site.name} 2026
+        </footer>
+      </main>
+    </>
   );
 }
