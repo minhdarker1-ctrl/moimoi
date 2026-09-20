@@ -68,10 +68,10 @@ export default function NovaTopBar({
               fontWeight="900"
               fill="url(#nova_lg)"
             >
-              D
+              O
             </text>
           </svg>
-          <span className="nova-brand-text">THE DARKER</span>
+          <span className="nova-brand-text">ONCYBER</span>
         </Link>
       </div>
 

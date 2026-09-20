@@ -251,34 +251,6 @@ export default function MusicPlayer() {
                 const dur = e.target.getDuration();
                 if (dur > 0) setDuration(dur);
               } catch {}
-
-              // Tự động phát nếu trình duyệt cho phép
-              try {
-                e.target.playVideo();
-              } catch {}
-
-              // Lắng nghe tương tác đầu tiên để kích hoạt phát nhạc nếu browser chặn autoplay
-              const triggerPlayOnGesture = () => {
-                if (userPausedRef.current) return;
-                try {
-                  playerRef.current?.unMute();
-                  playerRef.current?.setVolume(100);
-                  playerRef.current?.playVideo();
-                } catch {}
-                cleanupGesture();
-              };
-
-              const cleanupGesture = () => {
-                window.removeEventListener("pointerdown", triggerPlayOnGesture);
-                window.removeEventListener("touchstart", triggerPlayOnGesture);
-                window.removeEventListener("click", triggerPlayOnGesture);
-                window.removeEventListener("keydown", triggerPlayOnGesture);
-              };
-
-              window.addEventListener("pointerdown", triggerPlayOnGesture, { once: true, passive: true });
-              window.addEventListener("touchstart", triggerPlayOnGesture, { once: true, passive: true });
-              window.addEventListener("click", triggerPlayOnGesture, { once: true, passive: true });
-              window.addEventListener("keydown", triggerPlayOnGesture, { once: true, passive: true });
             },
             onStateChange: (e) => {
               if (!isMounted) return;

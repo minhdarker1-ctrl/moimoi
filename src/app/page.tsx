@@ -183,7 +183,9 @@ export default async function Home() {
                   <div className="vthangios-yt-text">
                     <p className="vthangios-yt-title">{site.name}</p>
                     <p className="vthangios-yt-handle">
-                      @{site.name.toLowerCase().replace(/[^a-z0-9]/g, "")}
+                      {site.ytChannelUrl?.includes("@")
+                        ? `@${site.ytChannelUrl.split("@")[1].split("/")[0].split("?")[0]}`
+                        : `@${site.name.toLowerCase().replace(/[^a-z0-9]/g, "")}`}
                     </p>
                     <p className="vthangios-yt-meta">
                       <span>Kênh YouTube chính thức</span>

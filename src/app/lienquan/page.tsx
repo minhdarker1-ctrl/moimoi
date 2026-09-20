@@ -9,7 +9,7 @@ export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: "Liên Quân Mobile - Mod Skin, Menu & Bản Đồ Sáng | The Darker",
+    title: "Liên Quân Mobile - Mod Skin, Menu & Bản Đồ Sáng | OnCyber",
     description: "Tổng hợp các bản mod skin an toàn, menu map sáng và file config tối ưu 60-120fps cho Liên Quân Mobile.",
     keywords: ["liên quân mobile", "mod skin liên quân", "map sáng lq", "config lq 60fps", "tối ưu liên quân"],
   };

@@ -33,7 +33,7 @@ export async function GET(req: Request) {
         {
           id: 1,
           category: "system",
-          title: "Chào mừng đến với The Darker!",
+          title: "Chào mừng đến với OnCyber!",
           message: "Hệ thống Dashboard mới đã chính thức hoạt động. Bạn có thể lưu trữ key, quay thưởng và xem bảng xếp hạng mỗi ngày.",
           isRead: false,
           linkUrl: "/dashboard",

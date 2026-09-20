@@ -18,11 +18,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     where: { slug, visible: true },
   });
 
-  if (!group) return { title: "Không tìm thấy trang | The Darker" };
+  if (!group) return { title: "Không tìm thấy trang | OnCyber" };
 
   return {
-    title: `${group.title} | The Darker`,
-    description: group.desc || `Khám phá các sản phẩm và công cụ thuộc mảng ${group.title} tại The Darker.`,
+    title: `${group.title} | OnCyber`,
+    description: group.desc || `Khám phá các sản phẩm và công cụ thuộc mảng ${group.title} tại OnCyber.`,
   };
 }
 

@@ -35,7 +35,7 @@ export default function NovaReferralCard({
       </div>
 
       <p className="nova-ref-desc">
-        Mời bạn bè sử dụng The Darker — nhận ngay <strong className="text-emerald-400">+500 coins</strong> và <strong className="text-amber-400">+1 lượt quay</strong> khi bạn bè đăng ký và lấy key lần đầu tiên.
+        Mời bạn bè sử dụng OnCyber — nhận ngay <strong className="text-emerald-400">+500 coins</strong> và <strong className="text-amber-400">+1 lượt quay</strong> khi bạn bè đăng ký và lấy key lần đầu tiên.
       </p>
 
       <div className="nova-ref-link-box" onClick={handleCopy} title="Bấm để sao chép liên kết">

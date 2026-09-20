@@ -59,7 +59,7 @@ export default function NovaInstallBanner() {
       </div>
 
       <div className="nova-install-body">
-        <div className="nova-install-title">📱 Bạn chưa cài đặt App The Darker?</div>
+        <div className="nova-install-title">📱 Bạn chưa cài đặt App OnCyber?</div>
         <div className="nova-install-desc">
           Thêm vào màn hình chính để trải nghiệm mượt mà, truy cập nhanh 1 chạm và không bị gián đoạn.
         </div>

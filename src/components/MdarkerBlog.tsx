@@ -40,7 +40,7 @@ function calculateReadingTime(text: string): number {
 
 export default function MdarkerBlog({
   posts,
-  authorName = "The Darker",
+  authorName = "OnCyber",
   authorAvatar = "https://i.ibb.co/jv75LbdS/6123108838828349044.jpg",
 }: MdarkerBlogProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
@@ -87,7 +87,7 @@ export default function MdarkerBlog({
   return (
     <div className="mdarker-blog-hub">
       {/* 1. PROFILE / ABOUT MDARKER HERO CARD */}
-      <section className="mdarker-about-card" aria-label="Giới thiệu về The Darker">
+      <section className="mdarker-about-card" aria-label="Giới thiệu về OnCyber">
         <div className="mdarker-about-glow" aria-hidden="true" />
         <div className="mdarker-about-header">
           <div className="mdarker-about-avatar-box">
@@ -104,7 +104,7 @@ export default function MdarkerBlog({
           <div className="mdarker-about-meta">
             <div className="mdarker-about-title-row">
               <h2 className="mdarker-about-title">{authorName}</h2>
-              <span className="mdarker-about-tag-pro">MDARKER BLOG</span>
+              <span className="mdarker-about-tag-pro">ONCYBER BLOG</span>
             </div>
             <p className="mdarker-about-sub">
               Developer • Mobile Modding • Game Performance Enthusiast
@@ -113,7 +113,7 @@ export default function MdarkerBlog({
         </div>
 
         <p className="mdarker-about-bio">
-          Chào mừng bạn đến với chuyên trang bài viết & blog chia sẻ của <strong>The Darker</strong>.
+          Chào mừng bạn đến với chuyên trang bài viết & blog chia sẻ của <strong>OnCyber</strong>.
           Nơi tổng hợp các hướng dẫn cài đặt mod, tinh chỉnh độ nhạy game, mẹo tối ưu hệ thống
           iOS & Android và cập nhật những công cụ tiện ích mới nhất dành riêng cho cộng đồng.
         </p>

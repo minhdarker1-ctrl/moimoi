@@ -10,20 +10,20 @@ async function main() {
     update: {},
     create: {
       id: 1,
-      name: "Văn Thắng iOS",
+      name: "OnCyber",
       iam: "Hi, i am",
       verified: true,
       avatarUrl: `${U}/uploads/intro/1785225956_f40be83fd24a69c4.jpeg`,
       avatarFrameUrl: `${U}/uploads/intro/1787761701_27566707d8893895.png`,
       typedLines: JSON.stringify(["Developer.", "Designer.", "Creator.", "Gamer."]),
-      seoTitle: "Văn Thắng iOS",
+      seoTitle: "OnCyber",
       seoDescription:
-        "Nền tảng cung cấp giải pháp công nghệ ios 5.0 giúp game thủ leo rank an toàn và hiệu quả.",
-      seoKeywords: "vthangios, văn thắng ios",
+        "Nền tảng cung cấp giải pháp công nghệ ios giúp game thủ leo rank an toàn và hiệu quả.",
+      seoKeywords: "oncyber, oncyberr",
       faviconUrl: `${U}/uploads/intro/1785223665_087e144254b7ed32.png`,
-      ytChannelUrl: "https://youtube.com/@vthangios",
+      ytChannelUrl: "https://youtube.com/@oncyberr",
       ytBannerOn: true,
-      footerText: "© Designer by Văn Thắng iOS 2026",
+      footerText: "© Designer by OnCyber 2026",
     },
   });
 

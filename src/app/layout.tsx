@@ -15,7 +15,7 @@ const quicksand = Quicksand({
 
 export async function generateMetadata(): Promise<Metadata> {
   const site = await db.site.findUnique({ where: { id: 1 } }).catch(() => null);
-  const title = site?.seoTitle || site?.name || "Website";
+  const title = site?.seoTitle || site?.name || "OnCyber";
   const description = site?.seoDescription || "";
   const base = process.env.NEXT_PUBLIC_SITE_URL;
   const images = site?.ogImageUrl ? [site.ogImageUrl] : undefined;

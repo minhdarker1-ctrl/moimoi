@@ -69,12 +69,12 @@ export default function NovaDrawer({ open, onClose, user }: NovaDrawerProps) {
               <polygon points="13,2 24,13 13,24 2,13" fill="url(#drw_lg)" opacity="0.25" />
               <polygon points="13,2 24,13 13,24 2,13" fill="none" stroke="url(#drw_lg)" strokeWidth="1.8" />
               <text x="13" y="17" textAnchor="middle" fontFamily="system-ui" fontSize="11" fontWeight="900" fill="url(#drw_lg)">
-                D
+                O
               </text>
             </svg>
           </div>
           <div>
-            <div className="nova-drawer-title">THE DARKER</div>
+            <div className="nova-drawer-title">ONCYBER</div>
             <div className="nova-drawer-sub">Hệ Thống Tiện Ích iOS &amp; Free Fire</div>
           </div>
         </div>
@@ -171,7 +171,7 @@ export default function NovaDrawer({ open, onClose, user }: NovaDrawerProps) {
 
         {/* Footer */}
         <div className="nova-drawer-foot">
-          <p>© 2026 The Darker iOS. All rights reserved.</p>
+          <p>© 2026 OnCyber iOS. All rights reserved.</p>
         </div>
       </aside>
     </>
