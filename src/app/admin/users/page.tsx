@@ -29,6 +29,7 @@ import {
   Monitor,
   Laptop,
 } from "lucide-react";
+import { ClearLogsButton, RoleSelect, DeleteUserButton } from "./UserAdminClient";
 
 export const dynamic = "force-dynamic";
 
@@ -686,30 +687,7 @@ export default async function AdminUsersPage({ searchParams }: Props) {
           >
             <form action={clearServiceLogs}>
               <input type="hidden" name="serviceType" value={serviceFilter} />
-              <button
-                type="submit"
-                className="vt-btn-sm"
-                style={{
-                  background: "transparent",
-                  color: "#ef4444",
-                  border: "1px solid rgba(239, 68, 68, 0.3)",
-                  padding: "6px 12px",
-                  borderRadius: 6,
-                  fontSize: 12,
-                  cursor: "pointer",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 6,
-                }}
-                onClick={(e) => {
-                  if (!confirm(`Bạn có chắc muốn xóa tất cả log của dịch vụ [${serviceFilter}]?`)) {
-                    e.preventDefault();
-                  }
-                }}
-              >
-                <Trash2 size={13} />
-                <span>Xóa sạch nhật ký ({serviceFilter})</span>
-              </button>
+              <ClearLogsButton serviceType={serviceFilter} />
             </form>
 
             {/* Pagination */}
@@ -860,24 +838,7 @@ export default async function AdminUsersPage({ searchParams }: Props) {
                       <td style={{ textAlign: "center" }}>
                         <form action={updateUserRole} style={{ display: "inline-block" }}>
                           <input type="hidden" name="userId" value={u.id} />
-                          <select
-                            name="role"
-                            defaultValue={u.role}
-                            onChange={(e) => e.target.form?.requestSubmit()}
-                            style={{
-                              padding: "4px 8px",
-                              borderRadius: 6,
-                              fontSize: 12,
-                              fontWeight: 700,
-                              background: u.role === "ADMIN" ? "rgba(239, 68, 68, 0.12)" : "rgba(59, 130, 246, 0.12)",
-                              color: u.role === "ADMIN" ? "#ef4444" : "#3b82f6",
-                              border: "1px solid var(--vi-border)",
-                              cursor: "pointer",
-                            }}
-                          >
-                            <option value="USER">USER</option>
-                            <option value="ADMIN">ADMIN</option>
-                          </select>
+                          <RoleSelect currentRole={u.role} />
                         </form>
                       </td>
 
@@ -969,24 +930,7 @@ export default async function AdminUsersPage({ searchParams }: Props) {
                       <td style={{ textAlign: "right" }}>
                         <form action={deleteUser}>
                           <input type="hidden" name="userId" value={u.id} />
-                          <button
-                            type="submit"
-                            style={{
-                              background: "transparent",
-                              border: "none",
-                              color: "#ef4444",
-                              cursor: "pointer",
-                              padding: 4,
-                            }}
-                            title="Xóa tài khoản này"
-                            onClick={(e) => {
-                              if (!confirm(`Bạn có chắc muốn xóa tài khoản @${u.username}?`)) {
-                                e.preventDefault();
-                              }
-                            }}
-                          >
-                            <Trash2 size={15} />
-                          </button>
+                          <DeleteUserButton username={u.username} />
                         </form>
                       </td>
                     </tr>

@@ -1,9 +1,19 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 
-export default function Error({ reset }: { error: Error; reset: () => void }) {
-  // Không hiện error.message: có thể chứa chuỗi kết nối DB hoặc chi tiết nội bộ.
+export default function Error({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) {
+  useEffect(() => {
+    console.error("Next.js error boundary caught:", error);
+  }, [error]);
+
   return (
     <main>
       <div className="vt-key-card">
@@ -11,6 +21,11 @@ export default function Error({ reset }: { error: Error; reset: () => void }) {
         <p className="vt-hint">
           Hệ thống đang gặp sự cố tạm thời. Thử tải lại trang sau vài giây.
         </p>
+        {process.env.NODE_ENV !== "production" && error?.message && (
+          <p style={{ fontSize: 12, color: "#ef4444", fontFamily: "monospace", marginTop: 8 }}>
+            {error.message}
+          </p>
+        )}
         <div className="vt-actions" style={{ marginTop: 14, justifyContent: "center" }}>
           <button className="vt-btn-primary" type="button" onClick={reset}>
             Thử lại
@@ -23,3 +38,4 @@ export default function Error({ reset }: { error: Error; reset: () => void }) {
     </main>
   );
 }
+
