@@ -6110,18 +6110,27 @@ body.vthangios-dark .mdarker-music-mini-dot {
 }
 
 .admin-stat-card {
-  background: rgba(255, 255, 255, 0.85);
-  border: 1px solid var(--vi-border);
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 18px;
   padding: 16px 18px;
   display: flex;
   align-items: center;
   gap: 14px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
 }
 
 [data-theme="dark"] .admin-stat-card {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(12px);
 }
 
 .admin-stat-icon {
@@ -6150,14 +6159,22 @@ body.vthangios-dark .mdarker-music-mini-dot {
 .admin-stat-val {
   font-size: 22px;
   font-weight: 800;
-  color: var(--vi-text);
+  color: #0f172a;
   letter-spacing: -0.02em;
+}
+
+[data-theme="dark"] .admin-stat-val {
+  color: #f8fafc;
 }
 
 .admin-stat-lbl {
   font-size: 12px;
-  color: var(--vi-muted);
+  color: #64748b;
   font-weight: 600;
+}
+
+[data-theme="dark"] .admin-stat-lbl {
+  color: #94a3b8;
 }
 
 /* ======================================================

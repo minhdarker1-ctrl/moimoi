@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { db } from "@/lib/db";
-import { requireAdmin, createSession, destroySession, verifyPassword } from "@/lib/auth";
+import { requireAdmin, createSession, destroySession, verifyPassword, verifyUserPassword, hashPassword } from "@/lib/auth";
 import { encryptToken, generateKey, hashKey, vnDate } from "@/lib/crypto";
 import { clientIp, loginLockedFor, recordLoginFail, clearLoginFails } from "@/lib/guard";
 import { isProvider } from "@/lib/shorteners";
@@ -72,15 +72,80 @@ export async function login(fd: FormData): Promise<{ error: string } | void> {
     return { error: `Sai quá nhiều lần. Thử lại sau ${m} phút.` };
   }
 
+  const rawUsername = String(fd.get("username") ?? "").trim().toLowerCase();
   const pw = String(fd.get("password") ?? "");
-  if (!(await verifyPassword(pw))) {
+  const redirectTo = String(fd.get("redirect") ?? "").trim();
+
+  if (!pw) {
+    return { error: "Vui lòng nhập mật khẩu quản trị." };
+  }
+
+  // 1. Nếu có nhập tên tài khoản cụ thể (khác admin) -> tra cứu bảng User
+  if (rawUsername && rawUsername !== "admin" && rawUsername !== "administrator") {
+    const userRecord = await db.user.findFirst({
+      where: {
+        OR: [{ username: rawUsername }, { email: rawUsername }],
+      },
+    });
+
+    if (userRecord) {
+      if (userRecord.role !== "ADMIN") {
+        await recordLoginFail(ip);
+        return { error: "Tài khoản này không có quyền quản trị viên." };
+      }
+
+      const match = await verifyUserPassword(pw, userRecord.passwordHash);
+      if (!match) {
+        await recordLoginFail(ip);
+        return { error: "Tài khoản hoặc mật khẩu không chính xác." };
+      }
+
+      await clearLoginFails(ip);
+      await createSession({
+        id: userRecord.id,
+        username: userRecord.username,
+        email: userRecord.email,
+        name: userRecord.name,
+        avatar: userRecord.avatar,
+        role: "ADMIN",
+      });
+
+      redirect(redirectTo.startsWith("/admin") && redirectTo !== "/admin/login" ? redirectTo : "/admin");
+    }
+  }
+
+  // 2. Kiểm tra mật khẩu Master Admin từ ADMIN_PASSWORD_HASH
+  const isMasterMatch = await verifyPassword(pw);
+  if (!isMasterMatch) {
     await recordLoginFail(ip);
-    return { error: "Mật khẩu không đúng." };
+    return { error: "Tài khoản hoặc mật khẩu quản trị không chính xác." };
+  }
+
+  // Tìm hoặc tạo tài khoản admin trong database
+  let adminRecord = await db.user.findUnique({ where: { username: "admin" } });
+  if (!adminRecord) {
+    try {
+      const hash = await hashPassword(pw);
+      adminRecord = await db.user.create({
+        data: {
+          username: "admin",
+          name: "Quản trị viên",
+          passwordHash: hash,
+          role: "ADMIN",
+        },
+      });
+    } catch {}
   }
 
   await clearLoginFails(ip);
-  await createSession();
-  redirect("/admin");
+  await createSession({
+    id: adminRecord?.id ?? 1,
+    username: adminRecord?.username ?? "admin",
+    name: adminRecord?.name ?? "Quản trị viên",
+    role: "ADMIN",
+  });
+
+  redirect(redirectTo.startsWith("/admin") && redirectTo !== "/admin/login" ? redirectTo : "/admin");
 }
 
 export async function logout() {

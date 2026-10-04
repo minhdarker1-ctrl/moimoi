@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
+import { getCurrentUser } from "@/lib/auth";
 import AdminNav from "../AdminNav";
 import {
   updateUserRole,
@@ -40,6 +42,11 @@ interface Props {
 }
 
 export default async function AdminUsersPage({ searchParams }: Props) {
+  const currentUser = await getCurrentUser();
+  if (!currentUser || currentUser.role !== "ADMIN") {
+    redirect("/admin/login?redirect=/admin/users");
+  }
+
   const sp = searchParams ? await searchParams : {};
   const currentTab = sp.tab === "users" ? "users" : "logs";
   const serviceFilter = sp.service?.trim().toUpperCase() || "ALL";
@@ -48,32 +55,45 @@ export default async function AdminUsersPage({ searchParams }: Props) {
   const pageSize = 35;
   const skip = (page - 1) * pageSize;
 
-  // Thống kê tổng quan KPI
-  const [
-    totalUsers,
-    adminUsers,
-    totalLogs,
-    locketLogs,
-    freefireLogs,
-    aovLogs,
-    otherLogs,
-  ] = await Promise.all([
-    db.user.count(),
-    db.user.count({ where: { role: "ADMIN" } }),
-    db.serviceUsageLog.count(),
-    db.serviceUsageLog.count({ where: { serviceType: "LOCKET_GOLD" } }),
-    db.serviceUsageLog.count({ where: { serviceType: "FREE_FIRE" } }),
-    db.serviceUsageLog.count({ where: { serviceType: "AOV" } }),
-    db.serviceUsageLog.count({ where: { serviceType: "OTHER" } }),
-  ]);
+  // Thống kê tổng quan KPI (bọc try-catch chống lỗi sập trang)
+  let totalUsers = 0;
+  let adminUsers = 0;
+  let totalLogs = 0;
+  let locketLogs = 0;
+  let freefireLogs = 0;
+  let aovLogs = 0;
+  let otherLogs = 0;
+  let uniqueLocketAccounts = 0;
 
-  // Đếm số tài khoản Locket duy nhất
-  const uniqueLocketAccountsRaw = await db.serviceUsageLog.groupBy({
-    by: ["targetUser"],
-    where: { serviceType: "LOCKET_GOLD" },
-    _count: true,
-  });
-  const uniqueLocketAccounts = uniqueLocketAccountsRaw.length;
+  try {
+    [
+      totalUsers,
+      adminUsers,
+      totalLogs,
+      locketLogs,
+      freefireLogs,
+      aovLogs,
+      otherLogs,
+    ] = await Promise.all([
+      db.user.count(),
+      db.user.count({ where: { role: "ADMIN" } }),
+      db.serviceUsageLog.count(),
+      db.serviceUsageLog.count({ where: { serviceType: "LOCKET_GOLD" } }),
+      db.serviceUsageLog.count({ where: { serviceType: "FREE_FIRE" } }),
+      db.serviceUsageLog.count({ where: { serviceType: "AOV" } }),
+      db.serviceUsageLog.count({ where: { serviceType: "OTHER" } }),
+    ]);
+
+    // Đếm số tài khoản Locket duy nhất qua distinct query an toàn
+    const uniqueLocketAccountsRaw = await db.serviceUsageLog.findMany({
+      where: { serviceType: "LOCKET_GOLD" },
+      select: { targetUser: true },
+      distinct: ["targetUser"],
+    });
+    uniqueLocketAccounts = uniqueLocketAccountsRaw.length;
+  } catch (err) {
+    console.error("Lỗi khi tải KPIs người dùng & dịch vụ:", err);
+  }
 
   const stats = [
     {
@@ -118,34 +138,38 @@ export default async function AdminUsersPage({ searchParams }: Props) {
   let totalLogsFiltered = 0;
 
   if (currentTab === "logs") {
-    const whereLogs: any = {};
-    if (serviceFilter !== "ALL") {
-      whereLogs.serviceType = serviceFilter;
-    }
-    if (query) {
-      whereLogs.OR = [
-        { targetUser: { contains: query, mode: "insensitive" } },
-        { serviceName: { contains: query, mode: "insensitive" } },
-        { ip: { contains: query, mode: "insensitive" } },
-        { device: { contains: query, mode: "insensitive" } },
-        { user: { username: { contains: query, mode: "insensitive" } } },
-      ];
-    }
+    try {
+      const whereLogs: any = {};
+      if (serviceFilter !== "ALL") {
+        whereLogs.serviceType = serviceFilter;
+      }
+      if (query) {
+        whereLogs.OR = [
+          { targetUser: { contains: query, mode: "insensitive" } },
+          { serviceName: { contains: query, mode: "insensitive" } },
+          { ip: { contains: query, mode: "insensitive" } },
+          { device: { contains: query, mode: "insensitive" } },
+          { user: { username: { contains: query, mode: "insensitive" } } },
+        ];
+      }
 
-    [totalLogsFiltered, logs] = await Promise.all([
-      db.serviceUsageLog.count({ where: whereLogs }),
-      db.serviceUsageLog.findMany({
-        where: whereLogs,
-        orderBy: { createdAt: "desc" },
-        skip,
-        take: pageSize,
-        include: {
-          user: {
-            select: { id: true, username: true, name: true, role: true },
+      [totalLogsFiltered, logs] = await Promise.all([
+        db.serviceUsageLog.count({ where: whereLogs }),
+        db.serviceUsageLog.findMany({
+          where: whereLogs,
+          orderBy: { createdAt: "desc" },
+          skip,
+          take: pageSize,
+          include: {
+            user: {
+              select: { id: true, username: true, name: true, role: true },
+            },
           },
-        },
-      }),
-    ]);
+        }),
+      ]);
+    } catch (err) {
+      console.error("Lỗi khi tải danh sách logs dịch vụ:", err);
+    }
   }
 
   // Dữ liệu cho TAB 2: DANH SÁCH THÀNH VIÊN (Registered Users)
@@ -153,29 +177,33 @@ export default async function AdminUsersPage({ searchParams }: Props) {
   let totalUsersFiltered = 0;
 
   if (currentTab === "users") {
-    const whereUsers: any = {};
-    if (query) {
-      whereUsers.OR = [
-        { username: { contains: query, mode: "insensitive" } },
-        { email: { contains: query, mode: "insensitive" } },
-        { name: { contains: query, mode: "insensitive" } },
-      ];
-    }
+    try {
+      const whereUsers: any = {};
+      if (query) {
+        whereUsers.OR = [
+          { username: { contains: query, mode: "insensitive" } },
+          { email: { contains: query, mode: "insensitive" } },
+          { name: { contains: query, mode: "insensitive" } },
+        ];
+      }
 
-    [totalUsersFiltered, usersList] = await Promise.all([
-      db.user.count({ where: whereUsers }),
-      db.user.findMany({
-        where: whereUsers,
-        orderBy: { createdAt: "desc" },
-        skip,
-        take: pageSize,
-        include: {
-          _count: {
-            select: { savedKeys: true, serviceLogs: true },
+      [totalUsersFiltered, usersList] = await Promise.all([
+        db.user.count({ where: whereUsers }),
+        db.user.findMany({
+          where: whereUsers,
+          orderBy: { createdAt: "desc" },
+          skip,
+          take: pageSize,
+          include: {
+            _count: {
+              select: { savedKeys: true, serviceLogs: true },
+            },
           },
-        },
-      }),
-    ]);
+        }),
+      ]);
+    } catch (err) {
+      console.error("Lỗi khi tải danh sách users:", err);
+    }
   }
 
   const currentTotal = currentTab === "logs" ? totalLogsFiltered : totalUsersFiltered;

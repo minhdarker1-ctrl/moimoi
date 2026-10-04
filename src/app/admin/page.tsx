@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
+import { getCurrentUser } from "@/lib/auth";
 import { vnDate } from "@/lib/crypto";
 import AdminNav from "./AdminNav";
 import { updateCounter } from "./actions";
@@ -26,20 +28,38 @@ export default async function AdminHome({
 }: {
   searchParams?: Promise<{ counter_saved?: string }>;
 }) {
+  const user = await getCurrentUser();
+  if (!user || user.role !== "ADMIN") {
+    redirect("/admin/login");
+  }
+
   const sp = searchParams ? await searchParams : {};
   const isSaved = sp.counter_saved === "1";
   const today = vnDate();
 
-  const [counter, daily, users, apps, keys, active, shorteners, serviceLogsCount] = await Promise.all([
-    db.counter.findUnique({ where: { id: 1 } }),
-    db.dailyHit.findUnique({ where: { date: today } }),
-    db.user.count(),
-    db.app.count(),
-    db.appKey.count(),
-    db.appKey.count({ where: { revoked: false, expiresAt: { gt: new Date() } } }),
-    db.shortener.count({ where: { enabled: true } }),
-    db.serviceUsageLog.count(),
-  ]);
+  let counter = null;
+  let daily = null;
+  let users = 0;
+  let apps = 0;
+  let keys = 0;
+  let active = 0;
+  let shorteners = 0;
+  let serviceLogsCount = 0;
+
+  try {
+    [counter, daily, users, apps, keys, active, shorteners, serviceLogsCount] = await Promise.all([
+      db.counter.findUnique({ where: { id: 1 } }),
+      db.dailyHit.findUnique({ where: { date: today } }),
+      db.user.count(),
+      db.app.count(),
+      db.appKey.count(),
+      db.appKey.count({ where: { revoked: false, expiresAt: { gt: new Date() } } }),
+      db.shortener.count({ where: { enabled: true } }),
+      db.serviceUsageLog.count(),
+    ]);
+  } catch (err) {
+    console.error("Error loading admin stats:", err);
+  }
 
   const stats = [
     { label: "Tổng lượt truy cập", value: counter?.total ?? 0, icon: Eye, color: "stat-purple" },
@@ -62,35 +82,37 @@ export default async function AdminHome({
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          background: "linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(168, 85, 247, 0.12))",
-          border: "1px solid rgba(99, 102, 241, 0.25)",
+          background: "var(--vi-card, #ffffff)",
+          border: "1px solid rgba(99, 102, 241, 0.35)",
+          boxShadow: "0 4px 20px rgba(0, 0, 0, 0.05)",
           borderRadius: 14,
-          padding: "14px 20px",
+          padding: "16px 20px",
           marginBottom: 20,
           flexWrap: "wrap",
           gap: 12,
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
           <div
             style={{
-              width: 40,
-              height: 40,
-              borderRadius: 10,
-              background: "var(--vi-primary, #6366f1)",
+              width: 44,
+              height: 44,
+              borderRadius: 12,
+              background: "linear-gradient(135deg, #6366f1, #a855f7)",
               color: "#fff",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
+              flexShrink: 0,
             }}
           >
-            <Users size={20} />
+            <Users size={22} />
           </div>
           <div>
-            <div style={{ fontWeight: 800, fontSize: 14, color: "var(--vi-text)" }}>
+            <div style={{ fontWeight: 800, fontSize: 15, color: "var(--vi-text)" }}>
               Quản Lý Người Dùng & Dịch Vụ Mới
             </div>
-            <div style={{ fontSize: 12, color: "var(--vi-muted)" }}>
+            <div style={{ fontSize: 13, color: "var(--vi-muted)", marginTop: 2 }}>
               Xem danh sách ai đang dùng Locket Gold, Free Fire, Liên Quân và quản lý tài khoản thành viên.
             </div>
           </div>
@@ -103,7 +125,7 @@ export default async function AdminHome({
             display: "inline-flex",
             alignItems: "center",
             gap: 6,
-            padding: "8px 16px",
+            padding: "9px 18px",
             fontSize: 13,
             fontWeight: 700,
           }}

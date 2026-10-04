@@ -28,17 +28,17 @@ export async function middleware(req: NextRequest) {
   const token = req.cookies.get(SESSION_COOKIE)?.value || req.cookies.get(LEGACY_COOKIE)?.value;
   const auth = await verifyAuth(token);
 
-  // Bảo vệ route /admin
+  // Bảo vệ route /admin (yêu cầu quyền ADMIN, chưa đăng nhập chuyển về /admin/login)
   if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
     if (auth?.role !== "ADMIN") {
       const url = req.nextUrl.clone();
-      url.pathname = "/login";
+      url.pathname = "/admin/login";
       url.searchParams.set("redirect", pathname);
       return NextResponse.redirect(url);
     }
   }
 
-  // Bảo vệ route /dashboard
+  // Bảo vệ route /dashboard (yêu cầu thành viên đăng nhập)
   if (pathname.startsWith("/dashboard")) {
     if (!auth) {
       const url = req.nextUrl.clone();
@@ -48,16 +48,31 @@ export async function middleware(req: NextRequest) {
     }
   }
 
-  // Nếu đã đăng nhập mà cố vào /login, /register hoặc /admin/login
-  if ((pathname === "/login" || pathname === "/register" || pathname === "/admin/login") && auth) {
+  // Nếu đã đăng nhập ADMIN mà truy cập /admin/login -> chuyển thẳng vào /admin
+  if (pathname === "/admin/login" && auth?.role === "ADMIN") {
+    const url = req.nextUrl.clone();
+    url.pathname = "/admin";
+    return NextResponse.redirect(url);
+  }
+
+  // Nếu đã đăng nhập mà cố vào /login hoặc /register
+  if ((pathname === "/login" || pathname === "/register") && auth) {
     const url = req.nextUrl.clone();
     url.pathname = auth.role === "ADMIN" ? "/admin" : "/dashboard";
     return NextResponse.redirect(url);
   }
 
-  return NextResponse.next();
+  const requestHeaders = new Headers(req.headers);
+  requestHeaders.set("x-pathname", pathname);
+
+  return NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  });
 }
 
 export const config = {
   matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 };
+
