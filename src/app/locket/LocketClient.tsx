@@ -243,13 +243,13 @@ Khoảng giữ an toàn sau kích hoạt được dành để bạn kiểm tra G
               <div className="locket-wf-step">
                 <span className="locket-wf-num">2</span>
                 <div className="locket-wf-text">
-                  <strong>Bước 2:</strong> Nhập tên đăng nhập cùng mật khẩu, <em>tuyệt đối chưa bấm Đăng nhập</em>.
+                  <strong>Bước 2:</strong> Nhập sẵn tên và mật khẩu, <em>tuyệt đối chưa bấm Đăng nhập</em>.
                 </div>
               </div>
               <div className="locket-wf-step">
                 <span className="locket-wf-num">3</span>
                 <div className="locket-wf-text">
-                  <strong>Bước 3:</strong> Gửi tên đăng nhập cho Admin và đợi kích hoạt (hoặc nhập vào ô bên dưới).
+                  <strong>Bước 3:</strong> Nhập tên đăng nhập vào ô bên dưới.
                 </div>
               </div>
               <div className="locket-wf-step">
