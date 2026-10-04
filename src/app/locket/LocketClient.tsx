@@ -17,6 +17,8 @@ export default function LocketClient() {
   const [step, setStep] = useState<number>(0);
   const [result, setResult] = useState<ActivateResult | null>(null);
   const [copied, setCopied] = useState(false);
+  const [completedAt, setCompletedAt] = useState<string>("");
+  const [copiedReceipt, setCopiedReceipt] = useState(false);
   const [dark, setDark] = useState(false);
 
   useEffect(() => {
@@ -62,6 +64,36 @@ export default function LocketClient() {
     } catch {}
   }
 
+  async function handleCopyReceipt() {
+    const timeStr = completedAt || "13:22:45 · 04/10/2026";
+    const receiptText = `✅ KÍCH HOẠT LOCKET GOLD THÀNH CÔNG
+──────────────
+👤 Tài khoản: ${target}
+📦 Gói dịch vụ: 🆓 Free
+💎 Hầm: Unlock Locket Gold
+🎟️ Đã sử dụng: 1 lượt
+📅 Hoàn tất: ${timeStr}
+
+✅ Liên kết cài DNS Giữ Gold đã sẵn sàng.
+
+📲 HOÀN TẤT TRÊN THIẾT BỊ
+1. Mở Locket và xác nhận Gold đã hiển thị.
+2. Chỉ sau khi thấy Gold, hãy cài và bật DNS bên dưới ngay; sau đó luôn duy trì DNS.
+
+Khoảng giữ an toàn sau kích hoạt được dành để bạn kiểm tra Gold và cài DNS trước khi nguồn xử lý được dùng cho tài khoản khác.
+
+⚠️ NẾU CHƯA THẤY GOLD
+• Đóng hẳn Locket khỏi màn hình đa nhiệm rồi mở lại.
+• Đăng xuất tài khoản và đăng nhập lại.
+• Nếu vẫn chưa có, xóa Locket và tải lại bản mới nhất.`;
+
+    try {
+      await navigator.clipboard.writeText(receiptText);
+      setCopiedReceipt(true);
+      setTimeout(() => setCopiedReceipt(false), 2000);
+    } catch {}
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const cleanTarget = target.trim();
@@ -85,6 +117,12 @@ export default function LocketClient() {
       clearTimeout(stepTimer1);
       clearTimeout(stepTimer2);
       setResult(data);
+      if (data.success) {
+        const now = new Date();
+        const pad = (n: number) => n.toString().padStart(2, "0");
+        const formatted = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())} · ${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()}`;
+        setCompletedAt(formatted);
+      }
     } catch {
       clearTimeout(stepTimer1);
       clearTimeout(stepTimer2);
@@ -182,6 +220,53 @@ export default function LocketClient() {
             </div>
           </div>
         </div>
+
+        {/* 5-STEP WORKFLOW GUIDE */}
+        {!result?.success && (
+          <div className="locket-workflow-box">
+            <div className="locket-wf-header">
+              <span className="locket-wf-badge">
+                <i className="fas fa-list-ol" /> QUY TRÌNH THỰC HIỆN
+              </span>
+              <h2 className="locket-wf-title">5 Bước Kích Hoạt Locket Gold</h2>
+              <p className="locket-wf-desc">
+                Vui lòng đọc kỹ và thực hiện đúng theo các bước dưới đây để tài khoản nhận gói Gold chuẩn xác nhất:
+              </p>
+            </div>
+            <div className="locket-wf-steps">
+              <div className="locket-wf-step">
+                <span className="locket-wf-num">1</span>
+                <div className="locket-wf-text">
+                  <strong>Bước 1:</strong> Mở Locket và đăng xuất tài khoản (nếu chưa đăng xuất).
+                </div>
+              </div>
+              <div className="locket-wf-step">
+                <span className="locket-wf-num">2</span>
+                <div className="locket-wf-text">
+                  <strong>Bước 2:</strong> Nhập tên đăng nhập cùng mật khẩu, <em>tuyệt đối chưa bấm Đăng nhập</em>.
+                </div>
+              </div>
+              <div className="locket-wf-step">
+                <span className="locket-wf-num">3</span>
+                <div className="locket-wf-text">
+                  <strong>Bước 3:</strong> Gửi tên đăng nhập cho Admin và đợi kích hoạt (hoặc nhập vào ô bên dưới).
+                </div>
+              </div>
+              <div className="locket-wf-step">
+                <span className="locket-wf-num">4</span>
+                <div className="locket-wf-text">
+                  <strong>Bước 4:</strong> Bấm Đăng nhập vào Locket và kiểm tra xem đã có gói Gold chưa.
+                </div>
+              </div>
+              <div className="locket-wf-step">
+                <span className="locket-wf-num">5</span>
+                <div className="locket-wf-text">
+                  <strong>Bước 5:</strong> Cài đặt file DNS do Admin cung cấp.
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* ACTIVATION FORM CARD */}
         <div className="locket-card">
@@ -290,88 +375,104 @@ export default function LocketClient() {
               </button>
             </form>
           ) : (
-            /* SUCCESS VIEW */
-            <div className="locket-success-view">
-              <div className="locket-success-icon-wrap">
-                <span className="locket-success-icon">👑</span>
-              </div>
-              <h2 className="locket-success-title">KÍCH HOẠT GOLD THÀNH CÔNG!</h2>
-              <p className="locket-success-sub">
-                Gói bản quyền Locket Gold đã được đồng bộ trực tiếp tới máy chủ Apple cho tài khoản của bạn.
-              </p>
-
-              <div className="locket-result-info">
-                <div className="locket-info-row">
-                  <span className="locket-info-label">Tài khoản:</span>
-                  <span className="locket-info-val bold">{target}</span>
+            /* SUCCESS RECEIPT VIEW */
+            <div className="locket-receipt-container">
+              <div className="locket-receipt-box">
+                {/* Header */}
+                <div className="locket-receipt-top">
+                  <h2 className="locket-receipt-headline">
+                    ✅ KÍCH HOẠT LOCKET GOLD THÀNH CÔNG
+                  </h2>
                 </div>
-                {result.uid && (
-                  <div className="locket-info-row">
-                    <span className="locket-info-label">UID Locket:</span>
-                    <span className="locket-info-val uid-badge" onClick={handleCopyUid} title="Bấm để sao chép UID">
-                      <code>{result.uid}</code>
-                      <i className={`fas ${copied ? "fa-check text-green" : "fa-copy"}`} />
-                    </span>
+
+                <div className="locket-receipt-line" />
+
+                {/* Details */}
+                <div className="locket-receipt-fields">
+                  <div className="locket-receipt-field-row">
+                    <span className="locket-receipt-label">👤 Tài khoản:</span>
+                    <span className="locket-receipt-value account-val">{target}</span>
                   </div>
-                )}
-                <div className="locket-info-row">
-                  <span className="locket-info-label">Thời hạn:</span>
-                  <span className="locket-info-val gold-badge">
-                    {formatExpiry(result.expiresDate)}
-                  </span>
+                  <div className="locket-receipt-field-row">
+                    <span className="locket-receipt-label">📦 Gói dịch vụ:</span>
+                    <span className="locket-receipt-value">🆓 Free</span>
+                  </div>
+                  <div className="locket-receipt-field-row">
+                    <span className="locket-receipt-label">💎 Hầm:</span>
+                    <span className="locket-receipt-value">Unlock Locket Gold</span>
+                  </div>
+                  <div className="locket-receipt-field-row">
+                    <span className="locket-receipt-label">🎟️ Đã sử dụng:</span>
+                    <span className="locket-receipt-value">1 lượt</span>
+                  </div>
+                  <div className="locket-receipt-field-row">
+                    <span className="locket-receipt-label">📅 Hoàn tất:</span>
+                    <span className="locket-receipt-value">{completedAt || "13:22:45 · 04/10/2026"}</span>
+                  </div>
                 </div>
-                <div className="locket-info-row">
-                  <span className="locket-info-label">Trạng thái:</span>
-                  <span className="locket-info-val active-status">
-                    <i className="fas fa-circle-check" /> Đã mở khóa thành công
-                  </span>
+
+                {/* Ready Notice */}
+                <div className="locket-receipt-ready-banner">
+                  <span>✅ Liên kết cài DNS Giữ Gold đã sẵn sàng.</span>
+                </div>
+
+                {/* Device completion steps */}
+                <div className="locket-receipt-sec">
+                  <h3 className="locket-receipt-sec-heading">📲 HOÀN TẤT TRÊN THIẾT BỊ</h3>
+                  <ol className="locket-receipt-ordered-list">
+                    <li>Mở Locket và xác nhận Gold đã hiển thị.</li>
+                    <li>Chỉ sau khi thấy Gold, hãy cài và bật DNS bên dưới ngay; sau đó luôn duy trì DNS.</li>
+                  </ol>
+                  <div className="locket-receipt-safe-box">
+                    Khoảng giữ an toàn sau kích hoạt được dành để bạn kiểm tra Gold và cài DNS trước khi nguồn xử lý được dùng cho tài khoản khác.
+                  </div>
+                </div>
+
+                {/* Troubleshooting */}
+                <div className="locket-receipt-sec">
+                  <h3 className="locket-receipt-sec-heading warn">⚠️ NẾU CHƯA THẤY GOLD</h3>
+                  <ul className="locket-receipt-bullet-list">
+                    <li>Đóng hẳn Locket khỏi màn hình đa nhiệm rồi mở lại.</li>
+                    <li>Đăng xuất tài khoản và đăng nhập lại.</li>
+                    <li>Nếu vẫn chưa có, xóa Locket và tải lại bản mới nhất.</li>
+                  </ul>
+                </div>
+
+                {/* Actions */}
+                <div className="locket-receipt-cta-group">
+                  <a
+                    href="/locket/Locket-Dong-Bang-Gold.mobileconfig"
+                    download="Locket-Dong-Bang-Gold.mobileconfig"
+                    className="locket-receipt-dns-btn"
+                  >
+                    <i className="fas fa-download" />
+                    <span>TẢI &amp; CÀI ĐẶT DNS GIỮ GOLD (.mobileconfig)</span>
+                  </a>
+
+                  <div className="locket-receipt-sub-actions">
+                    <button
+                      type="button"
+                      onClick={handleCopyReceipt}
+                      className={`locket-receipt-action-btn ${copiedReceipt ? "active-copied" : ""}`}
+                    >
+                      <i className={`fas ${copiedReceipt ? "fa-check" : "fa-copy"}`} />
+                      <span>{copiedReceipt ? "ĐÃ SAO CHÉP BIÊN LAI" : "SAO CHÉP BIÊN LAI"}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setResult(null);
+                        setTarget("");
+                      }}
+                      className="locket-receipt-action-btn"
+                    >
+                      <i className="fas fa-redo-alt" />
+                      <span>Kích hoạt cho tài khoản khác</span>
+                    </button>
+                  </div>
                 </div>
               </div>
-
-              {/* INSTRUCTIONS */}
-              <div className="locket-guide-box">
-                <h3 className="locket-guide-title">
-                  <i className="fas fa-list-check" /> 3 Bước nhận Gold ngay lập tức:
-                </h3>
-                <ol className="locket-guide-list">
-                  <li>
-                    <strong>Vuốt tắt ứng dụng Locket:</strong> Mở màn hình đa nhiệm (App Switcher) trên điện thoại và vuốt tắt hoàn toàn ứng dụng Locket.
-                  </li>
-                  <li>
-                    <strong>Mở lại Locket:</strong> Mở lại ứng dụng để tài khoản tải biên lai mới và xuất hiện huy hiệu Gold.
-                  </li>
-                  <li>
-                    <strong>(Khuyên dùng) Cài DNS Đóng Băng Gold:</strong> Tải cấu hình bên dưới để đóng băng gói, không bị reset hay thu hồi theo tháng.
-                  </li>
-                </ol>
-              </div>
-
-              {/* DOWNLOAD PROFILE BUTTON */}
-              <div className="locket-download-section">
-                <a
-                  href="/locket/Locket-Dong-Bang-Gold.mobileconfig"
-                  download="Locket-Dong-Bang-Gold.mobileconfig"
-                  className="locket-dns-btn"
-                >
-                  <i className="fas fa-download" />
-                  <span>TẢI DNS ĐÓNG BĂNG GOLD (.mobileconfig)</span>
-                </a>
-                <p className="locket-dns-hint">
-                  Mở bằng trình duyệt <strong>Safari</strong> trên iPhone/iPad &gt; Bấm Cho phép &gt; Mở <strong>Cài đặt</strong> &gt; Chọn <strong>Đã tải về hồ sơ</strong> &gt; Cài đặt.
-                </p>
-              </div>
-
-              {/* RESET BUTTON */}
-              <button
-                type="button"
-                onClick={() => {
-                  setResult(null);
-                  setTarget("");
-                }}
-                className="locket-reset-btn"
-              >
-                <i className="fas fa-redo-alt" /> Kích hoạt cho tài khoản khác
-              </button>
             </div>
           )}
         </div>

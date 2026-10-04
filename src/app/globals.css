@@ -9296,6 +9296,357 @@ body.vthangios-dark .vthangios-yt-btn {
   border-top: 1px solid var(--vi-border);
 }
 
+/* ========================================================
+   LOCKET WORKFLOW 5 STEPS & RECEIPT TICKET
+   ======================================================== */
+
+.locket-workflow-box {
+  background: var(--vi-surface);
+  border: 1px solid var(--vi-border);
+  border-radius: var(--vi-radius);
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: var(--vi-shadow-md);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  position: relative;
+  overflow: hidden;
+}
+
+@media (min-width: 640px) {
+  .locket-workflow-box {
+    padding: 24px 28px;
+  }
+}
+
+.locket-workflow-box::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #f59e0b, #fbbf24, #10b981);
+}
+
+.locket-wf-header {
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.locket-wf-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  padding: 4px 10px;
+  border-radius: 999px;
+  margin-bottom: 8px;
+}
+
+.locket-wf-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--vi-text);
+  margin: 0 0 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.locket-wf-desc {
+  font-size: 13px;
+  color: var(--vi-text-muted);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.locket-wf-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.locket-wf-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 11px 14px;
+  border-radius: var(--vi-radius-sm);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--vi-border);
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+[data-theme="dark"] .locket-wf-step {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.locket-wf-step:hover {
+  border-color: rgba(245, 158, 11, 0.4);
+  transform: translateX(3px);
+  background: rgba(245, 158, 11, 0.05);
+}
+
+.locket-wf-num {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #fff;
+  font-weight: 800;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.35);
+  margin-top: 1px;
+}
+
+.locket-wf-text {
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--vi-text);
+}
+
+.locket-wf-text strong {
+  color: #f59e0b;
+  margin-right: 4px;
+}
+
+.locket-wf-text em {
+  color: #ef4444;
+  font-style: normal;
+  font-weight: 700;
+}
+
+/* RECEIPT TICKET VIEW */
+.locket-receipt-container {
+  text-align: left;
+  padding: 4px 0;
+}
+
+.locket-receipt-box {
+  background: rgba(15, 23, 42, 0.75);
+  border: 1.5px solid rgba(245, 158, 11, 0.4);
+  border-radius: var(--vi-radius);
+  padding: 24px 20px;
+  box-shadow: 0 0 35px rgba(245, 158, 11, 0.15), inset 0 0 20px rgba(245, 158, 11, 0.04);
+  position: relative;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace, sans-serif;
+}
+
+[data-theme="light"] .locket-receipt-box {
+  background: #ffffff;
+  border-color: rgba(217, 119, 6, 0.45);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.locket-receipt-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.locket-receipt-headline {
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  color: #10b981;
+  margin: 0;
+  line-height: 1.35;
+}
+
+@media (min-width: 640px) {
+  .locket-receipt-headline {
+    font-size: 18px;
+  }
+}
+
+.locket-receipt-line {
+  height: 1px;
+  border-bottom: 1.5px dashed rgba(245, 158, 11, 0.4);
+  margin: 14px 0 16px;
+}
+
+.locket-receipt-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--vi-text);
+  margin-bottom: 16px;
+}
+
+.locket-receipt-field-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.locket-receipt-label {
+  font-weight: 600;
+  color: var(--vi-text);
+}
+
+.locket-receipt-value {
+  font-weight: 800;
+  color: #fbbf24;
+}
+
+.locket-receipt-value.account-val {
+  color: #38bdf8;
+  word-break: break-all;
+}
+
+.locket-receipt-ready-banner {
+  padding: 12px 14px;
+  border-radius: var(--vi-radius-sm);
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #10b981;
+  font-size: 13.5px;
+  font-weight: 700;
+  margin: 16px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.locket-receipt-sec {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--vi-border);
+}
+
+.locket-receipt-sec-heading {
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: #38bdf8;
+  margin: 0 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.locket-receipt-sec-heading.warn {
+  color: #f59e0b;
+}
+
+.locket-receipt-ordered-list {
+  margin: 0 0 10px;
+  padding-left: 20px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--vi-text);
+}
+
+.locket-receipt-ordered-list li {
+  margin-bottom: 6px;
+}
+
+.locket-receipt-bullet-list {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--vi-text-muted);
+}
+
+.locket-receipt-bullet-list li {
+  margin-bottom: 4px;
+}
+
+.locket-receipt-safe-box {
+  background: rgba(245, 158, 11, 0.08);
+  border-left: 3px solid #f59e0b;
+  padding: 10px 14px;
+  border-radius: 4px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--vi-text-muted);
+  margin-top: 10px;
+}
+
+/* BUTTONS IN RECEIPT */
+.locket-receipt-cta-group {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.locket-receipt-dns-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 20px;
+  border-radius: var(--vi-radius-sm);
+  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+  color: #ffffff !important;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-decoration: none !important;
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+  transition: all 0.2s ease;
+}
+
+.locket-receipt-dns-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px rgba(37, 99, 235, 0.55);
+  filter: brightness(1.08);
+}
+
+.locket-receipt-sub-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.locket-receipt-action-btn {
+  flex: 1;
+  min-width: 140px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 11px 16px;
+  border-radius: var(--vi-radius-sm);
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid var(--vi-border);
+  background: var(--vi-surface);
+  color: var(--vi-text);
+}
+
+.locket-receipt-action-btn:hover {
+  background: var(--vi-surface-solid);
+  border-color: #f59e0b;
+  color: #f59e0b;
+}
+
+.locket-receipt-action-btn.active-copied {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: #10b981;
+  color: #10b981;
+}
+
 /* ==================== ONCYBER REDESIGN (CYBER GAMING THEME) ==================== */
 /* TOP NAVIGATION */
 .cyber-header {
