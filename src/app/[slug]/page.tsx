@@ -94,6 +94,7 @@ export default async function DynamicGroupPage({ params }: PageProps) {
             groups={groups}
             defaultGroupId={currentGroup.id}
             freeFireNote={ffConfig}
+            hideCategoryMenu={true}
           />
         )}
 

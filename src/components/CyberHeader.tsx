@@ -84,34 +84,6 @@ export default function CyberHeader({
             <span className="cyber-logo-text">{siteName}</span>
           </Link>
 
-          {/* DESKTOP NAV TABS */}
-          <nav className="cyber-nav-menu" aria-label="Menu điều hướng">
-            <Link
-              href="/"
-              className={`cyber-nav-link ${pathname === "/" ? "active" : ""}`}
-            >
-              Trang chủ
-            </Link>
-            <a href="#services" className="cyber-nav-link">
-              Dịch vụ
-            </a>
-            <Link href="/free-fire" className="cyber-nav-link">
-              Hướng dẫn
-            </Link>
-            <Link href="/dashboard" className="cyber-nav-link">
-              Nạp tiền
-            </Link>
-            <button
-              type="button"
-              onClick={handleOpenNotif}
-              className="cyber-nav-link cyber-nav-btn"
-            >
-              Tin tức
-            </button>
-            <a href="#contact" className="cyber-nav-link">
-              Liên hệ
-            </a>
-          </nav>
 
           {/* RIGHT ACTIONS */}
           <div className="cyber-header-actions">

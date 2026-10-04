@@ -67,6 +67,7 @@ export default async function OtherPage() {
         <AppCatalog
           groups={groups}
           defaultGroupId={otherGroupId}
+          hideCategoryMenu={true}
         />
 
         <footer className="mdarker-footer" style={{ marginTop: 50 }}>

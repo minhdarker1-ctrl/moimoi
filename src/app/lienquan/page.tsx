@@ -3,7 +3,6 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import DesktopHeader from "@/components/DesktopHeader";
 import AppCard from "@/components/AppCard";
-import CategoryMenu from "@/components/CategoryMenu";
 
 export const revalidate = 60;
 
@@ -76,15 +75,6 @@ export default async function LienQuanPage() {
           >
             <span>← QUAY LẠI DỊCH VỤ</span>
           </Link>
-        </div>
-
-        {/* Category Menu với tab Liên Quân đang active và nút ALL ở cuối */}
-        <div style={{ marginBottom: 24 }}>
-          <CategoryMenu
-            categories={categoryItems}
-            selectedId={lqGroup?.id ?? 1}
-            useLinks={true}
-          />
         </div>
 
         {/* Hero banner phong cách Liên Quân Mobile */}

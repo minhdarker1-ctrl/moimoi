@@ -4,7 +4,6 @@ import { db } from "@/lib/db";
 import DesktopHeader from "@/components/DesktopHeader";
 import FreeFireHub from "@/components/FreeFireHub";
 import AppCard from "@/components/AppCard";
-import CategoryMenu from "@/components/CategoryMenu";
 
 export const dynamic = "force-dynamic";
 
@@ -74,15 +73,6 @@ export default async function FreeFirePage() {
           >
             <span>← QUAY LẠI DỊCH VỤ</span>
           </Link>
-        </div>
-
-        {/* Category Menu với tab Free Fire đang active và nút ALL ở cuối */}
-        <div style={{ marginBottom: 24 }}>
-          <CategoryMenu
-            categories={categoryItems}
-            selectedId={ffGroup?.id ?? 2}
-            useLinks={true}
-          />
         </div>
 
         {/* Component Công cụ Độ Nhạy Free Fire */}
