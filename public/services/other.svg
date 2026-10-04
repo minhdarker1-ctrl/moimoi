@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <!-- Background radial glow -->
+    <radialGradient id="otherBgGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#0284c7" stop-opacity="0.35"/>
+      <stop offset="60%" stop-color="#0f172a" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#030712" stop-opacity="1"/>
+    </radialGradient>
+
+    <!-- Top face gradient -->
+    <linearGradient id="cubeTop" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7dd3fc"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+
+    <!-- Left face gradient -->
+    <linearGradient id="cubeLeft" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0369a1"/>
+      <stop offset="100%" stop-color="#075985"/>
+    </linearGradient>
+
+    <!-- Right face gradient -->
+    <linearGradient id="cubeRight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0c4a6e"/>
+      <stop offset="100%" stop-color="#082f49"/>
+    </linearGradient>
+
+    <!-- Neon Cyan Glow -->
+    <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Background circle -->
+  <circle cx="100" cy="100" r="95" fill="url(#otherBgGlow)" stroke="#38bdf8" stroke-width="2" stroke-opacity="0.4"/>
+
+  <!-- Subtle circuit lines -->
+  <path d="M 30,100 L 55,100 L 70,85" stroke="#0ea5e9" stroke-width="1.5" stroke-opacity="0.4" fill="none"/>
+  <path d="M 170,100 L 145,100 L 130,115" stroke="#0ea5e9" stroke-width="1.5" stroke-opacity="0.4" fill="none"/>
+  <circle cx="30" cy="100" r="3" fill="#38bdf8" opacity="0.6"/>
+  <circle cx="170" cy="100" r="3" fill="#38bdf8" opacity="0.6"/>
+
+  <!-- Isometric 3D Cube Container (Center at 100, 105) -->
+  
+  <!-- Outer glowing edges -->
+  <!-- Top Face (y: 45 to 85) -->
+  <polygon points="100,45 155,75 100,105 45,75" fill="url(#cubeTop)" stroke="#e0f2fe" stroke-width="3" filter="url(#neonGlow)"/>
+
+  <!-- Left Face -->
+  <polygon points="45,75 100,105 100,165 45,135" fill="url(#cubeLeft)" stroke="#38bdf8" stroke-width="2.5"/>
+
+  <!-- Right Face -->
+  <polygon points="100,105 155,75 155,135 100,165" fill="url(#cubeRight)" stroke="#0284c7" stroke-width="2.5"/>
+
+  <!-- Corner Brackets / Sci-fi bevels -->
+  <!-- Top face inner bevel -->
+  <polygon points="100,53 145,78 100,100 55,78" fill="none" stroke="#bae6fd" stroke-width="1.5" stroke-dasharray="8 4"/>
+
+  <!-- Question mark on Left Face (transformed) -->
+  <g transform="translate(72, 120) skewY(25) scale(0.9, 1)">
+    <text x="0" y="0" font-family="'Segoe UI', Roboto, sans-serif" font-size="34" font-weight="900" fill="#38bdf8" text-anchor="middle" filter="url(#neonGlow)" opacity="0.95">?</text>
+  </g>
+
+  <!-- Question mark on Right Face (transformed) -->
+  <g transform="translate(128, 120) skewY(-25) scale(0.9, 1)">
+    <text x="0" y="0" font-family="'Segoe UI', Roboto, sans-serif" font-size="34" font-weight="900" fill="#38bdf8" text-anchor="middle" filter="url(#neonGlow)" opacity="0.95">?</text>
+  </g>
+
+  <!-- Glowing neon corner vertices -->
+  <circle cx="100" cy="45" r="4.5" fill="#f0f9ff" filter="url(#neonGlow)"/>
+  <circle cx="155" cy="75" r="4.5" fill="#38bdf8" filter="url(#neonGlow)"/>
+  <circle cx="45" cy="75" r="4.5" fill="#38bdf8" filter="url(#neonGlow)"/>
+  <circle cx="100" cy="105" r="5" fill="#bae6fd" filter="url(#neonGlow)"/>
+  <circle cx="100" cy="165" r="4.5" fill="#0284c7" filter="url(#neonGlow)"/>
+  <circle cx="45" cy="135" r="4" fill="#0369a1"/>
+  <circle cx="155" cy="135" r="4" fill="#0369a1"/>
+</svg>

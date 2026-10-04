@@ -119,9 +119,9 @@ export default function LocketClient() {
     <div className="locket-page-container">
       {/* TOP NAVIGATION BAR */}
       <header className="locket-top-nav">
-        <Link href="/" className="locket-back-btn" aria-label="Quay lại trang chủ">
+        <Link href="/#services" className="locket-back-btn" aria-label="Quay lại dịch vụ">
           <i className="fas fa-arrow-left" aria-hidden="true" />
-          <span>Trang chủ OnCyber</span>
+          <span>← QUAY LẠI DỊCH VỤ</span>
         </Link>
         <button
           type="button"

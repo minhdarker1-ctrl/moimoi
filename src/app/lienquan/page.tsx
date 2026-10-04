@@ -71,12 +71,11 @@ export default async function LienQuanPage() {
         {/* Nút quay lại trang chủ */}
         <div style={{ textAlign: "left", marginBottom: 16 }}>
           <Link
-            href="/"
-            className="mdarker-empty-btn"
-            style={{ textDecoration: "none", display: "inline-flex", gap: 8, padding: "8px 16px", fontSize: 13 }}
+            href="/#services"
+            className="cyber-back-btn"
           >
             <i className="fa-solid fa-arrow-left" aria-hidden="true" />
-            <span>Về trang chủ</span>
+            <span>← QUAY LẠI DỊCH VỤ</span>
           </Link>
         </div>
 

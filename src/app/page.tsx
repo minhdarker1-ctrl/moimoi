@@ -1,8 +1,7 @@
 import { db } from "@/lib/db";
 import Link from "next/link";
-import VthangNav from "@/components/VthangNav";
+import CyberHeader from "@/components/CyberHeader";
 import TypedText from "@/components/TypedText";
-import AppCard from "@/components/AppCard";
 
 export const revalidate = 60;
 
@@ -11,21 +10,15 @@ function parseLines(json: string): string[] {
     const v = JSON.parse(json);
     return Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : [];
   } catch {
-    return [];
+    return ["Developer...", "Designer...", "Creator...", "Gamer...."];
   }
 }
 
 export default async function Home() {
-  const [site, socials, linkBoxes, groups, notices] = await Promise.all([
+  const [site, socials, notices] = await Promise.all([
     db.site.findUnique({ where: { id: 1 } }),
     db.social.findMany({ where: { visible: true }, orderBy: { order: "asc" } }),
-    db.linkBox.findMany({ where: { visible: true }, orderBy: { order: "asc" } }),
-    db.group.findMany({
-      where: { visible: true },
-      orderBy: { order: "asc" },
-      include: { apps: { where: { visible: true }, orderBy: { order: "asc" } } },
-    }),
-    db.notice.findMany({ where: { visible: true }, orderBy: { createdAt: "desc" }, take: 20 }),
+    db.notice.findMany({ where: { visible: true }, orderBy: { createdAt: "desc" }, take: 15 }),
   ]);
 
   if (!site) {
@@ -39,11 +32,27 @@ export default async function Home() {
     );
   }
 
-  const allApps = groups.flatMap((g) => g.apps);
+  // Fallback defaults for socials if database has fewer than 4
+  const defaultSocials = [
+    { id: 1, type: "tiktok", name: "TikTok", icon: "fa-brands fa-tiktok", url: "https://www.tiktok.com/@oncyberr", color: "tiktok" },
+    { id: 2, type: "facebook", name: "Facebook", icon: "fa-brands fa-facebook-f", url: "https://www.facebook.com/oncyber", color: "facebook" },
+    { id: 3, type: "telegram", name: "Telegram", icon: "fa-brands fa-telegram", url: "https://t.me/thedarker1", color: "telegram" },
+    { id: 4, type: "youtube", name: "YouTube", icon: "fa-brands fa-youtube", url: "https://youtube.com/@oncyberr", color: "youtube" },
+  ];
+
+  const socialLinks = defaultSocials.map((def, idx) => {
+    const found = socials[idx];
+    return {
+      ...def,
+      url: found?.url || def.url,
+    };
+  });
 
   return (
     <>
-      <VthangNav
+      {/* CYBER TOP NAVIGATION */}
+      <CyberHeader
+        siteName={site.name}
         notices={notices.map((n) => ({
           id: n.id,
           title: n.title,
@@ -52,243 +61,237 @@ export default async function Home() {
         }))}
       />
 
-      <main role="main">
-        {/* AVATAR */}
-        <div className={`vthangios-avatar-wrap${site.avatarFrameUrl ? " has-frame" : ""}`}>
-          {site.avatarUrl && (
-            /* eslint-disable-next-line @next/next/no-img-element -- URL do admin dán */
-            <img
-              className="vthangios-avatar"
-              src={site.avatarUrl}
-              alt={`Ảnh đại diện ${site.name}`}
-              fetchPriority="high"
-              width={120}
-              height={120}
-            />
-          )}
-          {site.avatarFrameUrl && (
-            /* eslint-disable-next-line @next/next/no-img-element -- URL do admin dán */
-            <img className="vthangios-avatar-frame" src={site.avatarFrameUrl} alt="" aria-hidden="true" />
-          )}
-        </div>
+      <main className="cyber-main-wrap" role="main">
+        {/* HERO SECTION */}
+        <section className="cyber-hero-section" aria-label="Giới thiệu OnCyber">
+          <div className="cyber-avatar-container">
+            <div className="cyber-avatar-ring">
+              {site.avatarUrl ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  className="cyber-avatar-img"
+                  src={site.avatarUrl}
+                  alt={`Ảnh đại diện ${site.name}`}
+                  fetchPriority="high"
+                  width={112}
+                  height={112}
+                />
+              ) : (
+                <div className="cyber-avatar-fallback">OC</div>
+              )}
+              {site.avatarFrameUrl && (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img className="cyber-avatar-frame-overlay" src={site.avatarFrameUrl} alt="" aria-hidden="true" />
+              )}
+            </div>
+            {/* Online Green Indicator Dot */}
+            <span className="cyber-online-dot" title="Đang trực tuyến (Online)" />
+          </div>
 
-        {/* NAME & HEADLINE */}
-        <p className="vthangios-iam">{site.iam || "Hi, i am"}</p>
-        <h1 className="vthangios-name">
-          {site.name}
-          {site.verified && (
-            /* eslint-disable-next-line @next/next/no-img-element -- icon tĩnh nhỏ */
-            <img className="vthangios-verify" src="/verify.svg" alt="verified" width={27} height={27} />
-          )}
-        </h1>
-        <p className="vthangios-headline">
-          and I&apos;m a{" "}
-          <span className="vthangios-gradient-text">
-            <TypedText lines={parseLines(site.typedLines)} />
-          </span>
-        </p>
+          <p className="cyber-iam">{site.iam || "Hi, i am"}</p>
+          <h1 className="cyber-name">
+            {site.name}
+            {site.verified && (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img className="cyber-verify-badge" src="/verify.svg" alt="verified" width={24} height={24} />
+            )}
+          </h1>
+          <p className="cyber-headline">
+            and I&apos;m a{" "}
+            <span className="cyber-gradient-typed">
+              <TypedText lines={parseLines(site.typedLines)} />
+            </span>
+          </p>
 
-        {/* SOCIALS */}
-        {socials.length > 0 && (
-          <div className="vthangios-socials">
-            {socials.map((s) => (
+          {/* SOCIALS / CONTACT ROW */}
+          <div className="cyber-socials-row" id="contact" aria-label="Liên hệ">
+            {socialLinks.map((s) => (
               <a
                 key={s.id}
                 href={s.url}
-                className="vthangios-social-item"
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="Mạng xã hội"
+                className={`cyber-social-btn cyber-social-${s.color}`}
+                aria-label={s.name}
+                title={s.name}
               >
-                {/* eslint-disable-next-line @next/next/no-img-element -- URL do admin dán */}
-                <img src={s.iconUrl} alt="Social" width={40} height={40} />
+                <i className={s.icon} aria-hidden="true" />
               </a>
             ))}
           </div>
-        )}
-
-        {/* FEATURED: LOCKET GOLD BANNER */}
-        <div style={{ maxWidth: 640, margin: "0 auto 24px" }}>
-          <Link
-            href="/locket"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              padding: "14px 18px",
-              borderRadius: "var(--vi-radius-sm)",
-              background: "linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.25) 100%)",
-              border: "1.5px solid rgba(245, 158, 11, 0.4)",
-              backdropFilter: "blur(14px)",
-              WebkitBackdropFilter: "blur(14px)",
-              textDecoration: "none",
-              boxShadow: "0 8px 24px rgba(245, 158, 11, 0.12)",
-              transition: "transform 0.2s ease, box-shadow 0.2s ease",
-            }}
-            className="vthangios-locket-featured"
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: 14, textAlign: "left" }}>
-              <div
-                style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: "50%",
-                  background: "linear-gradient(135deg, #f59e0b, #d97706)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 20,
-                  boxShadow: "0 0 14px rgba(245, 158, 11, 0.5)",
-                  flexShrink: 0,
-                }}
-              >
-                👑
-              </div>
-              <div>
-                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                  <span style={{ fontSize: 15, fontWeight: 800, color: "var(--vi-text)" }}>
-                    Kích Hoạt Locket Gold Free
-                  </span>
-                  <span
-                    style={{
-                      fontSize: 10,
-                      fontWeight: 800,
-                      background: "#f59e0b",
-                      color: "#fff",
-                      padding: "2px 6px",
-                      borderRadius: 999,
-                    }}
-                  >
-                    HOT
-                  </span>
-                </div>
-                <p style={{ margin: "2px 0 0", fontSize: 12, color: "var(--vi-text-muted)", lineHeight: 1.3 }}>
-                  Mở khóa tính năng 1 năm miễn phí cho tài khoản của bạn
-                </p>
-              </div>
-            </div>
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 6,
-                padding: "8px 14px",
-                borderRadius: 999,
-                background: "linear-gradient(135deg, #f59e0b, #d97706)",
-                color: "#fff",
-                fontSize: 12,
-                fontWeight: 700,
-                flexShrink: 0,
-              }}
-            >
-              <span>Vào ngay</span>
-              <i className="fas fa-chevron-right" style={{ fontSize: 10 }} />
-            </div>
-          </Link>
-        </div>
-
-        {/* LINK BOXES */}
-        {linkBoxes.length > 0 && (
-          <div className="vthangios-linkbox-section">
-            {linkBoxes.map((b) => (
-              <div key={b.id}>
-                <div className="vthangios-linkbox">
-                  <div className="vthangios-linkbox-item">
-                    <p className="vthangios-linkbox-title">{b.title}</p>
-                    <a href={b.url} className="vthangios-link-btn" target="_blank" rel="noopener noreferrer">
-                      {b.iconUrl ? (
-                        /* eslint-disable-next-line @next/next/no-img-element -- URL do admin dán */
-                        <img src={b.iconUrl} width={34} height={34} alt="" />
-                      ) : (
-                        <i className="fas fa-link" aria-hidden="true" />
-                      )}
-                    </a>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* APP GROUPS */}
-        <section className="vthangios-app-section" aria-label="Danh sách ứng dụng">
-          {groups.map((group) => {
-            if (group.apps.length === 0) return null;
-            return (
-              <div key={group.id} className="vthangios-group-block" id={`group-${group.id}`}>
-                {groups.length > 1 && (
-                  <h2 className="vthangios-section-title">
-                    {group.title}
-                  </h2>
-                )}
-                <div className="vthangios-app-list">
-                  {group.apps.map((app) => (
-                    <div key={app.id} className="vthangios-app-entry">
-                      <AppCard app={app} />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-
-          {allApps.length === 0 && (
-            <div style={{ textAlign: "center", padding: "40px 16px", color: "var(--vi-text-muted)" }}>
-              Chưa có ứng dụng nào được hiển thị.
-            </div>
-          )}
         </section>
 
-        {/* WIDGETS */}
-        <div className="vthangios-widgets">
-          {/* YOUTUBE SUBSCRIBE BANNER */}
-          {site.ytBannerOn && site.ytChannelUrl && (
-            <div className="vthangios-yt-banner">
-              <div className="vthangios-yt-main">
-                <div className="vthangios-yt-head">
-                  {site.avatarUrl ? (
-                    /* eslint-disable-next-line @next/next/no-img-element -- URL do admin dán */
-                    <img
-                      className="vthangios-yt-avatar"
-                      src={site.avatarUrl}
-                      alt={site.name}
-                      width={80}
-                      height={80}
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div className="vthangios-yt-icon">
-                      <i className="fa-brands fa-youtube" aria-hidden="true" />
-                    </div>
-                  )}
-                  <div className="vthangios-yt-text">
-                    <p className="vthangios-yt-title">{site.name}</p>
-                    <p className="vthangios-yt-handle">
-                      {site.ytChannelUrl?.includes("@")
-                        ? `@${site.ytChannelUrl.split("@")[1].split("/")[0].split("?")[0]}`
-                        : `@${site.name.toLowerCase().replace(/[^a-z0-9]/g, "")}`}
-                    </p>
-                    <p className="vthangios-yt-meta">
-                      <span>Kênh YouTube chính thức</span>
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <a
-                href={site.ytChannelUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="vthangios-yt-btn"
-              >
-                Đăng ký
-              </a>
-            </div>
-          )}
+        {/* SECTION DIVIDER: DỊCH VỤ */}
+        <div className="cyber-section-divider" id="services">
+          <div className="cyber-divider-line left" />
+          <div className="cyber-divider-badge">
+            <span className="cyber-star-icon">✦</span>
+            <span className="cyber-divider-title">DỊCH VỤ</span>
+            <span className="cyber-star-icon">✦</span>
+          </div>
+          <div className="cyber-divider-line right" />
         </div>
+        <p className="cyber-section-subtitle">
+          Hệ thống dịch vụ uy tín - Tốc độ - Bảo mật - Giá tốt nhất
+        </p>
+
+        {/* 4 CORE SERVICES GRID */}
+        <section className="cyber-services-grid" aria-label="Danh sách 4 dịch vụ chính">
+          {/* CARD 1: FREE FIRE */}
+          <div className="cyber-card cyber-card-ff">
+            <div className="cyber-card-inner">
+              <div className="cyber-card-img-wrap">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/services/freefire.png"
+                  alt="Free Fire"
+                  className="cyber-card-img"
+                  width={96}
+                  height={96}
+                  loading="lazy"
+                />
+              </div>
+              <h2 className="cyber-card-title">FREE FIRE</h2>
+              <p className="cyber-card-desc">Nạp kim cương, đổi thẻ &amp; sự kiện</p>
+              <div className="cyber-card-badge badge-active">
+                <i className="fas fa-shield-alt" />
+                <span>HOẠT ĐỘNG</span>
+              </div>
+              <Link href="/free-fire" className="cyber-card-cta">
+                <span>XEM DỊCH VỤ</span>
+                <i className="fas fa-arrow-right" />
+              </Link>
+            </div>
+          </div>
+
+          {/* CARD 2: AOV */}
+          <div className="cyber-card cyber-card-aov">
+            <div className="cyber-card-inner">
+              <div className="cyber-card-img-wrap">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/services/aov.png"
+                  alt="AOV Liên Quân Mobile"
+                  className="cyber-card-img"
+                  width={96}
+                  height={96}
+                  loading="lazy"
+                />
+              </div>
+              <h2 className="cyber-card-title">AOV</h2>
+              <p className="cyber-card-desc">Nạp quân huy, cày thuê &amp; mod map</p>
+              <div className="cyber-card-badge badge-active-blue">
+                <i className="fas fa-shield-alt" />
+                <span>HOẠT ĐỘNG</span>
+              </div>
+              <Link href="/lien-quan-mobile" className="cyber-card-cta">
+                <span>XEM DỊCH VỤ</span>
+                <i className="fas fa-arrow-right" />
+              </Link>
+            </div>
+          </div>
+
+          {/* CARD 3: LOCKET GOLD */}
+          <div className="cyber-card cyber-card-locket">
+            <div className="cyber-card-inner">
+              <div className="cyber-card-img-wrap">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/services/locket.svg"
+                  alt="Locket Gold"
+                  className="cyber-card-img"
+                  width={96}
+                  height={96}
+                  loading="lazy"
+                />
+              </div>
+              <h2 className="cyber-card-title">LOCKET GOLD</h2>
+              <p className="cyber-card-desc">Kích hoạt locket gold miễn phí &amp; DNS</p>
+              <div className="cyber-card-badge badge-active">
+                <i className="fas fa-check-circle" />
+                <span>HOẠT ĐỘNG</span>
+              </div>
+              <Link href="/locket" className="cyber-card-cta">
+                <span>XEM DỊCH VỤ</span>
+                <i className="fas fa-arrow-right" />
+              </Link>
+            </div>
+          </div>
+
+          {/* CARD 4: OTHER */}
+          <div className="cyber-card cyber-card-other">
+            <div className="cyber-card-inner">
+              <div className="cyber-card-img-wrap">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/services/other.svg"
+                  alt="Other Services"
+                  className="cyber-card-img"
+                  width={96}
+                  height={96}
+                  loading="lazy"
+                />
+              </div>
+              <h2 className="cyber-card-title">OTHER</h2>
+              <p className="cyber-card-desc">Dịch vụ khác &amp; hỗ trợ toàn bộ game</p>
+              <div className="cyber-card-badge badge-pending">
+                <i className="fas fa-spinner fa-spin-pulse" />
+                <span>ĐANG CẬP NHẬT</span>
+              </div>
+              <Link href="/other" className="cyber-card-cta">
+                <span>XEM DỊCH VỤ</span>
+                <i className="fas fa-arrow-right" />
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* TRUST METRICS BAR */}
+        <section className="cyber-trust-bar" aria-label="Cam kết uy tín">
+          <div className="cyber-trust-item">
+            <div className="cyber-trust-icon-box purple">
+              <i className="fas fa-shield-halved" />
+            </div>
+            <div className="cyber-trust-text">
+              <strong>UY TÍN HÀNG ĐẦU</strong>
+              <p>Đảm bảo an toàn tuyệt đối</p>
+            </div>
+          </div>
+
+          <div className="cyber-trust-item">
+            <div className="cyber-trust-icon-box blue">
+              <i className="fas fa-bolt" />
+            </div>
+            <div className="cyber-trust-text">
+              <strong>XỬ LÝ TỰ ĐỘNG</strong>
+              <p>Giao dịch nhanh chóng 24/7</p>
+            </div>
+          </div>
+
+          <div className="cyber-trust-item">
+            <div className="cyber-trust-icon-box green">
+              <i className="fas fa-lock" />
+            </div>
+            <div className="cyber-trust-text">
+              <strong>BẢO MẬT TUYỆT ĐỐI</strong>
+              <p>Thông tin khách hàng được bảo vệ</p>
+            </div>
+          </div>
+
+          <div className="cyber-trust-item">
+            <div className="cyber-trust-icon-box pink">
+              <i className="fas fa-headset" />
+            </div>
+            <div className="cyber-trust-text">
+              <strong>HỖ TRỢ 24/7</strong>
+              <p>Luôn sẵn sàng hỗ trợ bạn</p>
+            </div>
+          </div>
+        </section>
 
         {/* FOOTER */}
-        <footer className="vthangios-footer">
-          &copy; Designer by {site.footerText || site.name} 2026
+        <footer className="cyber-footer">
+          <p>&copy; Designer by {site.footerText || site.name} 2026</p>
         </footer>
       </main>
     </>
