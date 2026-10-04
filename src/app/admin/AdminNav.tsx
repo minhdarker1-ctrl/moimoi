@@ -19,6 +19,7 @@ import {
   LogOut,
   Home,
   User,
+  Users,
 } from "lucide-react";
 import { logout } from "./actions";
 
@@ -28,9 +29,10 @@ interface Props {
 
 const NAV_GROUPS = [
   {
-    title: "Báo Cáo",
+    title: "Báo Cáo & Thành Viên",
     links: [
       { href: "/admin", label: "Tổng quan", icon: LayoutDashboard },
+      { href: "/admin/users", label: "Người dùng & Dịch vụ", icon: Users },
     ],
   },
   {

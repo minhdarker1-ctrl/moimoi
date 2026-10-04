@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { db } from "@/lib/db";
 import { vnDate } from "@/lib/crypto";
 import AdminNav from "./AdminNav";
@@ -14,6 +15,8 @@ import {
   CheckCircle2,
   Save,
   Activity,
+  Sparkles,
+  ArrowRight,
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -27,7 +30,7 @@ export default async function AdminHome({
   const isSaved = sp.counter_saved === "1";
   const today = vnDate();
 
-  const [counter, daily, users, apps, keys, active, shorteners] = await Promise.all([
+  const [counter, daily, users, apps, keys, active, shorteners, serviceLogsCount] = await Promise.all([
     db.counter.findUnique({ where: { id: 1 } }),
     db.dailyHit.findUnique({ where: { date: today } }),
     db.user.count(),
@@ -35,12 +38,14 @@ export default async function AdminHome({
     db.appKey.count(),
     db.appKey.count({ where: { revoked: false, expiresAt: { gt: new Date() } } }),
     db.shortener.count({ where: { enabled: true } }),
+    db.serviceUsageLog.count(),
   ]);
 
   const stats = [
     { label: "Tổng lượt truy cập", value: counter?.total ?? 0, icon: Eye, color: "stat-purple" },
     { label: "Truy cập hôm nay", value: daily?.count ?? 0, icon: Calendar, color: "stat-blue" },
     { label: "Thành viên đăng ký", value: users, icon: Users, color: "stat-green" },
+    { label: "Lượt dùng dịch vụ", value: serviceLogsCount, icon: Sparkles, color: "stat-yellow" },
     { label: "Ứng dụng & Mod", value: apps, icon: AppWindow, color: "stat-orange" },
     { label: "Key còn hiệu lực", value: active, icon: ShieldCheck, color: "stat-pink" },
     { label: "Tổng key đã phát", value: keys, icon: KeyRound, color: "stat-cyan" },
@@ -50,6 +55,63 @@ export default async function AdminHome({
   return (
     <div className="vt-admin">
       <AdminNav current="/admin" />
+
+      {/* BANNER ĐẾN TRANG QUẢN LÝ NGƯỜI DÙNG & DỊCH VỤ */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          background: "linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(168, 85, 247, 0.12))",
+          border: "1px solid rgba(99, 102, 241, 0.25)",
+          borderRadius: 14,
+          padding: "14px 20px",
+          marginBottom: 20,
+          flexWrap: "wrap",
+          gap: 12,
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: 10,
+              background: "var(--vi-primary, #6366f1)",
+              color: "#fff",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Users size={20} />
+          </div>
+          <div>
+            <div style={{ fontWeight: 800, fontSize: 14, color: "var(--vi-text)" }}>
+              Quản Lý Người Dùng & Dịch Vụ Mới
+            </div>
+            <div style={{ fontSize: 12, color: "var(--vi-muted)" }}>
+              Xem danh sách ai đang dùng Locket Gold, Free Fire, Liên Quân và quản lý tài khoản thành viên.
+            </div>
+          </div>
+        </div>
+        <Link
+          href="/admin/users"
+          className="vt-btn-primary"
+          style={{
+            textDecoration: "none",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+            padding: "8px 16px",
+            fontSize: 13,
+            fontWeight: 700,
+          }}
+        >
+          <span>Xem Chi Tiết</span>
+          <ArrowRight size={14} />
+        </Link>
+      </div>
 
       {isSaved && (
         <div className="dash-alert dash-alert-success" style={{ marginBottom: 20 }}>

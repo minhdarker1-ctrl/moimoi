@@ -229,6 +229,29 @@ export async function GET(req: Request) {
     }
   }
 
+  try {
+    const sType = scope === "freefire"
+      ? "FREE_FIRE"
+      : (app?.name?.toLowerCase().includes("liên quân") || app?.name?.toLowerCase().includes("aov"))
+      ? "AOV"
+      : "OTHER";
+    const sName = app ? app.name : (scope === "freefire" ? "Free Fire Tool" : kt.name);
+    const uaStr = req.headers.get("user-agent") || "";
+    const parsedUa = parseUserAgent(uaStr);
+
+    await db.serviceUsageLog.create({
+      data: {
+        serviceType: sType,
+        serviceName: sName,
+        targetUser: deviceInput || vid || ip,
+        ip,
+        device: `${parsedUa.device} (${parsedUa.os || "Unknown"})`,
+        status: "SUCCESS",
+        metadata: JSON.stringify({ token, keyTypeName: kt.name, appId: app?.id }),
+      },
+    }).catch(() => {});
+  } catch {}
+
   if (isJson) {
     return NextResponse.json({
       ok: true,

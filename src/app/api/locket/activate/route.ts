@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { clientIp, rateLimit } from "@/lib/guard";
+import { db } from "@/lib/db";
+import { getCurrentUser } from "@/lib/auth";
 
 // StoreKit 2 Receipt Tokens from C:\tmauto\locket\locketgold.py
 const TOKEN_CONFIG = {
@@ -246,7 +248,23 @@ export async function POST(req: Request) {
       }
     }
 
+    const sessionUser = await getCurrentUser().catch(() => null);
+    const userAgent = req.headers.get("user-agent")?.slice(0, 150) || "Mobile / iOS";
+
     if (activated) {
+      await db.serviceUsageLog.create({
+        data: {
+          serviceType: "LOCKET_GOLD",
+          serviceName: "Locket Gold",
+          targetUser: target,
+          ip,
+          device: userAgent,
+          status: "SUCCESS",
+          metadata: JSON.stringify({ uid, expiresDate: expiresDate || "1 Năm (Tự động đồng bộ)" }),
+          userId: sessionUser?.id ?? null,
+        },
+      }).catch(() => {});
+
       return NextResponse.json({
         success: true,
         uid,
@@ -254,6 +272,19 @@ export async function POST(req: Request) {
         message: "Kích hoạt Locket Gold thành công!",
       });
     }
+
+    await db.serviceUsageLog.create({
+      data: {
+        serviceType: "LOCKET_GOLD",
+        serviceName: "Locket Gold",
+        targetUser: target,
+        ip,
+        device: userAgent,
+        status: "FAILED",
+        metadata: JSON.stringify({ error: errorMessage }),
+        userId: sessionUser?.id ?? null,
+      },
+    }).catch(() => {});
 
     return NextResponse.json(
       {

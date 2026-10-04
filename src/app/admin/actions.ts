@@ -573,3 +573,66 @@ export async function clearAllFreeFireLogs() {
   revalidatePath("/admin/freefire/logs");
 }
 
+/* ---------- user & service logs ---------- */
+
+export async function updateUserRole(fd: FormData) {
+  const current = await requireAdmin();
+  const userId = num(fd, "userId");
+  const role = str(fd, "role");
+  if (!userId || (role !== "ADMIN" && role !== "USER")) return;
+  // Không cho tự hạ quyền của chính mình
+  if (current.id === userId && role !== "ADMIN") return;
+
+  await db.user.update({
+    where: { id: userId },
+    data: { role },
+  });
+  revalidatePath("/admin/users");
+}
+
+export async function updateUserCoins(fd: FormData) {
+  await requireAdmin();
+  const userId = num(fd, "userId");
+  const coins = num(fd, "coins", 0);
+  const spinTickets = num(fd, "spinTickets", 0);
+  if (!userId) return;
+
+  await db.user.update({
+    where: { id: userId },
+    data: {
+      coins: Math.max(0, coins),
+      spinTickets: Math.max(0, spinTickets),
+    },
+  });
+  revalidatePath("/admin/users");
+}
+
+export async function deleteUser(fd: FormData) {
+  const current = await requireAdmin();
+  const userId = num(fd, "userId");
+  if (!userId || current.id === userId) return; // Không cho xóa chính mình
+
+  await db.user.delete({ where: { id: userId } });
+  revalidatePath("/admin/users");
+}
+
+export async function deleteServiceLog(fd: FormData) {
+  await requireAdmin();
+  const id = num(fd, "id");
+  if (id > 0) {
+    await db.serviceUsageLog.delete({ where: { id } }).catch(() => {});
+  }
+  revalidatePath("/admin/users");
+}
+
+export async function clearServiceLogs(fd: FormData) {
+  await requireAdmin();
+  const serviceType = str(fd, "serviceType");
+  if (serviceType && serviceType !== "ALL") {
+    await db.serviceUsageLog.deleteMany({ where: { serviceType } });
+  } else {
+    await db.serviceUsageLog.deleteMany({});
+  }
+  revalidatePath("/admin/users");
+}
+

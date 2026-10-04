@@ -362,6 +362,7 @@ model User {
   updatedAt    DateTime       @updatedAt
   savedKeys    UserSavedKey[]
   notifications Notification[]
+  serviceLogs   ServiceUsageLog[]
 
   @@index([role])
 }
@@ -391,6 +392,26 @@ model Notification {
 
   @@index([userId])
   @@index([createdAt])
+}
+
+// ---------- Nhật ký người dùng sử dụng dịch vụ ----------
+
+model ServiceUsageLog {
+  id          Int      @id @default(autoincrement())
+  userId      Int?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  serviceType String   // "LOCKET_GOLD" | "FREE_FIRE" | "AOV" | "OTHER"
+  serviceName String   // "Locket Gold", "Free Fire VIP", "Liên Quân Mobile", etc.
+  targetUser  String   @default("") // username Locket ('tminh_238'), Ingame ID, device name, account ID
+  ip          String   @default("")
+  device      String   @default("") // iPhone, Android, Windows...
+  status      String   @default("SUCCESS") // "SUCCESS" | "FAILED" | "PENDING"
+  metadata    String   @default("{}") // JSON string: { uid, expiresDate, key, error... }
+  createdAt   DateTime @default(now())
+
+  @@index([serviceType])
+  @@index([createdAt])
+  @@index([userId])
 }
 
 

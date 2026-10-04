@@ -80,6 +80,18 @@ export async function POST(req: Request) {
       },
     });
 
+    await db.serviceUsageLog.create({
+      data: {
+        serviceType: "FREE_FIRE",
+        serviceName: "Free Fire Tool",
+        targetUser: deviceInput || visitorId,
+        ip,
+        device: `${parsedUa.device} (${parsedUa.os || "Unknown"})`,
+        status: "SUCCESS",
+        metadata: JSON.stringify({ keyTypeName, deviceType, location }),
+      },
+    }).catch(() => {});
+
     return NextResponse.json({ ok: true, id: log.id });
   } catch (err: any) {
     console.error("Lỗi ghi log Free Fire:", err);
