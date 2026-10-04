@@ -66,6 +66,14 @@ export default function CyberHeader({
     try {
       localStorage.setItem("vt-theme", next ? "dark" : "light");
     } catch {}
+
+    try {
+      window.dispatchEvent(
+        new CustomEvent("scenic-theme-change", {
+          detail: { theme: next ? "dark" : "light" },
+        })
+      );
+    } catch {}
   }
 
   return (

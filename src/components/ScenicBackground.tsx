@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 
 interface Star {
   id: number;
@@ -82,6 +82,73 @@ export default function ScenicBackground() {
       });
     }
     return list;
+  }, []);
+
+  // Twilight Transition State ("sunset" | "dawn" | null)
+  const [twilight, setTwilight] = useState<"sunset" | "dawn" | null>(null);
+  const twilightTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    let currentTheme =
+      document.documentElement.dataset.theme ||
+      (document.body.classList.contains("vthangios-dark") ? "dark" : "light");
+
+    let isReady = false;
+    // Không kích hoạt twilight lúc mới tải trang lần đầu
+    const readyTimer = setTimeout(() => {
+      isReady = true;
+    }, 400);
+
+    const triggerTwilight = (newTheme: string) => {
+      if (!isReady || newTheme === currentTheme) return;
+      const type: "sunset" | "dawn" = newTheme === "dark" ? "sunset" : "dawn";
+      currentTheme = newTheme;
+
+      if (twilightTimerRef.current) {
+        clearTimeout(twilightTimerRef.current);
+      }
+      setTwilight(type);
+
+      twilightTimerRef.current = setTimeout(() => {
+        setTwilight(null);
+      }, 1900);
+    };
+
+    // 1. Theo dõi data-theme trên thẻ html
+    const observer = new MutationObserver((mutations) => {
+      for (const m of mutations) {
+        if (m.type === "attributes" && m.attributeName === "data-theme") {
+          const theme = document.documentElement.dataset.theme || "light";
+          triggerTwilight(theme);
+        }
+      }
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme"],
+    });
+
+    // 2. Lắng nghe CustomEvent scenic-theme-change phát từ CyberHeader
+    const handleCustomEvent = (e: Event) => {
+      const detail = (e as CustomEvent)?.detail;
+      const targetTheme = typeof detail === "string" ? detail : detail?.theme;
+      if (targetTheme) {
+        triggerTwilight(targetTheme);
+      }
+    };
+    window.addEventListener("scenic-theme-change", handleCustomEvent);
+
+    return () => {
+      clearTimeout(readyTimer);
+      observer.disconnect();
+      window.removeEventListener("scenic-theme-change", handleCustomEvent);
+      if (twilightTimerRef.current) {
+        clearTimeout(twilightTimerRef.current);
+      }
+    };
   }, []);
 
   return (
@@ -305,6 +372,21 @@ export default function ScenicBackground() {
           </svg>
         </div>
       </div>
+
+      {/* ========================================================
+          3. TWILIGHT TRANSITION LAYER: HOÀNG HÔN & BÌNH MINH
+          ======================================================== */}
+      {twilight && (
+        <div
+          className={`scenic-twilight-layer is-active is-${twilight}`}
+          key={twilight}
+        >
+          <div className="scenic-twilight-sky" />
+          <div className="scenic-twilight-sun" />
+          <div className="scenic-twilight-glow-beam" />
+          <div className="scenic-twilight-horizon" />
+        </div>
+      )}
     </div>
   );
 }
