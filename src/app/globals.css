@@ -50,10 +50,11 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* body::before old navbar compensation removed to fix page shifting down */
 body::before {
+  display: none !important;
   content: "";
-  display: block;
-  height: calc(var(--vi-nav-h) + 10px);
+  height: 0;
 }
 
 [data-theme="dark"] body,
@@ -9489,28 +9490,28 @@ body.vthangios-dark .vthangios-yt-btn {
   margin-left: 2px;
 }
 
-/* MAIN WRAP */
+/* MAIN WRAP - Standardized offset matching 64px header + 8px breathing space */
 .cyber-main-wrap {
   width: 100%;
   max-width: 1140px;
   margin: 0 auto;
-  padding: 92px 16px 40px;
+  padding: 72px 16px 36px;
   text-align: center;
 }
 
-/* HERO SECTION */
+/* HERO SECTION - Compact vertical rhythm to fit within first viewport */
 .cyber-hero-section {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 18px;
 }
 
 .cyber-avatar-container {
   position: relative;
-  width: 116px;
-  height: 116px;
-  margin: 0 auto 12px;
+  width: 106px;
+  height: 106px;
+  margin: 0 auto 10px;
 }
 
 .cyber-avatar-ring {
@@ -9527,8 +9528,8 @@ body.vthangios-dark .vthangios-yt-btn {
 }
 
 .cyber-avatar-img {
-  width: 98px;
-  height: 98px;
+  width: 90px;
+  height: 90px;
   border-radius: 50%;
   object-fit: cover;
   display: block;
@@ -9536,23 +9537,23 @@ body.vthangios-dark .vthangios-yt-btn {
 
 .cyber-avatar-frame-overlay {
   position: absolute;
-  inset: -14px;
-  width: calc(100% + 28px);
-  height: calc(100% + 28px);
+  inset: -12px;
+  width: calc(100% + 24px);
+  height: calc(100% + 24px);
   pointer-events: none;
   z-index: 2;
 }
 
 .cyber-avatar-fallback {
-  width: 98px;
-  height: 98px;
+  width: 90px;
+  height: 90px;
   border-radius: 50%;
   background: linear-gradient(135deg, #a855f7, #38bdf8);
   display: flex;
   align-items: center;
   justify-content: center;
   color: #fff;
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 800;
 }
 
@@ -9561,11 +9562,11 @@ body.vthangios-dark .vthangios-yt-btn {
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 15px;
-  height: 15px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   background: #22c55e;
-  border: 3px solid #030c18;
+  border: 2.5px solid #030c18;
   box-shadow: 0 0 10px #22c55e, 0 0 18px rgba(34, 197, 94, 0.6);
   z-index: 3;
 }
@@ -9573,29 +9574,33 @@ body.vthangios-dark .vthangios-yt-btn {
 .cyber-iam {
   font-size: 13px;
   color: #94a3b8;
-  margin: 0 0 4px;
+  margin: 0 0 3px;
   font-weight: 500;
+  letter-spacing: 0.3px;
 }
 
 .cyber-name {
   font-size: 26px;
-  font-weight: 800;
+  font-weight: 900;
   color: #fff;
-  margin: 0 0 6px;
+  margin: 0 0 4px;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  letter-spacing: -0.3px;
 }
 
 .cyber-verify-badge {
   display: inline-block;
   vertical-align: middle;
+  width: 20px;
+  height: 20px;
 }
 
 .cyber-headline {
   font-size: 14px;
   color: #94a3b8;
-  margin: 0 0 20px;
+  margin: 0 0 16px;
 }
 
 .cyber-gradient-typed {
@@ -9605,68 +9610,102 @@ body.vthangios-dark .vthangios-yt-btn {
   font-weight: 700;
 }
 
-/* SOCIALS ROW */
+/* SOCIALS ROW - 3D Glossy / Specular Highlight matching Image 2 */
 .cyber-socials-row {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 14px;
-  margin: 0 auto;
+  gap: 16px;
+  margin: 0 auto 20px;
 }
 
 .cyber-social-btn {
-  width: 50px;
-  height: 50px;
-  border-radius: 16px;
+  width: 52px;
+  height: 52px;
+  border-radius: 17px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   font-size: 22px;
   color: #fff !important;
   text-decoration: none;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+  position: relative;
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.22s ease;
+  user-select: none;
 }
 
 .cyber-social-btn:hover {
-  transform: translateY(-4px) scale(1.05);
+  transform: translateY(-4px) scale(1.08);
 }
 
+.cyber-social-btn:focus-visible {
+  outline: 2px solid #a855f7;
+  outline-offset: 3px;
+}
+
+/* TikTok: Obsidian gloss, specular reflection */
 .cyber-social-tiktok {
-  background: #010101;
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: linear-gradient(180deg, #222226 0%, #0d0d10 100%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.65), inset 0 1px 1.5px rgba(255, 255, 255, 0.35), inset 0 -2px 4px rgba(0, 0, 0, 0.4);
 }
 
 .cyber-social-tiktok:hover {
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
-  border-color: rgba(255, 255, 255, 0.6);
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.8), 0 0 16px rgba(255, 255, 255, 0.25), inset 0 1px 1.5px rgba(255, 255, 255, 0.5);
 }
 
+/* Facebook: Royal blue gradient with specular highlight */
 .cyber-social-facebook {
-  background: #1877f2;
-  border: 1px solid rgba(24, 119, 242, 0.6);
+  background: linear-gradient(180deg, #1b74e4 0%, #0d5bbd 100%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 8px 24px rgba(24, 119, 242, 0.48), 0 2px 6px rgba(0, 0, 0, 0.3), inset 0 1px 1.5px rgba(255, 255, 255, 0.6), inset 0 -2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .cyber-social-facebook:hover {
-  box-shadow: 0 0 22px rgba(24, 119, 242, 0.7);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 12px 30px rgba(24, 119, 242, 0.75), 0 0 20px rgba(24, 119, 242, 0.45), inset 0 1px 1.5px rgba(255, 255, 255, 0.7);
 }
 
+/* Telegram: Sky blue with white circle emblem & cyan airplane matching Image 2 */
 .cyber-social-telegram {
-  background: #229ed9;
-  border: 1px solid rgba(34, 158, 217, 0.6);
+  background: linear-gradient(180deg, #2aaef5 0%, #178ecb 100%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 8px 24px rgba(34, 158, 217, 0.48), 0 2px 6px rgba(0, 0, 0, 0.3), inset 0 1px 1.5px rgba(255, 255, 255, 0.6), inset 0 -2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .cyber-social-telegram:hover {
-  box-shadow: 0 0 22px rgba(34, 158, 217, 0.7);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 12px 30px rgba(34, 158, 217, 0.75), 0 0 20px rgba(34, 158, 217, 0.45), inset 0 1px 1.5px rgba(255, 255, 255, 0.7);
 }
 
+.cyber-tg-badge {
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  background: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.cyber-tg-badge i {
+  color: #24a1de !important;
+  font-size: 13px !important;
+  transform: translate(-1px, 0.5px);
+}
+
+/* YouTube: Vivid scarlet red with specular gloss */
 .cyber-social-youtube {
-  background: #ff0000;
-  border: 1px solid rgba(255, 0, 0, 0.6);
+  background: linear-gradient(180deg, #ff0033 0%, #c90028 100%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 8px 24px rgba(255, 0, 51, 0.48), 0 2px 6px rgba(0, 0, 0, 0.3), inset 0 1px 1.5px rgba(255, 255, 255, 0.6), inset 0 -2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .cyber-social-youtube:hover {
-  box-shadow: 0 0 22px rgba(255, 0, 0, 0.7);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 12px 30px rgba(255, 0, 51, 0.75), 0 0 20px rgba(255, 0, 51, 0.45), inset 0 1px 1.5px rgba(255, 255, 255, 0.7);
 }
 
 /* SECTION DIVIDER: DỊCH VỤ */
@@ -9714,7 +9753,7 @@ body.vthangios-dark .vthangios-yt-btn {
 .cyber-section-subtitle {
   font-size: 13px;
   color: #94a3b8;
-  margin: 0 auto 26px;
+  margin: 0 auto 20px;
   max-width: 500px;
 }
 
@@ -9743,12 +9782,16 @@ body.vthangios-dark .vthangios-yt-btn {
   background: rgba(13, 20, 36, 0.72);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 20px;
-  padding: 24px 18px 20px;
+  padding: 22px 16px 18px;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
   display: flex;
   flex-direction: column;
+  text-decoration: none !important;
+  color: inherit !important;
+  cursor: pointer;
+  user-select: none;
 }
 
 .cyber-card:hover {

@@ -120,7 +120,6 @@ export default function LocketClient() {
       {/* TOP NAVIGATION BAR */}
       <header className="locket-top-nav">
         <Link href="/#services" className="locket-back-btn" aria-label="Quay lại dịch vụ">
-          <i className="fas fa-arrow-left" aria-hidden="true" />
           <span>← QUAY LẠI DỊCH VỤ</span>
         </Link>
         <button

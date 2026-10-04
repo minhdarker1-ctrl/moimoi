@@ -18,8 +18,8 @@ export function getGroupRoute(cat: { title: string; slug?: string; id?: number }
     return `/${cat.slug.trim().replace(/^\//, "")}`;
   }
   const lower = cat.title.toLowerCase();
-  if (lower.includes("free fire")) return "/freefire";
-  if (lower.includes("liên quân") || lower.includes("lien quan")) return "/lienquan";
+  if (lower.includes("free fire")) return "/free-fire";
+  if (lower.includes("liên quân") || lower.includes("lien quan")) return "/lien-quan-mobile";
   if (lower.includes("other")) return "/other";
   return `/#group-${cat.id}`;
 }

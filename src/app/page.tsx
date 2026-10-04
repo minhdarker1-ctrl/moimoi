@@ -115,7 +115,13 @@ export default async function Home() {
                 aria-label={s.name}
                 title={s.name}
               >
-                <i className={s.icon} aria-hidden="true" />
+                {s.color === "telegram" ? (
+                  <span className="cyber-tg-badge">
+                    <i className="fa-solid fa-paper-plane" aria-hidden="true" />
+                  </span>
+                ) : (
+                  <i className={s.icon} aria-hidden="true" />
+                )}
               </a>
             ))}
           </div>
@@ -138,7 +144,7 @@ export default async function Home() {
         {/* 4 CORE SERVICES GRID */}
         <section className="cyber-services-grid" aria-label="Danh sách 4 dịch vụ chính">
           {/* CARD 1: FREE FIRE */}
-          <div className="cyber-card cyber-card-ff">
+          <Link href="/free-fire" className="cyber-card cyber-card-ff" aria-label="Xem dịch vụ Free Fire">
             <div className="cyber-card-inner">
               <div className="cyber-card-img-wrap">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -157,15 +163,15 @@ export default async function Home() {
                 <i className="fas fa-shield-alt" />
                 <span>HOẠT ĐỘNG</span>
               </div>
-              <Link href="/free-fire" className="cyber-card-cta">
+              <span className="cyber-card-cta">
                 <span>XEM DỊCH VỤ</span>
                 <i className="fas fa-arrow-right" />
-              </Link>
+              </span>
             </div>
-          </div>
+          </Link>
 
           {/* CARD 2: AOV */}
-          <div className="cyber-card cyber-card-aov">
+          <Link href="/lien-quan-mobile" className="cyber-card cyber-card-aov" aria-label="Xem dịch vụ Liên Quân Mobile AOV">
             <div className="cyber-card-inner">
               <div className="cyber-card-img-wrap">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -184,15 +190,15 @@ export default async function Home() {
                 <i className="fas fa-shield-alt" />
                 <span>HOẠT ĐỘNG</span>
               </div>
-              <Link href="/lien-quan-mobile" className="cyber-card-cta">
+              <span className="cyber-card-cta">
                 <span>XEM DỊCH VỤ</span>
                 <i className="fas fa-arrow-right" />
-              </Link>
+              </span>
             </div>
-          </div>
+          </Link>
 
           {/* CARD 3: LOCKET GOLD */}
-          <div className="cyber-card cyber-card-locket">
+          <Link href="/locket" className="cyber-card cyber-card-locket" aria-label="Xem dịch vụ Locket Gold">
             <div className="cyber-card-inner">
               <div className="cyber-card-img-wrap">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -211,15 +217,15 @@ export default async function Home() {
                 <i className="fas fa-check-circle" />
                 <span>HOẠT ĐỘNG</span>
               </div>
-              <Link href="/locket" className="cyber-card-cta">
+              <span className="cyber-card-cta">
                 <span>XEM DỊCH VỤ</span>
                 <i className="fas fa-arrow-right" />
-              </Link>
+              </span>
             </div>
-          </div>
+          </Link>
 
           {/* CARD 4: OTHER */}
-          <div className="cyber-card cyber-card-other">
+          <Link href="/other" className="cyber-card cyber-card-other" aria-label="Xem dịch vụ khác">
             <div className="cyber-card-inner">
               <div className="cyber-card-img-wrap">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -238,12 +244,12 @@ export default async function Home() {
                 <i className="fas fa-spinner fa-spin-pulse" />
                 <span>ĐANG CẬP NHẬT</span>
               </div>
-              <Link href="/other" className="cyber-card-cta">
+              <span className="cyber-card-cta">
                 <span>XEM DỊCH VỤ</span>
                 <i className="fas fa-arrow-right" />
-              </Link>
+              </span>
             </div>
-          </div>
+          </Link>
         </section>
 
         {/* TRUST METRICS BAR */}

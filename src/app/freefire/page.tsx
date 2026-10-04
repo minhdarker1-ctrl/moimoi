@@ -72,7 +72,6 @@ export default async function FreeFirePage() {
             href="/#services"
             className="cyber-back-btn"
           >
-            <i className="fa-solid fa-arrow-left" aria-hidden="true" />
             <span>← QUAY LẠI DỊCH VỤ</span>
           </Link>
         </div>
