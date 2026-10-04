@@ -84,8 +84,6 @@ export default async function Home() {
                 <img className="cyber-avatar-frame-overlay" src={site.avatarFrameUrl} alt="" aria-hidden="true" />
               )}
             </div>
-            {/* Online Green Indicator Dot */}
-            <span className="cyber-online-dot" title="Đang trực tuyến (Online)" />
           </div>
 
           <p className="cyber-iam">{site.iam || "Hi, i am"}</p>
