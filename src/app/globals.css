@@ -10234,8 +10234,13 @@ body.vthangios-dark .vthangios-yt-btn {
 }
 
 /* ==================== ONCYBER REDESIGN (CYBER GAMING THEME) ==================== */
-/* TOP NAVIGATION */
-.cyber-header {
+/* TOP NAVIGATION - TRONG SUỐT TRIỆT ĐỂ (CẢ KHI CUỘN HOẶC KHÔNG CUỘN, CẢ LIGHT & DARK) */
+.cyber-header,
+.cyber-header.is-scrolled,
+[data-theme="dark"] .cyber-header,
+[data-theme="dark"] .cyber-header.is-scrolled,
+body.vthangios-dark .cyber-header,
+body.vthangios-dark .cyber-header.is-scrolled {
   position: fixed;
   top: 0;
   left: 0;
@@ -10243,36 +10248,12 @@ body.vthangios-dark .vthangios-yt-btn {
   height: 64px;
   z-index: 99;
   background: transparent !important;
-  border-bottom: 1px solid transparent !important;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, backdrop-filter 0.3s ease;
-}
-
-.cyber-header.is-scrolled {
-  background: rgba(255, 255, 255, 0.75) !important;
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
-}
-
-[data-theme="dark"] .cyber-header,
-body.vthangios-dark .cyber-header {
-  background: transparent !important;
-  border-bottom: 1px solid transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  border-bottom: none !important;
   box-shadow: none !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
-}
-
-[data-theme="dark"] .cyber-header.is-scrolled,
-body.vthangios-dark .cyber-header.is-scrolled {
-  background: rgba(3, 12, 24, 0.55) !important;
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 
 .cyber-header-inner {

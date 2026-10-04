@@ -21,7 +21,6 @@ export default function CyberHeader({
   const [openNotif, setOpenNotif] = useState(false);
   const [unread, setUnread] = useState(0);
   const [dark, setDark] = useState(true);
-  const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -38,12 +37,6 @@ export default function CyberHeader({
     } catch {
       setUnread(notices.length);
     }
-
-    const onScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
   }, [notices]);
 
   function handleOpenNotif() {
@@ -78,7 +71,7 @@ export default function CyberHeader({
 
   return (
     <>
-      <header className={`cyber-header ${scrolled ? "is-scrolled" : ""}`}>
+      <header className="cyber-header">
         <div className="cyber-header-inner">
           {/* LOGO */}
           <Link href="/" className="cyber-logo-brand" aria-label="OnCyber Trang chủ">
