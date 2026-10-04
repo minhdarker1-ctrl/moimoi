@@ -108,22 +108,7 @@ export default function CyberHeader({
               <i className={`bi ${dark ? "bi-moon-stars-fill" : "bi-sun-fill"}`} />
             </button>
 
-            {/* USER BADGE */}
-            <Link href="/dashboard" className="cyber-user-pill">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={user?.avatarUrl || "https://i.ibb.co/jv75LbdS/6123108838828349044.jpg"}
-                alt=""
-                className="cyber-user-avatar"
-                width={30}
-                height={30}
-              />
-              <div className="cyber-user-info">
-                <span className="cyber-user-name">{user?.name || "VỒNG VẦY"}</span>
-                <span className="cyber-user-role">{user?.role || "DEV"}</span>
-              </div>
-              <i className="fas fa-chevron-down cyber-user-arrow" />
-            </Link>
+
           </div>
         </div>
       </header>

@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import NoticeBell, { NoticeItem } from "./NoticeBell";
 import ThemeToggle from "./ThemeToggle";
-import UserNavButton from "./UserNavButton";
 import { getGroupRoute } from "./CategoryMenu";
 
 interface DesktopHeaderProps {
@@ -78,7 +77,6 @@ export default function DesktopHeader({
         )}
         <NoticeBell notices={notices} />
         <ThemeToggle />
-        <UserNavButton />
       </aside>
 
       {/* 
@@ -180,17 +178,6 @@ export default function DesktopHeader({
               );
             })}
 
-            {/* Lối tắt nhanh vào Dashboard */}
-            <Link
-              href="/dashboard"
-              className={`mdarker-header-nav-link ${pathname.startsWith("/dashboard") ? "active" : ""}`}
-            >
-              <span className="mdarker-header-nav-icon" aria-hidden="true">
-                <i className="fa-solid fa-gauge-high" />
-              </span>
-              <span>DASHBOARD</span>
-            </Link>
-
             {/* Nút ALL để ở cuối cùng - Chỉ hiển thị khi không bật hideAllNav */}
             {!hideAllNav && (
               <Link
@@ -204,11 +191,6 @@ export default function DesktopHeader({
               </Link>
             )}
           </nav>
-
-          {/* Cụm tài khoản bên phải khi taskbar trượt xuống */}
-          <div className="mdarker-header-right-user">
-            <UserNavButton />
-          </div>
         </div>
       </header>
     </>
