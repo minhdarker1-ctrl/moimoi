@@ -116,19 +116,330 @@ body.vthangios-dark {
   -webkit-backdrop-filter: blur(14px);
 }
 
-/* ---------- STARRY SKY (DARK MODE) ---------- */
-.mdarker-starry-sky {
-  display: none;
-}
+/* ========================================================
+   SCENIC LANDSCAPE CANVAS (DAY & NIGHT MODES)
+   ======================================================== */
 
-[data-theme="dark"] .mdarker-starry-sky {
-  display: block;
+.scenic-canvas-container {
   position: fixed;
   inset: 0;
-  z-index: -1;
+  z-index: 0;
   pointer-events: none;
   overflow: hidden;
   contain: strict;
+}
+
+.scenic-scene {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.6s ease;
+}
+
+/* Light Mode Scene active by default */
+.scenic-day {
+  opacity: 1;
+  visibility: visible;
+}
+
+.scenic-night {
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* Dark Mode Scene active when dark theme */
+[data-theme="dark"] .scenic-day,
+body.vthangios-dark .scenic-day {
+  opacity: 0;
+  visibility: hidden;
+}
+
+[data-theme="dark"] .scenic-night,
+body.vthangios-dark .scenic-night {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ---------- 1. LIGHT MODE: SKY, SUN, CLOUDS, BIRDS, MIST, GREEN HILLS ---------- */
+.scenic-day-sky {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #bae6fd 0%, #e0f2fe 35%, #f8fafc 85%, #ffffff 100%);
+  opacity: 0.95;
+  transition: opacity 0.6s ease;
+}
+
+/* Radiant Sun & Sunbeams */
+.scenic-sun-wrap {
+  position: absolute;
+  top: 36px;
+  right: 12%;
+  width: 140px;
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.scenic-sun {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #fef08a 30%, #fde047 65%, #f59e0b 100%);
+  box-shadow: 0 0 40px rgba(253, 224, 71, 0.75), 0 0 90px rgba(245, 158, 11, 0.5);
+  animation: scenic-sun-pulse 6s ease-in-out infinite alternate;
+  z-index: 2;
+}
+
+.scenic-sun-corona {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(254, 240, 138, 0.45) 0%, rgba(245, 158, 11, 0.15) 60%, transparent 80%);
+  animation: scenic-sun-corona-spin 20s linear infinite;
+  z-index: 1;
+}
+
+.scenic-sunbeams {
+  position: absolute;
+  width: 450px;
+  height: 450px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg at 50% 50%,
+    rgba(253, 224, 71, 0.16) 0deg,
+    transparent 15deg,
+    rgba(253, 224, 71, 0.18) 30deg,
+    transparent 55deg,
+    rgba(253, 224, 71, 0.15) 75deg,
+    transparent 105deg,
+    rgba(253, 224, 71, 0.17) 130deg,
+    transparent 165deg,
+    rgba(253, 224, 71, 0.15) 190deg,
+    transparent 230deg,
+    rgba(253, 224, 71, 0.18) 260deg,
+    transparent 295deg,
+    rgba(253, 224, 71, 0.16) 325deg,
+    transparent 360deg
+  );
+  filter: blur(12px);
+  opacity: 0.85;
+  animation: scenic-sunbeam-rotate 40s linear infinite;
+  z-index: 0;
+}
+
+@keyframes scenic-sun-pulse {
+  0% { transform: scale(0.96); filter: drop-shadow(0 0 16px rgba(253, 224, 71, 0.6)); }
+  100% { transform: scale(1.04); filter: drop-shadow(0 0 28px rgba(245, 158, 11, 0.85)); }
+}
+
+@keyframes scenic-sun-corona-spin {
+  0% { transform: rotate(0deg) scale(0.95); }
+  50% { transform: rotate(180deg) scale(1.05); }
+  100% { transform: rotate(360deg) scale(0.95); }
+}
+
+@keyframes scenic-sunbeam-rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Drifting Clouds */
+.scenic-clouds-wrap {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.scenic-cloud {
+  position: absolute;
+  color: rgba(255, 255, 255, 0.85);
+  filter: drop-shadow(0 8px 16px rgba(186, 230, 253, 0.5));
+  will-change: transform;
+}
+
+.scenic-cloud-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.cloud-1 {
+  top: 10%;
+  left: -200px;
+  width: 170px;
+  animation: scenic-drift 45s linear infinite;
+  animation-delay: 0s;
+  opacity: 0.88;
+}
+
+.cloud-2 {
+  top: 22%;
+  left: -240px;
+  width: 220px;
+  animation: scenic-drift 65s linear infinite;
+  animation-delay: -18s;
+  opacity: 0.78;
+}
+
+.cloud-3 {
+  top: 34%;
+  left: -180px;
+  width: 150px;
+  animation: scenic-drift 52s linear infinite;
+  animation-delay: -32s;
+  opacity: 0.72;
+}
+
+.cloud-4 {
+  top: 15%;
+  left: -210px;
+  width: 190px;
+  animation: scenic-drift 78s linear infinite;
+  animation-delay: -45s;
+  opacity: 0.65;
+}
+
+@keyframes scenic-drift {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(calc(100vw + 320px)); }
+}
+
+/* Flock of Birds */
+.scenic-flock-wrap {
+  position: absolute;
+  top: 18%;
+  left: -100px;
+  pointer-events: none;
+  animation: scenic-birds-flight 38s linear infinite;
+  animation-delay: -10s;
+}
+
+.scenic-bird {
+  position: absolute;
+  color: rgba(71, 85, 105, 0.45);
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+.scenic-bird-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  animation: scenic-bird-flap 1.2s ease-in-out infinite alternate;
+}
+
+.bird-1 {
+  width: 20px;
+  top: 0;
+  left: 20px;
+}
+
+.bird-2 {
+  width: 16px;
+  top: 16px;
+  left: 0px;
+}
+
+.bird-3 {
+  width: 14px;
+  top: 24px;
+  left: 36px;
+}
+
+@keyframes scenic-birds-flight {
+  0% { transform: translate(0, 0); }
+  50% { transform: translate(calc(50vw + 60px), -15px); }
+  100% { transform: translate(calc(100vw + 160px), 10px); }
+}
+
+@keyframes scenic-bird-flap {
+  0% { transform: scaleY(1); }
+  100% { transform: scaleY(0.7); }
+}
+
+/* Valley Mist */
+.scenic-mist {
+  position: absolute;
+  bottom: 120px;
+  left: 0;
+  right: 0;
+  height: 90px;
+  pointer-events: none;
+}
+
+.scenic-mist-day {
+  background: linear-gradient(180deg, transparent 0%, rgba(255, 255, 255, 0.6) 50%, transparent 100%);
+  filter: blur(14px);
+  animation: scenic-mist-drift 18s ease-in-out infinite alternate;
+}
+
+.scenic-mist-night {
+  background: linear-gradient(180deg, transparent 0%, rgba(99, 102, 241, 0.15) 50%, transparent 100%);
+  filter: blur(14px);
+  animation: scenic-mist-drift 22s ease-in-out infinite alternate;
+}
+
+@keyframes scenic-mist-drift {
+  0% { transform: translateX(-40px) scaleY(0.9); }
+  100% { transform: translateX(40px) scaleY(1.1); }
+}
+
+/* Layered Mountain Wrappers at Bottom */
+.scenic-mountains-wrap {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: clamp(140px, 22vw, 250px);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.scenic-mountains-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* ---------- 2. DARK MODE: STARS, NEBULA, FIREFLIES, NIGHT MOUNTAINS ---------- */
+.scenic-stars-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.scenic-fireflies-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.scenic-firefly {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: scenic-firefly-blink ease-in-out infinite alternate, scenic-firefly-hover ease-in-out infinite alternate;
+}
+
+@keyframes scenic-firefly-blink {
+  0%, 10% { opacity: 0.1; transform: scale(0.6); }
+  50%, 80% { opacity: 1; transform: scale(1.2); }
+  100% { opacity: 0.2; transform: scale(0.7); }
+}
+
+@keyframes scenic-firefly-hover {
+  0% { transform: translateY(0) translateX(0); }
+  50% { transform: translateY(-16px) translateX(12px); }
+  100% { transform: translateY(8px) translateX(-10px); }
+}
+
+/* Legacy support alias */
+.mdarker-starry-sky {
+  display: none !important;
 }
 
 .mdarker-nebula-glow {
@@ -249,14 +560,20 @@ body.vthangios-dark {
   }
 }
 
-/* ---------- BÔNG TUYẾT RƠI MÙA ĐÔNG (SNOW EFFECT) ---------- */
+/* ---------- BÔNG TUYẾT RƠI MÙA ĐÔNG (SNOW EFFECT - CHỈ HIỆN Ở DARK MODE) ---------- */
 .mdarker-snow-container {
+  display: none;
   position: fixed;
   inset: 0;
-  z-index: 20;
+  z-index: 10;
   pointer-events: none;
   overflow: hidden;
   contain: strict;
+}
+
+[data-theme="dark"] .mdarker-snow-container,
+body.vthangios-dark .mdarker-snow-container {
+  display: block;
 }
 
 .mdarker-snow-flake {
@@ -9935,6 +10252,8 @@ body.vthangios-dark .cyber-user-arrow {
 
 /* MAIN WRAP - Standardized offset matching 64px header + 8px breathing space */
 .cyber-main-wrap {
+  position: relative;
+  z-index: 5;
   width: 100%;
   max-width: 1140px;
   margin: 0 auto;

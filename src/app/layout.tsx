@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Quicksand } from "next/font/google";
 import { db } from "@/lib/db";
-import StarrySky from "@/components/StarrySky";
+import ScenicBackground from "@/components/ScenicBackground";
 import SnowEffect from "@/components/SnowEffect";
 import MusicPlayer from "@/components/MusicPlayer";
 import "./globals.css";
@@ -54,7 +54,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body>
-        <StarrySky />
+        <ScenicBackground />
         <SnowEffect />
         <MusicPlayer />
         {children}
