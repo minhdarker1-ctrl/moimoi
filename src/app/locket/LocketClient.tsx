@@ -140,7 +140,7 @@ export default function LocketClient() {
         <div className="locket-hero-section">
           <div className="locket-badge-glow">
             <span className="locket-badge-icon">👑</span>
-            <span className="locket-badge-text">ONCYBER TOOL • STOREKIT 2</span>
+            <span className="locket-badge-text">ONCYBER TOOL • PREMIUM ACTIVE</span>
           </div>
           <h1 className="locket-title">
             Kích Hoạt <span className="locket-gold-gradient">Locket Gold</span>
@@ -178,7 +178,7 @@ export default function LocketClient() {
             <i className="fas fa-shield-alt locket-feat-icon green" />
             <div>
               <strong>An Toàn 100%</strong>
-              <p>Bản quyền StoreKit 2 Apple</p>
+              <p>Bản quyền chính thức Apple</p>
             </div>
           </div>
         </div>
@@ -248,7 +248,7 @@ export default function LocketClient() {
                     <span className="locket-step-dot">
                       {step > 2 ? <i className="fas fa-check" /> : "2"}
                     </span>
-                    <span>Gửi gói biên lai Apple StoreKit 2...</span>
+                    <span>Xác thực gói bản quyền hệ thống...</span>
                   </div>
                   <div className={`locket-step-item ${step >= 3 ? "active" : ""}`}>
                     <span className="locket-step-dot">
@@ -323,7 +323,7 @@ export default function LocketClient() {
                 <div className="locket-info-row">
                   <span className="locket-info-label">Trạng thái:</span>
                   <span className="locket-info-val active-status">
-                    <i className="fas fa-circle-check" /> Đã mở khóa StoreKit 2
+                    <i className="fas fa-circle-check" /> Đã mở khóa thành công
                   </span>
                 </div>
               </div>
@@ -391,13 +391,13 @@ export default function LocketClient() {
             <div className="locket-faq-card">
               <h3>Kích hoạt có bị khoá tài khoản không?</h3>
               <p>
-                <strong>Tuyệt đối an toàn.</strong> Tool sử dụng biên lai StoreKit 2 chuẩn của Apple để restore bản quyền, không yêu cầu mật khẩu hay can thiệp vào tài khoản Apple ID của bạn.
+                <strong>Tuyệt đối an toàn.</strong> Tool sử dụng cơ chế đồng bộ bản quyền tự động, không yêu cầu mật khẩu hay can thiệp vào tài khoản Apple ID của bạn.
               </p>
             </div>
             <div className="locket-faq-card">
               <h3>Hồ sơ DNS Đóng Băng Gold có tác dụng gì?</h3>
               <p>
-                Đây là file cấu hình bảo mật DNS của Apple. Nó chặn các tín hiệu kiểm tra định kỳ của máy chủ RevenueCat, giúp tài khoản giữ trạng thái Gold bền vững trên thiết bị.
+                Đây là file cấu hình bảo mật DNS giúp duy trì trạng thái Locket Gold bền vững và ổn định lâu dài trên thiết bị của bạn.
               </p>
             </div>
             <div className="locket-faq-card">

@@ -235,12 +235,12 @@ export async function POST(req: Request) {
           continue;
         } else {
           const errData = await res.json().catch(() => ({}));
-          errorMessage = errData?.message || `Lỗi máy chủ RevenueCat (${res.status})`;
+          errorMessage = errData?.message || `Máy chủ xử lý phản hồi mã (${res.status}). Vui lòng thử lại sau!`;
           break;
         }
       } catch (err: any) {
         if (attempt === 2) {
-          errorMessage = err?.message || "Lỗi kết nối mạng tới máy chủ RevenueCat.";
+          errorMessage = err?.message || "Lỗi kết nối tới máy chủ dịch vụ. Vui lòng thử lại sau!";
         }
         await new Promise((r) => setTimeout(r, 1000));
       }
