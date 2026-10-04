@@ -156,48 +156,55 @@ export default function CyberHeader({
         </div>
       </header>
 
-      {/* NOTIFICATION OVERLAY */}
-      <div
-        className={`vthangios-notif-overlay ${openNotif ? "open" : ""}`}
-        onClick={() => setOpenNotif(false)}
-      />
-      <div className={`vthangios-notif-popup ${openNotif ? "open" : ""}`}>
-        <div className="vthangios-notif-head">
-          <div className="vthangios-notif-title">
-            <i className="fas fa-bell text-amber-400" />
-            <span>Thông báo hệ thống</span>
-          </div>
-          <button
-            type="button"
-            className="vthangios-notif-close"
+      {/* NOTIFICATION MODAL */}
+      {openNotif && (
+        <>
+          <div
+            className="cyber-notif-overlay"
             onClick={() => setOpenNotif(false)}
-            aria-label="Đóng"
-          >
-            <i className="fas fa-times" />
-          </button>
-        </div>
-        <div className="vthangios-notif-body">
-          {notices.length === 0 ? (
-            <p className="vthangios-notif-empty">Hiện chưa có thông báo mới.</p>
-          ) : (
-            notices.map((n) => (
-              <div key={n.id} className="vthangios-notif-item">
-                <p className="vthangios-notif-item-title">{n.title}</p>
-                <p className="vthangios-notif-item-body">{n.body}</p>
-                <span className="vthangios-notif-item-date">
-                  {new Date(n.createdAt).toLocaleDateString("vi-VN", {
-                    day: "2-digit",
-                    month: "2-digit",
-                    year: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </span>
+          />
+          <div className="cyber-notif-modal" role="dialog" aria-modal="true" aria-label="Thông báo hệ thống">
+            <div className="cyber-notif-head">
+              <div className="cyber-notif-title">
+                <i className="fas fa-bell" />
+                <span>Thông báo hệ thống</span>
               </div>
-            ))
-          )}
-        </div>
-      </div>
+              <button
+                type="button"
+                className="cyber-notif-close"
+                onClick={() => setOpenNotif(false)}
+                aria-label="Đóng"
+              >
+                <i className="fas fa-times" />
+              </button>
+            </div>
+            <div className="cyber-notif-body">
+              {notices.length === 0 ? (
+                <div className="cyber-notif-empty">
+                  <i className="fas fa-envelope-open" />
+                  <p>Hiện chưa có thông báo mới.</p>
+                </div>
+              ) : (
+                notices.map((n) => (
+                  <div key={n.id} className="cyber-notif-item">
+                    <p className="cyber-notif-item-title">{n.title}</p>
+                    <p className="cyber-notif-item-body">{n.body}</p>
+                    <span className="cyber-notif-item-date">
+                      {new Date(n.createdAt).toLocaleDateString("vi-VN", {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </span>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </>
+      )}
     </>
   );
 }
