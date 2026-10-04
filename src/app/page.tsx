@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import Link from "next/link";
 import VthangNav from "@/components/VthangNav";
 import TypedText from "@/components/TypedText";
 import AppCard from "@/components/AppCard";
@@ -105,6 +106,86 @@ export default async function Home() {
             ))}
           </div>
         )}
+
+        {/* FEATURED: LOCKET GOLD BANNER */}
+        <div style={{ maxWidth: 640, margin: "0 auto 24px" }}>
+          <Link
+            href="/locket"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: "14px 18px",
+              borderRadius: "var(--vi-radius-sm)",
+              background: "linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.25) 100%)",
+              border: "1.5px solid rgba(245, 158, 11, 0.4)",
+              backdropFilter: "blur(14px)",
+              WebkitBackdropFilter: "blur(14px)",
+              textDecoration: "none",
+              boxShadow: "0 8px 24px rgba(245, 158, 11, 0.12)",
+              transition: "transform 0.2s ease, box-shadow 0.2s ease",
+            }}
+            className="vthangios-locket-featured"
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 14, textAlign: "left" }}>
+              <div
+                style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: "50%",
+                  background: "linear-gradient(135deg, #f59e0b, #d97706)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 20,
+                  boxShadow: "0 0 14px rgba(245, 158, 11, 0.5)",
+                  flexShrink: 0,
+                }}
+              >
+                👑
+              </div>
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <span style={{ fontSize: 15, fontWeight: 800, color: "var(--vi-text)" }}>
+                    Kích Hoạt Locket Gold Free
+                  </span>
+                  <span
+                    style={{
+                      fontSize: 10,
+                      fontWeight: 800,
+                      background: "#f59e0b",
+                      color: "#fff",
+                      padding: "2px 6px",
+                      borderRadius: 999,
+                    }}
+                  >
+                    HOT
+                  </span>
+                </div>
+                <p style={{ margin: "2px 0 0", fontSize: 12, color: "var(--vi-text-muted)", lineHeight: 1.3 }}>
+                  Mở khóa tính năng 1 năm miễn phí cho tài khoản của bạn
+                </p>
+              </div>
+            </div>
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "8px 14px",
+                borderRadius: 999,
+                background: "linear-gradient(135deg, #f59e0b, #d97706)",
+                color: "#fff",
+                fontSize: 12,
+                fontWeight: 700,
+                flexShrink: 0,
+              }}
+            >
+              <span>Vào ngay</span>
+              <i className="fas fa-chevron-right" style={{ fontSize: 10 }} />
+            </div>
+          </Link>
+        </div>
 
         {/* LINK BOXES */}
         {linkBoxes.length > 0 && (
