@@ -82,7 +82,8 @@ export default async function KeyPage({
   // === NHÁNH 1: NHẬN ACC LIÊN QUÂN (AOV) ===
   if (isAov) {
     const aovConfig = await db.aovConfig.findUnique({ where: { id: 1 } });
-    const countToClaim = aovConfig?.blindBoxEnabled && Math.random() < 0.2 ? 2 : 1;
+    // Tỷ lệ 10% may mắn trúng Túi Mù nhận 5 tài khoản cùng lúc, 90% nhận 1 tài khoản
+    const countToClaim = aovConfig?.blindBoxEnabled && Math.random() < 0.1 ? 5 : 1;
 
     const available = await db.gameAccount.findMany({
       where: { game: "AOV", status: "AVAILABLE" },

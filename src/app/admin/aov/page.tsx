@@ -293,7 +293,7 @@ export default async function AdminAovPage({
                     defaultChecked={config?.blindBoxEnabled ?? true}
                     style={{ width: 16, height: 16 }}
                   />
-                  <span>Bật cơ chế <b>Túi Mù x2 Acc</b></span>
+                  <span>Bật cơ chế <b>Túi Mù x5 Acc (10%)</b></span>
                 </label>
                 <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, cursor: "pointer" }}>
                   <input

@@ -147,7 +147,7 @@ export default function AovClient({
               ✨ Cơ chế sự kiện
             </div>
             <div style={{ fontSize: 16, fontWeight: 800, color: "#f59e0b", marginTop: 8 }}>
-              {blindBoxEnabled ? "📦 Túi mù x2 Acc" : "🎯 Nhận 1 Acc"}
+              {blindBoxEnabled ? "📦 Túi mù x5 Acc" : "🎯 Nhận 1 Acc"}
             </div>
           </div>
         </div>
@@ -217,7 +217,7 @@ export default function AovClient({
             }}
           >
             <i className="fa-solid fa-sparkles" aria-hidden="true" />
-            <span>Đặc biệt: Tỷ lệ 20% trúng <b>Túi Mù May Mắn</b> (Nhận ngay 2 Acc cùng lúc)!</span>
+            <span>Đặc biệt: Tỷ lệ 10% trúng <b>Túi Mù May Mắn</b> (Nhận ngay 5 Acc cùng lúc)!</span>
           </div>
         )}
 
@@ -337,7 +337,7 @@ export default function AovClient({
             Hộp Quà Túi Mù
           </h3>
           <p style={{ fontSize: 13, color: "var(--vi-muted)", margin: 0, lineHeight: 1.5 }}>
-            Hệ thống ngẫu nhiên tặng thêm từ 1 đến 2 tài khoản VIP cho những bạn may mắn vượt link.
+            Hệ thống ngẫu nhiên tặng tới 5 tài khoản VIP cho những bạn may mắn vượt link.
           </p>
         </div>
 
