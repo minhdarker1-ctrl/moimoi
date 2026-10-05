@@ -399,21 +399,36 @@ export default function AovArenaClient({
             Vượt link nhận vé tham gia <b>Xé Túi Mù (1 - 3 acc)</b> hoặc thử vận may với <b>Vòng Quay May Mắn (0 - 5 acc)</b> 100% trắng thông tin!
           </p>
 
-          {/* KPI Thống kê kho */}
-          <div className="aov-stats-grid">
-            <div className="aov-stat-box">
-              <div className="aov-stat-num" style={{ color: "#38bdf8" }}>{availableStock}</div>
-              <div className="aov-stat-lbl">Nick Khả Dụng</div>
-            </div>
-            <div className="aov-stat-box">
-              <div className="aov-stat-num" style={{ color: "#10b981" }}>{claimedStock}</div>
-              <div className="aov-stat-lbl">Đã Phát Quà</div>
-            </div>
-            <div className="aov-stat-box">
-              <div className="aov-stat-num" style={{ color: "#f59e0b" }}>
-                {currentUser ? currentTickets : 0}
+          {/* HYPE CARDS: TÂM PHÁP GACHA & ĐẶC QUYỀN AOV */}
+          <div className="aov-hype-grid">
+            <div className="aov-hype-card gold">
+              <div className="aov-hype-icon">🔥</div>
+              <div className="aov-hype-content">
+                <div className="aov-hype-title">TỶ LỆ NỔ 5 ACC ~30%</div>
+                <div className="aov-hype-desc">
+                  Tỷ lệ nổ siêu phẩm Jackpot cực cao, tùy thuộc vào độ may mắn &amp; nhân phẩm!
+                </div>
               </div>
-              <div className="aov-stat-lbl">Vé Hiện Có Của Bạn</div>
+            </div>
+
+            <div className="aov-hype-card cyan">
+              <div className="aov-hype-icon">🤝</div>
+              <div className="aov-hype-content">
+                <div className="aov-hype-title">ACC CÀY CHUNG SỨC</div>
+                <div className="aov-hype-desc">
+                  Nick Garena trắng TT 100%, tha hồ cày sự kiện Chung Sức, kéo rank &amp; test tướng.
+                </div>
+              </div>
+            </div>
+
+            <div className="aov-hype-card purple">
+              <div className="aov-hype-icon">🎰</div>
+              <div className="aov-hype-content">
+                <div className="aov-hype-title">BẤT BẠI TÂM PHÁP</div>
+                <div className="aov-hype-desc">
+                  99% con bạc thường dừng lại ngay trước khi thắng lớn! Hãy kiên trì tới cùng.
+                </div>
+              </div>
             </div>
           </div>
 

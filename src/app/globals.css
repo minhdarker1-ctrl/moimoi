@@ -12617,32 +12617,98 @@ body.vthangios-dark .cyber-footer {
   line-height: 1.6;
 }
 
-.aov-stats-grid {
+/* --- HYPE CARDS (TÂM PHÁP GACHA) --- */
+.aov-hype-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  max-width: 600px;
+  gap: 14px;
+  max-width: 860px;
   margin: 0 auto 24px;
 }
 
-.aov-stat-box {
-  background: rgba(0, 0, 0, 0.25);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
-  padding: 12px 10px;
+.aov-hype-card {
+  background: rgba(15, 23, 42, 0.7);
+  border-radius: 16px;
+  padding: 16px 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  text-align: left;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
 }
 
-.aov-stat-num {
-  font-size: 24px;
+.aov-hype-card:hover {
+  transform: translateY(-2px);
+}
+
+.aov-hype-card.gold {
+  border-color: rgba(245, 158, 11, 0.35);
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(15, 23, 42, 0.8));
+}
+
+.aov-hype-card.gold:hover {
+  border-color: rgba(245, 158, 11, 0.6);
+  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.25);
+}
+
+.aov-hype-card.cyan {
+  border-color: rgba(56, 189, 248, 0.35);
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.1), rgba(15, 23, 42, 0.8));
+}
+
+.aov-hype-card.cyan:hover {
+  border-color: rgba(56, 189, 248, 0.6);
+  box-shadow: 0 4px 20px rgba(56, 189, 248, 0.25);
+}
+
+.aov-hype-card.purple {
+  border-color: rgba(168, 85, 247, 0.35);
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(15, 23, 42, 0.8));
+}
+
+.aov-hype-card.purple:hover {
+  border-color: rgba(168, 85, 247, 0.6);
+  box-shadow: 0 4px 20px rgba(168, 85, 247, 0.25);
+}
+
+.aov-hype-icon {
+  font-size: 26px;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.aov-hype-content {
+  flex: 1;
+}
+
+.aov-hype-title {
+  font-size: 13.5px;
   font-weight: 900;
-  font-family: monospace;
+  letter-spacing: 0.3px;
+  margin-bottom: 4px;
 }
 
-.aov-stat-lbl {
+.aov-hype-card.gold .aov-hype-title {
+  color: #fbbf24;
+}
+
+.aov-hype-card.cyan .aov-hype-title {
+  color: #38bdf8;
+}
+
+.aov-hype-card.purple .aov-hype-title {
+  color: #c084fc;
+}
+
+.aov-hype-desc {
   font-size: 12px;
   color: #94a3b8;
-  font-weight: 600;
-  margin-top: 2px;
+  line-height: 1.5;
+  margin: 0;
 }
 
 .aov-ticket-cta-wrap {
@@ -13534,8 +13600,9 @@ body.vthangios-dark .cyber-footer {
   .aov-steps-row {
     grid-template-columns: 1fr;
   }
-  .aov-stats-grid {
-    grid-template-columns: repeat(3, 1fr);
+  .aov-hype-grid {
+    grid-template-columns: 1fr;
+    max-width: 480px;
   }
 }
 
@@ -13543,9 +13610,8 @@ body.vthangios-dark .cyber-footer {
   .aov-hero-title {
     font-size: 22px;
   }
-  .aov-stats-grid {
-    grid-template-columns: 1fr;
-    gap: 8px;
+  .aov-hype-card {
+    padding: 14px 12px;
   }
   .hidden-xs {
     display: none !important;
