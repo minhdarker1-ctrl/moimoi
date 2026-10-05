@@ -139,8 +139,8 @@ export default async function Home() {
           Hệ thống dịch vụ uy tín - Tốc độ - Bảo mật - Giá tốt nhất
         </p>
 
-        {/* 4 CORE SERVICES GRID */}
-        <section className="cyber-services-grid" aria-label="Danh sách 4 dịch vụ chính">
+        {/* 5 CORE SERVICES GRID */}
+        <section className="cyber-services-grid" aria-label="Danh sách 5 dịch vụ chính">
           {/* CARD 1: FREE FIRE */}
           <Link href="/freefire" className="cyber-card cyber-card-ff" aria-label="Xem dịch vụ Free Fire">
             <div className="cyber-card-inner">
@@ -244,6 +244,33 @@ export default async function Home() {
               </div>
               <span className="cyber-card-cta">
                 <span>XEM DỊCH VỤ</span>
+                <i className="fas fa-arrow-right" />
+              </span>
+            </div>
+          </Link>
+
+          {/* CARD 5: NUÔI TÔI (DONATE) */}
+          <Link href="/donate" className="cyber-card cyber-card-donate" aria-label="Ủng hộ tác giả dự án Nuôi Tôi">
+            <div className="cyber-card-inner">
+              <div className="cyber-card-img-wrap">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/services/donate.svg"
+                  alt="Nuôi Tôi - Donate"
+                  className="cyber-card-img"
+                  width={96}
+                  height={96}
+                  loading="lazy"
+                />
+              </div>
+              <h2 className="cyber-card-title">NUÔI TÔI</h2>
+              <p className="cyber-card-desc">Ủng hộ cà phê &amp; duy trì server</p>
+              <div className="cyber-card-badge badge-active-pink">
+                <i className="fas fa-heart" />
+                <span>ỦNG HỘ</span>
+              </div>
+              <span className="cyber-card-cta">
+                <span>DONATE NGAY</span>
                 <i className="fas fa-arrow-right" />
               </span>
             </div>
