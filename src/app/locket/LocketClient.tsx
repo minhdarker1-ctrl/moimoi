@@ -311,7 +311,7 @@ Cài DNS khi Gold chưa xuất hiện sẽ chỉ giữ trạng thái chưa có G
                   <div className="locket-wf-step">
                     <span className="locket-wf-num">3</span>
                     <div className="locket-wf-text">
-                      <strong>Bước 3:</strong> Nhập tên đăng nhập vào ô bên dưới <em>(hoặc dán Link Invite / Link hồ sơ)</em>.
+                      <strong>Bước 3:</strong> Nhập link hồ sơ vào ô bên dưới.
                     </div>
                   </div>
 
