@@ -10918,7 +10918,7 @@ body.vthangios-dark .cyber-avatar-ring {
 .cyber-avatar-ring.has-frame {
   border: none;
   box-shadow: none;
-  background: transparent;
+  background: #ffffff;
 }
 
 .cyber-avatar-img {
@@ -10930,8 +10930,8 @@ body.vthangios-dark .cyber-avatar-ring {
 }
 
 .cyber-avatar-ring.has-frame .cyber-avatar-img {
-  width: 96px;
-  height: 96px;
+  width: 100%;
+  height: 100%;
 }
 
 .cyber-avatar-frame-overlay {
@@ -10939,8 +10939,8 @@ body.vthangios-dark .cyber-avatar-ring {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 128px;
-  height: 128px;
+  width: 124%;
+  height: 124%;
   pointer-events: none;
   z-index: 2;
 }
