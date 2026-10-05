@@ -10587,6 +10587,42 @@ body.vthangios-dark .vthangios-yt-btn {
   color: #f59e0b;
 }
 
+.locket-success-sub-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.locket-success-action-btn {
+  flex: 1;
+  min-width: 140px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 11px 16px;
+  border-radius: var(--vi-radius-sm);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid var(--vi-border);
+  background: var(--vi-surface);
+  color: var(--vi-text);
+}
+
+.locket-success-action-btn:hover {
+  background: var(--vi-surface-solid);
+  border-color: #f59e0b;
+  color: #f59e0b;
+}
+
+.locket-success-action-btn.active-copied {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: #10b981;
+  color: #10b981;
+}
+
 /* ==================== ONCYBER REDESIGN (CYBER GAMING THEME) ==================== */
 /* TOP NAVIGATION - TRONG SUỐT TRIỆT ĐỂ (CẢ KHI CUỘN HOẶC KHÔNG CUỘN, CẢ LIGHT & DARK) */
 .cyber-header,

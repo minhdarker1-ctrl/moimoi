@@ -18,6 +18,7 @@ export default function LocketClient() {
   const [result, setResult] = useState<ActivateResult | null>(null);
   const [completedAt, setCompletedAt] = useState<string>("");
   const [customerType, setCustomerType] = useState<"new" | "returning">("new");
+  const [copiedInfo, setCopiedInfo] = useState(false);
   const [dark, setDark] = useState(false);
 
   useEffect(() => {
@@ -52,6 +53,39 @@ export default function LocketClient() {
     } catch {
       alert("Không thể đọc từ bộ nhớ tạm. Bạn vui lòng dán thủ công nhé!");
     }
+  }
+
+  async function handleCopyInfo() {
+    const timeStr = completedAt || "13:22:45 · 04/10/2026";
+    const returningNote =
+      customerType === "returning"
+        ? `🔄 LƯU Ý CHO KHÁCH CŨ:\n• Vào Cài đặt → Cài đặt chung → VPN & Quản lý thiết bị → Xóa cấu hình DNS Locket cũ trước khi cài file DNS mới.\n\n`
+        : "";
+
+    const infoText = `✅ KÍCH HOẠT LOCKET GOLD THÀNH CÔNG
+──────────────
+👤 Tài khoản: ${target}
+📦 Gói dịch vụ: 🆓 1 Năm Bản Quyền Free
+📅 Hoàn tất: ${timeStr}
+
+🌐 DNS ĐÓNG BĂNG GOLD DÙNG CHUNG:
+DNS Đóng Băng Gold Locket dùng chung được thay theo tháng. Hồ sơ .mobileconfig đã cài không tự cập nhật; hãy cài phiên bản mới khi nhận nhắc hạn.
+
+${returningNote}📲 HOÀN TẤT TRÊN THIẾT BỊ:
+1. Xác nhận Gold đã hiển thị: Mở Locket ngay. Nếu chưa thấy Gold, hãy đăng xuất/đăng nhập lại hoặc cài lại app rồi kiểm tra lại.
+2. Cài DNS được bàn giao: Sau khi đã nhìn thấy Gold, tải file .mobileconfig do hệ thống cung cấp.
+3. Bật profile ngay: Vào Cài đặt → Cài đặt chung → VPN & Quản lý thiết bị, chọn profile DNS và hoàn tất cài đặt, không để gián đoạn mạng.
+
+⛔ CẢNH BÁO: KHÔNG LÀM NGƯỢC THỨ TỰ!
+Cài DNS khi Gold chưa xuất hiện sẽ chỉ giữ trạng thái chưa có Gold. DNS là lớp đóng băng, không phải lần kích hoạt thứ hai.
+
+⏱️ Thời gian hồi sau mỗi lượt chính là lúc kiểm tra Gold và hoàn tất đóng băng trước khi token được dùng cho tài khoản khác.`;
+
+    try {
+      await navigator.clipboard.writeText(infoText);
+      setCopiedInfo(true);
+      setTimeout(() => setCopiedInfo(false), 2000);
+    } catch {}
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -631,17 +665,28 @@ export default function LocketClient() {
                     <span>TẢI &amp; CÀI ĐẶT DNS ĐÓNG BĂNG GOLD (.mobileconfig)</span>
                   </a>
 
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setResult(null);
-                      setTarget("");
-                    }}
-                    className="locket-success-reset-btn"
-                  >
-                    <i className="fas fa-redo-alt" />
-                    <span>Kích hoạt cho tài khoản khác</span>
-                  </button>
+                  <div className="locket-success-sub-actions">
+                    <button
+                      type="button"
+                      onClick={handleCopyInfo}
+                      className={`locket-success-action-btn ${copiedInfo ? "active-copied" : ""}`}
+                    >
+                      <i className={`fas ${copiedInfo ? "fa-check" : "fa-copy"}`} />
+                      <span>{copiedInfo ? "ĐÃ SAO CHÉP HƯỚNG DẪN" : "SAO CHÉP HƯỚNG DẪN"}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setResult(null);
+                        setTarget("");
+                      }}
+                      className="locket-success-action-btn"
+                    >
+                      <i className="fas fa-redo-alt" />
+                      <span>Kích hoạt cho tài khoản khác</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
