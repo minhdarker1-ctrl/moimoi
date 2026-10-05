@@ -71,7 +71,7 @@ export default async function LienQuanPage() {
         }))}
       />
 
-      <main style={{ maxWidth: 1040, margin: "0 auto", padding: "20px 16px 60px" }}>
+      <main style={{ maxWidth: 1040, margin: "0 auto", padding: "76px 16px 60px" }}>
         {/* Nút quay lại trang chủ */}
         <div style={{ textAlign: "left", marginBottom: 16 }}>
           <Link href="/#services" className="cyber-back-btn">

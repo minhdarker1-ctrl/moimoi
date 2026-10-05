@@ -74,7 +74,7 @@ export default async function DynamicGroupPage({ params }: PageProps) {
         }))}
       />
 
-      <main style={{ maxWidth: 1240, margin: "0 auto", padding: "20px 16px 60px" }}>
+      <main style={{ maxWidth: 1240, margin: "0 auto", padding: "76px 16px 60px" }}>
         {/* Nút quay lại trang chủ */}
         <div style={{ textAlign: "left", marginBottom: 16 }}>
           <Link

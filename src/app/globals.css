@@ -1048,180 +1048,119 @@ button {
   display: none;
 }
 
+/* ========================================================
+   THANH TASKBAR TRONG SUỐT (GLASSMORPHISM DESKTOP HEADER)
+   ======================================================== */
 .mdarker-desktop-header {
-  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.03);
+  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-@media (min-width: 768px) {
-  .mdarker-mobile-nav {
-    display: none !important;
-  }
+[data-theme="dark"] .mdarker-desktop-header,
+body.vthangios-dark .mdarker-desktop-header {
+  background: rgba(3, 12, 24, 0.55);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+}
 
-  .mdarker-fixed-actions {
-    top: 10px;
-    right: 24px;
-    gap: 10px;
-  }
+.mdarker-header-container {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 10px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
 
-  .mdarker-fixed-actions .mdarker-header-clock {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 14px;
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--vi-muted);
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid var(--vi-border);
-    border-radius: 20px;
-    font-variant-numeric: tabular-nums;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  }
+.mdarker-header-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+  color: var(--vi-text);
+  background: none;
+  border: 0;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+  text-decoration: none;
+  transition: opacity 0.18s, transform 0.18s;
+}
 
-  [data-theme="dark"] .mdarker-fixed-actions .mdarker-header-clock {
-    background: rgba(18, 22, 34, 0.75);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  }
+.mdarker-header-brand:hover {
+  opacity: 0.85;
+  transform: translateY(-1px);
+}
 
-  .mdarker-desktop-header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 45;
-    display: block;
-    width: 100%;
-    background: rgba(234, 242, 248, 0.88);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-bottom: 1px solid var(--vi-border);
-    transform: translateY(-100%);
-    opacity: 0;
-    pointer-events: none;
-    transition: transform 0.42s cubic-bezier(0.16, 1, 0.3, 1),
-                opacity 0.32s ease,
-                background 0.25s ease,
-                box-shadow 0.25s ease;
-  }
+.mdarker-header-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--vi-accent);
+}
 
-  [data-theme="dark"] .mdarker-desktop-header {
-    background: rgb(12 14 22 / 88%);
-  }
+.mdarker-header-name {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--vi-text);
+  letter-spacing: -0.2px;
+}
 
-  /* Khi cuộn xuống: Taskbar trượt xuống từ từ và mượt mà */
-  .mdarker-desktop-header.mdarker-header-visible {
-    transform: translateY(0);
-    opacity: 1;
-    pointer-events: auto;
-    box-shadow: 0 4px 20px rgb(0 0 0 / 8%);
-  }
+.mdarker-header-verify {
+  width: 18px;
+  height: 18px;
+}
 
-  [data-theme="dark"] .mdarker-desktop-header.mdarker-header-visible {
-    box-shadow: 0 4px 20px rgb(0 0 0 / 45%);
-  }
+.mdarker-header-right-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 
+.mdarker-header-right-actions .mdarker-header-clock {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--vi-muted);
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--vi-border);
+  border-radius: 999px;
+  font-variant-numeric: tabular-nums;
+  font-family: monospace;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="dark"] .mdarker-header-right-actions .mdarker-header-clock,
+body.vthangios-dark .mdarker-header-right-actions .mdarker-header-clock {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+@media (max-width: 640px) {
   .mdarker-header-container {
-    max-width: 1240px;
-    margin: 0 auto;
-    padding: 8px 24px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
+    padding: 8px 16px;
   }
-
-  .mdarker-header-brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 0;
-    color: var(--vi-text);
-    background: none;
-    border: 0;
-    font-family: inherit;
-    cursor: pointer;
-    text-align: left;
-    text-decoration: none;
-    transition: opacity 0.18s, transform 0.18s;
-  }
-
-  .mdarker-header-brand:hover {
-    opacity: 0.85;
-    transform: translateY(-1px);
-  }
-
-  .mdarker-header-avatar {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid var(--vi-accent);
-  }
-
-  .mdarker-header-name {
-    font-size: 16px;
-    font-weight: 800;
-  }
-
-  .mdarker-header-verify {
-    width: 18px;
-    height: 18px;
-  }
-
-  .mdarker-header-nav {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    overflow-x: auto;
-    max-width: 55%;
-    scrollbar-width: none;
-  }
-
-  .mdarker-header-nav::-webkit-scrollbar {
+  .mdarker-header-right-actions .mdarker-header-clock {
     display: none;
-  }
-
-  .mdarker-header-nav-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--vi-muted);
-    text-decoration: none;
-    border-radius: 8px;
-    white-space: nowrap;
-    transition: color 0.18s, background 0.18s, transform 0.18s;
-  }
-
-  .mdarker-header-nav-link:hover {
-    color: var(--vi-accent);
-    background: var(--vi-card);
-    transform: translateY(-1px);
-  }
-
-  .mdarker-header-nav-link.active {
-    color: #fff;
-    background: var(--vi-accent);
-  }
-
-  .mdarker-nav-all {
-    background: rgba(99, 102, 241, 0.08);
-    border: 1px dashed rgba(99, 102, 241, 0.25);
-  }
-
-  .mdarker-nav-all:hover {
-    background: rgba(99, 102, 241, 0.18);
-  }
-
-  .mdarker-header-actions-spacer {
-    display: block;
-    width: 220px;
-    height: 36px;
-    flex-shrink: 0;
   }
 }
 

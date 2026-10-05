@@ -5,14 +5,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import NoticeBell, { NoticeItem } from "./NoticeBell";
 import ThemeToggle from "./ThemeToggle";
-import { getGroupRoute } from "./CategoryMenu";
 
 interface DesktopHeaderProps {
   siteName: string;
   avatarUrl: string;
   verified: boolean;
   notices: NoticeItem[];
-  groups: { id: number; title: string; slug?: string; icon?: string; badge?: string }[];
+  groups?: { id: number; title: string; slug?: string; icon?: string; badge?: string }[];
 }
 
 const timeFormatter = new Intl.DateTimeFormat("vi-VN", {
@@ -31,10 +30,8 @@ export default function DesktopHeader({
   avatarUrl,
   verified,
   notices,
-  groups,
 }: DesktopHeaderProps) {
   const [time, setTime] = useState("");
-  const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -44,16 +41,6 @@ export default function DesktopHeader({
     return () => clearInterval(id);
   }, []);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      // Khi cuộn xuống quá 50px thì kích hoạt hiện thanh taskbar
-      setScrolled(window.scrollY > 50);
-    };
-    handleScroll();
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
   const handleBrandClick = () => {
     if (pathname === "/") {
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -61,123 +48,80 @@ export default function DesktopHeader({
   };
 
   return (
-    <>
-      {/* 
-        1. CỤM THÔNG BÁO VÀ CHỈNH CHẾ ĐỘ: LUÔN GIỮ CỐ ĐỊNH TẠI CHỖ (FIXED TOP-RIGHT)
-        Đáp ứng yêu cầu: "phần thông báo và chỉnh chế độ được giữ tại chỗ"
-      */}
-      <aside className="mdarker-fixed-actions" aria-label="Cài đặt và thông báo">
-        {time && (
-          <div className="mdarker-header-clock" title="Giờ Việt Nam (GMT+7)" suppressHydrationWarning>
-            <i className="bi bi-clock" aria-hidden="true" />
-            <span>{time}</span>
-          </div>
+    <header className="mdarker-desktop-header" aria-label="Thanh điều hướng chính">
+      <div className="mdarker-header-container">
+        {/* BÊN TRÁI: Avatar tròn + Tên thương hiệu OnCyber + Tích xanh xác minh */}
+        {pathname === "/" ? (
+          <button
+            type="button"
+            className="mdarker-header-brand"
+            onClick={handleBrandClick}
+            title="Cuộn lên đầu trang"
+          >
+            {avatarUrl && (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img
+                src={avatarUrl}
+                alt={siteName}
+                width={36}
+                height={36}
+                className="mdarker-header-avatar"
+              />
+            )}
+            <span className="mdarker-header-name">{siteName}</span>
+            {verified && (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img
+                src="/verify.svg"
+                alt="Đã xác minh"
+                width={18}
+                height={18}
+                className="mdarker-header-verify"
+              />
+            )}
+          </button>
+        ) : (
+          <Link
+            href="/"
+            className="mdarker-header-brand"
+            title="Về trang chủ"
+          >
+            {avatarUrl && (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img
+                src={avatarUrl}
+                alt={siteName}
+                width={36}
+                height={36}
+                className="mdarker-header-avatar"
+              />
+            )}
+            <span className="mdarker-header-name">{siteName}</span>
+            {verified && (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img
+                src="/verify.svg"
+                alt="Đã xác minh"
+                width={18}
+                height={18}
+                className="mdarker-header-verify"
+              />
+            )}
+          </Link>
         )}
-        <NoticeBell notices={notices} />
-        <ThemeToggle />
-      </aside>
 
-      {/* 
-        2. THANH TASKBAR Ở TRÊN CÙNG (SLIDE-DOWN TASKBAR)
-        Đáp ứng yêu cầu: "chỉ khi cuộn xuống thì nó mới hiện xuống từ từ"
-      */}
-      <header
-        className={`mdarker-desktop-header ${
-          scrolled ? "mdarker-header-scrolled mdarker-header-visible" : "mdarker-header-hidden"
-        }`}
-        aria-label="Thanh điều hướng chính"
-      >
-        <div className="mdarker-header-container">
-          {/* Cụm Logo + Tên trang bên trái */}
-          {pathname === "/" ? (
-            <button
-              type="button"
-              className="mdarker-header-brand"
-              onClick={handleBrandClick}
-              title="Cuộn lên đầu trang"
-            >
-              {avatarUrl && (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img
-                  src={avatarUrl}
-                  alt={siteName}
-                  width={36}
-                  height={36}
-                  className="mdarker-header-avatar"
-                />
-              )}
-              <span className="mdarker-header-name">{siteName}</span>
-              {verified && (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img
-                  src="/verify.svg"
-                  alt="Đã xác minh"
-                  width={18}
-                  height={18}
-                  className="mdarker-header-verify"
-                />
-              )}
-            </button>
-          ) : (
-            <Link
-              href="/"
-              className="mdarker-header-brand"
-              title="Về trang chủ"
-            >
-              {avatarUrl && (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img
-                  src={avatarUrl}
-                  alt={siteName}
-                  width={36}
-                  height={36}
-                  className="mdarker-header-avatar"
-                />
-              )}
-              <span className="mdarker-header-name">{siteName}</span>
-              {verified && (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img
-                  src="/verify.svg"
-                  alt="Đã xác minh"
-                  width={18}
-                  height={18}
-                  className="mdarker-header-verify"
-                />
-              )}
-            </Link>
+        {/* BÊN PHẢI: Đồng hồ GMT+7 thời gian thực + Chuông thông báo nổi + Nút chuyển Dark/Light mode */}
+        <div className="mdarker-header-right-actions">
+          {time && (
+            <div className="mdarker-header-clock" title="Giờ Việt Nam (GMT+7)" suppressHydrationWarning>
+              <i className="bi bi-clock" aria-hidden="true" />
+              <span>{time}</span>
+            </div>
           )}
-
-          {/* Menu liên kết nhanh mảng ở giữa */}
-          <nav className="mdarker-header-nav" aria-label="Danh mục mảng">
-            {groups.slice(0, 6).map((g) => {
-              const href = getGroupRoute(g);
-              const isActive = pathname === href;
-              return (
-                <Link
-                  key={g.id}
-                  href={href}
-                  className={`mdarker-header-nav-link ${isActive ? "active" : ""}`}
-                >
-                  {g.icon && (
-                    <span className="mdarker-header-nav-icon" aria-hidden="true">
-                      {g.icon.startsWith("http") ? (
-                        /* eslint-disable-next-line @next/next/no-img-element */
-                        <img src={g.icon} alt="" width={15} height={15} />
-                      ) : g.icon.startsWith("bi-") ? (
-                        <i className={`bi ${g.icon}`} />
-                      ) : (
-                        <i className={g.icon} />
-                      )}
-                    </span>
-                  )}
-                  <span>{g.title}</span>
-                </Link>
-              );
-            })}
-          </nav>
+          <NoticeBell notices={notices} />
+          <ThemeToggle />
         </div>
-      </header>
-    </>
+      </div>
+    </header>
   );
 }
