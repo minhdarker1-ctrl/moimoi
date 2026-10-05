@@ -65,7 +65,7 @@ export default async function Home() {
         {/* HERO SECTION */}
         <section className="cyber-hero-section" aria-label="Giới thiệu MinSr">
           <div className="cyber-avatar-container">
-            <div className="cyber-avatar-ring">
+            <div className={`cyber-avatar-ring ${site.avatarFrameUrl ? "has-frame" : ""}`}>
               {site.avatarUrl ? (
                 /* eslint-disable-next-line @next/next/no-img-element */
                 <img
