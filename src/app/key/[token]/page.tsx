@@ -42,27 +42,40 @@ export default async function KeyPage({
 
   const isAov = sp.scope === "aov" || s.hopUrls.includes("scope=aov");
 
-  // Nếu là phiên AOV và đã hoàn thành trước đó: kiểm tra xem có acc đã gán token này không
+  // Nếu là phiên AOV và đã hoàn thành trước đó:
   if (isAov && s.doneAt) {
-    const claimedBefore = await db.gameAccount.findMany({
-      where: { token: s.token },
-      orderBy: { id: "asc" },
-    });
-    if (claimedBefore.length > 0) {
-      return (
-        <main>
-          <div className="vt-key-card" style={{ maxWidth: 540 }}>
-            <h1 style={{ fontSize: 22, margin: "0 0 4px", color: "#38bdf8" }}>
-              ⚔️ Nick Liên Quân Mobile Của Bạn
-            </h1>
-            <p className="vt-hint" style={{ marginBottom: 12 }}>
-              Tài khoản Garena trắng thông tin đã được phát thành công cho bạn.
-            </p>
-            <CopyAovAccount accounts={claimedBefore} />
+    return (
+      <main>
+        <div className="vt-key-card" style={{ maxWidth: 540, textAlign: "center" }}>
+          <div style={{ fontSize: 48, marginBottom: 10 }}>🎟️</div>
+          <h1 style={{ fontSize: 22, margin: "0 0 8px", color: "#38bdf8" }}>
+            Vé Đã Được Cộng Trước Đó
+          </h1>
+          <p className="vt-hint" style={{ marginBottom: 20 }}>
+            Phiên vượt link này đã cộng vé vào tài khoản của bạn. Hãy đến Đấu Trường AOV để xé Túi Mù hoặc quay Vòng Quay May Mắn!
+          </p>
+          <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
+            <Link
+              href="/aov"
+              className="vt-btn-primary"
+              style={{
+                textDecoration: "none",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "12px 24px",
+                fontSize: 15,
+                fontWeight: 700,
+                borderRadius: 12,
+                background: "linear-gradient(135deg, #0284c7, #2563eb)",
+              }}
+            >
+              <span>⚔️ VÀO ĐẤU TRƯỜNG AOV DÙNG VÉ</span>
+            </Link>
           </div>
-        </main>
-      );
-    }
+        </div>
+      </main>
+    );
   }
 
   if (s.doneAt && !isAov) return <Fail msg="Phiên này đã lấy key rồi. Bấm Get Key để lấy key mới." />;
@@ -79,44 +92,33 @@ export default async function KeyPage({
 
   const currentUser = await getCurrentUser();
 
-  // === NHÁNH 1: NHẬN ACC LIÊN QUÂN (AOV) ===
+  // === NHÁNH 1: NHẬN VÉ LIÊN QUÂN (AOV TICKET) ===
   if (isAov) {
-    const aovConfig = await db.aovConfig.findUnique({ where: { id: 1 } });
-    // Tỷ lệ 10% may mắn trúng Túi Mù nhận 5 tài khoản cùng lúc, 90% nhận 1 tài khoản
-    const countToClaim = aovConfig?.blindBoxEnabled && Math.random() < 0.1 ? 5 : 1;
+    let updatedTickets = 1;
 
-    const available = await db.gameAccount.findMany({
-      where: { game: "AOV", status: "AVAILABLE" },
-      take: countToClaim,
-      orderBy: { id: "asc" },
-    });
-
-    if (available.length === 0) {
-      return <Fail msg="Kho tài khoản Liên Quân hiện đang tạm hết. Admin đang nạp thêm acc, vui lòng quay lại sau ít phút!" />;
+    if (currentUser) {
+      const updatedUser = await db.user.update({
+        where: { id: currentUser.id },
+        data: { aovTickets: { increment: 1 } },
+        select: { aovTickets: true, username: true },
+      });
+      updatedTickets = updatedUser.aovTickets;
     }
 
     await db.$transaction([
-      db.gameAccount.updateMany({
-        where: { id: { in: available.map((a) => a.id) } },
-        data: {
-          status: "CLAIMED",
-          claimedBy: ip,
-          claimedAt: new Date(),
-          token: s.token,
-        },
-      }),
       db.keySession.update({ where: { id: s.id }, data: { doneAt: new Date() } }),
       db.serviceUsageLog.create({
         data: {
           userId: currentUser?.id ?? null,
-          serviceType: "AOV",
-          serviceName: "Tặng Nick Liên Quân",
-          targetUser: available[0].username,
+          serviceType: "AOV_TICKET",
+          serviceName: "Nạp Vé Đấu Trường AOV",
+          targetUser: currentUser?.username ?? ip,
           ip,
           status: "SUCCESS",
           metadata: JSON.stringify({
-            accounts: available.map((a) => a.username),
-            count: available.length,
+            ticketsAwarded: 1,
+            totalTickets: updatedTickets,
+            username: currentUser?.username ?? "Khách",
           }),
         },
       }),
@@ -124,16 +126,76 @@ export default async function KeyPage({
 
     return (
       <main>
-        <div className="vt-key-card" style={{ maxWidth: 540 }}>
-          <h1 style={{ fontSize: 22, margin: "0 0 4px", color: "#38bdf8" }}>
-            🎉 Chúc Mừng Bạn Nhận Acc Thành Công!
+        <div
+          className="vt-key-card"
+          style={{
+            maxWidth: 540,
+            textAlign: "center",
+            background: "linear-gradient(145deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95))",
+            border: "1.5px solid rgba(56, 189, 248, 0.4)",
+            boxShadow: "0 10px 40px rgba(0,0,0,0.4), 0 0 30px rgba(56, 189, 248, 0.2)",
+            borderRadius: 24,
+            padding: "36px 24px",
+          }}
+        >
+          <div style={{ fontSize: 56, marginBottom: 12, filter: "drop-shadow(0 0 16px rgba(245, 158, 11, 0.6))" }}>
+            🎟️
+          </div>
+          <h1 style={{ fontSize: 24, fontWeight: 900, margin: "0 0 8px", color: "#38bdf8" }}>
+            NHẬN VÉ AOV THÀNH CÔNG!
           </h1>
-          <p className="vt-hint" style={{ marginBottom: 12 }}>
-            {available.length > 1
-              ? `🎁 BẠN ĐÃ MỞ TRÚNG TÚI MÙ MAY MẮN: NHẬN ĐƯỢC ${available.length} TÀI KHOẢN VIP!`
-              : "Tài khoản Garena Liên Quân Mobile 100% trắng thông tin."}
+          <p style={{ fontSize: 15, color: "#cbd5e1", lineHeight: 1.6, margin: "0 0 20px" }}>
+            Bạn đã vượt link xuất sắc! Hệ thống đã cộng <b>+1 Vé Tham Gia</b> vào tài khoản{" "}
+            <span style={{ color: "#38bdf8", fontWeight: 700 }}>
+              {currentUser ? `@${currentUser.username}` : "của bạn"}
+            </span>.
           </p>
-          <CopyAovAccount accounts={available} />
+
+          <div
+            style={{
+              background: "rgba(56, 189, 248, 0.08)",
+              border: "1px dashed rgba(56, 189, 248, 0.3)",
+              borderRadius: 16,
+              padding: "16px 20px",
+              marginBottom: 24,
+              display: "flex",
+              justifyContent: "space-around",
+              alignItems: "center",
+            }}
+          >
+            <div>
+              <div style={{ fontSize: 12, color: "#94a3b8", fontWeight: 600 }}>VÉ VỪA NHẬN</div>
+              <div style={{ fontSize: 20, fontWeight: 900, color: "#10b981" }}>+1 Vé</div>
+            </div>
+            {currentUser && (
+              <div>
+                <div style={{ fontSize: 12, color: "#94a3b8", fontWeight: 600 }}>TỔNG VÉ HIỆN TẠI</div>
+                <div style={{ fontSize: 20, fontWeight: 900, color: "#f59e0b" }}>{updatedTickets} Vé</div>
+              </div>
+            )}
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <Link
+              href="/aov"
+              className="vt-btn-primary"
+              style={{
+                textDecoration: "none",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 10,
+                padding: "14px 28px",
+                fontSize: 16,
+                fontWeight: 800,
+                borderRadius: 14,
+                background: "linear-gradient(135deg, #0284c7, #2563eb)",
+                boxShadow: "0 4px 20px rgba(37, 99, 235, 0.4)",
+              }}
+            >
+              <span>⚔️ VÀO ĐẤU TRƯỜNG AOV DÙNG VÉ NGAY</span>
+            </Link>
+          </div>
         </div>
       </main>
     );

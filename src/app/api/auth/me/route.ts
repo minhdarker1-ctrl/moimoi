@@ -24,6 +24,7 @@ export async function GET() {
         role: true,
         coins: true,
         spinTickets: true,
+        aovTickets: true,
         tasksToday: true,
         referralCode: true,
         _count: {

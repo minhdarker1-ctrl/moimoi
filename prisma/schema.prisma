@@ -357,6 +357,7 @@ model User {
   role         String         @default("USER") // "USER" | "ADMIN"
   coins        Int            @default(100)    // Điểm thưởng / Coins
   spinTickets  Int            @default(1)      // Lượt quay may mắn
+  aovTickets   Int            @default(0)      // Vé tham gia Đấu Trường Liên Quân AOV
   tasksToday   Int            @default(0)      // Nhiệm vụ hôm nay
   referralCode String         @default("")     // Mã giới thiệu
   createdAt    DateTime       @default(now())

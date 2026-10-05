@@ -74,7 +74,7 @@ export default async function AdminAovPage({
 
           <div style={{ display: "flex", gap: 10 }}>
             <Link
-              href="/lienquan"
+              href="/aov"
               target="_blank"
               className="vt-btn-sm"
               style={{

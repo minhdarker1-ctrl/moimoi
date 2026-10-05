@@ -15,6 +15,7 @@ export interface AuthUser {
   role: "USER" | "ADMIN";
   coins?: number;
   spinTickets?: number;
+  aovTickets?: number;
   tasksToday?: number;
   referralCode?: string;
 }

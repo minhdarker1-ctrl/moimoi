@@ -19,7 +19,7 @@ export function getGroupRoute(cat: { title: string; slug?: string; id?: number }
   }
   const lower = cat.title.toLowerCase();
   if (lower.includes("free fire")) return "/freefire";
-  if (lower.includes("liên quân") || lower.includes("lien quan")) return "/lienquan";
+  if (lower.includes("liên quân") || lower.includes("lien quan") || lower.includes("aov")) return "/aov";
   if (lower.includes("other")) return "/other";
   return `/#group-${cat.id}`;
 }

@@ -169,7 +169,7 @@ export default async function Home() {
           </Link>
 
           {/* CARD 2: AOV */}
-          <Link href="/lienquan" className="cyber-card cyber-card-aov" aria-label="Xem dịch vụ Liên Quân Mobile AOV">
+          <Link href="/aov" className="cyber-card cyber-card-aov" aria-label="Xem dịch vụ Liên Quân Mobile AOV">
             <div className="cyber-card-inner">
               <div className="cyber-card-img-wrap">
                 {/* eslint-disable-next-line @next/next/no-img-element */}

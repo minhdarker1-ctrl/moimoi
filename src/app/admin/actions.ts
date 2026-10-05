@@ -735,6 +735,7 @@ export async function saveAovConfig(fd: FormData) {
   });
 
   revalidatePath("/admin/aov");
+  revalidatePath("/aov");
   revalidatePath("/lienquan");
 }
 
@@ -797,6 +798,7 @@ export async function importAovAccounts(fd: FormData): Promise<void> {
   }
 
   revalidatePath("/admin/aov");
+  revalidatePath("/aov");
   revalidatePath("/lienquan");
   redirect(`/admin/aov?imported=${totalInserted}`);
 }
@@ -808,6 +810,7 @@ export async function deleteAovAccount(fd: FormData) {
     await db.gameAccount.delete({ where: { id } }).catch(() => {});
   }
   revalidatePath("/admin/aov");
+  revalidatePath("/aov");
   revalidatePath("/lienquan");
 }
 
@@ -817,6 +820,7 @@ export async function clearClaimedAovAccounts() {
     where: { game: "AOV", status: "CLAIMED" },
   });
   revalidatePath("/admin/aov");
+  revalidatePath("/aov");
   revalidatePath("/lienquan");
 }
 
@@ -826,6 +830,7 @@ export async function clearAllAovAccounts() {
     where: { game: "AOV" },
   });
   revalidatePath("/admin/aov");
+  revalidatePath("/aov");
   revalidatePath("/lienquan");
 }
 

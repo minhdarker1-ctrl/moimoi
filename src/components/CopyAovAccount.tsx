@@ -205,7 +205,7 @@ export default function CopyAovAccount({ accounts }: { accounts: AccountItem[] }
           <span>Đăng Nhập Garena Đổi Pass</span>
         </a>
         <Link
-          href="/lienquan"
+          href="/aov"
           className="vt-btn-ghost"
           style={{
             textDecoration: "none",
