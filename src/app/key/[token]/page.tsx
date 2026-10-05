@@ -91,7 +91,7 @@ export default async function KeyPage({ params }: { params: Promise<{ token: str
           </div>
         ) : (
           <p className="vt-hint" style={{ marginTop: 10 }}>
-            💡 <Link href="/login" style={{ color: "#6366f1", fontWeight: 700 }}>Đăng nhập</Link> để tự động lưu các mã key vào tài khoản của bạn.
+            💡 Hãy sao chép và cất giữ mã key cẩn thận để kích hoạt dịch vụ của bạn.
           </p>
         )}
 

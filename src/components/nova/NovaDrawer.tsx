@@ -31,13 +31,13 @@ export default function NovaDrawer({ open, onClose, user }: NovaDrawerProps) {
 
   const handleLogout = async () => {
     await logoutAction();
-    window.location.href = "/login";
+    window.location.href = "/";
   };
 
   const navItems = [
     { href: "/dashboard", label: "Trang chủ", icon: <Home size={18} />, exact: true },
     { href: "/freefire", label: "Vượt link lấy Key", icon: <Zap size={18} className="text-amber-400" /> },
-    { href: "/all", label: "Kho Game & App iOS", icon: <Layers size={18} /> },
+    { href: "/", label: "Kho Game & App iOS", icon: <Layers size={18} /> },
     { href: "/dashboard/spin", label: "Vòng quay may mắn", icon: <Dices size={18} className="text-pink-400" /> },
     { href: "/dashboard/leaderboard", label: "Bảng xếp hạng", icon: <Trophy size={18} className="text-yellow-400" /> },
     { href: "/dashboard/keys", label: "Quản lý Key đã lưu", icon: <KeyRound size={18} /> },
@@ -154,19 +154,7 @@ export default function NovaDrawer({ open, onClose, user }: NovaDrawerProps) {
               </span>
               <span className="nova-drawer-label text-red-400 font-semibold">Đăng xuất</span>
             </button>
-          ) : (
-            <Link
-              href="/login"
-              onClick={onClose}
-              className="nova-drawer-item nova-drawer-login-btn"
-            >
-              <span className="nova-drawer-icon">
-                <User size={18} className="text-indigo-400" />
-              </span>
-              <span className="nova-drawer-label text-indigo-300 font-semibold">Đăng nhập tài khoản</span>
-              <ChevronRight size={14} className="nova-drawer-arr" />
-            </Link>
-          )}
+          ) : null}
         </div>
 
         {/* Footer */}

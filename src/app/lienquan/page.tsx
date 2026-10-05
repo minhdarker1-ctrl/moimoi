@@ -31,6 +31,7 @@ export default async function LienQuanPage() {
     (g) =>
       g.title.toLowerCase().includes("liên quân") ||
       g.title.toLowerCase().includes("lien quan") ||
+      g.slug === "lienquan" ||
       g.slug === "lien-quan-mobile"
   );
   const lqApps = lqGroup ? lqGroup.apps : [];
@@ -116,12 +117,12 @@ export default async function LienQuanPage() {
               Chiến trường Athanor đang chuẩn bị tài nguyên mới. Các bản mod skin, menu hỗ trợ và file tối ưu FPS Liên Quân Mobile sẽ sớm được cập nhật tại đây!
             </p>
             <Link
-              href="/all"
+              href="/"
               className="vt-btn-primary mdarker-empty-btn"
               style={{ textDecoration: "none", display: "inline-flex", gap: 8, padding: "10px 20px", fontSize: 13.5 }}
             >
-              <i className="fa-solid fa-shapes" aria-hidden="true" />
-              <span>Khám phá mục ALL</span>
+              <i className="fa-solid fa-house" aria-hidden="true" />
+              <span>Khám phá trang chủ</span>
             </Link>
           </div>
         )}

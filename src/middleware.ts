@@ -42,8 +42,7 @@ export async function middleware(req: NextRequest) {
   if (pathname.startsWith("/dashboard")) {
     if (!auth) {
       const url = req.nextUrl.clone();
-      url.pathname = "/login";
-      url.searchParams.set("redirect", pathname);
+      url.pathname = "/";
       return NextResponse.redirect(url);
     }
   }
@@ -52,13 +51,6 @@ export async function middleware(req: NextRequest) {
   if (pathname === "/admin/login" && auth?.role === "ADMIN") {
     const url = req.nextUrl.clone();
     url.pathname = "/admin";
-    return NextResponse.redirect(url);
-  }
-
-  // Nếu đã đăng nhập mà cố vào /login hoặc /register
-  if ((pathname === "/login" || pathname === "/register") && auth) {
-    const url = req.nextUrl.clone();
-    url.pathname = auth.role === "ADMIN" ? "/admin" : "/dashboard";
     return NextResponse.redirect(url);
   }
 

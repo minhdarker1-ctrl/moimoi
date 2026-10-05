@@ -23,7 +23,7 @@ export default function DashboardHeader({ user, onOpenSidebar }: Props) {
 
   const handleLogout = async () => {
     await logoutAction();
-    window.location.href = "/login";
+    window.location.href = "/";
   };
 
   return (

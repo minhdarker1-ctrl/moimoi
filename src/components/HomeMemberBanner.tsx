@@ -19,12 +19,8 @@ export default function HomeMemberBanner() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) {
-    return (
-      <div className="home-member-banner home-member-loading">
-        <div className="home-member-shimmer" />
-      </div>
-    );
+  if (loading || !user) {
+    return null;
   }
 
   return (

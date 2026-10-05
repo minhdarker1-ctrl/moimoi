@@ -12,7 +12,7 @@ export default function NovaQuickActions() {
       highlight: true,
     },
     {
-      href: "/all",
+      href: "/",
       label: "Kho Game / App",
       icon: <Layers size={22} className="text-sky-400" />,
     },

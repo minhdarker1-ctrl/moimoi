@@ -23,19 +23,10 @@ export default function UserNavButton() {
 
   const handleLogout = async () => {
     await logoutAction();
-    window.location.href = "/login";
+    window.location.href = "/";
   };
 
-  if (loading) return null;
-
-  if (!user) {
-    return (
-      <Link href="/login" className="user-login-nav-btn" title="Đăng nhập / Đăng ký">
-        <User size={15} />
-        <span>Đăng nhập</span>
-      </Link>
-    );
-  }
+  if (loading || !user) return null;
 
   return (
     <div className="user-nav-dropdown-wrap">

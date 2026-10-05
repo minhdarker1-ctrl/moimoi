@@ -16,8 +16,8 @@ export default function NovaReferralCard({
 
   const refParam = referralCode || username;
   const refUrl = typeof window !== "undefined"
-    ? `${window.location.origin}/register?ref=${refParam}`
-    : `https://thedarker.vercel.app/register?ref=${refParam}`;
+    ? `${window.location.origin}/?ref=${refParam}`
+    : `https://thedarker.vercel.app/?ref=${refParam}`;
 
   const handleCopy = () => {
     if (navigator.clipboard) {

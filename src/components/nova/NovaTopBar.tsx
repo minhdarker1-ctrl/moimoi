@@ -101,11 +101,7 @@ export default function NovaTopBar({
               <span>{(user.name || user.username).charAt(0).toUpperCase()}</span>
             )}
           </Link>
-        ) : (
-          <Link href="/login" className="nova-login-quick-btn" title="Đăng nhập">
-            <User size={16} />
-          </Link>
-        )}
+        ) : null}
       </div>
     </header>
   );

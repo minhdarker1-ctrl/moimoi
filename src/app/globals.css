@@ -11,7 +11,7 @@
   --vi-radius-xs: 12px;
   --vi-accent: #4a6cf7;
   --vi-accent2: #b983ff;
-  --vi-card: rgba(255, 255, 255, 0.88);
+  --vi-card: rgba(255, 255, 255, 0.96);
   --vi-text: #1a1a2e;
   --vi-text-muted: #7c8ca8;
   --vi-muted: #7c8ca8;
@@ -26,7 +26,7 @@ body.vthangios-dark {
   --vi-surface: rgba(10, 20, 40, 0.72);
   --vi-surface-solid: #071120;
   --vi-border: rgba(255, 255, 255, 0.08);
-  --vi-card: rgba(10, 20, 40, 0.82);
+  --vi-card: rgba(10, 20, 40, 0.92);
   --vi-text: #eef0f7;
   --vi-text-muted: #8892aa;
   --vi-muted: #8892aa;
@@ -3971,7 +3971,11 @@ body.vthangios-dark .mdarker-music-mini-dot {
 }
 
 .mdarker-lq-comingsoon {
+  position: relative;
+  z-index: 2;
   background: var(--vi-card);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   border: 1.5px dashed rgba(99, 102, 241, 0.4);
   border-radius: 20px;
   padding: 40px 20px;
@@ -6110,6 +6114,8 @@ body.vthangios-dark .mdarker-music-mini-dot {
 }
 
 .admin-stat-card {
+  position: relative;
+  z-index: 2;
   background: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 18px;

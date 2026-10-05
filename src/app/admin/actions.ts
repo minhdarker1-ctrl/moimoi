@@ -294,9 +294,7 @@ export async function saveFreeFireConfig(fd: FormData) {
 
   refresh("/admin/freefire");
   revalidatePath("/freefire");
-  revalidatePath("/free-fire");
   revalidatePath("/freefire/result");
-  revalidatePath("/free-fire/result");
   redirect("/admin/freefire?saved=1");
 }
 

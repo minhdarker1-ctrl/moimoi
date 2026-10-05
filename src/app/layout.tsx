@@ -57,7 +57,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ScenicBackground />
         <SnowEffect />
         <MusicPlayer />
-        {children}
+        <div className="app-page-wrapper" style={{ position: "relative", zIndex: 1, minHeight: "100vh" }}>
+          {children}
+        </div>
       </body>
     </html>
   );

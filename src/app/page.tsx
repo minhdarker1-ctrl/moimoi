@@ -142,7 +142,7 @@ export default async function Home() {
         {/* 4 CORE SERVICES GRID */}
         <section className="cyber-services-grid" aria-label="Danh sách 4 dịch vụ chính">
           {/* CARD 1: FREE FIRE */}
-          <Link href="/free-fire" className="cyber-card cyber-card-ff" aria-label="Xem dịch vụ Free Fire">
+          <Link href="/freefire" className="cyber-card cyber-card-ff" aria-label="Xem dịch vụ Free Fire">
             <div className="cyber-card-inner">
               <div className="cyber-card-img-wrap">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -169,7 +169,7 @@ export default async function Home() {
           </Link>
 
           {/* CARD 2: AOV */}
-          <Link href="/lien-quan-mobile" className="cyber-card cyber-card-aov" aria-label="Xem dịch vụ Liên Quân Mobile AOV">
+          <Link href="/lienquan" className="cyber-card cyber-card-aov" aria-label="Xem dịch vụ Liên Quân Mobile AOV">
             <div className="cyber-card-inner">
               <div className="cyber-card-img-wrap">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
