@@ -245,106 +245,182 @@ export default function LocketClient() {
               </div>
             </div>
 
-            {/* CONDITIONAL SECTION FOR RETURNING CUSTOMERS */}
-            {customerType === "returning" ? (
-              <div className="locket-returning-box">
-                <div className="locket-returning-header">
-                  <span className="locket-returning-badge">
-                    <i className="fas fa-exclamation-triangle" /> BƯỚC BẮT BUỘC DÀNH CHO KHÁCH CŨ
+            {/* CONDITIONAL WORKFLOW ACCORDING TO CUSTOMER TYPE */}
+            {customerType === "new" ? (
+              /* NEW CUSTOMER: 5 STEPS AS REQUESTED COMBINED WITH COOLDOWN & ORDER WARNINGS */
+              <div className="locket-new-customer-section">
+                <div className="locket-wf-header">
+                  <span className="locket-wf-badge">
+                    <i className="fas fa-list-ol" /> QUY TRÌNH THỰC HIỆN
                   </span>
-                  <h4 className="locket-returning-title">
-                    Gỡ Hoàn Toàn Cấu Hình DNS Cũ Trước Khi Kích Hoạt
-                  </h4>
-                  <p className="locket-returning-desc">
-                    Nếu máy từng cài DNS Locket, hãy xóa cấu hình cũ trước khi kích hoạt để thiết bị nhận được gói Gold mới:
+                  <h2 className="locket-wf-title">5 Bước Kích Hoạt Locket Gold</h2>
+                  <p className="locket-wf-desc">
+                    Vui lòng đọc kỹ và thực hiện đúng theo các bước dưới đây để tài khoản nhận gói Gold chuẩn xác nhất:
                   </p>
                 </div>
-                <div className="locket-returning-steps">
-                  <div className="locket-ret-step">
-                    <span className="locket-ret-num">1</span>
-                    <span>Vào <strong>Cài đặt</strong> trên iPhone &gt; <strong>Cài đặt chung</strong> &gt; <strong>VPN &amp; Quản lý thiết bị</strong>.</span>
+
+                <div className="locket-wf-steps">
+                  <div className="locket-wf-step">
+                    <span className="locket-wf-num">1</span>
+                    <div className="locket-wf-text">
+                      <strong>Bước 1:</strong> Mở Locket và đăng xuất tài khoản <em>(nếu chưa đăng xuất)</em>.
+                    </div>
                   </div>
-                  <div className="locket-ret-step">
-                    <span className="locket-ret-num">2</span>
-                    <span>Nhấn chọn cấu hình <strong>DNS Locket cũ</strong> đã cài trước đây.</span>
+
+                  <div className="locket-wf-step">
+                    <span className="locket-wf-num">2</span>
+                    <div className="locket-wf-text">
+                      <strong>Bước 2:</strong> Nhập sẵn tên và mật khẩu, <em>tuyệt đối chưa bấm Đăng nhập</em>.
+                    </div>
                   </div>
-                  <div className="locket-ret-step">
-                    <span className="locket-ret-num">3</span>
-                    <span>Bấm <strong>Xóa cấu hình</strong> (Remove Profile) để khôi phục kết nối mạng mặc định.</span>
+
+                  <div className="locket-wf-step">
+                    <span className="locket-wf-num">3</span>
+                    <div className="locket-wf-text">
+                      <strong>Bước 3:</strong> Nhập tên đăng nhập vào ô bên dưới <em>(hoặc dán Link Invite / Link hồ sơ)</em>.
+                    </div>
                   </div>
-                  <div className="locket-ret-step">
-                    <span className="locket-ret-num">4</span>
-                    <span>Sau khi gỡ sạch DNS cũ, nhập username vào ô bên dưới và gửi yêu cầu kích hoạt.</span>
+
+                  <div className="locket-wf-step">
+                    <span className="locket-wf-num">4</span>
+                    <div className="locket-wf-text">
+                      <strong>Bước 4:</strong> Bấm Đăng nhập vào Locket và kiểm tra xem đã có gói Gold chưa.
+                      <p>Mở Locket ngay khi hệ thống báo thành công. Nếu chưa thấy Gold, hãy đăng xuất/đăng nhập lại hoặc cài lại ứng dụng rồi kiểm tra lại.</p>
+                    </div>
+                  </div>
+
+                  <div className="locket-wf-step">
+                    <span className="locket-wf-num">5</span>
+                    <div className="locket-wf-text">
+                      <strong>Bước 5:</strong> Cài đặt file DNS do Admin cung cấp.
+                      <p>Sau khi đã nhìn thấy Gold, tải tệp <code>.mobileconfig</code> bên dưới và vào <strong>Cài đặt &gt; Cài đặt chung &gt; VPN &amp; Quản lý thiết bị</strong> để bật profile DNS.</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* IMPORTANT COOLDOWN RULE & ORDER WARNING */}
+                <div className="locket-main-wf" style={{ marginTop: "16px" }}>
+                  <div className="locket-wf-rule-banner">
+                    <i className="fas fa-stopwatch" />
+                    <span>
+                      <strong>Kiểm tra Gold rồi mới cài DNS:</strong> Thời gian hồi sau mỗi lượt chính là khoảng thời gian để bạn kiểm tra Gold và hoàn tất đóng băng trước khi token được dùng cho tài khoản khác.
+                    </span>
+                  </div>
+
+                  <div className="locket-warning-callout">
+                    <div className="locket-warn-head">
+                      <i className="fas fa-ban" />
+                      <strong>KHÔNG LÀM NGƯỢC THỨ TỰ</strong>
+                    </div>
+                    <p>
+                      Cài DNS khi Gold chưa xuất hiện sẽ chỉ giữ trạng thái <em>chưa có Gold</em>. DNS là lớp đóng băng, không phải lần kích hoạt thứ hai.
+                    </p>
+                  </div>
+
+                  <div className="locket-fast-summary">
+                    <span className="locket-summary-label">
+                      <i className="fas fa-bolt" /> KÍCH HOẠT THEO USERNAME (Web hoặc Bot):
+                    </span>
+                    <ol className="locket-summary-list">
+                      <li>Kiểm tra username và gửi yêu cầu.</li>
+                      <li>Chờ thông báo thành công rồi mở Locket kiểm tra Gold.</li>
+                      <li>Cài DNS được bàn giao ngay trong thời gian hồi.</li>
+                    </ol>
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="locket-new-box">
-                <i className="fas fa-check-circle" />
-                <span>
-                  <strong>Khách mới:</strong> Thiết bị của bạn chưa từng cài DNS, chỉ cần gửi yêu cầu kích hoạt và hoàn tất theo 3 bước chuẩn bên dưới!
-                </span>
+              /* RETURNING CUSTOMER: SEPARATE DNS REMOVAL STEP + NEW DNS SETUP */
+              <div className="locket-returning-customer-section">
+                <div className="locket-returning-box">
+                  <div className="locket-returning-header">
+                    <span className="locket-returning-badge">
+                      <i className="fas fa-exclamation-triangle" /> BƯỚC BẮT BUỘC DÀNH CHO KHÁCH CŨ
+                    </span>
+                    <h4 className="locket-returning-title">
+                      Gỡ Hoàn Toàn Cấu Hình DNS Cũ Trước Khi Kích Hoạt
+                    </h4>
+                    <p className="locket-returning-desc">
+                      Nếu máy từng cài DNS Locket, hãy xóa cấu hình cũ trước khi kích hoạt để thiết bị nhận được gói Gold mới:
+                    </p>
+                  </div>
+                  <div className="locket-returning-steps">
+                    <div className="locket-ret-step">
+                      <span className="locket-ret-num">1</span>
+                      <span>Vào <strong>Cài đặt</strong> trên iPhone &gt; <strong>Cài đặt chung</strong> &gt; <strong>VPN &amp; Quản lý thiết bị</strong>.</span>
+                    </div>
+                    <div className="locket-ret-step">
+                      <span className="locket-ret-num">2</span>
+                      <span>Nhấn chọn cấu hình <strong>DNS Locket cũ</strong> đã cài trước đây.</span>
+                    </div>
+                    <div className="locket-ret-step">
+                      <span className="locket-ret-num">3</span>
+                      <span>Bấm <strong>Xóa cấu hình</strong> (Remove Profile) để khôi phục kết nối mạng mặc định.</span>
+                    </div>
+                    <div className="locket-ret-step">
+                      <span className="locket-ret-num">4</span>
+                      <span>Sau khi gỡ sạch DNS cũ, nhập username vào ô bên dưới và gửi yêu cầu kích hoạt.</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="locket-main-wf">
+                  <div className="locket-wf-rule-banner">
+                    <i className="fas fa-stopwatch" />
+                    <span>
+                      <strong>Kiểm tra Gold rồi mới cài DNS:</strong> Thời gian hồi sau mỗi lượt chính là khoảng thời gian để bạn kiểm tra Gold và hoàn tất đóng băng trước khi token được dùng cho tài khoản khác.
+                    </span>
+                  </div>
+
+                  <div className="locket-wf-steps">
+                    <div className="locket-wf-step">
+                      <span className="locket-wf-num">1</span>
+                      <div className="locket-wf-text">
+                        <strong>Bước 1: Xác nhận Gold đã hiển thị</strong>
+                        <p>Mở Locket ngay khi hệ thống báo thành công. Nếu chưa thấy Gold, hãy đăng xuất/đăng nhập lại hoặc cài lại ứng dụng rồi kiểm tra lại.</p>
+                      </div>
+                    </div>
+
+                    <div className="locket-wf-step">
+                      <span className="locket-wf-num">2</span>
+                      <div className="locket-wf-text">
+                        <strong>Bước 2: Cài DNS được bàn giao</strong>
+                        <p>Sau khi đã nhìn thấy Gold, tải đúng link hoặc tệp <code>.mobileconfig</code> do Web/Bot gửi cho yêu cầu đó.</p>
+                      </div>
+                    </div>
+
+                    <div className="locket-wf-step">
+                      <span className="locket-wf-num">3</span>
+                      <div className="locket-wf-text">
+                        <strong>Bước 3: Bật profile ngay</strong>
+                        <p>Vào <strong>Cài đặt &gt; Cài đặt chung &gt; VPN &amp; Quản lý thiết bị</strong>, chọn profile DNS và hoàn tất cài đặt, không để gián đoạn mạng.</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="locket-warning-callout">
+                    <div className="locket-warn-head">
+                      <i className="fas fa-ban" />
+                      <strong>KHÔNG LÀM NGƯỢC THỨ TỰ</strong>
+                    </div>
+                    <p>
+                      Cài DNS khi Gold chưa xuất hiện sẽ chỉ giữ trạng thái <em>chưa có Gold</em>. DNS là lớp đóng băng, không phải lần kích hoạt thứ hai.
+                    </p>
+                  </div>
+
+                  <div className="locket-fast-summary">
+                    <span className="locket-summary-label">
+                      <i className="fas fa-bolt" /> KÍCH HOẠT THEO USERNAME (Web hoặc Bot):
+                    </span>
+                    <ol className="locket-summary-list">
+                      <li>Kiểm tra username và gửi yêu cầu.</li>
+                      <li>Chờ thông báo thành công rồi mở Locket kiểm tra Gold.</li>
+                      <li>Cài DNS được bàn giao ngay trong thời gian hồi.</li>
+                    </ol>
+                  </div>
+                </div>
               </div>
             )}
-
-            {/* CORE 3-STEP WORKFLOW */}
-            <div className="locket-main-wf">
-              <div className="locket-wf-rule-banner">
-                <i className="fas fa-stopwatch" />
-                <span>
-                  <strong>Kiểm tra Gold rồi mới cài DNS:</strong> Thời gian hồi sau mỗi lượt chính là khoảng thời gian để bạn kiểm tra Gold và hoàn tất đóng băng trước khi token được dùng cho tài khoản khác.
-                </span>
-              </div>
-
-              <div className="locket-wf-steps">
-                <div className="locket-wf-step">
-                  <span className="locket-wf-num">1</span>
-                  <div className="locket-wf-text">
-                    <strong>Bước 1: Xác nhận Gold đã hiển thị</strong>
-                    <p>Mở Locket ngay khi hệ thống báo thành công. Nếu chưa thấy Gold, hãy đăng xuất/đăng nhập lại hoặc cài lại ứng dụng rồi kiểm tra lại.</p>
-                  </div>
-                </div>
-
-                <div className="locket-wf-step">
-                  <span className="locket-wf-num">2</span>
-                  <div className="locket-wf-text">
-                    <strong>Bước 2: Cài DNS được bàn giao</strong>
-                    <p>Sau khi đã nhìn thấy Gold, tải đúng link hoặc tệp <code>.mobileconfig</code> do Web/Bot gửi cho yêu cầu đó.</p>
-                  </div>
-                </div>
-
-                <div className="locket-wf-step">
-                  <span className="locket-wf-num">3</span>
-                  <div className="locket-wf-text">
-                    <strong>Bước 3: Bật profile ngay</strong>
-                    <p>Vào <strong>Cài đặt &gt; Cài đặt chung &gt; VPN &amp; Quản lý thiết bị</strong>, chọn profile DNS và hoàn tất cài đặt, không để gián đoạn mạng.</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* CRUCIAL ORDER WARNING */}
-              <div className="locket-warning-callout">
-                <div className="locket-warn-head">
-                  <i className="fas fa-ban" />
-                  <strong>KHÔNG LÀM NGƯỢC THỨ TỰ</strong>
-                </div>
-                <p>
-                  Cài DNS khi Gold chưa xuất hiện sẽ chỉ giữ trạng thái <em>chưa có Gold</em>. DNS là lớp đóng băng, không phải lần kích hoạt thứ hai.
-                </p>
-              </div>
-
-              {/* FAST 3-STEP SUMMARY */}
-              <div className="locket-fast-summary">
-                <span className="locket-summary-label">
-                  <i className="fas fa-bolt" /> KÍCH HOẠT THEO USERNAME (Web hoặc Bot):
-                </span>
-                <ol className="locket-summary-list">
-                  <li>Kiểm tra username và gửi yêu cầu.</li>
-                  <li>Chờ thông báo thành công rồi mở Locket kiểm tra Gold.</li>
-                  <li>Cài DNS được bàn giao ngay trong thời gian hồi.</li>
-                </ol>
-              </div>
-            </div>
           </div>
         )}
 
