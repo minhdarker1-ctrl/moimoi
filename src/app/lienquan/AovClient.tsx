@@ -37,18 +37,25 @@ export default function AovClient({
     setError(null);
 
     try {
-      const res = await fetch("/api/getkey/start?scope=aov", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const res = await fetch("/api/getkey/start?scope=aov&format=json", {
+        method: "GET",
+        headers: { Accept: "application/json" },
       });
 
-      const data = await res.json();
-      if (!res.ok || !data.firstHopUrl) {
-        throw new Error(data.error || "Không thể tạo phiên nhận acc. Vui lòng thử lại!");
+      let data: any = null;
+      try {
+        data = await res.json();
+      } catch {
+        throw new Error(`Lỗi kết nối máy chủ (${res.status}). Vui lòng thử lại!`);
+      }
+
+      const redirectUrl = data?.firstHopUrl || data?.url;
+      if (!res.ok || !data?.ok || !redirectUrl) {
+        throw new Error(data?.error || "Không thể tạo phiên nhận acc. Vui lòng thử lại sau ít phút!");
       }
 
       // Chuyển hướng người dùng đến cổng vượt link
-      window.location.href = data.firstHopUrl;
+      window.location.href = redirectUrl;
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Đã có lỗi xảy ra. Vui lòng thử lại!";
       setError(msg);
@@ -85,14 +92,11 @@ export default function AovClient({
           Hệ thống phát tài khoản Liên Quân Mobile hoàn toàn miễn phí. Hỗ trợ game thủ trải nghiệm skin xịn, test bản đồ và leo rank cùng bạn bè.
         </p>
 
-        {/* Live Counters */}
+        {/* Chỉ hiển thị Card Cơ chế sự kiện */}
         <div
           style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-            gap: 12,
-            marginTop: 24,
-            maxWidth: 680,
+            marginTop: 22,
+            maxWidth: 320,
             marginLeft: "auto",
             marginRight: "auto",
           }}
@@ -101,53 +105,17 @@ export default function AovClient({
             style={{
               background: "var(--vi-card)",
               border: "1px solid var(--vi-border)",
-              borderRadius: 16,
-              padding: "14px 16px",
+              borderRadius: 18,
+              padding: "14px 24px",
               boxShadow: "var(--vi-shadow-sm)",
               textAlign: "center",
             }}
           >
-            <div style={{ fontSize: 12, color: "var(--vi-muted)", fontWeight: 600, textTransform: "uppercase" }}>
-              🟢 Sẵn sàng trong kho
+            <div style={{ fontSize: 12.5, color: "var(--vi-muted)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px" }}>
+              ✨ CƠ CHẾ SỰ KIỆN
             </div>
-            <div style={{ fontSize: 26, fontWeight: 900, color: "#10b981", marginTop: 4 }}>
-              {availableStock.toLocaleString()} <span style={{ fontSize: 13, fontWeight: 600 }}>acc</span>
-            </div>
-          </div>
-
-          <div
-            style={{
-              background: "var(--vi-card)",
-              border: "1px solid var(--vi-border)",
-              borderRadius: 16,
-              padding: "14px 16px",
-              boxShadow: "var(--vi-shadow-sm)",
-              textAlign: "center",
-            }}
-          >
-            <div style={{ fontSize: 12, color: "var(--vi-muted)", fontWeight: 600, textTransform: "uppercase" }}>
-              🎁 Đã phát tặng
-            </div>
-            <div style={{ fontSize: 26, fontWeight: 900, color: "#38bdf8", marginTop: 4 }}>
-              {claimedStock.toLocaleString()} <span style={{ fontSize: 13, fontWeight: 600 }}>acc</span>
-            </div>
-          </div>
-
-          <div
-            style={{
-              background: "var(--vi-card)",
-              border: "1px solid var(--vi-border)",
-              borderRadius: 16,
-              padding: "14px 16px",
-              boxShadow: "var(--vi-shadow-sm)",
-              textAlign: "center",
-            }}
-          >
-            <div style={{ fontSize: 12, color: "var(--vi-muted)", fontWeight: 600, textTransform: "uppercase" }}>
-              ✨ Cơ chế sự kiện
-            </div>
-            <div style={{ fontSize: 16, fontWeight: 800, color: "#f59e0b", marginTop: 8 }}>
-              {blindBoxEnabled ? "📦 Túi mù x5 Acc" : "🎯 Nhận 1 Acc"}
+            <div style={{ fontSize: 20, fontWeight: 900, color: "#f59e0b", marginTop: 6, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+              <span>{blindBoxEnabled ? "📦 Túi mù x5 Acc" : "🎯 Nhận 1 Acc"}</span>
             </div>
           </div>
         </div>

@@ -27,7 +27,11 @@ function fail(req: Request, msg: string, isJson: boolean = false) {
 
 export async function GET(req: Request) {
   const reqUrl = new URL(req.url);
-  const isJson = reqUrl.searchParams.get("format") === "json" || req.headers.get("accept")?.includes("application/json") || false;
+  const isJson =
+    reqUrl.searchParams.get("format") === "json" ||
+    req.headers.get("accept")?.includes("application/json") ||
+    req.headers.get("content-type")?.includes("application/json") ||
+    false;
 
   // Mỗi lần bấm tạo N link thật trên cổng rút gọn, đốt quota.
   // Không giới hạn thì spam F5 là hết 1000 link/ngày của Ontops.
@@ -274,6 +278,7 @@ export async function GET(req: Request) {
     return NextResponse.json({
       ok: true,
       url: hopUrls[0],
+      firstHopUrl: hopUrls[0],
       steps,
       appName: isAov ? "Tặng Nick Liên Quân Miễn Phí" : (app ? app.name : (scope === "freefire" ? "Độ Nhạy Free Fire" : kt.name)),
     });
@@ -281,3 +286,5 @@ export async function GET(req: Request) {
 
   return NextResponse.redirect(hopUrls[0], 302);
 }
+
+export const POST = GET;
