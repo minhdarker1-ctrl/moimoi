@@ -16,7 +16,7 @@ const SEEN_KEY = "vt-notice-seen";
 export default function CyberHeader({
   siteName = "MinSr",
   notices = [],
-  user = { name: "VỒNG VẦY", role: "DEV", avatarUrl: "https://i.ibb.co/jv75LbdS/6123108838828349044.jpg" },
+  user = { name: "VỒNG VẦY", role: "DEV", avatarUrl: "/avatar.png" },
 }: CyberHeaderProps) {
   const [openNotif, setOpenNotif] = useState(false);
   const [unread, setUnread] = useState(0);

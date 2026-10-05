@@ -41,7 +41,7 @@ function calculateReadingTime(text: string): number {
 export default function MdarkerBlog({
   posts,
   authorName = "MinSr",
-  authorAvatar = "https://i.ibb.co/jv75LbdS/6123108838828349044.jpg",
+  authorAvatar = "/avatar.png",
 }: MdarkerBlogProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
