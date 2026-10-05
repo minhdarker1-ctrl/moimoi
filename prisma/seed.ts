@@ -13,7 +13,7 @@ async function main() {
       name: "MinSr",
       iam: "Hi, i am",
       verified: true,
-      avatarUrl: "/avatar.png",
+      avatarUrl: "/avatar.png?v=2",
       avatarFrameUrl: `${U}/uploads/intro/1787761701_27566707d8893895.png`,
       typedLines: JSON.stringify(["Developer.", "Designer.", "Creator.", "Gamer."]),
       seoTitle: "MinSr",
