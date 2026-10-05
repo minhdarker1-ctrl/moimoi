@@ -40,29 +40,31 @@ export async function GET(req: Request) {
   }
   await maybeCleanup();
 
-  // Kiểm tra xác minh Anti-Bot & Giả lập nếu hệ thống đang bật bảo mật
-  const site = await db.site.findUnique({ where: { id: 1 } });
-  if (site?.antiBotEnabled) {
-    const botToken =
-      reqUrl.searchParams.get("botToken") ||
-      req.headers.get("x-antibot-token") ||
-      "";
-    const verified = verifyAntiBotToken(botToken);
-    if (!verified.valid) {
-      return fail(
-        req,
-        `Yêu cầu xác minh bảo mật chống bot / giả lập (${verified.error || "Mã không hợp lệ"}).`,
-        isJson
-      );
-    }
-  }
-
   const appIdParam = reqUrl.searchParams.get("appId");
   const keyTypeIdParam = reqUrl.searchParams.get("keyTypeId");
   const scope = reqUrl.searchParams.get("scope");
   const vid = reqUrl.searchParams.get("vid") || reqUrl.searchParams.get("visitorId") || "";
   const deviceInput = reqUrl.searchParams.get("device") || "";
   const deviceType = reqUrl.searchParams.get("type") || "";
+
+  // Chỉ yêu cầu xác minh Anti-Bot & thiết bị cho riêng trang Free Fire
+  if (scope === "freefire") {
+    const site = await db.site.findUnique({ where: { id: 1 } });
+    if (site?.antiBotEnabled) {
+      const botToken =
+        reqUrl.searchParams.get("botToken") ||
+        req.headers.get("x-antibot-token") ||
+        "";
+      const verified = verifyAntiBotToken(botToken);
+      if (!verified.valid) {
+        return fail(
+          req,
+          `Yêu cầu xác minh bảo mật chống bot / giả lập (${verified.error || "Mã không hợp lệ"}).`,
+          isJson
+        );
+      }
+    }
+  }
 
   let kt = null;
   let app = null;
