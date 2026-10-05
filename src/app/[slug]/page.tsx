@@ -18,11 +18,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     where: { slug, visible: true },
   });
 
-  if (!group) return { title: "Không tìm thấy trang | OnCyber" };
+  if (!group) return { title: "Không tìm thấy trang | MinSr" };
 
   return {
-    title: `${group.title} | OnCyber`,
-    description: group.desc || `Khám phá các sản phẩm và công cụ thuộc mảng ${group.title} tại OnCyber.`,
+    title: `${group.title} | MinSr`,
+    description: group.desc || `Khám phá các sản phẩm và công cụ thuộc mảng ${group.title} tại MinSr.`,
   };
 }
 

@@ -8,8 +8,8 @@ export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: "Ứng Dụng & Công Cụ Khác - OTHER | OnCyber",
-    description: "Khám phá các ứng dụng tiện ích, công cụ game và mod khác từ OnCyber.",
+    title: "Ứng Dụng & Công Cụ Khác - OTHER | MinSr",
+    description: "Khám phá các ứng dụng tiện ích, công cụ game và mod khác từ MinSr.",
   };
 }
 

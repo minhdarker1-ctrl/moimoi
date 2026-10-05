@@ -7,7 +7,7 @@ import { DONATE_CONFIG, PresetOption } from "@/config/donate";
 export default function DonateClient() {
   const [selectedPreset, setSelectedPreset] = useState<number>(DONATE_CONFIG.defaultAmount);
   const [customAmount, setCustomAmount] = useState<string>("");
-  const [donorName, setDonorName] = useState<string>("Fan OnCyber");
+  const [donorName, setDonorName] = useState<string>("Fan MinSr");
   const [donorMessage, setDonorMessage] = useState<string>("Cảm ơn bạn vì những công cụ hữu ích!");
   const [dark, setDark] = useState<boolean>(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
@@ -73,14 +73,14 @@ export default function DonateClient() {
   }
 
   async function handleCopyAll() {
-    const text = `💖 THÔNG TIN ỦNG HỘ DỰ ÁN NUÔI TÔI - ONCYBER
+    const text = `💖 THÔNG TIN ỦNG HỘ DỰ ÁN NUÔI TÔI - MINSR
 ──────────────
 🏦 Ngân hàng: ${DONATE_CONFIG.bankName} (${DONATE_CONFIG.bankId})
 💳 Số tài khoản: ${DONATE_CONFIG.accountNo}
 👤 Chủ tài khoản: ${DONATE_CONFIG.accountName}
 💰 Số tiền: ${actualAmount.toLocaleString("vi-VN")} VNĐ
 📝 Nội dung CK: ${memo}
-💌 Lời nhắn: ${donorMessage || "Chúc OnCyber ngày càng phát triển!"}
+💌 Lời nhắn: ${donorMessage || "Chúc MinSr ngày càng phát triển!"}
 ──────────────
 Cảm ơn bạn rất nhiều vì đã tiếp thêm động lực cho mình! ✨`;
 
@@ -131,7 +131,7 @@ Cảm ơn bạn rất nhiều vì đã tiếp thêm động lực cho mình! ✨
             Ủng Hộ Tác Giả <span className="donate-pink-gradient">Nuôi Tôi</span> ☕
           </h1>
           <p className="donate-subtitle">
-            Mọi công cụ trên OnCyber đều hoàn toàn miễn phí. Nếu bạn yêu quý hệ thống, hãy mời mình
+            Mọi công cụ trên MinSr đều hoàn toàn miễn phí. Nếu bạn yêu quý hệ thống, hãy mời mình
             một cốc trà đá hay ly cà phê để tiếp thêm kinh phí duy trì máy chủ &amp; phát triển thêm nhiều
             tính năng hữu ích nhé!
           </p>
@@ -201,7 +201,7 @@ Cảm ơn bạn rất nhiều vì đã tiếp thêm động lực cho mình! ✨
                   type="text"
                   value={donorName}
                   onChange={(e) => setDonorName(e.target.value)}
-                  placeholder="VD: Minh, Fan OnCyber, Ẩn danh..."
+                  placeholder="VD: Minh, Fan MinSr, Ẩn danh..."
                   className="donate-text-input"
                   maxLength={30}
                 />
@@ -359,7 +359,7 @@ Cảm ơn bạn rất nhiều vì đã tiếp thêm động lực cho mình! ✨
             <i className="fas fa-heart" />
           </div>
           <div className="donate-appreciation-content">
-            <h3>Cảm ơn bạn rất nhiều vì đã đồng hành cùng OnCyber! ✨</h3>
+            <h3>Cảm ơn bạn rất nhiều vì đã đồng hành cùng MinSr! ✨</h3>
             <p>
               Mỗi cốc cà phê hay sự ủng hộ của bạn, dù lớn hay nhỏ, đều là nguồn động viên vô giá giúp
               mình duy trì hệ thống máy chủ vận hành 24/7 và tiếp tục chia sẻ thêm nhiều công cụ miễn phí
@@ -370,7 +370,7 @@ Cảm ơn bạn rất nhiều vì đã tiếp thêm động lực cho mình! ✨
 
         {/* FOOTER */}
         <footer className="donate-footer">
-          <p>© 2026 OnCyber • Dự Án Nuôi Tôi • Cảm ơn sự đồng hành của bạn</p>
+          <p>© 2026 MinSr • Dự Án Nuôi Tôi • Cảm ơn sự đồng hành của bạn</p>
         </footer>
       </main>
     </div>

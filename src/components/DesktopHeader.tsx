@@ -50,7 +50,7 @@ export default function DesktopHeader({
   return (
     <header className="mdarker-desktop-header" aria-label="Thanh điều hướng chính">
       <div className="mdarker-header-container">
-        {/* BÊN TRÁI: Avatar tròn + Tên thương hiệu OnCyber + Tích xanh xác minh */}
+        {/* BÊN TRÁI: Avatar tròn + Tên thương hiệu MinSr + Tích xanh xác minh */}
         {pathname === "/" ? (
           <button
             type="button"

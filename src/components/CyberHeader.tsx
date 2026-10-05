@@ -14,7 +14,7 @@ interface CyberHeaderProps {
 const SEEN_KEY = "vt-notice-seen";
 
 export default function CyberHeader({
-  siteName = "OnCyber",
+  siteName = "MinSr",
   notices = [],
   user = { name: "VỒNG VẦY", role: "DEV", avatarUrl: "https://i.ibb.co/jv75LbdS/6123108838828349044.jpg" },
 }: CyberHeaderProps) {
@@ -74,7 +74,7 @@ export default function CyberHeader({
       <header className="cyber-header">
         <div className="cyber-header-inner">
           {/* LOGO */}
-          <Link href="/" className="cyber-logo-brand" aria-label="OnCyber Trang chủ">
+          <Link href="/" className="cyber-logo-brand" aria-label="MinSr Trang chủ">
             <div className="cyber-logo-icon">
               <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polygon points="12 2 2 7 12 12 22 7 12 2" />

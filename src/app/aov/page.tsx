@@ -9,7 +9,7 @@ export const revalidate = 10; // Cập nhật kho và dữ liệu nhanh
 export async function generateMetadata(): Promise<Metadata> {
   const config = await db.aovConfig.findUnique({ where: { id: 1 } });
   return {
-    title: `${config?.title || "Đấu Trường Liên Quân AOV - Xé Túi Mù & Vòng Quay May Mắn"} | OnCyber`,
+    title: `${config?.title || "Đấu Trường Liên Quân AOV - Xé Túi Mù & Vòng Quay May Mắn"} | MinSr`,
     description:
       config?.description ||
       "Đấu trường nhận nick Liên Quân Garena trắng thông tin miễn phí, cơ chế Xé Túi Mù và Vòng Quay May Mắn nhận tới 5 acc VIP.",

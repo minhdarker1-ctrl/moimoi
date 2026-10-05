@@ -63,7 +63,7 @@ export default async function Home() {
 
       <main className="cyber-main-wrap" role="main">
         {/* HERO SECTION */}
-        <section className="cyber-hero-section" aria-label="Giới thiệu OnCyber">
+        <section className="cyber-hero-section" aria-label="Giới thiệu MinSr">
           <div className="cyber-avatar-container">
             <div className="cyber-avatar-ring">
               {site.avatarUrl ? (
@@ -77,7 +77,7 @@ export default async function Home() {
                   height={112}
                 />
               ) : (
-                <div className="cyber-avatar-fallback">OC</div>
+                <div className="cyber-avatar-fallback">MS</div>
               )}
               {site.avatarFrameUrl && (
                 /* eslint-disable-next-line @next/next/no-img-element */

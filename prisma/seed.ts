@@ -10,20 +10,20 @@ async function main() {
     update: {},
     create: {
       id: 1,
-      name: "OnCyber",
+      name: "MinSr",
       iam: "Hi, i am",
       verified: true,
       avatarUrl: `${U}/uploads/intro/1785225956_f40be83fd24a69c4.jpeg`,
       avatarFrameUrl: `${U}/uploads/intro/1787761701_27566707d8893895.png`,
       typedLines: JSON.stringify(["Developer.", "Designer.", "Creator.", "Gamer."]),
-      seoTitle: "OnCyber",
+      seoTitle: "MinSr",
       seoDescription:
         "Nền tảng cung cấp giải pháp công nghệ ios giúp game thủ leo rank an toàn và hiệu quả.",
-      seoKeywords: "oncyber, oncyberr",
+      seoKeywords: "minsr, minsr app, minsr vercel",
       faviconUrl: `${U}/uploads/intro/1785223665_087e144254b7ed32.png`,
       ytChannelUrl: "https://youtube.com/@oncyberr",
       ytBannerOn: true,
-      footerText: "© Designer by OnCyber 2026",
+      footerText: "© Designer by MinSr 2026",
     },
   });
 

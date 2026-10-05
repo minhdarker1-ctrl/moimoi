@@ -172,7 +172,7 @@ Cài DNS khi Gold chưa xuất hiện sẽ chỉ giữ trạng thái chưa có G
         <div className="locket-hero-section">
           <div className="locket-badge-glow">
             <span className="locket-badge-icon">👑</span>
-            <span className="locket-badge-text">ONCYBER TOOL • PREMIUM ACTIVE</span>
+            <span className="locket-badge-text">MINSR TOOL • PREMIUM ACTIVE</span>
           </div>
           <h1 className="locket-title">
             Kích Hoạt <span className="locket-gold-gradient">Locket Gold</span>
@@ -728,7 +728,7 @@ Cài DNS khi Gold chưa xuất hiện sẽ chỉ giữ trạng thái chưa có G
 
         {/* FOOTER */}
         <footer className="locket-footer">
-          <p>© 2026 OnCyber • Locket Gold Automation Service</p>
+          <p>© 2026 MinSr • Locket Gold Automation Service</p>
         </footer>
       </main>
     </div>
