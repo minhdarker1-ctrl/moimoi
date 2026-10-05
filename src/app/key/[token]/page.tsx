@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { fingerprint, generateKey, hashKey } from "@/lib/crypto";
 import { clientIp } from "@/lib/guard";
 import CopyKey from "@/components/CopyKey";
+import CopyAovAccount from "@/components/CopyAovAccount";
 import { getCurrentUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
@@ -12,7 +13,7 @@ function Fail({ msg }: { msg: string }) {
   return (
     <main>
       <div className="vt-key-card">
-        <h1 style={{ fontSize: 19, margin: "0 0 8px" }}>Không lấy được key</h1>
+        <h1 style={{ fontSize: 19, margin: "0 0 8px" }}>Thông báo</h1>
         <p className="vt-hint">{msg}</p>
         <Link className="vt-btn-ghost" href="/" style={{ marginTop: 14 }}>
           Về trang chính
@@ -22,16 +23,49 @@ function Fail({ msg }: { msg: string }) {
   );
 }
 
-export default async function KeyPage({ params }: { params: Promise<{ token: string }> }) {
+export default async function KeyPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ token: string }>;
+  searchParams?: Promise<{ scope?: string }>;
+}) {
   const { token } = await params;
+  const sp = searchParams ? await searchParams : {};
 
   const s = await db.keySession.findUnique({
     where: { token },
     include: { keyType: true, app: true },
   });
-  if (!s) return <Fail msg="Phiên không tồn tại." />;
-  if (s.expiresAt < new Date()) return <Fail msg="Phiên đã hết hạn. Bấm Get Key lại." />;
-  if (s.doneAt) return <Fail msg="Phiên này đã lấy key rồi. Bấm Get Key để lấy key mới." />;
+  if (!s) return <Fail msg="Phiên không tồn tại hoặc đã hết hạn." />;
+  if (s.expiresAt < new Date()) return <Fail msg="Phiên đã hết hạn. Vui lòng bấm nhận lại." />;
+
+  const isAov = sp.scope === "aov" || s.hopUrls.includes("scope=aov");
+
+  // Nếu là phiên AOV và đã hoàn thành trước đó: kiểm tra xem có acc đã gán token này không
+  if (isAov && s.doneAt) {
+    const claimedBefore = await db.gameAccount.findMany({
+      where: { token: s.token },
+      orderBy: { id: "asc" },
+    });
+    if (claimedBefore.length > 0) {
+      return (
+        <main>
+          <div className="vt-key-card" style={{ maxWidth: 540 }}>
+            <h1 style={{ fontSize: 22, margin: "0 0 4px", color: "#38bdf8" }}>
+              ⚔️ Nick Liên Quân Mobile Của Bạn
+            </h1>
+            <p className="vt-hint" style={{ marginBottom: 12 }}>
+              Tài khoản Garena trắng thông tin đã được phát thành công cho bạn.
+            </p>
+            <CopyAovAccount accounts={claimedBefore} />
+          </div>
+        </main>
+      );
+    }
+  }
+
+  if (s.doneAt && !isAov) return <Fail msg="Phiên này đã lấy key rồi. Bấm Get Key để lấy key mới." />;
 
   const h = await headers();
   const ip = clientIp(h);
@@ -40,9 +74,71 @@ export default async function KeyPage({ params }: { params: Promise<{ token: str
   // Phải vượt đủ số cổng: step đếm từ 0, lớp cuối không có checkpoint riêng.
   const need = Math.max(1, Math.min(s.keyType.steps, 8)) - 1;
   if (s.step < need) {
-    return <Fail msg={`Bạn chưa vượt đủ ${need + 1} bước. Bấm Get Key để làm lại.`} />;
+    return <Fail msg={`Bạn chưa vượt đủ ${need + 1} bước nhiệm vụ. Vui lòng thử lại.`} />;
   }
 
+  const currentUser = await getCurrentUser();
+
+  // === NHÁNH 1: NHẬN ACC LIÊN QUÂN (AOV) ===
+  if (isAov) {
+    const aovConfig = await db.aovConfig.findUnique({ where: { id: 1 } });
+    const countToClaim = aovConfig?.blindBoxEnabled && Math.random() < 0.2 ? 2 : 1;
+
+    const available = await db.gameAccount.findMany({
+      where: { game: "AOV", status: "AVAILABLE" },
+      take: countToClaim,
+      orderBy: { id: "asc" },
+    });
+
+    if (available.length === 0) {
+      return <Fail msg="Kho tài khoản Liên Quân hiện đang tạm hết. Admin đang nạp thêm acc, vui lòng quay lại sau ít phút!" />;
+    }
+
+    await db.$transaction([
+      db.gameAccount.updateMany({
+        where: { id: { in: available.map((a) => a.id) } },
+        data: {
+          status: "CLAIMED",
+          claimedBy: ip,
+          claimedAt: new Date(),
+          token: s.token,
+        },
+      }),
+      db.keySession.update({ where: { id: s.id }, data: { doneAt: new Date() } }),
+      db.serviceUsageLog.create({
+        data: {
+          userId: currentUser?.id ?? null,
+          serviceType: "AOV",
+          serviceName: "Tặng Nick Liên Quân",
+          targetUser: available[0].username,
+          ip,
+          status: "SUCCESS",
+          metadata: JSON.stringify({
+            accounts: available.map((a) => a.username),
+            count: available.length,
+          }),
+        },
+      }),
+    ]);
+
+    return (
+      <main>
+        <div className="vt-key-card" style={{ maxWidth: 540 }}>
+          <h1 style={{ fontSize: 22, margin: "0 0 4px", color: "#38bdf8" }}>
+            🎉 Chúc Mừng Bạn Nhận Acc Thành Công!
+          </h1>
+          <p className="vt-hint" style={{ marginBottom: 12 }}>
+            {available.length > 1
+              ? `🎁 BẠN ĐÃ MỞ TRÚNG TÚI MÙ MAY MẮN: NHẬN ĐƯỢC ${available.length} TÀI KHOẢN VIP!`
+              : "Tài khoản Garena Liên Quân Mobile 100% trắng thông tin."}
+          </p>
+          <CopyAovAccount accounts={available} />
+        </div>
+      </main>
+    );
+  }
+
+  // === NHÁNH 2: NHẬN KEY THÔNG THƯỜNG / FREE FIRE ===
   const plain = generateKey();
   const expiresAt = new Date(Date.now() + s.keyType.ttlHours * 3600_000);
 
@@ -57,12 +153,10 @@ export default async function KeyPage({ params }: { params: Promise<{ token: str
         maxUses: s.keyType.maxUses,
       },
     }),
-    // Đánh dấu xong: reload trang không sinh key thứ hai.
     db.keySession.update({ where: { id: s.id }, data: { doneAt: new Date() } }),
     db.freeFireKeyLog.updateMany({ where: { token: s.token }, data: { status: "completed" } }),
   ]);
 
-  const currentUser = await getCurrentUser();
   if (currentUser) {
     await db.userSavedKey.create({
       data: {

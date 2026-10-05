@@ -686,6 +686,7 @@ export async function deleteServiceLog(fd: FormData) {
     await db.serviceUsageLog.delete({ where: { id } }).catch(() => {});
   }
   revalidatePath("/admin/users");
+  revalidatePath("/admin/locket");
 }
 
 export async function clearServiceLogs(fd: FormData) {
@@ -697,5 +698,134 @@ export async function clearServiceLogs(fd: FormData) {
     await db.serviceUsageLog.deleteMany({});
   }
   revalidatePath("/admin/users");
+  revalidatePath("/admin/locket");
+}
+
+/* ---------- aov account management ---------- */
+
+export async function saveAovConfig(fd: FormData) {
+  await requireAdmin();
+  const title = str(fd, "title", 200) || "Tặng Nick Liên Quân Mobile Miễn Phí";
+  const description = str(fd, "description", 500) || "Kho tài khoản Liên Quân Garena trắng thông tin.";
+  const notice = str(fd, "notice", 500) || "Mỗi người nhận 1 acc/lượt vượt link. Vui lòng đổi mật khẩu sau khi nhận.";
+  const requireKey = bool(fd, "requireKey");
+  const blindBoxEnabled = bool(fd, "blindBoxEnabled");
+  const keyTypeIdRaw = num(fd, "keyTypeId", 0);
+  const keyTypeId = keyTypeIdRaw > 0 ? keyTypeIdRaw : null;
+
+  await db.aovConfig.upsert({
+    where: { id: 1 },
+    create: {
+      id: 1,
+      title,
+      description,
+      notice,
+      requireKey,
+      blindBoxEnabled,
+      keyTypeId,
+    },
+    update: {
+      title,
+      description,
+      notice,
+      requireKey,
+      blindBoxEnabled,
+      keyTypeId,
+    },
+  });
+
+  revalidatePath("/admin/aov");
+  revalidatePath("/lienquan");
+}
+
+export async function importAovAccounts(fd: FormData): Promise<void> {
+  await requireAdmin();
+  const rawText = String(fd.get("rawAccounts") ?? "");
+  const lines = rawText.split(/\r?\n/);
+  const accountsToCreate: {
+    game: string;
+    username: string;
+    password: string;
+    notes: string;
+    status: string;
+  }[] = [];
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#") || trimmed.startsWith("//")) continue;
+
+    let user = "";
+    let pass = "";
+    let notes = "Trắng thông tin Garena";
+
+    if (trimmed.includes("|")) {
+      const parts = trimmed.split("|");
+      user = parts[0]?.trim() || "";
+      pass = parts[1]?.trim() || "";
+      if (parts[2]) notes = parts[2].trim();
+    } else if (trimmed.includes(":") && !trimmed.includes("http")) {
+      const parts = trimmed.split(":");
+      user = parts[0]?.trim() || "";
+      pass = parts[1]?.trim() || "";
+      if (parts[2]) notes = parts[2].trim();
+    }
+
+    if (user && pass) {
+      accountsToCreate.push({
+        game: "AOV",
+        username: user,
+        password: pass,
+        notes,
+        status: "AVAILABLE",
+      });
+    }
+  }
+
+  if (accountsToCreate.length === 0) {
+    redirect("/admin/aov?error=empty");
+  }
+
+  // Chia nhỏ batch 1000 items để không vượt quá giới hạn connection
+  const batchSize = 1000;
+  let totalInserted = 0;
+  for (let i = 0; i < accountsToCreate.length; i += batchSize) {
+    const chunk = accountsToCreate.slice(i, i + batchSize);
+    const res = await db.gameAccount.createMany({
+      data: chunk,
+    });
+    totalInserted += res.count;
+  }
+
+  revalidatePath("/admin/aov");
+  revalidatePath("/lienquan");
+  redirect(`/admin/aov?imported=${totalInserted}`);
+}
+
+export async function deleteAovAccount(fd: FormData) {
+  await requireAdmin();
+  const id = num(fd, "id");
+  if (id > 0) {
+    await db.gameAccount.delete({ where: { id } }).catch(() => {});
+  }
+  revalidatePath("/admin/aov");
+  revalidatePath("/lienquan");
+}
+
+export async function clearClaimedAovAccounts() {
+  await requireAdmin();
+  await db.gameAccount.deleteMany({
+    where: { game: "AOV", status: "CLAIMED" },
+  });
+  revalidatePath("/admin/aov");
+  revalidatePath("/lienquan");
+}
+
+export async function clearAllAovAccounts() {
+  await requireAdmin();
+  await db.gameAccount.deleteMany({
+    where: { game: "AOV" },
+  });
+  revalidatePath("/admin/aov");
+  revalidatePath("/lienquan");
 }
 

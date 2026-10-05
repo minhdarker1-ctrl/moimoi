@@ -249,6 +249,7 @@ model KeyType {
   keys       AppKey[]
   sessions   KeySession[]
   freeFireConfigs FreeFireConfig[]
+  aovConfigs      AovConfig[]
 }
 
 model KeySession {
@@ -412,6 +413,41 @@ model ServiceUsageLog {
   @@index([serviceType])
   @@index([createdAt])
   @@index([userId])
+}
+
+// ---------- Kho Nick Game (Liên Quân AOV / Free Fire) ----------
+
+model GameAccount {
+  id        Int       @id @default(autoincrement())
+  game      String    @default("AOV") // "AOV" | "FREEFIRE"
+  username  String
+  password  String
+  rank      String    @default("Ngẫu nhiên") // Tinh Anh, Kim Cương, Cao Thủ, Trắng thông tin...
+  skins     Int       @default(0)
+  champs    Int       @default(0)
+  status    String    @default("AVAILABLE")  // "AVAILABLE" | "CLAIMED" | "LOCKED"
+  claimedBy String    @default("")           // IP hoặc username người nhận
+  claimedAt DateTime?
+  token     String    @default("")           // Token phiên vượt link gắn với acc này
+  notes     String    @default("Trắng thông tin Garena")
+  createdAt DateTime  @default(now())
+
+  @@index([game, status])
+  @@index([createdAt])
+  @@index([token])
+}
+
+model AovConfig {
+  id               Int      @id @default(1)
+  title            String   @default("Tặng Nick Liên Quân Mobile Miễn Phí")
+  description      String   @default("Kho tài khoản Liên Quân Garena trắng thông tin, cập nhật liên tục hàng ngày.")
+  notice           String   @default("Mỗi người nhận 1 acc/lượt vượt link. Vui lòng đổi mật khẩu sau khi nhận.")
+  requireKey       Boolean  @default(true)
+  keyTypeId        Int?
+  keyType          KeyType? @relation(fields: [keyTypeId], references: [id], onDelete: SetNull)
+  getKeyUrl        String   @default("")
+  blindBoxEnabled  Boolean  @default(true) // Cho phép sự kiện Túi Mù nhận 1-5 acc
+  updatedAt        DateTime @updatedAt
 }
 
 

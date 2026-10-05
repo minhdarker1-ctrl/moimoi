@@ -121,6 +121,24 @@ export async function GET(req: Request) {
     }
     if (!ffConfig?.keyType?.enabled) return fail(req, "Chưa cấu hình cổng vượt link API bên thứ 3 cho Free Fire.", isJson);
     kt = ffConfig.keyType;
+  } else if (scope === "aov" || scope === "lienquan") {
+    const aovConfig = await db.aovConfig.findUnique({ where: { id: 1 }, include: { keyType: true } });
+    const availableCount = await db.gameAccount.count({ where: { game: "AOV", status: "AVAILABLE" } });
+    if (availableCount <= 0) {
+      return fail(req, "Kho tài khoản Liên Quân hiện đang tạm hết. Admin đang nạp thêm, bạn vui lòng quay lại sau ít phút!", isJson);
+    }
+    if (aovConfig?.getKeyUrl && (!aovConfig.keyTypeId || aovConfig.keyTypeId <= 0)) {
+      if (isJson) {
+        return NextResponse.json({ ok: true, url: aovConfig.getKeyUrl, appName: "Tặng Nick Liên Quân" });
+      }
+      return NextResponse.redirect(aovConfig.getKeyUrl, 302);
+    }
+    if (aovConfig?.keyType?.enabled) {
+      kt = aovConfig.keyType;
+    } else {
+      kt = await db.keyType.findFirst({ where: { enabled: true } });
+    }
+    if (!kt) return fail(req, "Chưa cấu hình cổng vượt link cho dịch vụ tặng nick Liên Quân.", isJson);
   } else if (keyTypeIdParam && Number.isInteger(Number(keyTypeIdParam))) {
     kt = await db.keyType.findUnique({ where: { id: Number(keyTypeIdParam) } });
     if (!kt?.enabled) return fail(req, "Loại key không hợp lệ hoặc đã bị tắt.", isJson);
@@ -147,10 +165,10 @@ export async function GET(req: Request) {
   const token = sessionToken();
   const base = baseUrl(req);
 
-  // Mỗi lớp trỏ về checkpoint trên server, không lồng trực tiếp:
-  // lộ URL 1 lớp cũng không nhảy được lớp sau.
+  const isAov = scope === "aov" || scope === "lienquan";
+  const finalDest = isAov ? `${base}/key/${token}?scope=aov` : `${base}/key/${token}`;
   const targets = Array.from({ length: steps }, (_, i) =>
-    i === steps - 1 ? `${base}/key/${token}` : `${base}/hop/${token}/${i + 1}`,
+    i === steps - 1 ? finalDest : `${base}/hop/${token}/${i + 1}`,
   );
 
   const used = new Set<number>();
@@ -232,10 +250,10 @@ export async function GET(req: Request) {
   try {
     const sType = scope === "freefire"
       ? "FREE_FIRE"
-      : (app?.name?.toLowerCase().includes("liên quân") || app?.name?.toLowerCase().includes("aov"))
+      : (isAov || app?.name?.toLowerCase().includes("liên quân") || app?.name?.toLowerCase().includes("aov"))
       ? "AOV"
       : "OTHER";
-    const sName = app ? app.name : (scope === "freefire" ? "Free Fire Tool" : kt.name);
+    const sName = app ? app.name : (scope === "freefire" ? "Free Fire Tool" : (isAov ? "Tặng Nick Liên Quân" : kt.name));
     const uaStr = req.headers.get("user-agent") || "";
     const parsedUa = parseUserAgent(uaStr);
 
@@ -257,7 +275,7 @@ export async function GET(req: Request) {
       ok: true,
       url: hopUrls[0],
       steps,
-      appName: app ? app.name : (scope === "freefire" ? "Độ Nhạy Free Fire" : kt.name),
+      appName: isAov ? "Tặng Nick Liên Quân Miễn Phí" : (app ? app.name : (scope === "freefire" ? "Độ Nhạy Free Fire" : kt.name)),
     });
   }
 

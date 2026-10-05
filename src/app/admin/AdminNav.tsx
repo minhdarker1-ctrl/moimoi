@@ -6,9 +6,7 @@ import {
   Globe,
   Share2,
   Link2,
-  FolderKanban,
   AppWindow,
-  FileText,
   Bell,
   Music,
   Flame,
@@ -20,6 +18,8 @@ import {
   Home,
   User,
   Users,
+  Gift,
+  Smartphone,
 } from "lucide-react";
 import { logout } from "./actions";
 
@@ -36,31 +36,31 @@ const NAV_GROUPS = [
     ],
   },
   {
-    title: "Nội Dung Site",
+    title: "Dịch Vụ Trọng Tâm",
     links: [
-      { href: "/admin/site", label: "Thông tin site", icon: Globe },
-      { href: "/admin/socials", label: "Social links", icon: Share2 },
-      { href: "/admin/linkboxes", label: "Link boxes", icon: Link2 },
-      { href: "/admin/notices", label: "Thông báo", icon: Bell },
-      { href: "/admin/music", label: "Kho nhạc nền", icon: Music },
-      { href: "/admin/blogs", label: "Bài viết Blog", icon: FileText },
+      { href: "/admin/aov", label: "Kho Acc Liên Quân", icon: Gift },
+      { href: "/admin/freefire", label: "Free Fire Setting", icon: Flame },
+      { href: "/admin/freefire/logs", label: "Logs Key Free Fire", icon: Activity },
+      { href: "/admin/locket", label: "Locket Gold", icon: Smartphone },
+      { href: "/admin/apps", label: "Kho Ứng Dụng & Mod", icon: AppWindow },
     ],
   },
   {
-    title: "Ứng Dụng & Phân Loại",
+    title: "Hệ Thống Vượt Link",
     links: [
-      { href: "/admin/groups", label: "Nhóm / Thể loại", icon: FolderKanban },
-      { href: "/admin/apps", label: "Ứng dụng & Mod", icon: AppWindow },
-    ],
-  },
-  {
-    title: "Key & Vượt Link",
-    links: [
-      { href: "/admin/freefire", label: "Free Fire Tool", icon: Flame },
-      { href: "/admin/freefire/logs", label: "Logs khách lấy key", icon: Activity },
       { href: "/admin/shorteners", label: "Cổng rút gọn link", icon: Network },
-      { href: "/admin/keytypes", label: "Loại key", icon: KeyRound },
+      { href: "/admin/keytypes", label: "Loại key & cấu hình", icon: KeyRound },
       { href: "/admin/keys", label: "Key đã phát", icon: ShieldCheck },
+    ],
+  },
+  {
+    title: "Cài Đặt Website",
+    links: [
+      { href: "/admin/site", label: "Thông tin website", icon: Globe },
+      { href: "/admin/socials", label: "Mạng xã hội", icon: Share2 },
+      { href: "/admin/linkboxes", label: "Hộp liên kết", icon: Link2 },
+      { href: "/admin/notices", label: "Thông báo nổi", icon: Bell },
+      { href: "/admin/music", label: "Kho nhạc nền", icon: Music },
     ],
   },
 ];

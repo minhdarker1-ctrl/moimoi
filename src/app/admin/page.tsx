@@ -9,16 +9,18 @@ import {
   Eye,
   Calendar,
   Users,
-  AppWindow,
   ShieldCheck,
   KeyRound,
   Network,
   TrendingUp,
   CheckCircle2,
   Save,
-  Activity,
   Sparkles,
   ArrowRight,
+  Gift,
+  Flame,
+  Smartphone,
+  AppWindow,
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -40,35 +42,77 @@ export default async function AdminHome({
   let counter = null;
   let daily = null;
   let users = 0;
-  let apps = 0;
-  let keys = 0;
-  let active = 0;
+  let activeKeys = 0;
   let shorteners = 0;
-  let serviceLogsCount = 0;
+  let aovAvailable = 0;
+  let aovClaimed = 0;
+  let freefireLogsCount = 0;
+  let locketLogsCount = 0;
 
   try {
-    [counter, daily, users, apps, keys, active, shorteners, serviceLogsCount] = await Promise.all([
+    [
+      counter,
+      daily,
+      users,
+      activeKeys,
+      shorteners,
+      aovAvailable,
+      aovClaimed,
+      freefireLogsCount,
+      locketLogsCount,
+    ] = await Promise.all([
       db.counter.findUnique({ where: { id: 1 } }),
       db.dailyHit.findUnique({ where: { date: today } }),
       db.user.count(),
-      db.app.count(),
-      db.appKey.count(),
       db.appKey.count({ where: { revoked: false, expiresAt: { gt: new Date() } } }),
       db.shortener.count({ where: { enabled: true } }),
-      db.serviceUsageLog.count(),
+      db.gameAccount.count({ where: { game: "AOV", status: "AVAILABLE" } }),
+      db.gameAccount.count({ where: { game: "AOV", status: "CLAIMED" } }),
+      db.freeFireKeyLog.count(),
+      db.serviceUsageLog.count({ where: { serviceType: "LOCKET_GOLD" } }),
     ]);
   } catch (err) {
     console.error("Error loading admin stats:", err);
   }
 
+  const coreServices = [
+    {
+      title: "Kho Acc Liên Quân (AOV)",
+      subtitle: `${aovAvailable.toLocaleString()} acc sẵn sàng • Đã tặng ${aovClaimed.toLocaleString()}`,
+      href: "/admin/aov",
+      icon: Gift,
+      color: "from-sky-500 to-indigo-600",
+      badge: `${aovAvailable} Tồn kho`,
+      badgeColor: "#10b981",
+    },
+    {
+      title: "Free Fire Setting & Key",
+      subtitle: `${freefireLogsCount.toLocaleString()} lượt tra cứu & lấy key`,
+      href: "/admin/freefire",
+      icon: Flame,
+      color: "from-amber-500 to-orange-600",
+      badge: "Đang hoạt động",
+      badgeColor: "#f59e0b",
+    },
+    {
+      title: "Locket Gold VIP",
+      subtitle: `${locketLogsCount.toLocaleString()} lượt kích hoạt thành công`,
+      href: "/admin/locket",
+      icon: Smartphone,
+      color: "from-purple-500 to-pink-600",
+      badge: `${locketLogsCount} Buffs`,
+      badgeColor: "#8b5cf6",
+    },
+  ];
+
   const stats = [
     { label: "Tổng lượt truy cập", value: counter?.total ?? 0, icon: Eye, color: "stat-purple" },
     { label: "Truy cập hôm nay", value: daily?.count ?? 0, icon: Calendar, color: "stat-blue" },
-    { label: "Thành viên đăng ký", value: users, icon: Users, color: "stat-green" },
-    { label: "Lượt dùng dịch vụ", value: serviceLogsCount, icon: Sparkles, color: "stat-yellow" },
-    { label: "Ứng dụng & Mod", value: apps, icon: AppWindow, color: "stat-orange" },
-    { label: "Key còn hiệu lực", value: active, icon: ShieldCheck, color: "stat-pink" },
-    { label: "Tổng key đã phát", value: keys, icon: KeyRound, color: "stat-cyan" },
+    { label: "Kho Nick AOV sẵn sàng", value: aovAvailable, icon: Gift, color: "stat-green" },
+    { label: "Nick AOV đã phát", value: aovClaimed, icon: Sparkles, color: "stat-cyan" },
+    { label: "Lượt lấy key Free Fire", value: freefireLogsCount, icon: Flame, color: "stat-orange" },
+    { label: "Lượt buff Locket Gold", value: locketLogsCount, icon: Smartphone, color: "stat-yellow" },
+    { label: "Key vượt link còn hạn", value: activeKeys, icon: ShieldCheck, color: "stat-pink" },
     { label: "Cổng vượt link đang bật", value: shorteners, icon: Network, color: "stat-yellow" },
   ];
 
@@ -76,65 +120,74 @@ export default async function AdminHome({
     <div className="vt-admin">
       <AdminNav current="/admin" />
 
-      {/* BANNER ĐẾN TRANG QUẢN LÝ NGƯỜI DÙNG & DỊCH VỤ */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          position: "relative",
-          zIndex: 2,
-          background: "#ffffff",
-          border: "1px solid rgba(99, 102, 241, 0.35)",
-          boxShadow: "0 4px 20px rgba(0, 0, 0, 0.05)",
-          borderRadius: 14,
-          padding: "16px 20px",
-          marginBottom: 20,
-          flexWrap: "wrap",
-          gap: 12,
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-          <div
-            style={{
-              width: 44,
-              height: 44,
-              borderRadius: 12,
-              background: "linear-gradient(135deg, #6366f1, #a855f7)",
-              color: "#fff",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-            }}
-          >
-            <Users size={22} />
-          </div>
-          <div>
-            <div style={{ fontWeight: 800, fontSize: 15, color: "var(--vi-text)" }}>
-              Quản Lý Người Dùng & Dịch Vụ Mới
-            </div>
-            <div style={{ fontSize: 13, color: "var(--vi-muted)", marginTop: 2 }}>
-              Xem danh sách ai đang dùng Locket Gold, Free Fire, Liên Quân và quản lý tài khoản thành viên.
-            </div>
-          </div>
+      {/* TOP SERVICES SHORTCUT CARDS */}
+      <div style={{ marginBottom: 24 }}>
+        <h2 style={{ fontSize: 16, fontWeight: 800, margin: "0 0 12px", color: "var(--vi-text)" }}>
+          🎯 Dịch Vụ Trọng Tâm Website
+        </h2>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 14 }}>
+          {coreServices.map((srv) => {
+            const Icon = srv.icon;
+            return (
+              <Link
+                key={srv.title}
+                href={srv.href}
+                style={{
+                  background: "var(--vi-card)",
+                  border: "1px solid var(--vi-border)",
+                  borderRadius: 16,
+                  padding: "16px 18px",
+                  textDecoration: "none",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  boxShadow: "var(--vi-shadow-sm)",
+                  transition: "transform 0.15s ease, border-color 0.15s ease",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <div
+                    style={{
+                      width: 42,
+                      height: 42,
+                      borderRadius: 12,
+                      background: "rgba(99, 102, 241, 0.1)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "var(--vi-accent)",
+                    }}
+                  >
+                    <Icon size={20} />
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 800, fontSize: 14.5, color: "var(--vi-text)" }}>
+                      {srv.title}
+                    </div>
+                    <div style={{ fontSize: 12.5, color: "var(--vi-muted)", marginTop: 2 }}>
+                      {srv.subtitle}
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ textAlign: "right" }}>
+                  <span
+                    style={{
+                      background: `${srv.badgeColor}18`,
+                      color: srv.badgeColor,
+                      padding: "4px 8px",
+                      borderRadius: 8,
+                      fontSize: 11.5,
+                      fontWeight: 700,
+                    }}
+                  >
+                    {srv.badge}
+                  </span>
+                </div>
+              </Link>
+            );
+          })}
         </div>
-        <Link
-          href="/admin/users"
-          className="vt-btn-primary"
-          style={{
-            textDecoration: "none",
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 6,
-            padding: "9px 18px",
-            fontSize: 13,
-            fontWeight: 700,
-          }}
-        >
-          <span>Xem Chi Tiết</span>
-          <ArrowRight size={14} />
-        </Link>
       </div>
 
       {isSaved && (

@@ -156,7 +156,7 @@ export default async function Home() {
                 />
               </div>
               <h2 className="cyber-card-title">FREE FIRE</h2>
-              <p className="cyber-card-desc">Nạp kim cương, đổi thẻ &amp; sự kiện</p>
+              <p className="cyber-card-desc">Độ nhạy &amp; setting chuẩn</p>
               <div className="cyber-card-badge badge-active">
                 <i className="fas fa-shield-alt" />
                 <span>HOẠT ĐỘNG</span>
@@ -183,7 +183,7 @@ export default async function Home() {
                 />
               </div>
               <h2 className="cyber-card-title">AOV</h2>
-              <p className="cyber-card-desc">Nạp quân huy, cày thuê &amp; mod map</p>
+              <p className="cyber-card-desc">Tặng nick miễn phí</p>
               <div className="cyber-card-badge badge-active-blue">
                 <i className="fas fa-shield-alt" />
                 <span>HOẠT ĐỘNG</span>
