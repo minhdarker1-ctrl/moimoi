@@ -3,18 +3,11 @@
 import { useState } from "react";
 import Link from "next/link";
 
-interface RecentLog {
-  targetUser: string;
-  createdAt: string;
-  status: string;
-}
-
 interface AovClientProps {
   availableStock: number;
   claimedStock: number;
   blindBoxEnabled: boolean;
   notice: string;
-  recentLogs: RecentLog[];
 }
 
 export default function AovClient({
@@ -22,7 +15,6 @@ export default function AovClient({
   claimedStock,
   blindBoxEnabled,
   notice,
-  recentLogs,
 }: AovClientProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -61,20 +53,6 @@ export default function AovClient({
       setError(msg);
       setLoading(false);
     }
-  };
-
-  const maskUsername = (u: string) => {
-    if (!u) return "garena_***";
-    if (u.length <= 4) return u.slice(0, 1) + "***";
-    return u.slice(0, 3) + "***" + u.slice(-2);
-  };
-
-  const timeAgo = (dateStr: string) => {
-    const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
-    if (diff < 60) return "vừa xong";
-    if (diff < 3600) return `${Math.floor(diff / 60)} phút trước`;
-    if (diff < 86400) return `${Math.floor(diff / 3600)} giờ trước`;
-    return `${Math.floor(diff / 86400)} ngày trước`;
   };
 
   return (
@@ -404,52 +382,6 @@ export default function AovClient({
           </div>
         </div>
       </div>
-
-      {/* Recent Claims Feed */}
-      {recentLogs.length > 0 && (
-        <div
-          style={{
-            background: "var(--vi-card)",
-            border: "1px solid var(--vi-border)",
-            borderRadius: 20,
-            padding: "20px",
-            boxShadow: "var(--vi-shadow-sm)",
-            marginBottom: 36,
-          }}
-        >
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-            <h4 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "var(--vi-text)", display: "flex", alignItems: "center", gap: 8 }}>
-              <i className="fa-solid fa-clock-rotate-left" style={{ color: "#10b981" }} />
-              Nhật Ký Nhận Acc Gần Đây
-            </h4>
-            <span style={{ fontSize: 12, color: "#10b981", fontWeight: 600 }}>● Trực tiếp</span>
-          </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 10 }}>
-            {recentLogs.map((log, idx) => (
-              <div
-                key={idx}
-                style={{
-                  background: "rgba(0, 0, 0, 0.03)",
-                  borderRadius: 12,
-                  padding: "8px 12px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  fontSize: 12.5,
-                }}
-              >
-                <span style={{ fontWeight: 600, color: "var(--vi-text)", fontFamily: "monospace" }}>
-                  {maskUsername(log.targetUser)}
-                </span>
-                <span style={{ color: "var(--vi-muted)", fontSize: 11.5 }}>
-                  {timeAgo(log.createdAt)}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Notice & Disclaimer */}
       <div

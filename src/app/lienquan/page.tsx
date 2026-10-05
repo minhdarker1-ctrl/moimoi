@@ -24,7 +24,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function LienQuanPage() {
-  const [site, groups, notices, aovConfig, availableStock, claimedStock, recentLogs] =
+  const [site, groups, notices, aovConfig, availableStock, claimedStock] =
     await Promise.all([
       db.site.findUnique({ where: { id: 1 } }),
       db.group.findMany({
@@ -36,16 +36,6 @@ export default async function LienQuanPage() {
       db.aovConfig.findUnique({ where: { id: 1 } }),
       db.gameAccount.count({ where: { game: "AOV", status: "AVAILABLE" } }),
       db.gameAccount.count({ where: { game: "AOV", status: "CLAIMED" } }),
-      db.serviceUsageLog.findMany({
-        where: { serviceType: "AOV" },
-        orderBy: { createdAt: "desc" },
-        take: 8,
-        select: {
-          targetUser: true,
-          createdAt: true,
-          status: true,
-        },
-      }),
     ]);
 
   if (!site) return null;
@@ -85,11 +75,6 @@ export default async function LienQuanPage() {
           claimedStock={claimedStock}
           blindBoxEnabled={aovConfig?.blindBoxEnabled ?? true}
           notice={aovConfig?.notice ?? ""}
-          recentLogs={recentLogs.map((l) => ({
-            targetUser: l.targetUser,
-            createdAt: l.createdAt.toISOString(),
-            status: l.status,
-          }))}
         />
 
         <footer className="mdarker-footer" style={{ marginTop: 50 }}>
