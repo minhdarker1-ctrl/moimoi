@@ -6,7 +6,7 @@ import DesktopHeader from "@/components/DesktopHeader";
 import AppCatalog from "@/components/AppCatalog";
 import FreeFireHub from "@/components/FreeFireHub";
 
-export const revalidate = 60;
+export const revalidate = 900; // 15 phút
 
 interface PageProps {
   params: Promise<{ slug: string }>;

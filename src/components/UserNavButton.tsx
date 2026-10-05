@@ -1,27 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { User, LayoutDashboard, KeyRound, ShieldAlert, LogOut, Settings } from "lucide-react";
-import { AuthUser } from "@/lib/auth";
 import { logoutAction } from "@/app/actions/auth";
+import { useCurrentUser } from "@/lib/useCurrentUser";
 
 export default function UserNavButton() {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { user, loading, mutate } = useCurrentUser();
   const [open, setOpen] = useState(false);
 
-  useEffect(() => {
-    fetch("/api/auth/me")
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.user) setUser(data.user);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
-
   const handleLogout = async () => {
+    mutate(null);
     await logoutAction();
     window.location.href = "/";
   };

@@ -4,7 +4,7 @@ import { getCurrentUser } from "@/lib/auth";
 import DesktopHeader from "@/components/DesktopHeader";
 import AovArenaClient from "./AovArenaClient";
 
-export const revalidate = 10; // Cập nhật kho và dữ liệu nhanh
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
   const config = await db.aovConfig.findUnique({ where: { id: 1 } });

@@ -1,23 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Sparkles, LayoutDashboard, LogIn, UserPlus, KeyRound, ArrowRight } from "lucide-react";
-import { AuthUser } from "@/lib/auth";
+import { useCurrentUser } from "@/lib/useCurrentUser";
 
 export default function HomeMemberBanner() {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch("/api/auth/me")
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.user) setUser(data.user);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
+  const { user, loading } = useCurrentUser();
 
   if (loading || !user) {
     return null;

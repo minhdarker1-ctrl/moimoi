@@ -3,7 +3,7 @@ import Link from "next/link";
 import CyberHeader from "@/components/CyberHeader";
 import TypedText from "@/components/TypedText";
 
-export const revalidate = 60;
+export const revalidate = 900; // 15 phút - kết hợp on-demand revalidation khi admin lưu
 
 function parseLines(json: string): string[] {
   try {
