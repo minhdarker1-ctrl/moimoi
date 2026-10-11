@@ -297,6 +297,10 @@ export async function saveFreeFireConfig(fd: FormData) {
     telegramNotifyEnabled: bool(fd, "telegramNotifyEnabled"),
     telegramBotToken: str(fd, "telegramBotToken", 200),
     telegramChatId: str(fd, "telegramChatId", 100),
+
+    // Wake Up config khi Bot Offline
+    adminWakeupUrl: str(fd, "adminWakeupUrl", 200) || "https://t.me/mdarker_bot",
+    wakeupMessage: str(fd, "wakeupMessage", 500) || "Bot chợp mắt 1 tý, ai dùng thì kêu admin gọi bot dậy nha",
   };
 
   await db.freeFireConfig.upsert({

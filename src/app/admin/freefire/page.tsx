@@ -433,6 +433,29 @@ export default async function AdminFreeFirePage({
             />
           </label>
 
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16, marginBottom: 16 }}>
+            <label className="vt-field">
+              <span>Đường dẫn gọi Admin thức dậy (Nút Wake Up)</span>
+              <input
+                type="text"
+                name="adminWakeupUrl"
+                defaultValue={config?.adminWakeupUrl || config?.teleBotLink || "https://t.me/mdarker_bot"}
+                placeholder="https://t.me/mdarker_bot hoặc link Telegram/Zalo"
+                className="vt-input"
+              />
+            </label>
+
+            <label className="vt-field">
+              <span>Thông báo khi Bot Offline</span>
+              <input
+                type="text"
+                name="wakeupMessage"
+                defaultValue={config?.wakeupMessage || "Bot chợp mắt 1 tý, ai dùng thì kêu admin gọi bot dậy nha"}
+                className="vt-input"
+              />
+            </label>
+          </div>
+
           {/* CẤU HÌNH BẮN THÔNG BÁO BOT TELEGRAM (PHƯƠNG ÁN 3) */}
           <div
             style={{

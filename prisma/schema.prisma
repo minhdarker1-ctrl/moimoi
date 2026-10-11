@@ -134,6 +134,11 @@ model FreeFireConfig {
   telegramBotToken      String   @default("")
   telegramChatId        String   @default("")
 
+  // Trạng thái Bot Worker & Nút Wake Up khi Offline
+  workerHeartbeatAt     DateTime?
+  adminWakeupUrl        String   @default("https://t.me/mdarker_bot")
+  wakeupMessage         String   @default("Bot chợp mắt 1 tý, ai dùng thì kêu admin gọi bot dậy nha")
+
   updatedAt DateTime @updatedAt
 }
 

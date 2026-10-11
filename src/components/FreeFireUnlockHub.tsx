@@ -54,6 +54,29 @@ export default function FreeFireUnlockHub({
   const [copiedUid, setCopiedUid] = useState(false);
   const activePollRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Trạng thái Bot Worker (Online / Offline)
+  const [workerStatus, setWorkerStatus] = useState<{
+    isOnline: boolean;
+    lastSeenSeconds: number;
+    adminWakeupUrl: string;
+    wakeupMessage: string;
+  } | null>(null);
+
+  useEffect(() => {
+    async function checkWorker() {
+      try {
+        const res = await fetch("/api/freefire/worker/status");
+        const data = await res.json();
+        if (data.success) {
+          setWorkerStatus(data);
+        }
+      } catch {}
+    }
+    checkWorker();
+    const timer = setInterval(checkWorker, 10000);
+    return () => clearInterval(timer);
+  }, []);
+
   // Lắng nghe thông điệp phản hồi từ Extension (chạy ngầm, không lộ UI kỹ thuật)
   useEffect(() => {
     function handleExtensionMessage(event: MessageEvent) {
@@ -300,10 +323,15 @@ export default function FreeFireUnlockHub({
     <section className="mdarker-ff-unlock-hub" aria-label="Unlock ID Free Fire">
       {/* HEADER SECTION */}
       <div className="mdarker-ff-unlock-header">
-        <div className="mdarker-ff-unlock-badge-wrap">
+        <div className="mdarker-ff-unlock-badge-wrap" style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap", alignItems: "center" }}>
           <span className="mdarker-ff-unlock-badge">
             <i className="fa-solid fa-bolt mdarker-ff-unlock-icon" />
             <span>WHITELIST SERVER PRO</span>
+          </span>
+
+          <span className={`mdarker-ff-worker-badge ${workerStatus?.isOnline ? "online" : "offline"}`}>
+            <span className={`mdarker-worker-dot ${workerStatus?.isOnline ? "green" : "sleep"}`} />
+            <span>{workerStatus?.isOnline ? "BOT ONLINE · SẴN SÀNG" : "BOT ĐANG CHỢP MẮT (OFFLINE)"}</span>
           </span>
         </div>
         <h2 className="mdarker-ff-unlock-title">
@@ -472,26 +500,53 @@ export default function FreeFireUnlockHub({
             </div>
           )}
 
-          {/* NÚT SUBMIT CHÍNH */}
-          <div style={{ marginTop: 22 }}>
-            <button
-              type="submit"
-              className="mdarker-ff-unlock-submit-btn"
-              disabled={loading || !uid.trim()}
-            >
-              {loading ? (
-                <>
-                  <i className="fa-solid fa-spinner fa-spin" />
-                  <span>ĐANG ĐỒNG BỘ WHITELIST...</span>
-                </>
-              ) : (
-                <>
-                  <i className="fa-solid fa-bolt" />
-                  <span>KÍCH HOẠT UNLOCK ID NGAY</span>
-                </>
-              )}
-            </button>
-          </div>
+          {/* NẾU BOT ĐANG CHỢP MẮT (OFFLINE) */}
+          {workerStatus && !workerStatus.isOnline ? (
+            <div className="mdarker-ff-sleep-wrap" style={{ marginTop: 20 }}>
+              <div className="mdarker-ff-sleep-banner">
+                <div className="mdarker-sleep-header">
+                  <span className="mdarker-sleep-icon">💤</span>
+                  <strong>{workerStatus.wakeupMessage || "Bot chợp mắt 1 tý, ai dùng thì kêu admin gọi bot dậy nha"}</strong>
+                </div>
+                <p className="mdarker-sleep-sub">
+                  Máy chủ tự động đang tạm nghỉ ngơi. Bạn hãy bấm nút bên dưới để gọi Admin bật bot thức dậy ngay nhé!
+                </p>
+              </div>
+
+              <div style={{ marginTop: 14 }}>
+                <a
+                  href={workerStatus.adminWakeupUrl || "https://t.me/mdarker_bot"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mdarker-ff-wakeup-btn"
+                >
+                  <i className="fa-solid fa-bell fa-shake" />
+                  <span>⏰ WAKE UP - GỌI ADMIN BẬT BOT DẬY</span>
+                </a>
+              </div>
+            </div>
+          ) : (
+            /* NÚT SUBMIT CHÍNH KHI BOT ĐANG ONLINE */
+            <div style={{ marginTop: 22 }}>
+              <button
+                type="submit"
+                className="mdarker-ff-unlock-submit-btn"
+                disabled={loading || !uid.trim()}
+              >
+                {loading ? (
+                  <>
+                    <i className="fa-solid fa-spinner fa-spin" />
+                    <span>ĐANG ĐỒNG BỘ WHITELIST...</span>
+                  </>
+                ) : (
+                  <>
+                    <i className="fa-solid fa-bolt" />
+                    <span>KÍCH HOẠT UNLOCK ID NGAY</span>
+                  </>
+                )}
+              </button>
+            </div>
+          )}
         </form>
 
         {/* KẾT QUẢ KÍCH HOẠT THÀNH CÔNG */}

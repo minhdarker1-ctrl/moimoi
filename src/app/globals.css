@@ -4242,6 +4242,127 @@ body.vthangios-dark .mdarker-music-mini-dot {
   box-shadow: 0 4px 15px rgba(2, 132, 199, 0.35);
 }
 
+.mdarker-ff-worker-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+}
+
+.mdarker-ff-worker-badge.online {
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+}
+
+.mdarker-ff-worker-badge.offline {
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+}
+
+.mdarker-worker-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.mdarker-worker-dot.green {
+  background: #10b981;
+  box-shadow: 0 0 8px #10b981;
+  animation: pulseGreen 1.5s infinite;
+}
+
+.mdarker-worker-dot.sleep {
+  background: #f59e0b;
+  box-shadow: 0 0 6px #f59e0b;
+}
+
+@keyframes pulseGreen {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.2); opacity: 0.7; }
+}
+
+/* SLEEP BANNER & WAKE UP BUTTON */
+.mdarker-ff-sleep-wrap {
+  width: 100%;
+}
+
+.mdarker-ff-sleep-banner {
+  background: rgba(245, 158, 11, 0.08);
+  border: 1.5px dashed rgba(245, 158, 11, 0.4);
+  border-radius: 16px;
+  padding: 16px 18px;
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+[data-theme="dark"] .mdarker-ff-sleep-banner {
+  background: rgba(245, 158, 11, 0.05);
+  border-color: rgba(245, 158, 11, 0.35);
+}
+
+.mdarker-sleep-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 13.5px;
+  color: #f59e0b;
+  margin-bottom: 6px;
+}
+
+.mdarker-sleep-icon {
+  font-size: 18px;
+  display: inline-block;
+  animation: floatingZzz 2s ease-in-out infinite;
+}
+
+@keyframes floatingZzz {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.mdarker-sleep-sub {
+  margin: 0;
+  font-size: 12px;
+  color: var(--vi-muted);
+  line-height: 1.5;
+}
+
+.mdarker-ff-wakeup-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 20px;
+  border-radius: 14px;
+  font-size: 14.5px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: #fff;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  border: none;
+  cursor: pointer;
+  text-decoration: none !important;
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.35);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mdarker-ff-wakeup-btn:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  box-shadow: 0 8px 25px rgba(245, 158, 11, 0.5);
+  color: #fff;
+}
+
 .mdarker-ff-unlock-title {
   margin: 0 0 8px;
   font-size: 24px;
