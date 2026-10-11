@@ -247,9 +247,25 @@ export default async function KeyPage({
             <span>✅ Mã key này đã được tự động lưu vào <Link href="/dashboard/keys" style={{ color: "inherit", textDecoration: "underline" }}>Dashboard của bạn</Link>!</span>
           </div>
         ) : (
-          <p className="vt-hint" style={{ marginTop: 10 }}>
-            💡 Hãy sao chép và cất giữ mã key cẩn thận để kích hoạt dịch vụ của bạn.
-          </p>
+          <div style={{
+            margin: "12px 0 10px",
+            padding: "12px 14px",
+            background: "rgba(56, 189, 248, 0.1)",
+            border: "1px solid rgba(56, 189, 248, 0.25)",
+            borderRadius: 12,
+            fontSize: 12.5,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: 8,
+            textAlign: "left"
+          }}>
+            <span style={{ color: "#cbd5e1" }}>💡 Bạn muốn tự động lưu trữ các mã Key không lo bị mất?</span>
+            <Link href="/register" style={{ color: "#38bdf8", fontWeight: 700, textDecoration: "none" }}>
+              Tạo tài khoản miễn phí →
+            </Link>
+          </div>
         )}
 
         <p className="vt-hint">

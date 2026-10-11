@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import Link from "next/link";
 import CyberHeader from "@/components/CyberHeader";
 import TypedText from "@/components/TypedText";
+import HomeMemberBanner from "@/components/HomeMemberBanner";
 
 export const revalidate = 900; // 15 phút - kết hợp on-demand revalidation khi admin lưu
 
@@ -276,6 +277,11 @@ export default async function Home() {
             </div>
           </Link>
         </section>
+
+        {/* HOME MEMBER PORTAL BANNER */}
+        <div style={{ margin: "32px 0 20px" }}>
+          <HomeMemberBanner />
+        </div>
 
         {/* TRUST METRICS BAR */}
         <section className="cyber-trust-bar" aria-label="Cam kết uy tín">

@@ -948,6 +948,48 @@ export default function AovArenaClient({
             <li>Nghiêm cấm hành vi sử dụng tài khoản vào các mục đích lừa đảo hoặc vi phạm điều khoản nhà phát hành.</li>
           </ul>
         </div>
+
+        {/* HỖ TRỢ TRỰC TUYẾN AOV */}
+        <div style={{
+          marginTop: 16,
+          padding: "14px 20px",
+          background: "rgba(2, 132, 199, 0.1)",
+          border: "1px solid rgba(56, 189, 248, 0.3)",
+          borderRadius: 16,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          flexWrap: "wrap",
+          gap: 12,
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <span style={{ fontSize: 22 }}>💬</span>
+            <div>
+              <strong style={{ display: "block", color: "#f8fafc", fontSize: 13.5 }}>Gặp sự cố đăng nhập acc nhận được?</strong>
+              <span style={{ fontSize: 12, color: "#94a3b8" }}>Nhắn tin cho Admin để được đổi acc khác hoặc hỗ trợ tức thì</span>
+            </div>
+          </div>
+          <a
+            href="https://t.me/thedarker1"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "8px 16px",
+              background: "linear-gradient(135deg, #0284c7, #2563eb)",
+              borderRadius: 12,
+              color: "#fff",
+              fontWeight: 700,
+              fontSize: 12.5,
+              textDecoration: "none",
+            }}
+          >
+            <i className="fa-brands fa-telegram" />
+            <span>Hỗ Trợ Đổi Acc 1:1</span>
+          </a>
+        </div>
       </div>
     </div>
   );

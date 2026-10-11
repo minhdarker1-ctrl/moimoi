@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { NoticeItem } from "./NoticeBell";
+import { useCurrentUser } from "@/lib/useCurrentUser";
+import UserNavButton from "./UserNavButton";
 
 interface CyberHeaderProps {
   siteName?: string;
@@ -16,12 +18,13 @@ const SEEN_KEY = "vt-notice-seen";
 export default function CyberHeader({
   siteName = "MinSr",
   notices = [],
-  user = { name: "VỒNG VẦY", role: "DEV", avatarUrl: "/avatar.png?v=hd" },
 }: CyberHeaderProps) {
   const [openNotif, setOpenNotif] = useState(false);
+  const [openMobileMenu, setOpenMobileMenu] = useState(false);
   const [unread, setUnread] = useState(0);
   const [dark, setDark] = useState(true);
   const pathname = usePathname();
+  const { user, loading } = useCurrentUser();
 
   useEffect(() => {
     try {
@@ -38,6 +41,11 @@ export default function CyberHeader({
       setUnread(notices.length);
     }
   }, [notices]);
+
+  // Đóng mobile menu khi chuyển trang
+  useEffect(() => {
+    setOpenMobileMenu(false);
+  }, [pathname]);
 
   function handleOpenNotif() {
     setOpenNotif(true);
@@ -85,6 +93,29 @@ export default function CyberHeader({
             <span className="cyber-logo-text">{siteName}</span>
           </Link>
 
+          {/* DESKTOP NAV LINKS */}
+          <nav className="cyber-nav-links" aria-label="Menu chính">
+            <Link href="/#services" className={`cyber-nav-item ${pathname === "/" ? "active" : ""}`}>
+              <i className="fas fa-layer-group" />
+              <span>Dịch Vụ</span>
+            </Link>
+            <Link href="/locket" className={`cyber-nav-item ${pathname === "/locket" ? "active" : ""}`}>
+              <i className="fas fa-crown text-amber-400" />
+              <span>Locket Gold</span>
+            </Link>
+            <Link href="/freefire" className={`cyber-nav-item ${pathname.startsWith("/freefire") ? "active" : ""}`}>
+              <i className="fa-solid fa-fire text-orange-500" />
+              <span>Free Fire</span>
+            </Link>
+            <Link href="/aov" className={`cyber-nav-item ${pathname === "/aov" ? "active" : ""}`}>
+              <i className="fas fa-shield-alt text-sky-400" />
+              <span>AOV</span>
+            </Link>
+            <Link href="/donate" className={`cyber-nav-item ${pathname === "/donate" ? "active" : ""}`}>
+              <i className="fas fa-heart text-pink-500" />
+              <span>Ủng Hộ</span>
+            </Link>
+          </nav>
 
           {/* RIGHT ACTIONS */}
           <div className="cyber-header-actions">
@@ -109,10 +140,160 @@ export default function CyberHeader({
               <i className={`bi ${dark ? "bi-moon-stars-fill" : "bi-sun-fill"}`} />
             </button>
 
+            {/* USER LOGIN / PROFILE BUTTON */}
+            {!loading && (
+              user ? (
+                <UserNavButton />
+              ) : (
+                <Link href="/login" className="cyber-nav-login-btn" title="Đăng nhập tài khoản">
+                  <i className="fas fa-user-circle" />
+                  <span>Đăng Nhập</span>
+                </Link>
+              )
+            )}
 
+            {/* MOBILE HAMBURGER BUTTON */}
+            <button
+              type="button"
+              className="cyber-mobile-menu-btn"
+              onClick={() => setOpenMobileMenu(!openMobileMenu)}
+              aria-label={openMobileMenu ? "Đóng menu" : "Mở menu"}
+              aria-expanded={openMobileMenu}
+            >
+              <i className={`fas ${openMobileMenu ? "fa-times" : "fa-bars"}`} />
+            </button>
           </div>
         </div>
       </header>
+
+      {/* MOBILE MENU DRAWER */}
+      {openMobileMenu && (
+        <>
+          <div
+            className="cyber-mobile-drawer-backdrop"
+            onClick={() => setOpenMobileMenu(false)}
+            aria-hidden="true"
+          />
+          <div className="cyber-mobile-drawer" role="dialog" aria-modal="true" aria-label="Menu điều hướng di động">
+            <div className="cyber-mobile-drawer-header">
+              <span className="cyber-mobile-drawer-title">Danh Mục &amp; Dịch Vụ</span>
+              <button
+                type="button"
+                className="cyber-mobile-drawer-close"
+                onClick={() => setOpenMobileMenu(false)}
+                aria-label="Đóng"
+              >
+                <i className="fas fa-times" />
+              </button>
+            </div>
+
+            <div className="cyber-mobile-drawer-body">
+              {/* MEMBER PORTAL SHORTCUT */}
+              <div className="cyber-mobile-user-box">
+                {user ? (
+                  <div className="cyber-mobile-user-logged">
+                    <div className="cyber-mobile-user-info">
+                      <div className="cyber-mobile-avatar">
+                        {user.avatar ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={user.avatar} alt="" />
+                        ) : (
+                          <span>{(user.name || user.username).charAt(0).toUpperCase()}</span>
+                        )}
+                      </div>
+                      <div>
+                        <strong>{user.name || user.username}</strong>
+                        <span>{user.role === "ADMIN" ? "Quản Trị Viên" : "Thành Viên"}</span>
+                      </div>
+                    </div>
+                    <Link href="/dashboard" className="cyber-mobile-dash-btn" onClick={() => setOpenMobileMenu(false)}>
+                      <span>Vào Dashboard</span>
+                      <i className="fas fa-arrow-right" />
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="cyber-mobile-guest-box">
+                    <p>Đăng nhập để tự động lưu Key &amp; nhận quà mỗi ngày</p>
+                    <div className="cyber-mobile-auth-actions">
+                      <Link href="/login" className="cyber-m-auth-btn primary" onClick={() => setOpenMobileMenu(false)}>
+                        <i className="fas fa-sign-in-alt" />
+                        <span>Đăng Nhập</span>
+                      </Link>
+                      <Link href="/register" className="cyber-m-auth-btn secondary" onClick={() => setOpenMobileMenu(false)}>
+                        <i className="fas fa-user-plus" />
+                        <span>Đăng Ký</span>
+                      </Link>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* SERVICE LINKS */}
+              <div className="cyber-mobile-links-list">
+                <Link href="/" className="cyber-mobile-link" onClick={() => setOpenMobileMenu(false)}>
+                  <div className="cyber-m-link-icon home">
+                    <i className="fas fa-home" />
+                  </div>
+                  <div className="cyber-m-link-text">
+                    <strong>Trang Chủ</strong>
+                    <span>Giới thiệu MinSr &amp; mạng xã hội</span>
+                  </div>
+                </Link>
+
+                <Link href="/#services" className="cyber-mobile-link" onClick={() => setOpenMobileMenu(false)}>
+                  <div className="cyber-m-link-icon services">
+                    <i className="fas fa-layer-group" />
+                  </div>
+                  <div className="cyber-m-link-text">
+                    <strong>Toàn Bộ Dịch Vụ</strong>
+                    <span>Danh sách 5 dịch vụ cốt lõi</span>
+                  </div>
+                </Link>
+
+                <Link href="/locket" className="cyber-mobile-link" onClick={() => setOpenMobileMenu(false)}>
+                  <div className="cyber-m-link-icon locket">
+                    <i className="fas fa-crown" />
+                  </div>
+                  <div className="cyber-m-link-text">
+                    <strong>Kích Hoạt Locket Gold</strong>
+                    <span>Bản quyền 1 năm &amp; DNS Đóng Băng Gold</span>
+                  </div>
+                </Link>
+
+                <Link href="/freefire" className="cyber-mobile-link" onClick={() => setOpenMobileMenu(false)}>
+                  <div className="cyber-m-link-icon ff">
+                    <i className="fa-solid fa-fire" />
+                  </div>
+                  <div className="cyber-m-link-text">
+                    <strong>Độ Nhạy Free Fire Pro</strong>
+                    <span>Cài đặt kéo tâm full đỏ theo từng dòng máy</span>
+                  </div>
+                </Link>
+
+                <Link href="/aov" className="cyber-mobile-link" onClick={() => setOpenMobileMenu(false)}>
+                  <div className="cyber-m-link-icon aov">
+                    <i className="fas fa-shield-alt" />
+                  </div>
+                  <div className="cyber-m-link-text">
+                    <strong>Đấu Trường AOV</strong>
+                    <span>Xé Túi Mù nhận nick Liên Quân VIP</span>
+                  </div>
+                </Link>
+
+                <Link href="/donate" className="cyber-mobile-link" onClick={() => setOpenMobileMenu(false)}>
+                  <div className="cyber-m-link-icon donate">
+                    <i className="fas fa-heart" />
+                  </div>
+                  <div className="cyber-m-link-text">
+                    <strong>Nuôi Tôi (Donate)</strong>
+                    <span>Ủng hộ cà phê duy trì server</span>
+                  </div>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* NOTIFICATION MODAL */}
       {openNotif && (

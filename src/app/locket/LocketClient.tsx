@@ -723,6 +723,61 @@ Cài DNS khi Gold chưa xuất hiện sẽ chỉ giữ trạng thái chưa có G
                 Hãy vuốt tắt hẳn app Locket từ đa nhiệm rồi mở lại. Nếu vẫn chưa hiển thị, hãy đăng xuất tài khoản trong Locket rồi đăng nhập lại hoặc gỡ app cài lại bản mới nhất để làm mới phiên làm việc.
               </p>
             </div>
+            <div className="locket-faq-card">
+              <h3>iOS 17 &amp; iOS 18 không tải được hồ sơ .mobileconfig?</h3>
+              <p>
+                Bắt buộc mở website bằng trình duyệt <strong>Safari gốc</strong> của iPhone (không dùng qua in-app browser của TikTok/Facebook). Khi có thông báo hiện lên, bấm <strong>Cho phép</strong>, sau đó vào <strong>Cài đặt &gt; Đã tải về hồ sơ</strong> để kích hoạt.
+              </p>
+            </div>
+            <div className="locket-faq-card">
+              <h3>Gặp lỗi không rõ nguyên nhân hoặc cần hỗ trợ?</h3>
+              <p>
+                Đội ngũ Admin MinSr luôn trực tuyến hỗ trợ miễn phí. Nhắn tin trực tiếp qua Telegram <a href="https://t.me/thedarker1" target="_blank" rel="noopener noreferrer" style={{ color: "#38bdf8", fontWeight: "bold" }}>@thedarker1</a> để được hỗ trợ trong 1-2 phút.
+              </p>
+            </div>
+          </div>
+
+          {/* ADMIN DIRECT SUPPORT CALLOUT */}
+          <div style={{
+            marginTop: 24,
+            padding: "16px 20px",
+            background: "linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(14, 165, 233, 0.15))",
+            border: "1px solid rgba(56, 189, 248, 0.35)",
+            borderRadius: 16,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: 12
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <span style={{ fontSize: 24 }}>🛟</span>
+              <div>
+                <strong style={{ display: "block", color: "#f8fafc", fontSize: 14 }}>Bạn cần hỗ trợ cài đặt hoặc kích hoạt?</strong>
+                <span style={{ fontSize: 12, color: "#94a3b8" }}>Admin trực tuyến 24/7 giải đáp mọi thắc mắc hoàn toàn miễn phí</span>
+              </div>
+            </div>
+            <a
+              href="https://t.me/thedarker1"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "9px 18px",
+                background: "linear-gradient(135deg, #0284c7, #2563eb)",
+                borderRadius: 12,
+                color: "#fff",
+                fontWeight: 700,
+                fontSize: 13,
+                textDecoration: "none",
+                boxShadow: "0 4px 12px rgba(2, 132, 199, 0.35)"
+              }}
+            >
+              <i className="fa-brands fa-telegram" />
+              <span>Nhắn Admin Telegram</span>
+            </a>
           </div>
         </section>
 

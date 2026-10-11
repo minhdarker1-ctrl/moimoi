@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import ScenicBackground from "@/components/ScenicBackground";
 import SnowEffect from "@/components/SnowEffect";
 import MusicPlayer from "@/components/MusicPlayer";
+import FloatingSupportHub from "@/components/FloatingSupportHub";
 import "./globals.css";
 
 const quicksand = Quicksand({
@@ -60,6 +61,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <div className="app-page-wrapper" style={{ position: "relative", zIndex: 1, minHeight: "100vh" }}>
           {children}
         </div>
+        <FloatingSupportHub />
       </body>
     </html>
   );

@@ -7,7 +7,7 @@ import { useCurrentUser } from "@/lib/useCurrentUser";
 export default function HomeMemberBanner() {
   const { user, loading } = useCurrentUser();
 
-  if (loading || !user) {
+  if (loading) {
     return null;
   }
 

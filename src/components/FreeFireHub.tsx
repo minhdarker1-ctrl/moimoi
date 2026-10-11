@@ -331,6 +331,118 @@ export default function FreeFireHub({ adminNote }: { adminNote?: FreeFireNoteDat
         </form>
       </div>
 
+      {/* CẨM NANG KÉO TÂM PRO & HƯỚNG DẪN TẬN TÌNH */}
+      <div style={{ marginTop: 24 }}>
+        <div style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          marginBottom: 14,
+          color: "var(--vi-text)",
+          fontWeight: 800,
+          fontSize: 16
+        }}>
+          <i className="fa-solid fa-book-bookmark text-orange-500" />
+          <span>CẨM NANG KÉO TÂM PRO &amp; MẸO TỐI ƯU THIẾT BỊ</span>
+        </div>
+
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+          gap: 12
+        }}>
+          {/* Card 1 */}
+          <div style={{
+            padding: 16,
+            background: "var(--vi-card)",
+            border: "1px solid var(--vi-border)",
+            borderRadius: 16,
+            boxShadow: "var(--vi-shadow)"
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+              <span style={{ fontSize: 20 }}>🎯</span>
+              <strong style={{ fontSize: 14, color: "var(--vi-text)" }}>Vị Trí &amp; Cỡ Nút Bắn</strong>
+            </div>
+            <p style={{ margin: 0, fontSize: 12.5, color: "var(--vi-muted)", lineHeight: 1.5 }}>
+              Đặt kích thước nút bắn từ <strong>45% - 52%</strong>. Đặt nút bắn nằm ở <strong>1/3 góc dưới bên phải màn hình</strong> và kéo sát mép dưới để tạo tối đa diện tích vuốt ngón tay lên trên.
+            </p>
+          </div>
+
+          {/* Card 2 */}
+          <div style={{
+            padding: 16,
+            background: "var(--vi-card)",
+            border: "1px solid var(--vi-border)",
+            borderRadius: 16,
+            boxShadow: "var(--vi-shadow)"
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+              <span style={{ fontSize: 20 }}>⚙️</span>
+              <strong style={{ fontSize: 14, color: "var(--vi-text)" }}>Chỉnh DPI Khuyến Nghị</strong>
+            </div>
+            <p style={{ margin: 0, fontSize: 12.5, color: "var(--vi-muted)", lineHeight: 1.5 }}>
+              • <strong>Android:</strong> Tùy chọn nhà phát triển &gt; Độ rộng nhỏ nhất chỉnh <strong>392 - 420</strong>.<br />
+              • <strong>iPhone / iPad:</strong> Cài đặt &gt; Trợ năng &gt; Cảm ứng &gt; Độ nhạy theo dõi tối đa.<br />
+              • <strong>PC Giả Lập:</strong> 240 DPI (LDPlayer / BlueStacks).
+            </p>
+          </div>
+
+          {/* Card 3 */}
+          <div style={{
+            padding: 16,
+            background: "var(--vi-card)",
+            border: "1px solid var(--vi-border)",
+            borderRadius: 16,
+            boxShadow: "var(--vi-shadow)"
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+              <span style={{ fontSize: 20 }}>⚡</span>
+              <strong style={{ fontSize: 14, color: "var(--vi-text)" }}>Kỹ Thuật Vuốt Tâm</strong>
+            </div>
+            <p style={{ margin: 0, fontSize: 12.5, color: "var(--vi-muted)", lineHeight: 1.5 }}>
+              • <strong>Địch đối đầu:</strong> Kéo thẳng dứt khoát từ dưới lên trên đỉnh đầu.<br />
+              • <strong>Địch chạy ngang:</strong> Vuốt theo hình chữ <strong>J</strong> hoặc móc vòng ngược theo hướng chạy của mục tiêu.
+            </p>
+          </div>
+        </div>
+
+        {/* Support callout */}
+        <div style={{
+          marginTop: 16,
+          padding: "12px 18px",
+          background: "rgba(234, 88, 12, 0.08)",
+          border: "1px solid rgba(234, 88, 12, 0.25)",
+          borderRadius: 14,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          flexWrap: "wrap",
+          gap: 10,
+          fontSize: 13
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--vi-text)" }}>
+            <i className="fa-brands fa-telegram text-sky-400" style={{ fontSize: 18 }} />
+            <span>Chưa thấy ưng ý hoặc cần chỉnh theo thói quen bắn của bạn?</span>
+          </div>
+          <a
+            href="https://t.me/thedarker1"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              color: "#38bdf8",
+              fontWeight: 800,
+              textDecoration: "none",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6
+            }}
+          >
+            <span>Nhắn Admin chỉnh tay 1:1</span>
+            <i className="fa-solid fa-arrow-right" />
+          </a>
+        </div>
+      </div>
+
       {/* Modal Popup Xác minh & Tự nhận diện thiết bị */}
       {showVerifyModal && (
         <AntiBotOverlay
