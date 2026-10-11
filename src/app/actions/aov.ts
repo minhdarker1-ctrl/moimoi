@@ -1,9 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { headers } from "next/headers";
+import { headers, cookies } from "next/headers";
 import { db } from "@/lib/db";
-import { getCurrentUser } from "@/lib/auth";
 import { clientIp } from "@/lib/guard";
 
 export interface ActionResult<T = unknown> {
@@ -24,6 +23,15 @@ export interface ClaimedAovAccount {
 }
 
 /**
+ * LẤY SỐ VÉ HIỆN TẠI TỪ COOKIE CỦA KHÁCH
+ */
+export async function getAovTicketsAction(): Promise<number> {
+  const cookieStore = await cookies();
+  const val = cookieStore.get("aov_tickets")?.value;
+  return Math.max(0, parseInt(val || "0", 10) || 0);
+}
+
+/**
  * XÉ TÚI MÙ (Mystery Blind Bag)
  * Chi phí: 1 Vé
  * Phần thưởng ngẫu nhiên: 1 đến 3 acc Liên Quân Garena
@@ -31,20 +39,13 @@ export interface ClaimedAovAccount {
 export async function openBlindBagAction(): Promise<
   ActionResult<{ accounts: ClaimedAovAccount[]; remainingTickets: number }>
 > {
-  const currentUser = await getCurrentUser();
-  if (!currentUser) {
-    return { ok: false, error: "Vui lòng đăng nhập để tham gia xé Túi Mù!" };
-  }
+  const cookieStore = await cookies();
+  const currentTickets = Math.max(0, parseInt(cookieStore.get("aov_tickets")?.value || "0", 10) || 0);
 
-  const user = await db.user.findUnique({
-    where: { id: currentUser.id },
-    select: { id: true, username: true, aovTickets: true },
-  });
-
-  if (!user || user.aovTickets < 1) {
+  if (currentTickets < 1) {
     return {
       ok: false,
-      error: "Bạn không đủ vé để xé Túi Mù (Cần 1 vé). Hãy bấm 'Lấy Ticket' để vượt link nạp thêm vé nhé!",
+      error: "Bạn không đủ vé để xé Túi Mù (Cần 1 vé). Hãy bấm 'Lấy Thêm Vé' để vượt link nạp thêm vé nhé!",
     };
   }
 
@@ -85,28 +86,29 @@ export async function openBlindBagAction(): Promise<
   const h = await headers();
   const ip = clientIp(h);
   const now = new Date();
+  const remainingTickets = currentTickets - 1;
 
-  // Thực hiện transaction: trừ 1 vé + chuyển trạng thái acc + ghi log
-  const [updatedUser] = await db.$transaction([
-    db.user.update({
-      where: { id: user.id },
-      data: { aovTickets: { decrement: 1 } },
-      select: { aovTickets: true },
-    }),
+  cookieStore.set("aov_tickets", String(remainingTickets), {
+    path: "/",
+    maxAge: 86400 * 30,
+    httpOnly: true,
+    sameSite: "lax",
+  });
+
+  await db.$transaction([
     db.gameAccount.updateMany({
       where: { id: { in: accountsToClaim.map((a) => a.id) } },
       data: {
         status: "CLAIMED",
-        claimedBy: user.username,
+        claimedBy: `Khách (${ip})`,
         claimedAt: now,
       },
     }),
     db.serviceUsageLog.create({
       data: {
-        userId: user.id,
         serviceType: "AOV",
         serviceName: "Xé Túi Mù Liên Quân",
-        targetUser: user.username,
+        targetUser: ip,
         ip,
         status: "SUCCESS",
         metadata: JSON.stringify({
@@ -134,21 +136,15 @@ export async function openBlindBagAction(): Promise<
         notes: a.notes,
         claimedAt: now.toISOString(),
       })),
-      remainingTickets: updatedUser.aovTickets,
+      remainingTickets,
     },
   };
 }
 
 /**
- * VÒNG QUAY MAY MẮN (Lucky Wheel)
+ * VÒNG QUAY MAY MẮN (Lucky Spin Wheel)
  * Chi phí: 2 Vé
- * 6 Ô giải thưởng:
- * Index 0: 0 Acc (Chúc bạn may mắn lần sau)
- * Index 1: 1 Acc VIP
- * Index 2: 2 Acc VIP
- * Index 3: 3 Acc VIP
- * Index 4: 4 Acc VIP
- * Index 5: 5 Acc JACKPOT
+ * 6 Ô: 0 acc (chúc may mắn), 1 acc, 2 acc, 3 acc, 4 acc, 5 acc
  */
 export async function spinWheelAction(): Promise<
   ActionResult<{
@@ -158,20 +154,13 @@ export async function spinWheelAction(): Promise<
     remainingTickets: number;
   }>
 > {
-  const currentUser = await getCurrentUser();
-  if (!currentUser) {
-    return { ok: false, error: "Vui lòng đăng nhập để tham gia Vòng Quay May Mắn!" };
-  }
+  const cookieStore = await cookies();
+  const currentTickets = Math.max(0, parseInt(cookieStore.get("aov_tickets")?.value || "0", 10) || 0);
 
-  const user = await db.user.findUnique({
-    where: { id: currentUser.id },
-    select: { id: true, username: true, aovTickets: true },
-  });
-
-  if (!user || user.aovTickets < 2) {
+  if (currentTickets < 2) {
     return {
       ok: false,
-      error: "Bạn cần ít nhất 2 vé để quay Vòng Quay May Mắn. Hãy bấm 'Lấy Ticket' để vượt link nạp thêm vé nhé!",
+      error: "Bạn cần ít nhất 2 vé để quay Vòng Quay May Mắn. Hãy bấm 'Lấy Thêm Vé' để vượt link nạp thêm vé nhé!",
     };
   }
 
@@ -181,12 +170,6 @@ export async function spinWheelAction(): Promise<
   });
 
   // Tỷ lệ quay trúng các ô:
-  // Ô 0 (0 acc): 25%
-  // Ô 1 (1 acc): 45%
-  // Ô 2 (2 acc): 18%
-  // Ô 3 (3 acc): 8%
-  // Ô 4 (4 acc): 3%
-  // Ô 5 (5 acc): 1%
   const rand = Math.random();
   let sliceIndex = 0;
   let desiredCount = 0;
@@ -211,7 +194,6 @@ export async function spinWheelAction(): Promise<
     desiredCount = 5;
   }
 
-  // Điều chỉnh theo số acc thật có trong kho nếu kho ít hơn
   const actualCount = Math.min(desiredCount, availableCount);
   if (actualCount === 0 && desiredCount > 0) {
     sliceIndex = 0;
@@ -231,21 +213,23 @@ export async function spinWheelAction(): Promise<
   const h = await headers();
   const ip = clientIp(h);
   const now = new Date();
+  const remainingTickets = currentTickets - 2;
 
-  // Transaction: trừ 2 vé + cập nhật acc + ghi nhật ký
-  const [updatedUser] = await db.$transaction([
-    db.user.update({
-      where: { id: user.id },
-      data: { aovTickets: { decrement: 2 } },
-      select: { aovTickets: true },
-    }),
+  cookieStore.set("aov_tickets", String(remainingTickets), {
+    path: "/",
+    maxAge: 86400 * 30,
+    httpOnly: true,
+    sameSite: "lax",
+  });
+
+  await db.$transaction([
     ...(accountsToClaim.length > 0
       ? [
           db.gameAccount.updateMany({
             where: { id: { in: accountsToClaim.map((a) => a.id) } },
             data: {
               status: "CLAIMED",
-              claimedBy: user.username,
+              claimedBy: `Khách (${ip})`,
               claimedAt: now,
             },
           }),
@@ -253,10 +237,9 @@ export async function spinWheelAction(): Promise<
       : []),
     db.serviceUsageLog.create({
       data: {
-        userId: user.id,
         serviceType: "AOV",
         serviceName: "Vòng Quay May Mắn Liên Quân",
-        targetUser: user.username,
+        targetUser: ip,
         ip,
         status: "SUCCESS",
         metadata: JSON.stringify({
@@ -287,42 +270,7 @@ export async function spinWheelAction(): Promise<
         notes: a.notes,
         claimedAt: now.toISOString(),
       })),
-      remainingTickets: updatedUser.aovTickets,
+      remainingTickets,
     },
-  };
-}
-
-/**
- * LẤY TÚI ĐỒ (Danh sách acc AOV của tôi)
- */
-export async function getMyAovInventoryAction(): Promise<
-  ActionResult<ClaimedAovAccount[]>
-> {
-  const currentUser = await getCurrentUser();
-  if (!currentUser) {
-    return { ok: true, data: [] };
-  }
-
-  const accounts = await db.gameAccount.findMany({
-    where: {
-      game: "AOV",
-      claimedBy: currentUser.username,
-    },
-    orderBy: { claimedAt: "desc" },
-    take: 50,
-  });
-
-  return {
-    ok: true,
-    data: accounts.map((a) => ({
-      id: a.id,
-      username: a.username,
-      password: a.password,
-      rank: a.rank,
-      skins: a.skins,
-      champs: a.champs,
-      notes: a.notes,
-      claimedAt: a.claimedAt ? a.claimedAt.toISOString() : null,
-    })),
   };
 }

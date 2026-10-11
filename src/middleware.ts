@@ -38,14 +38,6 @@ export async function middleware(req: NextRequest) {
     }
   }
 
-  // Bảo vệ route /dashboard (yêu cầu thành viên đăng nhập)
-  if (pathname.startsWith("/dashboard")) {
-    if (!auth) {
-      const url = req.nextUrl.clone();
-      url.pathname = "/";
-      return NextResponse.redirect(url);
-    }
-  }
 
   // Nếu đã đăng nhập ADMIN mà truy cập /admin/login -> chuyển thẳng vào /admin
   if (pathname === "/admin/login" && auth?.role === "ADMIN") {

@@ -4,13 +4,10 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { NoticeItem } from "./NoticeBell";
-import { useCurrentUser } from "@/lib/useCurrentUser";
-import UserNavButton from "./UserNavButton";
 
 interface CyberHeaderProps {
   siteName?: string;
   notices?: NoticeItem[];
-  user?: { name?: string; role?: string; avatarUrl?: string } | null;
 }
 
 const SEEN_KEY = "vt-notice-seen";
@@ -24,7 +21,6 @@ export default function CyberHeader({
   const [unread, setUnread] = useState(0);
   const [dark, setDark] = useState(true);
   const pathname = usePathname();
-  const { user, loading } = useCurrentUser();
 
   useEffect(() => {
     try {
@@ -140,17 +136,6 @@ export default function CyberHeader({
               <i className={`bi ${dark ? "bi-moon-stars-fill" : "bi-sun-fill"}`} />
             </button>
 
-            {/* USER LOGIN / PROFILE BUTTON */}
-            {!loading && (
-              user ? (
-                <UserNavButton />
-              ) : (
-                <Link href="/login" className="cyber-nav-login-btn" title="Đăng nhập tài khoản">
-                  <i className="fas fa-user-circle" />
-                  <span>Đăng Nhập</span>
-                </Link>
-              )
-            )}
 
             {/* MOBILE HAMBURGER BUTTON */}
             <button
@@ -188,45 +173,6 @@ export default function CyberHeader({
             </div>
 
             <div className="cyber-mobile-drawer-body">
-              {/* MEMBER PORTAL SHORTCUT */}
-              <div className="cyber-mobile-user-box">
-                {user ? (
-                  <div className="cyber-mobile-user-logged">
-                    <div className="cyber-mobile-user-info">
-                      <div className="cyber-mobile-avatar">
-                        {user.avatar ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={user.avatar} alt="" />
-                        ) : (
-                          <span>{(user.name || user.username).charAt(0).toUpperCase()}</span>
-                        )}
-                      </div>
-                      <div>
-                        <strong>{user.name || user.username}</strong>
-                        <span>{user.role === "ADMIN" ? "Quản Trị Viên" : "Thành Viên"}</span>
-                      </div>
-                    </div>
-                    <Link href="/dashboard" className="cyber-mobile-dash-btn" onClick={() => setOpenMobileMenu(false)}>
-                      <span>Vào Dashboard</span>
-                      <i className="fas fa-arrow-right" />
-                    </Link>
-                  </div>
-                ) : (
-                  <div className="cyber-mobile-guest-box">
-                    <p>Đăng nhập để tự động lưu Key &amp; nhận quà mỗi ngày</p>
-                    <div className="cyber-mobile-auth-actions">
-                      <Link href="/login" className="cyber-m-auth-btn primary" onClick={() => setOpenMobileMenu(false)}>
-                        <i className="fas fa-sign-in-alt" />
-                        <span>Đăng Nhập</span>
-                      </Link>
-                      <Link href="/register" className="cyber-m-auth-btn secondary" onClick={() => setOpenMobileMenu(false)}>
-                        <i className="fas fa-user-plus" />
-                        <span>Đăng Ký</span>
-                      </Link>
-                    </div>
-                  </div>
-                )}
-              </div>
 
               {/* SERVICE LINKS */}
               <div className="cyber-mobile-links-list">

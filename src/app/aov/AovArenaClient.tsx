@@ -27,25 +27,15 @@ import AovTaskbar from "./AovTaskbar";
 import {
   openBlindBagAction,
   spinWheelAction,
-  getMyAovInventoryAction,
   ClaimedAovAccount,
 } from "@/app/actions/aov";
 
-interface CurrentUserData {
-  id: number;
-  username: string;
-  role: string;
-  aovTickets: number;
-  name?: string | null;
-}
-
 interface AovArenaClientProps {
-  currentUser: CurrentUserData | null;
+  initialTickets?: number;
   availableStock: number;
   claimedStock: number;
   blindBoxEnabled: boolean;
   notice: string;
-  initialInventory: ClaimedAovAccount[];
 }
 
 // 6 Lớp giải thưởng của Vòng Quay (Mỗi ô 60 độ)
@@ -59,21 +49,36 @@ const WHEEL_SLICES = [
 ];
 
 export default function AovArenaClient({
-  currentUser,
+  initialTickets = 0,
   availableStock,
   claimedStock,
   blindBoxEnabled,
   notice,
-  initialInventory,
 }: AovArenaClientProps) {
-  // Trạng thái tài khoản & số vé hiện tại (cập nhật realtime sau khi chơi)
-  const [currentTickets, setCurrentTickets] = useState<number>(currentUser?.aovTickets ?? 0);
-  const [inventory, setInventory] = useState<ClaimedAovAccount[]>(initialInventory);
+  // Trạng thái tài khoản & số vé hiện tại (lưu trên cookie của trình duyệt)
+  const [currentTickets, setCurrentTickets] = useState<number>(initialTickets);
+  const [inventory, setInventory] = useState<ClaimedAovAccount[]>([]);
 
-  // Trạng thái Auth Modal
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [authModalTab, setAuthModalTab] = useState<"login" | "register">("login");
-  const [authPromptMessage, setAuthPromptMessage] = useState<string>("");
+  // Tải danh sách acc đã nhận từ LocalStorage
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("minsr_aov_inventory");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) setInventory(parsed);
+      }
+    } catch {}
+  }, []);
+
+  const saveToInventory = (newAccs: ClaimedAovAccount[]) => {
+    setInventory((prev) => {
+      const merged = [...newAccs, ...prev];
+      try {
+        localStorage.setItem("minsr_aov_inventory", JSON.stringify(merged));
+      } catch {}
+      return merged;
+    });
+  };
 
   // Trạng thái Túi đồ Inventory Modal
   const [isInventoryOpen, setIsInventoryOpen] = useState(false);
@@ -187,15 +192,6 @@ export default function AovArenaClient({
   // Hành động Lấy Ticket (Vượt Link)
   const handleGetTicket = async () => {
     setHopError(null);
-
-    // BẮT BUỘC ĐĂNG NHẬP KHI BẤM LẤY VÉ
-    if (!currentUser) {
-      setAuthPromptMessage("Vui lòng đăng nhập hoặc tạo tài khoản để nhận và lưu trữ vé của bạn!");
-      setAuthModalTab("login");
-      setIsAuthModalOpen(true);
-      return;
-    }
-
     setIsStartingHop(true);
 
     try {
@@ -229,17 +225,9 @@ export default function AovArenaClient({
     if (bagStage !== "idle") return;
     setBagError(null);
 
-    // Kiểm tra đăng nhập
-    if (!currentUser) {
-      setAuthPromptMessage("Vui lòng đăng nhập tài khoản để xé Túi Mù và nhận acc!");
-      setAuthModalTab("login");
-      setIsAuthModalOpen(true);
-      return;
-    }
-
     // Kiểm tra số vé
     if (currentTickets < 1) {
-      setBagError("Bạn không đủ vé để xé Túi Mù (Cần 1 Vé). Vui lòng bấm 'Lấy Ticket' để vượt link nạp vé!");
+      setBagError("Bạn chưa đủ vé để xé Túi Mù (Cần 1 Vé). Vui lòng bấm 'Lấy Thêm Vé' để vượt link nạp vé!");
       return;
     }
 
@@ -271,7 +259,7 @@ export default function AovArenaClient({
       setTimeout(() => {
         setBagResultAccounts(accounts);
         setCurrentTickets(remainingTickets);
-        setInventory((prev) => [...accounts, ...prev]);
+        saveToInventory(accounts);
         setBagStage("revealed");
       }, 2800);
     } catch {
@@ -285,17 +273,9 @@ export default function AovArenaClient({
     if (isSpinning) return;
     setSpinError(null);
 
-    // Kiểm tra đăng nhập
-    if (!currentUser) {
-      setAuthPromptMessage("Vui lòng đăng nhập tài khoản để quay Vòng Quay May Mắn!");
-      setAuthModalTab("login");
-      setIsAuthModalOpen(true);
-      return;
-    }
-
     // Kiểm tra vé
     if (currentTickets < 2) {
-      setSpinError("Bạn cần ít nhất 2 vé để quay Vòng Quay. Vui lòng bấm 'Lấy Ticket' để vượt link nạp vé!");
+      setSpinError("Bạn cần ít nhất 2 vé để quay Vòng Quay. Vui lòng bấm 'Lấy Thêm Vé' để vượt link nạp vé!");
       return;
     }
 
@@ -311,12 +291,6 @@ export default function AovArenaClient({
 
       const { sliceIndex, count, accounts, remainingTickets } = res.data;
 
-      // Tính toán góc quay:
-      // Bánh xe có 6 ô, mỗi ô 60 độ.
-      // Kim chỉ ở đỉnh 12h (0 độ).
-      // Ô i có tâm tại: (i * 60 + 30) độ. Để ô i quay đến đỉnh 12h:
-      // Target rotation = 360 - (sliceIndex * 60 + 30)
-      // Quay thêm 5 - 7 vòng đầy đủ (5 * 360 = 1800 độ).
       const sliceCenter = sliceIndex * 60 + 30;
       const baseRotation = 360 - sliceCenter;
       const totalFullSpins = 5 * 360;
@@ -329,7 +303,7 @@ export default function AovArenaClient({
         setIsSpinning(false);
         setCurrentTickets(remainingTickets);
         if (accounts.length > 0) {
-          setInventory((prev) => [...accounts, ...prev]);
+          saveToInventory(accounts);
           triggerConfetti();
         }
         setSpinResultModal({
@@ -362,19 +336,11 @@ export default function AovArenaClient({
 
       {/* TASKBAR BÊN TRÊN */}
       <AovTaskbar
-        currentUser={
-          currentUser
-            ? { ...currentUser, aovTickets: currentTickets }
-            : null
-        }
+        tickets={currentTickets}
         inventoryCount={inventory.length}
-        isAuthModalOpen={isAuthModalOpen}
-        setIsAuthModalOpen={setIsAuthModalOpen}
-        authModalTab={authModalTab}
-        setAuthModalTab={setAuthModalTab}
         onOpenInventory={() => setIsInventoryOpen(true)}
         onGetTicketClick={handleGetTicket}
-        authPromptMessage={authPromptMessage}
+        isStartingHop={isStartingHop}
       />
 
       <div style={{ maxWidth: 1040, margin: "0 auto", padding: "16px 16px 60px" }}>

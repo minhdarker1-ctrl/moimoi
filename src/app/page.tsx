@@ -2,7 +2,6 @@ import { db } from "@/lib/db";
 import Link from "next/link";
 import CyberHeader from "@/components/CyberHeader";
 import TypedText from "@/components/TypedText";
-import HomeMemberBanner from "@/components/HomeMemberBanner";
 
 export const revalidate = 900; // 15 phút - kết hợp on-demand revalidation khi admin lưu
 
@@ -27,7 +26,7 @@ export default async function Home() {
       <main>
         <h1>Chưa có dữ liệu</h1>
         <p className="vt-hint">
-          Chạy <code>npm run db:seed</code> rồi vào <a href="/admin">/admin</a> để cấu hình.
+          Hệ thống đang được cấu hình. Vui lòng quay lại sau.
         </p>
       </main>
     );
@@ -278,10 +277,6 @@ export default async function Home() {
           </Link>
         </section>
 
-        {/* HOME MEMBER PORTAL BANNER */}
-        <div style={{ margin: "32px 0 20px" }}>
-          <HomeMemberBanner />
-        </div>
 
         {/* TRUST METRICS BAR */}
         <section className="cyber-trust-bar" aria-label="Cam kết uy tín">

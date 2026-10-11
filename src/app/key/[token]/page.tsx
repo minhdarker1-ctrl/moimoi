@@ -1,11 +1,10 @@
 import Link from "next/link";
-import { headers } from "next/headers";
+import { headers, cookies } from "next/headers";
 import { db } from "@/lib/db";
 import { fingerprint, generateKey, hashKey } from "@/lib/crypto";
 import { clientIp } from "@/lib/guard";
 import CopyKey from "@/components/CopyKey";
 import CopyAovAccount from "@/components/CopyAovAccount";
-import { getCurrentUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -90,35 +89,30 @@ export default async function KeyPage({
     return <Fail msg={`Bạn chưa vượt đủ ${need + 1} bước nhiệm vụ. Vui lòng thử lại.`} />;
   }
 
-  const currentUser = await getCurrentUser();
-
   // === NHÁNH 1: NHẬN VÉ LIÊN QUÂN (AOV TICKET) ===
   if (isAov) {
-    let updatedTickets = 1;
-
-    if (currentUser) {
-      const updatedUser = await db.user.update({
-        where: { id: currentUser.id },
-        data: { aovTickets: { increment: 1 } },
-        select: { aovTickets: true, username: true },
-      });
-      updatedTickets = updatedUser.aovTickets;
-    }
+    const cookieStore = await cookies();
+    const prevTickets = Math.max(0, parseInt(cookieStore.get("aov_tickets")?.value || "0", 10) || 0);
+    const updatedTickets = prevTickets + 1;
+    cookieStore.set("aov_tickets", String(updatedTickets), {
+      path: "/",
+      maxAge: 86400 * 30,
+      httpOnly: true,
+      sameSite: "lax",
+    });
 
     await db.$transaction([
       db.keySession.update({ where: { id: s.id }, data: { doneAt: new Date() } }),
       db.serviceUsageLog.create({
         data: {
-          userId: currentUser?.id ?? null,
           serviceType: "AOV_TICKET",
           serviceName: "Nạp Vé Đấu Trường AOV",
-          targetUser: currentUser?.username ?? ip,
+          targetUser: ip,
           ip,
           status: "SUCCESS",
           metadata: JSON.stringify({
             ticketsAwarded: 1,
             totalTickets: updatedTickets,
-            username: currentUser?.username ?? "Khách",
           }),
         },
       }),
@@ -145,10 +139,7 @@ export default async function KeyPage({
             NHẬN VÉ AOV THÀNH CÔNG!
           </h1>
           <p style={{ fontSize: 15, color: "#cbd5e1", lineHeight: 1.6, margin: "0 0 20px" }}>
-            Bạn đã vượt link xuất sắc! Hệ thống đã cộng <b>+1 Vé Tham Gia</b> vào tài khoản{" "}
-            <span style={{ color: "#38bdf8", fontWeight: 700 }}>
-              {currentUser ? `@${currentUser.username}` : "của bạn"}
-            </span>.
+            Bạn đã vượt link xuất sắc! Hệ thống đã tự động cộng <b>+1 Vé Tham Gia</b> vào phiên của bạn.
           </p>
 
           <div
@@ -167,12 +158,10 @@ export default async function KeyPage({
               <div style={{ fontSize: 12, color: "#94a3b8", fontWeight: 600 }}>VÉ VỪA NHẬN</div>
               <div style={{ fontSize: 20, fontWeight: 900, color: "#10b981" }}>+1 Vé</div>
             </div>
-            {currentUser && (
-              <div>
-                <div style={{ fontSize: 12, color: "#94a3b8", fontWeight: 600 }}>TỔNG VÉ HIỆN TẠI</div>
-                <div style={{ fontSize: 20, fontWeight: 900, color: "#f59e0b" }}>{updatedTickets} Vé</div>
-              </div>
-            )}
+            <div>
+              <div style={{ fontSize: 12, color: "#94a3b8", fontWeight: 600 }}>TỔNG VÉ HIỆN TẠI</div>
+              <div style={{ fontSize: 20, fontWeight: 900, color: "#f59e0b" }}>{updatedTickets} Vé</div>
+            </div>
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -219,18 +208,6 @@ export default async function KeyPage({
     db.keySession.update({ where: { id: s.id }, data: { doneAt: new Date() } }),
     db.freeFireKeyLog.updateMany({ where: { token: s.token }, data: { status: "completed" } }),
   ]);
-
-  if (currentUser) {
-    await db.userSavedKey.create({
-      data: {
-        userId: currentUser.id,
-        appName: s.app ? s.app.name : (s.keyType ? s.keyType.name : "Free Fire"),
-        key: plain,
-        expiresAt,
-      },
-    }).catch(() => {});
-  }
-
   return (
     <main>
       <div className="vt-key-card">
@@ -241,32 +218,6 @@ export default async function KeyPage({
         </p>
 
         <CopyKey value={plain} />
-
-        {currentUser ? (
-          <div className="dash-alert dash-alert-success" style={{ margin: "14px 0 6px", fontSize: 13 }}>
-            <span>✅ Mã key này đã được tự động lưu vào <Link href="/dashboard/keys" style={{ color: "inherit", textDecoration: "underline" }}>Dashboard của bạn</Link>!</span>
-          </div>
-        ) : (
-          <div style={{
-            margin: "12px 0 10px",
-            padding: "12px 14px",
-            background: "rgba(56, 189, 248, 0.1)",
-            border: "1px solid rgba(56, 189, 248, 0.25)",
-            borderRadius: 12,
-            fontSize: 12.5,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            flexWrap: "wrap",
-            gap: 8,
-            textAlign: "left"
-          }}>
-            <span style={{ color: "#cbd5e1" }}>💡 Bạn muốn tự động lưu trữ các mã Key không lo bị mất?</span>
-            <Link href="/register" style={{ color: "#38bdf8", fontWeight: 700, textDecoration: "none" }}>
-              Tạo tài khoản miễn phí →
-            </Link>
-          </div>
-        )}
 
         <p className="vt-hint">
           Hạn sống (TTL): {expiresAt.toLocaleString("vi-VN", { timeZone: "Asia/Ho_Chi_Minh" })}

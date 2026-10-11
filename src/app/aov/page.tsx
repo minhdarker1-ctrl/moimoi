@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import { db } from "@/lib/db";
-import { getCurrentUser } from "@/lib/auth";
 import DesktopHeader from "@/components/DesktopHeader";
 import AovArenaClient from "./AovArenaClient";
 
@@ -25,9 +25,10 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function AovPage() {
-  const currentUser = await getCurrentUser();
+  const cookieStore = await cookies();
+  const ticketCount = Math.max(0, parseInt(cookieStore.get("aov_tickets")?.value || "0", 10) || 0);
 
-  const [site, groups, notices, aovConfig, availableStock, claimedStock, dbUser, userInventory] =
+  const [site, groups, notices, aovConfig, availableStock, claimedStock] =
     await Promise.all([
       db.site.findUnique({ where: { id: 1 } }),
       db.group.findMany({
@@ -39,28 +40,6 @@ export default async function AovPage() {
       db.aovConfig.findUnique({ where: { id: 1 } }),
       db.gameAccount.count({ where: { game: "AOV", status: "AVAILABLE" } }),
       db.gameAccount.count({ where: { game: "AOV", status: "CLAIMED" } }),
-      currentUser
-        ? db.user.findUnique({
-            where: { id: currentUser.id },
-            select: {
-              id: true,
-              username: true,
-              role: true,
-              aovTickets: true,
-              name: true,
-            },
-          })
-        : null,
-      currentUser
-        ? db.gameAccount.findMany({
-            where: {
-              game: "AOV",
-              claimedBy: currentUser.username,
-            },
-            orderBy: { claimedAt: "desc" },
-            take: 50,
-          })
-        : [],
     ]);
 
   if (!site) return null;
@@ -88,31 +67,11 @@ export default async function AovPage() {
 
       <main style={{ minHeight: "100vh", paddingTop: 56 }}>
         <AovArenaClient
-          currentUser={
-            dbUser
-              ? {
-                  id: dbUser.id,
-                  username: dbUser.username,
-                  role: dbUser.role,
-                  aovTickets: dbUser.aovTickets,
-                  name: dbUser.name,
-                }
-              : null
-          }
+          initialTickets={ticketCount}
           availableStock={availableStock}
           claimedStock={claimedStock}
           blindBoxEnabled={aovConfig?.blindBoxEnabled ?? true}
           notice={aovConfig?.notice ?? ""}
-          initialInventory={userInventory.map((a) => ({
-            id: a.id,
-            username: a.username,
-            password: a.password,
-            rank: a.rank,
-            skins: a.skins,
-            champs: a.champs,
-            notes: a.notes,
-            claimedAt: a.claimedAt ? a.claimedAt.toISOString() : null,
-          }))}
         />
 
         <footer className="mdarker-footer" style={{ marginTop: 40, paddingBottom: 40 }}>

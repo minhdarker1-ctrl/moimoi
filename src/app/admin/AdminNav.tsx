@@ -16,7 +16,6 @@ import {
   ShieldCheck,
   LogOut,
   Home,
-  User,
   Users,
   Gift,
   Smartphone,
@@ -76,10 +75,6 @@ export default function AdminNav({ current }: Props) {
         </div>
 
         <div className="admin-nav-top-actions">
-          <Link href="/dashboard" className="admin-nav-btn-link" title="Đến Dashboard thành viên">
-            <User size={15} />
-            <span>Dashboard User</span>
-          </Link>
           <Link href="/" className="admin-nav-btn-link" title="Xem trang chủ ngoài">
             <Home size={15} />
             <span>Trang chủ</span>

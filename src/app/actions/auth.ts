@@ -130,7 +130,7 @@ export async function loginAction(fd: FormData): Promise<ActionResult<{ role: st
       role: user.role === "ADMIN" ? "ADMIN" : "USER",
     });
 
-    const redirectUrl = user.role === "ADMIN" ? "/admin" : "/dashboard";
+    const redirectUrl = user.role === "ADMIN" ? "/admin" : "/";
     return { ok: true, data: { role: user.role, redirectUrl } };
   }
 
@@ -213,8 +213,7 @@ export async function updateProfileAction(fd: FormData): Promise<ActionResult> {
     role: updated.role === "ADMIN" ? "ADMIN" : "USER",
   });
 
-  revalidatePath("/dashboard");
-  revalidatePath("/dashboard/profile");
+  revalidatePath("/");
   return { ok: true };
 }
 
@@ -231,7 +230,6 @@ export async function saveUserKeyAction(appName: string, key: string, expiresAt?
     },
   });
 
-  revalidatePath("/dashboard/keys");
   return { ok: true };
 }
 
@@ -243,8 +241,6 @@ export async function deleteSavedKeyAction(id: number): Promise<ActionResult> {
     where: { id, userId: user.id },
   });
 
-  revalidatePath("/dashboard/keys");
-  revalidatePath("/dashboard");
   return { ok: true };
 }
 
