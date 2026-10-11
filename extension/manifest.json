@@ -1,0 +1,35 @@
+{
+  "manifest_version": 3,
+  "name": "mDarker Free Fire Helper & Auto Worker",
+  "version": "1.0.0",
+  "description": "Tiện ích kết nối 2 chiều giữa Web mDarker và Máy chủ Whitelist Free Fire Mod",
+  "permissions": [
+    "storage",
+    "alarms"
+  ],
+  "host_permissions": [
+    "http://localhost:3000/*",
+    "http://localhost/*",
+    "https://*.vercel.app/*",
+    "https://minsr.vercel.app/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "http://localhost:3000/*",
+        "http://localhost/*",
+        "https://*.vercel.app/*",
+        "https://minsr.vercel.app/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_end"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "mDarker Free Fire Helper"
+  }
+}

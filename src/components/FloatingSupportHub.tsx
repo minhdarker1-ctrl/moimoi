@@ -130,12 +130,12 @@ export default function FloatingSupportHub() {
 
   return (
     <>
-      {/* NÚT KÍCH HOẠT NỔI Ở GÓC MÀN HÌNH */}
+      {/* NÚT KÍCH HOẠT NỔI HÌNH TRÒN Ở GÓC MÀN HÌNH */}
       <div className="floating-support-wrap" aria-label="Nút trợ giúp trực tuyến MinSr">
         <button
           type="button"
           onClick={() => setOpen(!open)}
-          className={`floating-support-btn ${open ? "is-active" : ""}`}
+          className={`floating-support-btn floating-support-circle-fab ${open ? "is-active" : ""}`}
           aria-expanded={open}
           aria-haspopup="dialog"
           title="Trợ giúp & Hỗ trợ 24/7"
@@ -144,8 +144,7 @@ export default function FloatingSupportHub() {
           <div className="floating-support-icon">
             {open ? <X size={22} /> : <Headphones size={22} />}
           </div>
-          <span className="floating-support-label">HỖ TRỢ 24/7</span>
-          <span className="floating-support-badge-dot" title="Admin online" />
+          <span className="floating-support-badge-dot" title="Admin online 24/7" />
         </button>
       </div>
 

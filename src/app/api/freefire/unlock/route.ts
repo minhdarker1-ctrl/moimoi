@@ -80,7 +80,7 @@ export async function POST(req: Request) {
       }
     }
 
-    // 6. Ghi nhật ký vào ServiceUsageLog
+    // 6. Tạo Task Hàng Đợi (Status = PENDING) để Extension Worker nhận việc
     const user = await getCurrentUser();
     const userAgent = req.headers.get("user-agent") || "";
     let deviceName = "Khác";
@@ -89,7 +89,7 @@ export async function POST(req: Request) {
     else if (/windows/i.test(userAgent)) deviceName = "Windows PC";
     else if (/macintosh/i.test(userAgent)) deviceName = "Mac";
 
-    await db.serviceUsageLog.create({
+    const task = await db.serviceUsageLog.create({
       data: {
         userId: user?.id ?? null,
         serviceType: "FREE_FIRE",
@@ -97,24 +97,25 @@ export async function POST(req: Request) {
         targetUser: rawUid,
         ip,
         device: deviceName,
-        status: "SUCCESS",
+        status: "PENDING",
         metadata: JSON.stringify({
           server,
           serverLabel,
           timestamp: Date.now(),
           clientAgent: userAgent.slice(0, 150),
+          retries: 0,
         }),
       },
     });
 
     return NextResponse.json({
       success: true,
+      jobId: task.id,
       uid: rawUid,
       server,
       serverLabel,
-      message:
-        config?.unlockSuccessMsg ||
-        "Kích hoạt thành công! Dữ liệu đã được nạp lên máy chủ. Hãy mở lại game Free Fire sau 1-2 phút.",
+      status: "PENDING",
+      message: "Yêu cầu đã được tiếp nhận. Đang kết nối tới Extension Worker để nạp lên máy chủ...",
     });
   } catch (error) {
     console.error("FF Unlock Error:", error);
@@ -129,14 +130,49 @@ export async function POST(req: Request) {
 }
 
 /**
- * GET: Tra cứu nhanh các UID vừa kích hoạt gần đây trên hệ thống (ẩn một vài số đuôi để bảo mật người dùng)
+ * GET: Tra cứu trạng thái Task (nếu có ?jobId=...) HOẶC danh sách các UID vừa kích hoạt gần đây
  */
-export async function GET() {
+export async function GET(req: Request) {
   try {
+    const { searchParams } = new URL(req.url);
+    const jobIdParam = searchParams.get("jobId");
+
+    // 1. Nếu có jobId: Trả về trạng thái thời gian thực của task đó
+    if (jobIdParam) {
+      const id = parseInt(jobIdParam, 10);
+      if (!isNaN(id)) {
+        const task = await db.serviceUsageLog.findUnique({
+          where: { id },
+        });
+
+        if (!task) {
+          return NextResponse.json({ success: false, error: "Không tìm thấy task." }, { status: 404 });
+        }
+
+        let meta: Record<string, any> = {};
+        try {
+          meta = JSON.parse(task.metadata || "{}");
+        } catch {}
+
+        return NextResponse.json({
+          success: true,
+          jobId: task.id,
+          uid: task.targetUser,
+          status: task.status, // "PENDING" | "PROCESSING" | "SUCCESS" | "FAILED"
+          server: meta.server || "kipas",
+          serverLabel: meta.serverLabel || "FF Kipas",
+          resultMessage: meta.resultMessage || "",
+          completedAt: meta.completedAt || null,
+        });
+      }
+    }
+
+    // 2. Không có jobId: Trả về danh sách UID vừa kích hoạt gần đây
     const recentLogs = await db.serviceUsageLog.findMany({
       where: {
         serviceType: "FREE_FIRE",
         serviceName: { contains: "Unlock" },
+        status: { in: ["SUCCESS", "PENDING"] },
       },
       orderBy: { createdAt: "desc" },
       take: 8,
@@ -144,6 +180,7 @@ export async function GET() {
         id: true,
         targetUser: true,
         serviceName: true,
+        status: true,
         createdAt: true,
       },
     });
@@ -160,6 +197,7 @@ export async function GET() {
         id: log.id,
         maskedUid: masked,
         server: isAstute ? "Astute" : "FF Kipas",
+        status: log.status,
         timeAgo: getTimeAgo(log.createdAt),
       };
     });
