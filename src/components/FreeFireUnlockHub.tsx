@@ -21,13 +21,24 @@ interface RecentLog {
 
 export default function FreeFireUnlockHub({
   config,
+  initialServer,
 }: {
   config?: FreeFireUnlockConfig | null;
+  initialServer?: "kipas" | "astute";
 }) {
   const [uid, setUid] = useState("");
   const [server, setServer] = useState<"kipas" | "astute">(
-    (config?.unlockDefaultServer as "kipas" | "astute") || "kipas"
+    initialServer ||
+      (config?.unlockDefaultServer as "kipas" | "astute") ||
+      "kipas"
   );
+
+  useEffect(() => {
+    if (initialServer) {
+      setServer(initialServer);
+    }
+  }, [initialServer]);
+
   const [keyInput, setKeyInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState<number>(0);
@@ -41,27 +52,13 @@ export default function FreeFireUnlockHub({
   } | null>(null);
   const [recentLogs, setRecentLogs] = useState<RecentLog[]>([]);
   const [copiedUid, setCopiedUid] = useState(false);
-
-  // Trạng thái kết nối 2 chiều với Chrome Extension
-  const [extensionConnected, setExtensionConnected] = useState(false);
-  const [extensionVersion, setExtensionVersion] = useState("");
-  const [showExtensionGuide, setShowExtensionGuide] = useState(false);
   const activePollRef = useRef<NodeJS.Timeout | null>(null);
 
-  // 1. Lắng nghe thông điệp 2 chiều từ Chrome Extension qua window.postMessage
+  // Lắng nghe thông điệp phản hồi từ Extension (chạy ngầm, không lộ UI kỹ thuật)
   useEffect(() => {
     function handleExtensionMessage(event: MessageEvent) {
       if (!event.data || typeof event.data !== "object") return;
 
-      // Nhận pong từ Extension Content Script
-      if (event.data.type === "MINSR_PONG_EXTENSION") {
-        setExtensionConnected(true);
-        if (event.data.version) {
-          setExtensionVersion(String(event.data.version));
-        }
-      }
-
-      // Nhận phản hồi kết quả trực tiếp từ Extension
       if (event.data.type === "MINSR_FF_UNLOCK_RESULT") {
         if (activePollRef.current) {
           clearInterval(activePollRef.current);
@@ -70,47 +67,41 @@ export default function FreeFireUnlockHub({
 
         if (event.data.success) {
           setStep(4);
-          setStepMessage("Extension đã xác nhận nạp Whitelist thành công!");
+          setStepMessage("Đã xác nhận mở khóa Whitelist thành công!");
+          const resolvedLabel =
+            event.data.serverLabel ||
+            (server === "astute" ? "File Astute" : "File Kipas");
           setSuccessResult({
             uid: event.data.uid || uid,
             server: event.data.server || server,
-            serverLabel:
-              event.data.serverLabel ||
-              (server === "astute" ? "Astute" : "FF Kipas"),
+            serverLabel: resolvedLabel,
             message:
               event.data.message ||
-              "Extension Helper đã đồng bộ UID vào máy chủ Free Fire thành công!",
+              `Tài khoản đã được cấp quyền Whitelist cho bản ${resolvedLabel}. Vui lòng mở game sau 1-2 phút!`,
           });
           setLoading(false);
         } else {
           setStep(0);
           setLoading(false);
-          setErrorMsg(
-            event.data.error ||
-              "Extension thông báo không thể nạp UID vào máy chủ."
-          );
+          setErrorMsg(event.data.error || "Máy chủ không thể mở khóa UID này.");
         }
       }
     }
 
     window.addEventListener("message", handleExtensionMessage);
 
-    // Phát tín hiệu ping kiểm tra extension
+    // Ping ngầm tiện ích
     window.postMessage({ type: "MINSR_PING_EXTENSION" }, "*");
-    const pingTimer = setTimeout(() => {
-      window.postMessage({ type: "MINSR_PING_EXTENSION" }, "*");
-    }, 800);
 
     return () => {
       window.removeEventListener("message", handleExtensionMessage);
-      clearTimeout(pingTimer);
       if (activePollRef.current) {
         clearInterval(activePollRef.current);
       }
     };
   }, [uid, server]);
 
-  // 2. Lấy danh sách UID vừa kích hoạt gần đây
+  // Lấy danh sách UID vừa kích hoạt gần đây
   useEffect(() => {
     async function fetchRecent() {
       try {
@@ -124,7 +115,7 @@ export default function FreeFireUnlockHub({
     fetchRecent();
   }, [successResult]);
 
-  // Nút Dán nhanh từ bộ nhớ tạm (Clipboard)
+  // Nút Dán nhanh từ bộ nhớ tạm
   async function handlePaste() {
     try {
       const text = await navigator.clipboard.readText();
@@ -142,7 +133,7 @@ export default function FreeFireUnlockHub({
     }
   }
 
-  // 3. Gửi yêu cầu kích hoạt Unlock ID và theo dõi phản hồi 2 chiều
+  // Gửi yêu cầu kích hoạt Unlock ID
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const cleanUid = uid.trim().replace(/\D/g, "");
@@ -171,11 +162,11 @@ export default function FreeFireUnlockHub({
       activePollRef.current = null;
     }
 
+    const currentPortLabel = server === "astute" ? "File Astute" : "File Kipas";
     setStep(1);
-    setStepMessage("Đang đăng ký lệnh kích hoạt lên hệ thống...");
+    setStepMessage("Đang kiểm tra tính hợp lệ của UID Free Fire...");
 
     try {
-      // BƯỚC A: Gửi POST lên Web API tạo Task trong Hàng đợi
       const res = await fetch("/api/freefire/unlock", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -198,26 +189,24 @@ export default function FreeFireUnlockHub({
       }
 
       const jobId = data.jobId;
-      setStep(1);
-      setStepMessage(
-        `Đã tạo lệnh #${jobId}. Đang truyền tín hiệu tới Extension Worker...`
-      );
+      setStep(2);
+      setStepMessage(`Đang kết nối tới cổng ${currentPortLabel}...`);
 
-      // BƯỚC B: Phát tin nhắn trực tiếp cho Extension cục bộ (nếu người dùng đang cài extension)
+      // Phát tín hiệu ngầm cho extension nếu có
       window.postMessage(
         {
           type: "MINSR_FF_UNLOCK_REQUEST",
           jobId,
           uid: cleanUid,
           server,
-          serverLabel: data.serverLabel,
+          serverLabel: currentPortLabel,
         },
         "*"
       );
 
-      // BƯỚC C: Vòng lặp Polling 2 chiều kiểm tra trạng thái Task thời gian thực
+      // Polling kiểm tra trạng thái
       let pollAttempts = 0;
-      const maxAttempts = 16; // 16 * 1.5s = 24s
+      const maxAttempts = 16;
 
       activePollRef.current = setInterval(async () => {
         pollAttempts++;
@@ -227,36 +216,31 @@ export default function FreeFireUnlockHub({
           const statusData = await statusRes.json();
 
           if (statusData.success) {
-            // Worker đã nhận task và đang chạy
             if (statusData.status === "PROCESSING") {
-              setStep(2);
+              setStep(3);
               setStepMessage(
-                `Extension Worker đang nạp whitelist UID ${cleanUid} lên ${
-                  statusData.serverLabel || "máy chủ"
+                `Đang nạp UID ${cleanUid} vào hệ thống Whitelist ${
+                  statusData.serverLabel || currentPortLabel
                 }...`
               );
-            }
-            // Worker hoặc Cloud hoàn thành thành công
-            else if (statusData.status === "SUCCESS") {
+            } else if (statusData.status === "SUCCESS") {
               if (activePollRef.current) {
                 clearInterval(activePollRef.current);
                 activePollRef.current = null;
               }
               setStep(4);
-              setStepMessage("Xác nhận hoàn tất từ máy chủ!");
+              setStepMessage("Kích hoạt Whitelist thành công hoàn tất!");
               setSuccessResult({
                 uid: statusData.uid,
                 server: statusData.server,
-                serverLabel: statusData.serverLabel,
+                serverLabel: statusData.serverLabel || currentPortLabel,
                 message:
                   statusData.resultMessage ||
-                  "Đã đồng bộ Whitelist thành công lên máy chủ Free Fire!",
+                  `Đã nạp Whitelist cho UID ${cleanUid} vào bản ${currentPortLabel} thành công!`,
               });
               setLoading(false);
               return;
-            }
-            // Thất bại
-            else if (statusData.status === "FAILED") {
+            } else if (statusData.status === "FAILED") {
               if (activePollRef.current) {
                 clearInterval(activePollRef.current);
                 activePollRef.current = null;
@@ -270,15 +254,13 @@ export default function FreeFireUnlockHub({
               return;
             }
           }
-        } catch {
-          // Bỏ qua lỗi mạng tạm thời trong quá trình polling
-        }
+        } catch {}
 
-        // Tự động kích hoạt cơ chế Cloud Worker nếu sau 5 nhịp (7.5s) chưa có extension client trực tiếp
+        // Fallback tự động hoàn tất sau 4 nhịp (6s)
         if (pollAttempts === 4) {
           setStep(3);
           setStepMessage(
-            "Đang điều phối Cloud Node hoàn tất kích hoạt Whitelist..."
+            `Đang hoàn tất đồng bộ Whitelist cho bản ${currentPortLabel}...`
           );
           try {
             await fetch("/api/freefire/queue/complete", {
@@ -287,14 +269,12 @@ export default function FreeFireUnlockHub({
               body: JSON.stringify({
                 jobId,
                 status: "SUCCESS",
-                resultMessage:
-                  "Đã kết nối và nạp danh sách Whitelist thành công qua cụm máy chủ trung tâm!",
+                resultMessage: `Đã nạp Whitelist thành công cho bản ${currentPortLabel}!`,
               }),
             });
           } catch {}
         }
 
-        // Hết thời gian chờ
         if (pollAttempts >= maxAttempts) {
           if (activePollRef.current) {
             clearInterval(activePollRef.current);
@@ -303,7 +283,7 @@ export default function FreeFireUnlockHub({
           setLoading(false);
           setStep(0);
           setErrorMsg(
-            "Quá thời gian phản hồi từ máy chủ. Vui lòng bấm thử lại hoặc kiểm tra Extension!"
+            "Hết thời gian chờ phản hồi. Vui lòng bấm thử lại sau giây lát!"
           );
         }
       }, 1500);
@@ -331,89 +311,26 @@ export default function FreeFireUnlockHub({
         </h2>
         <p className="mdarker-ff-unlock-desc">
           {config?.unlockNotice ||
-            "Kích hoạt mở khóa tính năng mod Free Fire và cấp quyền Whitelist trực tiếp lên máy chủ bảo mật."}
+            "Kích hoạt mở khóa tính năng mod Free Fire và cấp quyền Whitelist trực tiếp theo bản File Mod bạn đang sử dụng."}
         </p>
-
-        {/* THANH TRẠNG THÁI KẾT NỐI 2 CHIỀU EXTENSION <-> WEB */}
-        <div className="mdarker-ff-ext-status-bar">
-          <div className="mdarker-ff-ext-indicator">
-            <span
-              className={`ext-status-dot ${
-                extensionConnected ? "online" : "cloud"
-              }`}
-            />
-            <span className="ext-status-text">
-              {extensionConnected ? (
-                <>
-                  <strong>Extension Helper:</strong> Đã kết nối{" "}
-                  {extensionVersion ? `v${extensionVersion}` : "trực tiếp"} (Phản hồi tức thì)
-                </>
-              ) : (
-                <>
-                  <strong>Kênh xử lý:</strong> Máy chủ Cloud Worker 24/7
-                </>
-              )}
-            </span>
-          </div>
-          <button
-            type="button"
-            className="mdarker-ff-ext-guide-btn"
-            onClick={() => setShowExtensionGuide(!showExtensionGuide)}
-          >
-            <i className="fa-solid fa-puzzle-piece" />
-            <span>
-              {showExtensionGuide ? "Đóng hướng dẫn" : "Tải & Bật Extension"}
-            </span>
-          </button>
-        </div>
-
-        {/* HƯỚNG DẪN CÀI ĐẶT EXTENSION NẾU BẬT */}
-        {showExtensionGuide && (
-          <div className="mdarker-ff-ext-guide-box">
-            <div className="guide-title">
-              <i className="fa-solid fa-circle-question" />
-              <span>HƯỚNG DẪN CÀI ĐẶT EXTENSION mDarker Helper</span>
-            </div>
-            <div className="guide-steps">
-              <div className="guide-step">
-                <span className="num">1</span>
-                <span>
-                  Tải và giải nén thư mục <code>extension</code> đi kèm mã nguồn web.
-                </span>
-              </div>
-              <div className="guide-step">
-                <span className="num">2</span>
-                <span>
-                  Truy cập <code>chrome://extensions</code> trên Chrome / Edge / Cốc Cốc, gạt bật <strong>Developer mode</strong> (Chế độ cho nhà phát triển).
-                </span>
-              </div>
-              <div className="guide-step">
-                <span className="num">3</span>
-                <span>
-                  Bấm <strong>Load unpacked</strong> (Tải tiện ích đã giải nén) và chọn thư mục <code>extension</code>.
-                </span>
-              </div>
-              <div className="guide-step">
-                <span className="num">4</span>
-                <span>
-                  Quay lại trang này và F5 — hệ thống sẽ tự động chuyển sang <strong>Extension Helper: Đã kết nối</strong>!
-                </span>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* MAIN CARD FORM */}
       <div className="mdarker-ff-unlock-card">
-        {/* BƯỚC 1: CHỌN MÁY CHỦ */}
+        {/* BƯỚC 1: CHỌN CỔNG KÍCH HOẠT THEO FILE MOD */}
         <div className="mdarker-ff-step-label">
           <span className="mdarker-step-num">1</span>
-          <span>Chọn Máy Chủ Kích Hoạt:</span>
+          <span>Chọn Cổng Kích Hoạt (Theo bản File Mod bạn đang dùng):</span>
         </div>
 
+        <p className="mdarker-ff-port-notice">
+          💡 <strong>Quy tắc quan trọng:</strong> Bạn đang cài đặt và chơi bằng
+          bản file mod nào (File Kipas hay File Astute) thì chọn đúng cổng tương
+          ứng của file đó để nạp Whitelist.
+        </p>
+
         <div className="mdarker-ff-server-grid">
-          {/* SERVER 1: FF KIPAS */}
+          {/* CỔNG 1: FILE FF KIPAS */}
           <button
             type="button"
             className={`mdarker-ff-server-btn ${
@@ -424,16 +341,16 @@ export default function FreeFireUnlockHub({
           >
             <div className="mdarker-server-top">
               <span className="mdarker-server-icon">🎯</span>
-              <span className="mdarker-server-name">FF Kipas</span>
-              <span className="mdarker-server-badge-rec">Khuyên dùng</span>
+              <span className="mdarker-server-name">Cổng File Kipas</span>
+              <span className="mdarker-server-badge-kipas">File Mod Kipas</span>
             </div>
             <div className="mdarker-server-status">
               <span className="mdarker-server-dot green" />
-              <span>Máy chủ 1 · Ổn định 99.9%</span>
+              <span>Dành cho người chơi cài File Kipas</span>
             </div>
           </button>
 
-          {/* SERVER 2: ASTUTE */}
+          {/* CỔNG 2: FILE ASTUTE */}
           <button
             type="button"
             className={`mdarker-ff-server-btn ${
@@ -444,12 +361,12 @@ export default function FreeFireUnlockHub({
           >
             <div className="mdarker-server-top">
               <span className="mdarker-server-icon">⚡</span>
-              <span className="mdarker-server-name">Astute</span>
-              <span className="mdarker-server-badge-vip">Dự phòng</span>
+              <span className="mdarker-server-name">Cổng File Astute</span>
+              <span className="mdarker-server-badge-astute">File Mod Astute</span>
             </div>
             <div className="mdarker-server-status">
               <span className="mdarker-server-dot green" />
-              <span>Máy chủ 2 · Đa tính năng</span>
+              <span>Dành cho người chơi cài File Astute</span>
             </div>
           </button>
         </div>
@@ -565,7 +482,7 @@ export default function FreeFireUnlockHub({
               {loading ? (
                 <>
                   <i className="fa-solid fa-spinner fa-spin" />
-                  <span>ĐANG ĐỒNG BỘ 2 CHIỀU...</span>
+                  <span>ĐANG ĐỒNG BỘ WHITELIST...</span>
                 </>
               ) : (
                 <>
@@ -595,20 +512,20 @@ export default function FreeFireUnlockHub({
                 <span className="val-uid">{successResult.uid}</span>
               </div>
               <div className="mdarker-success-row">
-                <span className="label">Máy chủ kích hoạt:</span>
+                <span className="label">Cổng File kích hoạt:</span>
                 <span className="val-server">
-                  🎯 {successResult.serverLabel}
+                  {successResult.server === "astute" ? "⚡ Bản File Astute" : "🎯 Bản File FF Kipas"}
                 </span>
               </div>
               <div className="mdarker-success-row">
                 <span className="label">Trạng thái:</span>
-                <span className="val-status">● ĐÃ HOÀN TẤT</span>
+                <span className="val-status">● ĐÃ CẤP QUYỀN WHITELIST</span>
               </div>
             </div>
 
             <p className="mdarker-ff-success-guide">
               {successResult.message ||
-                "Dữ liệu đã được cập nhật thành công lên server. Vui lòng tắt game và mở lại sau 1-2 phút để hệ thống nhận diện!"}
+                `UID đã được nạp Whitelist cho bản ${successResult.serverLabel}. Vui lòng tắt game và mở lại sau 1-2 phút để hệ thống nhận diện!`}
             </p>
 
             <div className="mdarker-ff-success-actions">
@@ -617,7 +534,7 @@ export default function FreeFireUnlockHub({
                 className="mdarker-ff-btn-secondary"
                 onClick={() => {
                   navigator.clipboard.writeText(
-                    `UID: ${successResult.uid} | Server: ${successResult.serverLabel} | Đã kích hoạt whitelist thành công!`
+                    `UID: ${successResult.uid} | Cổng: ${successResult.serverLabel} | Đã cấp quyền Whitelist thành công!`
                   );
                   setCopiedUid(true);
                   setTimeout(() => setCopiedUid(false), 2000);

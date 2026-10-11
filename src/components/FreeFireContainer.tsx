@@ -14,27 +14,51 @@ export default function FreeFireContainer({
 }) {
   const searchParams = useSearchParams();
   const tabParam = searchParams.get("tab") || searchParams.get("mode");
-  const initialMode = tabParam === "unlock" ? "unlock" : tabParam === "sens" ? "sens" : "select";
-  const [activeMode, setActiveMode] = useState<"select" | "sens" | "unlock">(initialMode);
+  const serverParam = searchParams.get("server") || searchParams.get("port");
+
+  const [activeMode, setActiveMode] = useState<"select" | "sens" | "unlock">(
+    tabParam === "unlock" || serverParam === "kipas" || serverParam === "astute"
+      ? "unlock"
+      : tabParam === "sens"
+      ? "sens"
+      : "select"
+  );
+
+  const [selectedServer, setSelectedServer] = useState<"kipas" | "astute">(
+    serverParam === "astute" ? "astute" : "kipas"
+  );
 
   useEffect(() => {
     const p = searchParams.get("tab") || searchParams.get("mode");
-    if (p === "unlock" || p === "sens") {
+    const s = searchParams.get("server") || searchParams.get("port");
+
+    if (s === "kipas" || s === "astute") {
+      setSelectedServer(s);
+      setActiveMode("unlock");
+    } else if (p === "unlock" || p === "sens") {
       setActiveMode(p);
     } else if (!p) {
       setActiveMode("select");
     }
   }, [searchParams]);
 
-  function selectTool(mode: "select" | "sens" | "unlock") {
+  function selectTool(mode: "select" | "sens" | "unlock", serverChoice?: "kipas" | "astute") {
     setActiveMode(mode);
+    if (serverChoice) {
+      setSelectedServer(serverChoice);
+    }
     try {
       const url = new URL(window.location.href);
       if (mode === "select") {
         url.searchParams.delete("tab");
         url.searchParams.delete("mode");
+        url.searchParams.delete("server");
+        url.searchParams.delete("port");
       } else {
         url.searchParams.set("tab", mode);
+        if (serverChoice) {
+          url.searchParams.set("server", serverChoice);
+        }
       }
       window.history.replaceState({}, "", url.toString());
     } catch {}
@@ -70,12 +94,14 @@ export default function FreeFireContainer({
                 <div className="ff-card-icon-wrap sens">
                   <Crosshair size={28} />
                 </div>
-                <div className="ff-card-tag sens">CHUẨN HEADSHOT</div>
+                <div className="ff-card-tag sens">
+                  <span>KÉO TÂM AUTO HEADSHOT</span>
+                </div>
               </div>
 
               <h2 className="ff-card-title">Độ Nhạy Kéo Tâm Pro</h2>
               <p className="ff-card-desc">
-                Cài đặt thông số độ nhạy, DPI và cỡ nút bắn chuẩn xác cho từng dòng máy iPhone, Android &amp; PC Giả lập.
+                Cung cấp chỉ số độ nhạy chuẩn xác theo từng thiết bị iOS &amp; Android, tối ưu vuốt tâm mượt mà.
               </p>
 
               <div className="ff-card-bullets">
@@ -119,17 +145,17 @@ export default function FreeFireContainer({
 
               <h2 className="ff-card-title">Unlock ID Whitelist</h2>
               <p className="ff-card-desc">
-                Kích hoạt whitelist UID trực tiếp lên máy chủ FF Kipas &amp; Astute, tự động đồng bộ kết nối 2 chiều.
+                Kích hoạt Whitelist UID trực tiếp cho cả 2 bản: File Mod Kipas &amp; File Mod Astute.
               </p>
 
               <div className="ff-card-bullets">
                 <div className="ff-bullet-item">
                   <span className="ff-bullet-check">✓</span>
-                  <span>Máy chủ kép FF Kipas &amp; Astute ổn định 99.9%</span>
+                  <span>Phân luồng 2 cổng: File Kipas &amp; File Astute</span>
                 </div>
                 <div className="ff-bullet-item">
                   <span className="ff-bullet-check">✓</span>
-                  <span>Đồng bộ Worker Extension xử lý tác vụ ngầm</span>
+                  <span>Tự động nạp Whitelist và kích hoạt quyền ingame</span>
                 </div>
                 <div className="ff-bullet-item">
                   <span className="ff-bullet-check">✓</span>
@@ -181,7 +207,7 @@ export default function FreeFireContainer({
           {activeMode === "sens" ? (
             <FreeFireHub adminNote={ffConfig} />
           ) : (
-            <FreeFireUnlockHub config={ffConfig} />
+            <FreeFireUnlockHub config={ffConfig} initialServer={selectedServer} />
           )}
         </div>
       )}

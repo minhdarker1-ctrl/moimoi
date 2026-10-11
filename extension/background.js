@@ -74,7 +74,7 @@ async function handleDirectUnlock(data) {
     body: JSON.stringify({
       jobId,
       status: "SUCCESS",
-      resultMessage: `Extension Helper đã nạp UID ${uid} thành công vào máy chủ ${serverLabel || "Free Fire"}!`,
+      resultMessage: `Đã nạp Whitelist cho UID ${uid} vào cổng ${serverLabel || "File Mod"} thành công!`,
     }),
   });
 
@@ -128,7 +128,7 @@ async function pollAndProcessQueue() {
         body: JSON.stringify({
           jobId: task.id,
           status: "SUCCESS",
-          resultMessage: `Auto Worker Extension đã đồng bộ UID ${task.uid} lên máy chủ ${task.serverLabel || "Free Fire"}!`,
+          resultMessage: `Đã đồng bộ Whitelist cho UID ${task.uid} vào cổng ${task.serverLabel || "File Mod"} thành công!`,
         }),
       });
 

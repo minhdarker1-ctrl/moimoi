@@ -26,7 +26,7 @@ export async function POST(req: Request) {
     const rawUid = String(body.uid ?? "").trim();
     const serverParam = String(body.server ?? "kipas").toLowerCase().trim();
     const server = serverParam === "astute" ? "astute" : "kipas";
-    const serverLabel = server === "astute" ? "Astute" : "FF Kipas";
+    const serverLabel = server === "astute" ? "File Astute" : "File Kipas";
 
     // 3. Kiểm tra tính hợp lệ của UID Free Fire (5 đến 12 chữ số)
     if (!rawUid) {
@@ -115,7 +115,7 @@ export async function POST(req: Request) {
       server,
       serverLabel,
       status: "PENDING",
-      message: "Yêu cầu đã được tiếp nhận. Đang kết nối tới Extension Worker để nạp lên máy chủ...",
+      message: "Yêu cầu mở khóa đã được tiếp nhận. Đang đồng bộ danh sách Whitelist lên máy chủ...",
     });
   } catch (error) {
     console.error("FF Unlock Error:", error);
@@ -196,7 +196,7 @@ export async function GET(req: Request) {
       return {
         id: log.id,
         maskedUid: masked,
-        server: isAstute ? "Astute" : "FF Kipas",
+        server: isAstute ? "File Astute" : "File Kipas",
         status: log.status,
         timeAgo: getTimeAgo(log.createdAt),
       };

@@ -4499,13 +4499,42 @@ body.vthangios-dark .mdarker-music-mini-dot {
   color: var(--vi-text);
 }
 
+.mdarker-ff-port-notice {
+  font-size: 12px;
+  color: #94a3b8;
+  background: rgba(255, 140, 0, 0.08);
+  border-left: 3px solid #ff8c00;
+  padding: 8px 12px;
+  border-radius: 0 8px 8px 0;
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+
+.mdarker-ff-port-notice strong {
+  color: #ffaa1d;
+}
+
 .mdarker-server-badge-rec,
-.mdarker-server-badge-vip {
+.mdarker-server-badge-vip,
+.mdarker-server-badge-kipas,
+.mdarker-server-badge-astute {
   margin-left: auto;
   font-size: 10px;
   font-weight: 800;
   padding: 2px 8px;
   border-radius: 999px;
+}
+
+.mdarker-server-badge-kipas {
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+}
+
+.mdarker-server-badge-astute {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.35);
 }
 
 .mdarker-server-badge-rec {

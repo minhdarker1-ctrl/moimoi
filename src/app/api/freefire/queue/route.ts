@@ -48,7 +48,7 @@ export async function GET(req: Request) {
       });
 
       const server = meta.server || (pendingTask.serviceName.includes("Astute") ? "astute" : "kipas");
-      const serverLabel = meta.serverLabel || (server === "astute" ? "Astute" : "FF Kipas");
+      const serverLabel = meta.serverLabel || (server === "astute" ? "File Astute" : "File Kipas");
 
       return NextResponse.json({
         success: true,
@@ -99,7 +99,7 @@ export async function GET(req: Request) {
           id: item.id,
           uid: item.targetUser,
           server: meta.server || (item.serviceName.includes("Astute") ? "astute" : "kipas"),
-          serverLabel: item.serviceName.includes("Astute") ? "Astute" : "FF Kipas",
+          serverLabel: item.serviceName.includes("Astute") ? "File Astute" : "File Kipas",
           status: item.status,
           resultMessage: meta.resultMessage || "",
           createdAt: item.createdAt,

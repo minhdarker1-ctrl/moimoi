@@ -350,10 +350,10 @@ export default async function AdminFreeFirePage({
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16, marginBottom: 16 }}>
             <label className="vt-field">
-              <span>Máy chủ kích hoạt mặc định</span>
+              <span>Cổng mở khóa mặc định</span>
               <select name="unlockDefaultServer" defaultValue={config?.unlockDefaultServer || "kipas"} className="vt-input">
-                <option value="kipas">🎯 FF Kipas (Server 1 - Khuyên dùng)</option>
-                <option value="astute">⚡ Astute (Server 2 - Đa phiên bản)</option>
+                <option value="kipas">🎯 Cổng File Kipas (Bản Mod Kipas)</option>
+                <option value="astute">⚡ Cổng File Astute (Bản Mod Astute)</option>
               </select>
             </label>
 
