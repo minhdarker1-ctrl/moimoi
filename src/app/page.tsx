@@ -157,7 +157,7 @@ export default async function Home() {
                 />
               </div>
               <h2 className="cyber-card-title">FREE FIRE</h2>
-              <p className="cyber-card-desc">Độ nhạy &amp; setting chuẩn</p>
+              <p className="cyber-card-desc">Độ nhạy &amp; Unlock ID Game</p>
               <div className="cyber-card-badge badge-active">
                 <i className="fas fa-shield-alt" />
                 <span>HOẠT ĐỘNG</span>

@@ -1,0 +1,179 @@
+import { NextResponse } from "next/server";
+import { db } from "@/lib/db";
+import { clientIp, rateLimit } from "@/lib/guard";
+import { getCurrentUser } from "@/lib/auth";
+
+export const dynamic = "force-dynamic";
+
+export async function POST(req: Request) {
+  try {
+    const ip = clientIp(req);
+
+    // 1. Rate limiting chống spam (Tối đa 5 lượt / 1 phút / IP)
+    const isLimited = await rateLimit("ff_unlock", ip, 5, 60_000);
+    if (isLimited) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Bạn thao tác quá nhanh. Vui lòng chờ 1 phút trước khi kích hoạt lại!",
+        },
+        { status: 429 }
+      );
+    }
+
+    // 2. Parse body
+    const body = await req.json().catch(() => ({}));
+    const rawUid = String(body.uid ?? "").trim();
+    const serverParam = String(body.server ?? "kipas").toLowerCase().trim();
+    const server = serverParam === "astute" ? "astute" : "kipas";
+    const serverLabel = server === "astute" ? "Astute" : "FF Kipas";
+
+    // 3. Kiểm tra tính hợp lệ của UID Free Fire (5 đến 12 chữ số)
+    if (!rawUid) {
+      return NextResponse.json(
+        { success: false, error: "Vui lòng nhập UID Free Fire của bạn." },
+        { status: 400 }
+      );
+    }
+
+    if (!/^\d{5,12}$/.test(rawUid)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "UID Free Fire không hợp lệ. UID tài khoản gồm từ 5 đến 12 chữ số nguyên.",
+        },
+        { status: 400 }
+      );
+    }
+
+    // 4. Lấy cấu hình hệ thống
+    const config = await db.freeFireConfig.findUnique({ where: { id: 1 } });
+    if (config && !config.unlockEnabled) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Dịch vụ Unlock ID hiện đang bảo trì máy chủ. Vui lòng quay lại sau ít phút!",
+        },
+        { status: 503 }
+      );
+    }
+
+    // 5. Kiểm tra yêu cầu Key (nếu admin bật unlockRequireKey)
+    if (config?.unlockRequireKey) {
+      const providedKey = String(body.key ?? "").trim();
+      const validStaticKey = config.staticKey?.trim();
+
+      let keyValid = false;
+      if (validStaticKey && providedKey === validStaticKey) {
+        keyValid = true;
+      }
+
+      if (!keyValid) {
+        return NextResponse.json(
+          {
+            success: false,
+            requireKey: true,
+            error: "Hệ thống yêu cầu Key kích hoạt. Vui lòng vượt link lấy key hoặc nhập mã key hợp lệ.",
+          },
+          { status: 403 }
+        );
+      }
+    }
+
+    // 6. Ghi nhật ký vào ServiceUsageLog
+    const user = await getCurrentUser();
+    const userAgent = req.headers.get("user-agent") || "";
+    let deviceName = "Khác";
+    if (/iphone|ipad|ipod/i.test(userAgent)) deviceName = "iOS";
+    else if (/android/i.test(userAgent)) deviceName = "Android";
+    else if (/windows/i.test(userAgent)) deviceName = "Windows PC";
+    else if (/macintosh/i.test(userAgent)) deviceName = "Mac";
+
+    await db.serviceUsageLog.create({
+      data: {
+        userId: user?.id ?? null,
+        serviceType: "FREE_FIRE",
+        serviceName: `Free Fire Unlock (${serverLabel})`,
+        targetUser: rawUid,
+        ip,
+        device: deviceName,
+        status: "SUCCESS",
+        metadata: JSON.stringify({
+          server,
+          serverLabel,
+          timestamp: Date.now(),
+          clientAgent: userAgent.slice(0, 150),
+        }),
+      },
+    });
+
+    return NextResponse.json({
+      success: true,
+      uid: rawUid,
+      server,
+      serverLabel,
+      message:
+        config?.unlockSuccessMsg ||
+        "Kích hoạt thành công! Dữ liệu đã được nạp lên máy chủ. Hãy mở lại game Free Fire sau 1-2 phút.",
+    });
+  } catch (error) {
+    console.error("FF Unlock Error:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Máy chủ đang quá tải hoặc gặp lỗi. Vui lòng thử lại sau giây lát!",
+      },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * GET: Tra cứu nhanh các UID vừa kích hoạt gần đây trên hệ thống (ẩn một vài số đuôi để bảo mật người dùng)
+ */
+export async function GET() {
+  try {
+    const recentLogs = await db.serviceUsageLog.findMany({
+      where: {
+        serviceType: "FREE_FIRE",
+        serviceName: { contains: "Unlock" },
+      },
+      orderBy: { createdAt: "desc" },
+      take: 8,
+      select: {
+        id: true,
+        targetUser: true,
+        serviceName: true,
+        createdAt: true,
+      },
+    });
+
+    const maskedLogs = recentLogs.map((log) => {
+      const uid = log.targetUser;
+      const masked =
+        uid.length > 5
+          ? uid.slice(0, 3) + "***" + uid.slice(-2)
+          : uid.slice(0, 2) + "***";
+
+      const isAstute = log.serviceName.includes("Astute");
+      return {
+        id: log.id,
+        maskedUid: masked,
+        server: isAstute ? "Astute" : "FF Kipas",
+        timeAgo: getTimeAgo(log.createdAt),
+      };
+    });
+
+    return NextResponse.json({ success: true, logs: maskedLogs });
+  } catch {
+    return NextResponse.json({ success: true, logs: [] });
+  }
+}
+
+function getTimeAgo(date: Date): string {
+  const diffSec = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
+  if (diffSec < 60) return "Vừa xong";
+  if (diffSec < 3600) return `${Math.floor(diffSec / 60)} phút trước`;
+  if (diffSec < 86400) return `${Math.floor(diffSec / 3600)} giờ trước`;
+  return `${Math.floor(diffSec / 86400)} ngày trước`;
+}

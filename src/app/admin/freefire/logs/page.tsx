@@ -40,7 +40,7 @@ export default async function FreeFireLogsPage({
     }
   }
 
-  const [totalLogs, logs, totalAll, mobileCount, desktopCount, emulatorCount, verifiedCount] = await Promise.all([
+  const [totalLogs, logs, totalAll, mobileCount, desktopCount, emulatorCount, verifiedCount, totalUnlockLogs] = await Promise.all([
     db.freeFireKeyLog.count({ where }),
     db.freeFireKeyLog.findMany({
       where,
@@ -53,6 +53,9 @@ export default async function FreeFireLogsPage({
     db.freeFireKeyLog.count({ where: { device: "Desktop" } }),
     db.freeFireKeyLog.count({ where: { isEmulator: true } }),
     db.freeFireKeyLog.count({ where: { status: "verified" } }),
+    db.serviceUsageLog.count({
+      where: { serviceType: "FREE_FIRE", serviceName: { contains: "Unlock" } },
+    }),
   ]);
 
   const totalPages = Math.ceil(totalLogs / pageSize) || 1;
@@ -97,7 +100,7 @@ export default async function FreeFireLogsPage({
           }}
         >
           <i className="fa-solid fa-sliders" />
-          <span>Cấu Hình & Cài Đặt Khóa Key</span>
+          <span>Cấu Hình & Khóa Key</span>
         </Link>
         <Link
           href="/admin/freefire/logs"
@@ -116,7 +119,24 @@ export default async function FreeFireLogsPage({
           }}
         >
           <i className="fa-solid fa-chart-simple" />
-          <span>Nhật Ký Khách Lấy Key ({totalAll})</span>
+          <span>Nhật Ký Lấy Key ({totalAll})</span>
+        </Link>
+        <Link
+          href="/admin/freefire/unlock-logs"
+          className="vt-btn-sm"
+          style={{
+            textDecoration: "none",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
+            padding: "8px 16px",
+            fontSize: 13,
+            background: "transparent",
+            color: "var(--vi-muted)",
+          }}
+        >
+          <i className="fa-solid fa-bolt" />
+          <span>Nhật Ký Unlock ID ({totalUnlockLogs})</span>
         </Link>
       </div>
 

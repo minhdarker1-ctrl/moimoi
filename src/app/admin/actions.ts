@@ -284,6 +284,14 @@ export async function saveFreeFireConfig(fd: FormData) {
     fireButtonMin: num(fd, "fireButtonMin", 35),
     fireButtonMax: num(fd, "fireButtonMax", 55),
     tipsText: str(fd, "tipsText", 2000),
+
+    // Unlock ID config
+    unlockEnabled: bool(fd, "unlockEnabled"),
+    unlockRequireKey: bool(fd, "unlockRequireKey"),
+    unlockDefaultServer: str(fd, "unlockDefaultServer", 20) || "kipas",
+    unlockNotice: str(fd, "unlockNotice", 1000) || "Nhập UID Free Fire để kích hoạt mod/whitelist trực tiếp lên máy chủ.",
+    unlockSuccessMsg: str(fd, "unlockSuccessMsg", 500) || "Kích hoạt thành công! Vui lòng vào game kiểm tra sau 1-2 phút.",
+    teleBotLink: str(fd, "teleBotLink", 200) || "https://t.me/mdarker_bot",
   };
 
   await db.freeFireConfig.upsert({

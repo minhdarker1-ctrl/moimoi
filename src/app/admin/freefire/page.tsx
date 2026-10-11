@@ -33,11 +33,14 @@ export default async function AdminFreeFirePage({
   const sp = searchParams ? await searchParams : {};
   const isSaved = sp.saved === "1";
 
-  const [config, keyTypes, shorteners, totalLogs] = await Promise.all([
+  const [config, keyTypes, shorteners, totalLogs, totalUnlockLogs] = await Promise.all([
     db.freeFireConfig.findUnique({ where: { id: 1 } }),
     db.keyType.findMany({ where: { enabled: true }, orderBy: { id: "asc" } }),
     db.shortener.findMany({ orderBy: { order: "asc" } }),
     db.freeFireKeyLog.count(),
+    db.serviceUsageLog.count({
+      where: { serviceType: "FREE_FIRE", serviceName: { contains: "Unlock" } },
+    }),
   ]);
 
   const embedUrl = config?.videoUrl ? getYouTubeEmbedUrl(config.videoUrl) : null;
@@ -66,7 +69,7 @@ export default async function AdminFreeFirePage({
           }}
         >
           <i className="fa-solid fa-sliders" />
-          <span>Cấu Hình & Cài Đặt Khóa Key</span>
+          <span>Cấu Hình & Khóa Key</span>
         </Link>
         <Link
           href="/admin/freefire/logs"
@@ -83,7 +86,24 @@ export default async function AdminFreeFirePage({
           }}
         >
           <i className="fa-solid fa-chart-simple" />
-          <span>Nhật Ký Khách Lấy Key ({totalLogs})</span>
+          <span>Nhật Ký Lấy Key ({totalLogs})</span>
+        </Link>
+        <Link
+          href="/admin/freefire/unlock-logs"
+          className="vt-btn-sm"
+          style={{
+            textDecoration: "none",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
+            padding: "8px 16px",
+            fontSize: 13,
+            background: "transparent",
+            color: "var(--vi-muted)",
+          }}
+        >
+          <i className="fa-solid fa-bolt" />
+          <span>Nhật Ký Unlock ID ({totalUnlockLogs})</span>
         </Link>
       </div>
 
@@ -282,11 +302,134 @@ export default async function AdminFreeFirePage({
           </div>
         </div>
 
-        {/* CARD 2: QUẢN LÝ MÃ SETTING HUD */}
+        {/* CARD: CẤU HÌNH DỊCH VỤ UNLOCK ID (WHITELIST SERVER) */}
+        <div className="vt-card" style={{ marginBottom: 20 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10, marginBottom: 8 }}>
+            <h2 style={{ fontSize: 17, margin: 0, display: "flex", alignItems: "center", gap: 8, color: "#38bdf8" }}>
+              <i className="fa-solid fa-bolt" />
+              <span>2. Cấu Hình Dịch Vụ Unlock ID Free Fire (Whitelist Server)</span>
+            </h2>
+            <span
+              style={{
+                fontSize: 12,
+                padding: "3px 10px",
+                borderRadius: 999,
+                fontWeight: 600,
+                background: config?.unlockEnabled ? "rgba(34, 197, 94, 0.15)" : "rgba(239, 68, 68, 0.15)",
+                color: config?.unlockEnabled ? "#22c55e" : "#ef4444",
+                border: `1px solid ${config?.unlockEnabled ? "rgba(34, 197, 94, 0.4)" : "rgba(239, 68, 68, 0.4)"}`,
+              }}
+            >
+              {config?.unlockEnabled ? "● Dịch vụ đang BẬT" : "○ Đang TẮT (Bảo trì)"}
+            </span>
+          </div>
+
+          <p className="vt-hint" style={{ marginBottom: 16 }}>
+            Quản lý tính năng người chơi nhập UID Free Fire để kích hoạt mod / whitelist trực tiếp lên máy chủ FF Kipas & Astute.
+          </p>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16, marginBottom: 16 }}>
+            <label className="vt-checkbox" style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <input
+                type="checkbox"
+                name="unlockEnabled"
+                defaultChecked={config?.unlockEnabled ?? true}
+              />
+              <span style={{ fontWeight: 600 }}>Cho phép khách Unlock ID trên web</span>
+            </label>
+
+            <label className="vt-checkbox" style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <input
+                type="checkbox"
+                name="unlockRequireKey"
+                defaultChecked={config?.unlockRequireKey ?? false}
+              />
+              <span style={{ fontWeight: 600 }}>Bắt buộc nhập Key để Unlock ID (Khóa Key)</span>
+            </label>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16, marginBottom: 16 }}>
+            <label className="vt-field">
+              <span>Máy chủ kích hoạt mặc định</span>
+              <select name="unlockDefaultServer" defaultValue={config?.unlockDefaultServer || "kipas"} className="vt-input">
+                <option value="kipas">🎯 FF Kipas (Server 1 - Khuyên dùng)</option>
+                <option value="astute">⚡ Astute (Server 2 - Đa phiên bản)</option>
+              </select>
+            </label>
+
+            <label className="vt-field">
+              <span>Liên kết Telegram Bot (@mdarker_bot)</span>
+              <input
+                type="text"
+                name="teleBotLink"
+                defaultValue={config?.teleBotLink || "https://t.me/mdarker_bot"}
+                placeholder="https://t.me/mdarker_bot"
+                className="vt-input"
+              />
+            </label>
+          </div>
+
+          <label className="vt-field" style={{ marginBottom: 16 }}>
+            <span>Lời nhắc / Hướng dẫn hiển thị trên trang Unlock ID</span>
+            <textarea
+              name="unlockNotice"
+              rows={2}
+              defaultValue={config?.unlockNotice || "Nhập UID Free Fire để kích hoạt mod/whitelist trực tiếp lên máy chủ."}
+              className="vt-input"
+            />
+          </label>
+
+          <label className="vt-field" style={{ marginBottom: 16 }}>
+            <span>Thông báo khi kích hoạt thành công</span>
+            <input
+              type="text"
+              name="unlockSuccessMsg"
+              defaultValue={config?.unlockSuccessMsg || "Kích hoạt thành công! Dữ liệu đã được nạp lên máy chủ. Hãy mở lại game Free Fire sau 1-2 phút."}
+              className="vt-input"
+            />
+          </label>
+
+          <div
+            style={{
+              paddingTop: 12,
+              borderTop: "1px solid rgba(255, 255, 255, 0.08)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              flexWrap: "wrap",
+              gap: 10,
+            }}
+          >
+            <div style={{ fontSize: 13, color: "var(--vi-muted)" }}>
+              ⚡ Tổng số lượt đã Unlock ID qua hệ thống: <strong>{totalUnlockLogs} lượt</strong>
+            </div>
+            <Link
+              href="/admin/freefire/unlock-logs"
+              className="vt-btn-sm"
+              style={{
+                textDecoration: "none",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                background: "rgba(56, 189, 248, 0.15)",
+                color: "#38bdf8",
+                border: "1px solid rgba(56, 189, 248, 0.4)",
+                fontWeight: 600,
+                padding: "6px 14px",
+                borderRadius: 8,
+              }}
+            >
+              <i className="fa-solid fa-list-check" />
+              <span>Xem Nhật Ký Unlock ID</span>
+            </Link>
+          </div>
+        </div>
+
+        {/* CARD 3: QUẢN LÝ MÃ SETTING HUD */}
         <div className="vt-card" style={{ marginBottom: 20 }}>
           <h2 style={{ fontSize: 17, marginTop: 0, display: "flex", alignItems: "center", gap: 8, color: "#10b981" }}>
             <i className="fa-solid fa-gamepad" />
-            <span>2. Quản Lý Mã Setting HUD (2 - 3 - 4 Ngón)</span>
+            <span>3. Quản Lý Mã Setting HUD (2 - 3 - 4 Ngón)</span>
           </h2>
           <p className="vt-hint" style={{ marginBottom: 16 }}>
             Nhập các mã setting nút trong game Free Fire. Mỗi dòng là 1 mã riêng biệt, có thể nhập nhiều mã cho từng thể loại.

@@ -121,6 +121,14 @@ model FreeFireConfig {
   fireButtonMax      Int      @default(55)
   tipsText           String   @default("Kéo tâm chữ J cho cận chiến và kéo thẳng lên khi bắn tầm trung/xa. Chỉnh nút bắn vừa ngón tay cái.")
 
+  // Cấu hình tính năng Unlock ID (Whitelist)
+  unlockEnabled        Boolean  @default(true)
+  unlockRequireKey     Boolean  @default(false)
+  unlockDefaultServer  String   @default("kipas")
+  unlockNotice         String   @default("Nhập UID Free Fire để kích hoạt mod/whitelist trực tiếp lên máy chủ.")
+  unlockSuccessMsg     String   @default("Kích hoạt thành công! Vui lòng vào game kiểm tra sau 1-2 phút.")
+  teleBotLink          String   @default("https://t.me/mdarker_bot")
+
   updatedAt DateTime @updatedAt
 }
 

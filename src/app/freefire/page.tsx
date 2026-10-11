@@ -1,17 +1,18 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { db } from "@/lib/db";
 import DesktopHeader from "@/components/DesktopHeader";
-import FreeFireHub from "@/components/FreeFireHub";
+import FreeFireContainer from "@/components/FreeFireContainer";
 import AppCard from "@/components/AppCard";
 
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: "Độ Nhạy Free Fire Pro - Cài Đặt Kéo Tâm Full Đỏ Cho Mọi Thiết Bị",
-    description: "Nhận ngay bộ cài đặt độ nhạy Free Fire chuẩn chỉnh, tối ưu riêng cho từng dòng máy iPhone, iPad, Samsung, Xiaomi, Oppo, Vivo, PC Giả Lập kéo tâm full đỏ cực dễ.",
-    keywords: ["độ nhạy ff", "độ nhạy free fire", "kéo tâm full đỏ", "mã hud ff", "setting free fire"],
+    title: "Độ Nhạy & Unlock ID Free Fire Pro - Kéo Tâm Chuẩn & Whitelist Server",
+    description: "Trọn bộ công cụ Free Fire Pro: Cài đặt độ nhạy kéo tâm full đỏ chuẩn cho mọi thiết bị & Kích hoạt Unlock ID Whitelist máy chủ an toàn, nhanh chóng.",
+    keywords: ["độ nhạy ff", "độ nhạy free fire", "unlock id free fire", "whitelist ff", "kéo tâm full đỏ", "mã hud ff", "setting free fire"],
   };
 }
 
@@ -75,8 +76,10 @@ export default async function FreeFirePage() {
           </Link>
         </div>
 
-        {/* Component Công cụ Độ Nhạy Free Fire */}
-        <FreeFireHub adminNote={ffConfig} />
+        {/* Component Công cụ Free Fire (Độ Nhạy & Unlock ID) */}
+        <Suspense fallback={<div style={{ textAlign: "center", padding: "40px 0", color: "var(--vi-muted)" }}><i className="fa-solid fa-spinner fa-spin" /> Đang tải dữ liệu Free Fire...</div>}>
+          <FreeFireContainer ffConfig={ffConfig} />
+        </Suspense>
 
         {/* Nếu có app / mod Free Fire thì hiển thị thêm ở đây */}
         {ffApps.length > 0 && (
