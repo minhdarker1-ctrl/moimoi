@@ -3,6 +3,16 @@ import { db } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+};
+
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204, headers: corsHeaders });
+}
+
 /**
  * Endpoint hàng đợi 2 chiều giữa Web mDarker và Chrome Extension / Worker
  * - action=claim: Extension worker nhận việc cần xử lý (chuyển PENDING -> PROCESSING)
@@ -24,11 +34,14 @@ export async function GET(req: Request) {
       });
 
       if (!pendingTask) {
-        return NextResponse.json({
-          success: true,
-          task: null,
-          message: "Không có task nào đang chờ xử lý.",
-        });
+        return NextResponse.json(
+          {
+            success: true,
+            task: null,
+            message: "Không có task nào đang chờ xử lý.",
+          },
+          { headers: corsHeaders }
+        );
       }
 
       // Đánh dấu là PROCESSING để không bị worker khác nhận trùng
@@ -50,16 +63,19 @@ export async function GET(req: Request) {
       const server = meta.server || (pendingTask.serviceName.includes("Astute") ? "astute" : "kipas");
       const serverLabel = meta.serverLabel || (server === "astute" ? "File Astute" : "File Kipas");
 
-      return NextResponse.json({
-        success: true,
-        task: {
-          id: pendingTask.id,
-          uid: pendingTask.targetUser,
-          server,
-          serverLabel,
-          createdAt: pendingTask.createdAt,
+      return NextResponse.json(
+        {
+          success: true,
+          task: {
+            id: pendingTask.id,
+            uid: pendingTask.targetUser,
+            server,
+            serverLabel,
+            createdAt: pendingTask.createdAt,
+          },
         },
-      });
+        { headers: corsHeaders }
+      );
     }
 
     // LIST QUEUE: Xem danh sách hàng đợi gần đây
@@ -88,26 +104,69 @@ export async function GET(req: Request) {
       },
     });
 
-    return NextResponse.json({
-      success: true,
-      queue: items.map((item) => {
-        let meta: Record<string, any> = {};
-        try {
-          meta = JSON.parse(item.metadata || "{}");
-        } catch {}
-        return {
-          id: item.id,
-          uid: item.targetUser,
-          server: meta.server || (item.serviceName.includes("Astute") ? "astute" : "kipas"),
-          serverLabel: item.serviceName.includes("Astute") ? "File Astute" : "File Kipas",
-          status: item.status,
-          resultMessage: meta.resultMessage || "",
-          createdAt: item.createdAt,
-        };
-      }),
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        queue: items.map((item) => {
+          let meta: Record<string, any> = {};
+          try {
+            meta = JSON.parse(item.metadata || "{}");
+          } catch {}
+          return {
+            id: item.id,
+            uid: item.targetUser,
+            server: meta.server || (item.serviceName.includes("Astute") ? "astute" : "kipas"),
+            serverLabel: item.serviceName.includes("Astute") ? "File Astute" : "File Kipas",
+            status: item.status,
+            resultMessage: meta.resultMessage || "",
+            createdAt: item.createdAt,
+          };
+        }),
+      },
+      { headers: corsHeaders }
+    );
   } catch (error) {
     console.error("Queue Route Error:", error);
-    return NextResponse.json({ success: false, error: String(error) }, { status: 500 });
+    return NextResponse.json({ success: false, error: String(error) }, { status: 500, headers: corsHeaders });
+  }
+}
+
+/**
+ * POST: Extension Worker báo cáo kết quả hoàn thành task
+ */
+export async function POST(req: Request) {
+  try {
+    const body = await req.json().catch(() => ({}));
+    const { jobId, status = "SUCCESS", resultMessage = "" } = body;
+
+    if (!jobId) {
+      return NextResponse.json({ success: false, error: "Thiếu jobId" }, { status: 400, headers: corsHeaders });
+    }
+
+    const id = parseInt(String(jobId), 10);
+    const existing = await db.serviceUsageLog.findUnique({ where: { id } });
+    if (!existing) {
+      return NextResponse.json({ success: false, error: "Không tìm thấy task" }, { status: 404, headers: corsHeaders });
+    }
+
+    let meta: Record<string, any> = {};
+    try {
+      meta = JSON.parse(existing.metadata || "{}");
+    } catch {}
+
+    meta.completedAt = new Date().toISOString();
+    meta.resultMessage = resultMessage;
+
+    await db.serviceUsageLog.update({
+      where: { id },
+      data: {
+        status: status === "FAILED" ? "FAILED" : "SUCCESS",
+        metadata: JSON.stringify(meta),
+      },
+    });
+
+    return NextResponse.json({ success: true, message: "Task completed updated" }, { headers: corsHeaders });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: String(error) }, { status: 500, headers: corsHeaders });
   }
 }
