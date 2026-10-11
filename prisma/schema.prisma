@@ -129,6 +129,11 @@ model FreeFireConfig {
   unlockSuccessMsg     String   @default("Kích hoạt thành công! Vui lòng vào game kiểm tra sau 1-2 phút.")
   teleBotLink          String   @default("https://t.me/mdarker_bot")
 
+  // Cấu hình Bắn thông báo Telegram tự động (Phương án 3)
+  telegramNotifyEnabled Boolean  @default(false)
+  telegramBotToken      String   @default("")
+  telegramChatId        String   @default("")
+
   updatedAt DateTime @updatedAt
 }
 

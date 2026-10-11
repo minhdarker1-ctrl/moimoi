@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import Link from "next/link";
 import AdminNav from "../AdminNav";
-import { saveFreeFireConfig } from "../actions";
+import { saveFreeFireConfig, testTelegramNotification } from "../actions";
 
 export const dynamic = "force-dynamic";
 
@@ -28,10 +28,12 @@ function getYouTubeEmbedUrl(url: string): string | null {
 export default async function AdminFreeFirePage({
   searchParams,
 }: {
-  searchParams?: Promise<{ saved?: string }>;
+  searchParams?: Promise<{ saved?: string; tele_ok?: string; tele_err?: string }>;
 }) {
   const sp = searchParams ? await searchParams : {};
   const isSaved = sp.saved === "1";
+  const teleOk = sp.tele_ok === "1";
+  const teleErr = sp.tele_err ? decodeURIComponent(sp.tele_err) : "";
 
   const [config, keyTypes, shorteners, totalLogs, totalUnlockLogs] = await Promise.all([
     db.freeFireConfig.findUnique({ where: { id: 1 } }),
@@ -125,6 +127,48 @@ export default async function AdminFreeFirePage({
         >
           <i className="fa-solid fa-circle-check" style={{ fontSize: 18 }} />
           <span>Đã lưu thành công cấu hình Free Fire vào cơ sở dữ liệu!</span>
+        </div>
+      )}
+
+      {teleOk && (
+        <div
+          style={{
+            padding: "14px 18px",
+            borderRadius: 10,
+            background: "rgba(34, 197, 94, 0.15)",
+            border: "1px solid rgba(34, 197, 94, 0.4)",
+            color: "#4ade80",
+            marginBottom: 20,
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            fontSize: 14,
+            fontWeight: 600,
+          }}
+        >
+          <i className="fa-brands fa-telegram" style={{ fontSize: 20 }} />
+          <span>Đã gửi tin nhắn thử nghiệm thành công tới Telegram! Bot hoạt động hoàn hảo.</span>
+        </div>
+      )}
+
+      {teleErr && (
+        <div
+          style={{
+            padding: "14px 18px",
+            borderRadius: 10,
+            background: "rgba(239, 68, 68, 0.15)",
+            border: "1px solid rgba(239, 68, 68, 0.4)",
+            color: "#f87171",
+            marginBottom: 20,
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            fontSize: 14,
+            fontWeight: 600,
+          }}
+        >
+          <i className="fa-solid fa-circle-exclamation" style={{ fontSize: 18 }} />
+          <span>Lỗi kết nối Telegram: {teleErr}</span>
         </div>
       )}
 
@@ -389,6 +433,103 @@ export default async function AdminFreeFirePage({
             />
           </label>
 
+          {/* CẤU HÌNH BẮN THÔNG BÁO BOT TELEGRAM (PHƯƠNG ÁN 3) */}
+          <div
+            style={{
+              background: "rgba(14, 165, 233, 0.05)",
+              border: "1.5px solid rgba(14, 165, 233, 0.3)",
+              borderRadius: 14,
+              padding: "18px 16px",
+              marginBottom: 18,
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                flexWrap: "wrap",
+                gap: 12,
+                marginBottom: 10,
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  fontWeight: 700,
+                  color: "#38bdf8",
+                  fontSize: 15,
+                }}
+              >
+                <i className="fa-brands fa-telegram" style={{ fontSize: 18 }} />
+                <span>Đồng Bộ Thông Báo Qua Bot Telegram (Phương Án 3)</span>
+              </div>
+
+              <label
+                className="vt-checkbox"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  margin: 0,
+                  cursor: "pointer",
+                }}
+              >
+                <input
+                  type="checkbox"
+                  name="telegramNotifyEnabled"
+                  defaultChecked={config?.telegramNotifyEnabled ?? false}
+                />
+                <span style={{ fontWeight: 700, color: "#22c55e", fontSize: 13 }}>
+                  Bật tự động gửi Telegram khi có người Unlock ID
+                </span>
+              </label>
+            </div>
+
+            <p className="vt-hint" style={{ marginBottom: 14, fontSize: 12.5, lineHeight: 1.5 }}>
+              Mỗi khi có khách bấm Unlock ID (Cổng Kipas hoặc Astute), hệ thống sẽ lập tức gửi tin nhắn về Bot / Kênh Telegram của bạn kèm đầy đủ UID, Cổng, Thiết bị, IP và Thời gian để bạn quản lý nạp Whitelist.
+            </p>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+                gap: 14,
+                marginBottom: 14,
+              }}
+            >
+              <label className="vt-field">
+                <span>Mã Bot Token Telegram (tạo từ @BotFather)</span>
+                <input
+                  type="text"
+                  name="telegramBotToken"
+                  defaultValue={config?.telegramBotToken || ""}
+                  placeholder="Ví dụ: 123456789:AAFg8ZkQ..."
+                  className="vt-input"
+                  autoComplete="off"
+                />
+              </label>
+
+              <label className="vt-field">
+                <span>Chat ID người nhận / Nhóm / Kênh Telegram</span>
+                <input
+                  type="text"
+                  name="telegramChatId"
+                  defaultValue={config?.telegramChatId || ""}
+                  placeholder="Ví dụ: 198273645 hoặc -1001982736452"
+                  className="vt-input"
+                  autoComplete="off"
+                />
+              </label>
+            </div>
+
+            <p style={{ margin: "0 0 10px", fontSize: 11.5, color: "var(--vi-muted)" }}>
+              💡 <em>Cách lấy Chat ID: Thêm bot vào nhóm và gửi 1 tin nhắn, sau đó chat với <code>@userinfobot</code> hoặc <code>@getmyid_bot</code> để lấy ID.</em>
+            </p>
+          </div>
+
           <div
             style={{
               paddingTop: 12,
@@ -403,25 +544,53 @@ export default async function AdminFreeFirePage({
             <div style={{ fontSize: 13, color: "var(--vi-muted)" }}>
               ⚡ Tổng số lượt đã Unlock ID qua hệ thống: <strong>{totalUnlockLogs} lượt</strong>
             </div>
-            <Link
-              href="/admin/freefire/unlock-logs"
-              className="vt-btn-sm"
-              style={{
-                textDecoration: "none",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 6,
-                background: "rgba(56, 189, 248, 0.15)",
-                color: "#38bdf8",
-                border: "1px solid rgba(56, 189, 248, 0.4)",
-                fontWeight: 600,
-                padding: "6px 14px",
-                borderRadius: 8,
-              }}
-            >
-              <i className="fa-solid fa-list-check" />
-              <span>Xem Nhật Ký Unlock ID</span>
-            </Link>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+              {config?.telegramBotToken && config?.telegramChatId && (
+                <form action={testTelegramNotification} style={{ display: "inline" }}>
+                  <input type="hidden" name="telegramBotToken" value={config.telegramBotToken} />
+                  <input type="hidden" name="telegramChatId" value={config.telegramChatId} />
+                  <button
+                    type="submit"
+                    className="vt-btn-sm"
+                    style={{
+                      background: "rgba(34, 197, 94, 0.15)",
+                      border: "1px solid rgba(34, 197, 94, 0.4)",
+                      color: "#4ade80",
+                      fontWeight: 600,
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 6,
+                      padding: "6px 14px",
+                      borderRadius: 8,
+                      cursor: "pointer",
+                    }}
+                  >
+                    <i className="fa-solid fa-paper-plane" />
+                    <span>Bắn Thử Bot Telegram</span>
+                  </button>
+                </form>
+              )}
+
+              <Link
+                href="/admin/freefire/unlock-logs"
+                className="vt-btn-sm"
+                style={{
+                  textDecoration: "none",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  background: "rgba(56, 189, 248, 0.15)",
+                  color: "#38bdf8",
+                  border: "1px solid rgba(56, 189, 248, 0.4)",
+                  fontWeight: 600,
+                  padding: "6px 14px",
+                  borderRadius: 8,
+                }}
+              >
+                <i className="fa-solid fa-list-check" />
+                <span>Xem Nhật Ký Unlock ID</span>
+              </Link>
+            </div>
           </div>
         </div>
 

@@ -292,6 +292,11 @@ export async function saveFreeFireConfig(fd: FormData) {
     unlockNotice: str(fd, "unlockNotice", 1000) || "Nhập UID Free Fire để kích hoạt mod/whitelist trực tiếp lên máy chủ.",
     unlockSuccessMsg: str(fd, "unlockSuccessMsg", 500) || "Kích hoạt thành công! Vui lòng vào game kiểm tra sau 1-2 phút.",
     teleBotLink: str(fd, "teleBotLink", 200) || "https://t.me/mdarker_bot",
+
+    // Telegram Notify config (Phương án 3)
+    telegramNotifyEnabled: bool(fd, "telegramNotifyEnabled"),
+    telegramBotToken: str(fd, "telegramBotToken", 200),
+    telegramChatId: str(fd, "telegramChatId", 100),
   };
 
   await db.freeFireConfig.upsert({
@@ -304,6 +309,27 @@ export async function saveFreeFireConfig(fd: FormData) {
   revalidatePath("/freefire");
   revalidatePath("/freefire/result");
   redirect("/admin/freefire?saved=1");
+}
+
+export async function testTelegramNotification(fd: FormData) {
+  await requireAdmin();
+  const token = str(fd, "telegramBotToken", 200);
+  const chatId = str(fd, "telegramChatId", 100);
+
+  if (!token || !chatId) {
+    redirect("/admin/freefire?tele_err=" + encodeURIComponent("Vui lòng nhập Bot Token và Chat ID trước khi test!"));
+  }
+
+  const { sendTelegramMessage } = await import("@/lib/telegram");
+  const now = new Date().toLocaleTimeString("vi-VN");
+  const text = `🔔 <b>[TEST THÀNH CÔNG]</b>\n━━━━━━━━━━━━━━━━━━━━━\nBot Telegram đã kết nối thành công với website mDarker!\nThời gian: ${now}\n━━━━━━━━━━━━━━━━━━━━━`;
+
+  const res = await sendTelegramMessage(token, chatId, text);
+  if (res.success) {
+    redirect("/admin/freefire?tele_ok=1");
+  } else {
+    redirect("/admin/freefire?tele_err=" + encodeURIComponent(res.error || "Gửi tin nhắn thất bại!"));
+  }
 }
 
 /* ---------- social ---------- */

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { clientIp, rateLimit } from "@/lib/guard";
 import { getCurrentUser } from "@/lib/auth";
+import { sendFreeFireUnlockTelegramAlert } from "@/lib/telegram";
 
 export const dynamic = "force-dynamic";
 
@@ -107,6 +108,16 @@ export async function POST(req: Request) {
         }),
       },
     });
+
+    // Bắn thông báo về Telegram tự động theo Phương án 3 (chạy nền, không chặn phản hồi)
+    sendFreeFireUnlockTelegramAlert({
+      uid: rawUid,
+      server,
+      serverLabel,
+      device: deviceName,
+      ip,
+      status: "PENDING",
+    }).catch((e) => console.error("Telegram notify failed:", e));
 
     return NextResponse.json({
       success: true,

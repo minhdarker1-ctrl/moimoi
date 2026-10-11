@@ -38,7 +38,7 @@ export default async function FreeFireUnlockLogsPage({
     }
   }
 
-  const [totalLogs, logs, totalAll, kipasCount, astuteCount, keyLogCount] = await Promise.all([
+  const [totalLogs, logs, totalAll, kipasCount, astuteCount, keyLogCount, ffConfig] = await Promise.all([
     db.serviceUsageLog.count({ where }),
     db.serviceUsageLog.findMany({
       where,
@@ -50,12 +50,13 @@ export default async function FreeFireUnlockLogsPage({
       where: { serviceType: "FREE_FIRE", serviceName: { contains: "Unlock" } },
     }),
     db.serviceUsageLog.count({
-      where: { serviceType: "FREE_FIRE", serviceName: { contains: "FF Kipas" } },
+      where: { serviceType: "FREE_FIRE", serviceName: { contains: "Kipas" } },
     }),
     db.serviceUsageLog.count({
       where: { serviceType: "FREE_FIRE", serviceName: { contains: "Astute" } },
     }),
     db.freeFireKeyLog.count(),
+    db.freeFireConfig.findUnique({ where: { id: 1 } }),
   ]);
 
   const totalPages = Math.ceil(totalLogs / pageSize) || 1;
@@ -147,12 +148,124 @@ export default async function FreeFireUnlockLogsPage({
           <div style={{ fontSize: 22, fontWeight: 800, color: "#38bdf8" }}>{totalAll}</div>
         </div>
         <div className="vt-card" style={{ padding: "14px 18px", borderLeft: "4px solid #f59e0b" }}>
-          <div style={{ fontSize: 12, color: "var(--vi-muted)", marginBottom: 4 }}>Máy chủ FF Kipas</div>
+          <div style={{ fontSize: 12, color: "var(--vi-muted)", marginBottom: 4 }}>Cổng File Kipas</div>
           <div style={{ fontSize: 22, fontWeight: 800, color: "#f59e0b" }}>{kipasCount}</div>
         </div>
         <div className="vt-card" style={{ padding: "14px 18px", borderLeft: "4px solid #a855f7" }}>
-          <div style={{ fontSize: 12, color: "var(--vi-muted)", marginBottom: 4 }}>Máy chủ Astute</div>
+          <div style={{ fontSize: 12, color: "var(--vi-muted)", marginBottom: 4 }}>Cổng File Astute</div>
           <div style={{ fontSize: 22, fontWeight: 800, color: "#a855f7" }}>{astuteCount}</div>
+        </div>
+      </div>
+
+      {/* THANH XUẤT WHITELIST VÀ TRẠNG THÁI TELEGRAM BOT */}
+      <div
+        className="vt-card"
+        style={{
+          marginBottom: 20,
+          background: "rgba(14, 165, 233, 0.05)",
+          border: "1px solid rgba(14, 165, 233, 0.25)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          flexWrap: "wrap",
+          gap: 12,
+          padding: "14px 18px",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13 }}>
+          <span
+            style={{
+              width: 10,
+              height: 10,
+              borderRadius: "50%",
+              backgroundColor: ffConfig?.telegramNotifyEnabled ? "#22c55e" : "#64748b",
+              boxShadow: ffConfig?.telegramNotifyEnabled ? "0 0 8px #22c55e" : "none",
+              display: "inline-block",
+            }}
+          />
+          <span style={{ color: "var(--vi-text)" }}>
+            {ffConfig?.telegramNotifyEnabled ? (
+              <>
+                <strong>Bot Telegram:</strong> Đang bật tự động bắn thông báo khi có lượt unlock
+              </>
+            ) : (
+              <>
+                <strong>Bot Telegram:</strong> Chưa bật (
+                <Link href="/admin/freefire" style={{ color: "#38bdf8", textDecoration: "underline" }}>
+                  Bật trong Cấu hình
+                </Link>
+                )
+              </>
+            )}
+          </span>
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+          <a
+            href="/api/freefire/whitelist?port=kipas&format=download"
+            className="vt-btn-sm"
+            style={{
+              textDecoration: "none",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              background: "rgba(245, 158, 11, 0.15)",
+              color: "#f59e0b",
+              border: "1px solid rgba(245, 158, 11, 0.4)",
+              fontWeight: 600,
+              padding: "6px 12px",
+              borderRadius: 8,
+              fontSize: 12,
+            }}
+            title="Tải file .txt danh sách UID Kipas đã lọc trùng"
+          >
+            <i className="fa-solid fa-download" />
+            <span>Tải TXT File Kipas</span>
+          </a>
+
+          <a
+            href="/api/freefire/whitelist?port=astute&format=download"
+            className="vt-btn-sm"
+            style={{
+              textDecoration: "none",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              background: "rgba(168, 85, 247, 0.15)",
+              color: "#c084fc",
+              border: "1px solid rgba(168, 85, 247, 0.4)",
+              fontWeight: 600,
+              padding: "6px 12px",
+              borderRadius: 8,
+              fontSize: 12,
+            }}
+            title="Tải file .txt danh sách UID Astute đã lọc trùng"
+          >
+            <i className="fa-solid fa-download" />
+            <span>Tải TXT File Astute</span>
+          </a>
+
+          <a
+            href="/api/freefire/whitelist?format=download"
+            className="vt-btn-sm"
+            style={{
+              textDecoration: "none",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              background: "rgba(56, 189, 248, 0.15)",
+              color: "#38bdf8",
+              border: "1px solid rgba(56, 189, 248, 0.4)",
+              fontWeight: 600,
+              padding: "6px 12px",
+              borderRadius: 8,
+              fontSize: 12,
+            }}
+            title="Tải toàn bộ UID của cả 2 cổng"
+          >
+            <i className="fa-solid fa-file-arrow-down" />
+            <span>Tải Toàn Bộ UID</span>
+          </a>
         </div>
       </div>
 
@@ -170,8 +283,8 @@ export default async function FreeFireUnlockLogsPage({
             />
             <select name="server" defaultValue={serverFilter} className="vt-input" style={{ width: 170 }}>
               <option value="">Tất cả máy chủ</option>
-              <option value="kipas">🎯 FF Kipas</option>
-              <option value="astute">⚡ Astute</option>
+              <option value="kipas">🎯 Cổng File Kipas</option>
+              <option value="astute">⚡ Cổng File Astute</option>
             </select>
             <button type="submit" className="vt-btn-primary" style={{ padding: "8px 16px" }}>
               <i className="fa-solid fa-magnifying-glass" style={{ marginRight: 6 }} />
