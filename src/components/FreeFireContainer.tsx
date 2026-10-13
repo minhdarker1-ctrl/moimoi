@@ -145,13 +145,13 @@ export default function FreeFireContainer({
 
               <h2 className="ff-card-title">Unlock ID Whitelist</h2>
               <p className="ff-card-desc">
-                Kích hoạt Whitelist UID trực tiếp cho cả 2 bản: File Mod Kipas &amp; File Mod Astute.
+                Kích hoạt Whitelist UID trực tiếp cho cả 2 cổng: FF Kipas &amp; Astute.
               </p>
 
               <div className="ff-card-bullets">
                 <div className="ff-bullet-item">
                   <span className="ff-bullet-check">✓</span>
-                  <span>Phân luồng 2 cổng: File Kipas &amp; File Astute</span>
+                  <span>Phân luồng 2 cổng: FF Kipas &amp; Astute</span>
                 </div>
                 <div className="ff-bullet-item">
                   <span className="ff-bullet-check">✓</span>
@@ -177,37 +177,32 @@ export default function FreeFireContainer({
       {/* 2. GIAO DIỆN CÔNG CỤ ĐÃ CHỌN (KÈM NÚT QUAY LẠI CHỌN) */}
       {activeMode !== "select" && (
         <div className="ff-active-tool-wrap">
-          {/* THANH ĐIỀU HƯỚNG QUAY LẠI 2 CARD */}
-          <div className="ff-top-nav-bar">
-            <button
-              type="button"
-              onClick={() => selectTool("select")}
-              className="ff-back-to-cards-btn"
-            >
-              <ChevronLeft size={16} />
-              <span>← Chọn Công Cụ Khác</span>
-            </button>
-
-            <div className="ff-current-tool-pill">
-              {activeMode === "sens" ? (
-                <>
-                  <Crosshair size={14} className="text-orange-400" />
-                  <span>Độ Nhạy Kéo Tâm</span>
-                </>
-              ) : (
-                <>
-                  <Zap size={14} className="text-amber-400" />
-                  <span>Unlock ID Whitelist</span>
-                </>
-              )}
-            </div>
-          </div>
-
           {/* HIỂN THỊ NỘI DUNG TƯƠNG ỨNG */}
           {activeMode === "sens" ? (
-            <FreeFireHub adminNote={ffConfig} />
+            <>
+              <div className="ff-top-nav-bar">
+                <button
+                  type="button"
+                  onClick={() => selectTool("select")}
+                  className="ff-back-to-cards-btn"
+                >
+                  <ChevronLeft size={16} />
+                  <span>← Chọn Công Cụ Khác</span>
+                </button>
+
+                <div className="ff-current-tool-pill">
+                  <Crosshair size={14} className="text-orange-400" />
+                  <span>Độ Nhạy Kéo Tâm</span>
+                </div>
+              </div>
+              <FreeFireHub adminNote={ffConfig} />
+            </>
           ) : (
-            <FreeFireUnlockHub config={ffConfig} initialServer={selectedServer} />
+            <FreeFireUnlockHub
+              config={ffConfig}
+              initialServer={selectedServer}
+              onBack={() => selectTool("select")}
+            />
           )}
         </div>
       )}

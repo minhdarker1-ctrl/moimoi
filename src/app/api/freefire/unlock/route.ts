@@ -24,12 +24,22 @@ export async function POST(req: Request) {
 
     // 2. Parse body
     const body = await req.json().catch(() => ({}));
-    const rawUid = String(body.uid ?? "").trim();
+
+    // Chặn Bot tự động bằng trường Honeypot ẩn
+    const honeypot = String(body.website ?? body.phone ?? "").trim();
+    if (honeypot) {
+      return NextResponse.json(
+        { success: false, error: "Yêu cầu không hợp lệ." },
+        { status: 400 }
+      );
+    }
+
+    const rawUid = String(body.uid ?? "").trim().replace(/\D/g, "");
     const serverParam = String(body.server ?? "kipas").toLowerCase().trim();
     const server = serverParam === "astute" ? "astute" : "kipas";
-    const serverLabel = server === "astute" ? "File Astute" : "File Kipas";
+    const serverLabel = server === "astute" ? "Astute" : "FF Kipas";
 
-    // 3. Kiểm tra tính hợp lệ của UID Free Fire (5 đến 12 chữ số)
+    // 3. Kiểm tra tính hợp lệ của UID Free Fire (5 đến 15 chữ số theo chuẩn kiểm duyệt)
     if (!rawUid) {
       return NextResponse.json(
         { success: false, error: "Vui lòng nhập UID Free Fire của bạn." },
@@ -37,14 +47,39 @@ export async function POST(req: Request) {
       );
     }
 
-    if (!/^\d{5,12}$/.test(rawUid)) {
+    if (!/^\d{5,15}$/.test(rawUid)) {
       return NextResponse.json(
         {
           success: false,
-          error: "UID Free Fire không hợp lệ. UID tài khoản gồm từ 5 đến 12 chữ số nguyên.",
+          error: "UID không hợp lệ. Vui lòng nhập từ 5–15 chữ số.",
         },
         { status: 400 }
       );
+    }
+
+    // Chống gửi trùng UID liên tiếp trong 60 giây (Deduplication / Cooldown)
+    const oneMinuteAgo = new Date(Date.now() - 60_000);
+    const existingRecentTask = await db.serviceUsageLog.findFirst({
+      where: {
+        serviceType: "FREE_FIRE",
+        targetUser: rawUid,
+        createdAt: { gte: oneMinuteAgo },
+        status: { in: ["PENDING", "PROCESSING", "SUCCESS"] },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    if (existingRecentTask) {
+      return NextResponse.json({
+        success: true,
+        jobId: existingRecentTask.id,
+        uid: rawUid,
+        server,
+        serverLabel,
+        status: existingRecentTask.status,
+        message:
+          "UID của bạn đã được tiếp nhận gần đây và đang trong quá trình đồng bộ. Vui lòng không gửi liên tiếp!",
+      });
     }
 
     // 4. Lấy cấu hình hệ thống
@@ -207,7 +242,7 @@ export async function GET(req: Request) {
       return {
         id: log.id,
         maskedUid: masked,
-        server: isAstute ? "File Astute" : "File Kipas",
+        server: isAstute ? "Astute" : "FF Kipas",
         status: log.status,
         timeAgo: getTimeAgo(log.createdAt),
       };
