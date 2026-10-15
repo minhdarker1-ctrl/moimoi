@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { clientIp, rateLimit } from "@/lib/guard";
 import { getCurrentUser } from "@/lib/auth";
 import { sendFreeFireUnlockTelegramAlert } from "@/lib/telegram";
+import { checkOntopUnlimited } from "@/lib/ontop";
 
 export const dynamic = "force-dynamic";
 
@@ -57,29 +58,37 @@ export async function POST(req: Request) {
       );
     }
 
-    // Chống gửi trùng UID liên tiếp trong 60 giây (Deduplication / Cooldown)
-    const oneMinuteAgo = new Date(Date.now() - 60_000);
-    const existingRecentTask = await db.serviceUsageLog.findFirst({
-      where: {
-        serviceType: "FREE_FIRE",
-        targetUser: rawUid,
-        createdAt: { gte: oneMinuteAgo },
-        status: { in: ["PENDING", "PROCESSING", "SUCCESS"] },
-      },
-      orderBy: { createdAt: "desc" },
-    });
+    // Kiểm tra quyền Vô Hạn từ thẻ OnTop Daily Pass (2/2 lần trong ngày)
+    const cookieHeader = req.headers.get("cookie") || "";
+    const ontopCookieMatch = cookieHeader.match(/ontop_daily_pass=([^;]+)/);
+    const ontopCookieVal = ontopCookieMatch ? decodeURIComponent(ontopCookieMatch[1]) : undefined;
+    const isOntopUnlimited = await checkOntopUnlimited(ip, ontopCookieVal);
 
-    if (existingRecentTask) {
-      return NextResponse.json({
-        success: true,
-        jobId: existingRecentTask.id,
-        uid: rawUid,
-        server,
-        serverLabel,
-        status: existingRecentTask.status,
-        message:
-          "UID của bạn đã được tiếp nhận gần đây và đang trong quá trình đồng bộ. Vui lòng không gửi liên tiếp!",
+    // Chống gửi trùng UID liên tiếp trong 60 giây (nếu chưa có thẻ vô hạn)
+    if (!isOntopUnlimited) {
+      const oneMinuteAgo = new Date(Date.now() - 60_000);
+      const existingRecentTask = await db.serviceUsageLog.findFirst({
+        where: {
+          serviceType: "FREE_FIRE",
+          targetUser: rawUid,
+          createdAt: { gte: oneMinuteAgo },
+          status: { in: ["PENDING", "PROCESSING", "SUCCESS"] },
+        },
+        orderBy: { createdAt: "desc" },
       });
+
+      if (existingRecentTask) {
+        return NextResponse.json({
+          success: true,
+          jobId: existingRecentTask.id,
+          uid: rawUid,
+          server,
+          serverLabel,
+          status: existingRecentTask.status,
+          message:
+            "UID của bạn đã được tiếp nhận gần đây và đang trong quá trình đồng bộ. Vui lòng không gửi liên tiếp!",
+        });
+      }
     }
 
     // 4. Lấy cấu hình hệ thống
@@ -94,8 +103,8 @@ export async function POST(req: Request) {
       );
     }
 
-    // 5. Kiểm tra yêu cầu Key (nếu admin bật unlockRequireKey)
-    if (config?.unlockRequireKey) {
+    // 5. Kiểm tra yêu cầu Key (nếu admin bật unlockRequireKey và user CHƯA có thẻ Vô Hạn OnTop)
+    if (config?.unlockRequireKey && !isOntopUnlimited) {
       const providedKey = String(body.key ?? "").trim();
       const validStaticKey = config.staticKey?.trim();
 
@@ -109,7 +118,7 @@ export async function POST(req: Request) {
           {
             success: false,
             requireKey: true,
-            error: "Hệ thống yêu cầu Key kích hoạt. Vui lòng vượt link lấy key hoặc nhập mã key hợp lệ.",
+            error: "Hệ thống yêu cầu Key kích hoạt hoặc vượt 2 lần link OnTop để mở khóa VÔ HẠN.",
           },
           { status: 403 }
         );

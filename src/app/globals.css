@@ -5868,6 +5868,307 @@ body.vthangios-dark .mdarker-music-mini-dot {
 }
 
 /* =====================================================
+   ONTOP.LINK DAILY PASS WIDGET (UNLOCK & LOCKET)
+   ===================================================== */
+.ontop-widget-container {
+  width: 100%;
+  margin-bottom: 20px;
+  animation: fadeIn 0.3s ease;
+}
+
+.ontop-toast-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 14px;
+  position: relative;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  animation: fadeInDown 0.3s ease-out;
+}
+
+.ontop-toast-banner.success {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1.5px solid #10b981;
+  color: #10b981;
+}
+
+.ontop-toast-banner.gold {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(251, 191, 36, 0.15));
+  border: 1.5px solid #f59e0b;
+  color: #f59e0b;
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.35);
+}
+
+.ontop-toast-close {
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.8;
+  padding: 0 4px;
+}
+
+.ontop-toast-close:hover {
+  opacity: 1;
+}
+
+/* VIP GOLD CARD (WHEN 2/2 REACHED) */
+.ontop-vip-card {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(217, 119, 6, 0.08));
+  border: 1.5px solid rgba(245, 158, 11, 0.5);
+  border-radius: 16px;
+  padding: 16px 18px;
+  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.15), 0 0 20px rgba(245, 158, 11, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.ontop-vip-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.ontop-vip-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #fff;
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.ontop-crown {
+  font-size: 13px;
+}
+
+.ontop-status-live {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #10b981;
+}
+
+.ontop-vip-heading {
+  margin: 0 0 6px;
+  font-size: 16px;
+  font-weight: 900;
+  color: #fbbf24;
+  letter-spacing: 0.5px;
+}
+
+.ontop-vip-sub {
+  margin: 0;
+  font-size: 12px;
+  color: #cbd5e1;
+  line-height: 1.5;
+}
+
+.ontop-vip-sub strong {
+  color: #f59e0b;
+}
+
+/* PASS PROGRESS CARD (WHEN 0/2 OR 1/2) */
+.ontop-pass-card {
+  background: rgba(14, 23, 42, 0.7);
+  border: 1.5px solid rgba(56, 189, 248, 0.25);
+  border-radius: 16px;
+  padding: 16px 16px 14px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+}
+
+.ontop-pass-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.ontop-pass-title-wrap {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.ontop-bolt-icon {
+  font-size: 18px;
+  color: #38bdf8;
+  margin-top: 1px;
+}
+
+.ontop-pass-title {
+  display: block;
+  font-size: 13px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 0.4px;
+}
+
+.ontop-pass-desc {
+  display: block;
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.ontop-count-pill {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: #38bdf8;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.ontop-count-pill strong {
+  color: #00d2ff;
+  font-weight: 900;
+}
+
+/* 2-STEP PROGRESS TRACK */
+.ontop-steps-track {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: rgba(15, 23, 42, 0.6);
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  margin-bottom: 14px;
+}
+
+.ontop-step-block {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.ontop-step-block .step-num {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 800;
+  flex-shrink: 0;
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.ontop-step-block.done .step-num {
+  background: #10b981;
+  border-color: #10b981;
+  color: #fff;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+}
+
+.ontop-step-block.current .step-num {
+  background: linear-gradient(135deg, #0284c7, #38bdf8);
+  border-color: #38bdf8;
+  color: #fff;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
+}
+
+.ontop-step-block .step-label {
+  display: flex;
+  flex-direction: column;
+}
+
+.ontop-step-block .step-label strong {
+  font-size: 12px;
+  color: #e2e8f0;
+}
+
+.ontop-step-block .step-label small {
+  font-size: 10.5px;
+  color: #94a3b8;
+}
+
+.ontop-step-block.done .step-label strong {
+  color: #10b981;
+}
+
+.ontop-step-block.current .step-label strong {
+  color: #38bdf8;
+}
+
+.ontop-step-connector {
+  flex: 0 0 30px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  position: relative;
+  overflow: hidden;
+}
+
+.ontop-step-connector .connector-line {
+  height: 100%;
+  background: #10b981;
+  transition: width 0.3s ease;
+}
+
+/* START ACTION BUTTON */
+.ontop-action-wrap {
+  width: 100%;
+}
+
+.ontop-start-btn {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 48px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #d97706, #f59e0b);
+  border: none;
+  color: #ffffff;
+  font-size: 13.5px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.35);
+  transition: all 0.25s ease;
+  user-select: none;
+  text-decoration: none !important;
+}
+
+.ontop-start-btn:hover:not(:disabled) {
+  background: linear-gradient(90deg, #f59e0b, #fbbf24);
+  box-shadow: 0 6px 22px rgba(245, 158, 11, 0.5);
+  transform: translateY(-1px);
+}
+
+.ontop-start-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* =====================================================
    LIÊN QUÂN MOBILE CUSTOM STYLING
    ===================================================== */
 .mdarker-lq-hero {

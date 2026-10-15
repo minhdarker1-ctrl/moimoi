@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import OntopPassWidget, { OntopStatusData } from "@/components/OntopPassWidget";
 
 interface ActivateResult {
   success: boolean;
@@ -18,6 +19,7 @@ export default function LocketClient() {
   const [result, setResult] = useState<ActivateResult | null>(null);
   const [completedAt, setCompletedAt] = useState<string>("");
   const [customerType, setCustomerType] = useState<"new" | "returning">("new");
+  const [ontopPass, setOntopPass] = useState<OntopStatusData | null>(null);
   const [copiedInfo, setCopiedInfo] = useState(false);
   const [dark, setDark] = useState(false);
 
@@ -460,6 +462,9 @@ Cài DNS khi Gold chưa xuất hiện sẽ chỉ giữ trạng thái chưa có G
 
         {/* ACTIVATION FORM CARD */}
         <div className="locket-card">
+          {/* THẺ TIẾN ĐỘ VƯỢT LINK ONTOP.LINK MỞ KHÓA VÔ HẠN */}
+          <OntopPassWidget service="locket" onStatusChange={setOntopPass} />
+
           {!result?.success ? (
             <form onSubmit={handleSubmit} className="locket-form">
               <label htmlFor="locket-input" className="locket-input-label">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import OntopPassWidget, { OntopStatusData } from "@/components/OntopPassWidget";
 
 export interface FreeFireUnlockConfig {
   unlockEnabled?: boolean;
@@ -53,6 +54,7 @@ export default function FreeFireUnlockHub({
 
   // State Machine
   const [status, setStatus] = useState<VerifyStatus>("idle");
+  const [ontopPass, setOntopPass] = useState<OntopStatusData | null>(null);
   const [keyInput, setKeyInput] = useState("");
   const [honeypot, setHoneypot] = useState("");
   const [stepMessage, setStepMessage] = useState("");
@@ -219,9 +221,9 @@ export default function FreeFireUnlockHub({
       return;
     }
 
-    if (config?.unlockRequireKey && !keyInput.trim()) {
+    if (config?.unlockRequireKey && !ontopPass?.isUnlimited && !keyInput.trim()) {
       setStatus("error");
-      setErrorMsg("Vui lòng nhập Key mở khóa để kích hoạt.");
+      setErrorMsg("Vui lòng nhập Key mở khóa hoặc vượt 2 lượt link OnTop để mở VÔ HẠN.");
       return;
     }
 
@@ -454,6 +456,9 @@ export default function FreeFireUnlockHub({
           </p>
         </div>
 
+        {/* THẺ TIẾN ĐỘ VƯỢT LINK ONTOP.LINK MỞ KHÓA VÔ HẠN */}
+        <OntopPassWidget service="freefire" onStatusChange={setOntopPass} />
+
         {/* 4. FORM NHẬP UID FREE FIRE */}
         <form onSubmit={handleSubmit} className="kps-verify-form" noValidate>
           {/* Honeypot chống bot tự động */}
@@ -519,8 +524,8 @@ export default function FreeFireUnlockHub({
             </p>
           </div>
 
-          {/* NẾU ADMIN YÊU CẦU KEY */}
-          {config?.unlockRequireKey && (
+          {/* NẾU ADMIN YÊU CẦU KEY VÀ CHƯA CÓ VÔ HẠN ONTOP */}
+          {config?.unlockRequireKey && !ontopPass?.isUnlimited && (
             <div className="kps-key-group">
               <label htmlFor="keyInput" className="kps-input-label">
                 Mã Key Kích Hoạt

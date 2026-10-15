@@ -469,4 +469,36 @@ model AovConfig {
   updatedAt        DateTime @updatedAt
 }
 
+// ---------- Thẻ Vô Hạn Ngày OnTop.link (Unlock ID & Locket) ----------
+
+model OntopDailyPass {
+  id          Int      @id @default(autoincrement())
+  token       String   @unique // Token định danh thiết bị / phiên người dùng
+  ip          String
+  date        String   // YYYY-MM-DD theo giờ Việt Nam
+  count       Int      @default(0) // Số lượt đã vượt: 0, 1, 2
+  isUnlimited Boolean  @default(false) // true khi count >= 2
+  expiresAt   DateTime // Hết hạn lúc 23:59:59 của ngày
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([ip, date])
+  @@index([token])
+}
+
+model OntopPendingSession {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  passToken String
+  step      Int      // 1 hoặc 2
+  service   String   // "freefire" | "locket" | "all"
+  used      Boolean  @default(false)
+  expiresAt DateTime // TTL 30 phút
+  createdAt DateTime @default(now())
+
+  @@index([token])
+  @@index([passToken])
+}
+
+
 

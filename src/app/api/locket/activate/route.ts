@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { clientIp, rateLimit } from "@/lib/guard";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
+import { checkOntopUnlimited } from "@/lib/ontop";
 
 // StoreKit 2 Receipt Tokens from C:\tmauto\locket\locketgold.py
 const TOKEN_CONFIG = {
@@ -127,12 +128,17 @@ async function checkStatus(uid: string): Promise<{ active: boolean; expires?: st
 export async function POST(req: Request) {
   try {
     const ip = clientIp(req);
-    // Rate limit: tối đa 6 lượt / 10 phút / IP để chống DDoS / bot spam
-    if (await rateLimit("locket-activate", ip, 6, 10 * 60_000)) {
+    const cookieHeader = req.headers.get("cookie") || "";
+    const ontopCookieMatch = cookieHeader.match(/ontop_daily_pass=([^;]+)/);
+    const ontopCookieVal = ontopCookieMatch ? decodeURIComponent(ontopCookieMatch[1]) : undefined;
+    const isOntopUnlimited = await checkOntopUnlimited(ip, ontopCookieVal);
+
+    // Rate limit: Nếu đã có thẻ Vô Hạn OnTop Pass thì cho phép dùng liên tục, nếu chưa thì tối đa 6 lượt / 10 phút
+    if (!isOntopUnlimited && (await rateLimit("locket-activate", ip, 6, 10 * 60_000))) {
       return NextResponse.json(
         {
           success: false,
-          error: "Bạn thao tác quá nhanh. Vui lòng thử lại sau 10 phút!",
+          error: "Bạn thao tác quá nhanh. Vui lòng thử lại sau 10 phút hoặc vượt 2 lượt OnTop.link để mở khóa VÔ HẠN!",
         },
         { status: 429 }
       );
