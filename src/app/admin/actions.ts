@@ -58,6 +58,8 @@ function urlList(fd: FormData, k: string): string {
 
 function refresh(path: string) {
   revalidatePath("/");
+  revalidatePath("/freefire");
+  revalidatePath("/other");
   revalidatePath(path);
 }
 

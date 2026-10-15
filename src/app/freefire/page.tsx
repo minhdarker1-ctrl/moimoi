@@ -6,7 +6,7 @@ import DesktopHeader from "@/components/DesktopHeader";
 import FreeFireContainer from "@/components/FreeFireContainer";
 import AppCard from "@/components/AppCard";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 86400; // 24 giờ - ISR kết hợp On-Demand Revalidation khi Admin lưu cấu hình
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
