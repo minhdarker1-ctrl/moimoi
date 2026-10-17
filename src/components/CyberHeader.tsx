@@ -95,10 +95,6 @@ export default function CyberHeader({
               <i className="fas fa-layer-group" />
               <span>Dịch Vụ</span>
             </Link>
-            <Link href="/locket" className={`cyber-nav-item ${pathname === "/locket" ? "active" : ""}`}>
-              <i className="fas fa-crown text-amber-400" />
-              <span>Locket Gold</span>
-            </Link>
             <Link href="/freefire" className={`cyber-nav-item ${pathname.startsWith("/freefire") ? "active" : ""}`}>
               <i className="fa-solid fa-fire text-orange-500" />
               <span>Free Fire</span>
@@ -106,6 +102,10 @@ export default function CyberHeader({
             <Link href="/aov" className={`cyber-nav-item ${pathname === "/aov" ? "active" : ""}`}>
               <i className="fas fa-shield-alt text-sky-400" />
               <span>AOV</span>
+            </Link>
+            <Link href="/locket" className={`cyber-nav-item ${pathname === "/locket" ? "active" : ""}`}>
+              <i className="fas fa-crown text-amber-400" />
+              <span>Locket Gold</span>
             </Link>
             <Link href="/donate" className={`cyber-nav-item ${pathname === "/donate" ? "active" : ""}`}>
               <i className="fas fa-heart text-pink-500" />
@@ -196,16 +196,6 @@ export default function CyberHeader({
                   </div>
                 </Link>
 
-                <Link href="/locket" className="cyber-mobile-link" onClick={() => setOpenMobileMenu(false)}>
-                  <div className="cyber-m-link-icon locket">
-                    <i className="fas fa-crown" />
-                  </div>
-                  <div className="cyber-m-link-text">
-                    <strong>Kích Hoạt Locket Gold</strong>
-                    <span>Bản quyền 1 năm &amp; DNS Đóng Băng Gold</span>
-                  </div>
-                </Link>
-
                 <Link href="/freefire" className="cyber-mobile-link" onClick={() => setOpenMobileMenu(false)}>
                   <div className="cyber-m-link-icon ff">
                     <i className="fa-solid fa-fire" />
@@ -223,6 +213,16 @@ export default function CyberHeader({
                   <div className="cyber-m-link-text">
                     <strong>Đấu Trường AOV</strong>
                     <span>Xé Túi Mù nhận nick Liên Quân VIP</span>
+                  </div>
+                </Link>
+
+                <Link href="/locket" className="cyber-mobile-link" onClick={() => setOpenMobileMenu(false)}>
+                  <div className="cyber-m-link-icon locket">
+                    <i className="fas fa-crown" />
+                  </div>
+                  <div className="cyber-m-link-text">
+                    <strong>Kích Hoạt Locket Gold</strong>
+                    <span>Bản quyền 1 năm &amp; DNS Đóng Băng Gold</span>
                   </div>
                 </Link>
 

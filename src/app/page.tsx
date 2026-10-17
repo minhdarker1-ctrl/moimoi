@@ -86,7 +86,7 @@ export default async function Home() {
             </div>
           </div>
 
-          <p className="cyber-iam">{site.iam || "Hi, i am"}</p>
+          <p className="cyber-iam">{site.iam && site.iam !== "Hi, i am" ? site.iam : "Hi, I am"}</p>
           <h1 className="cyber-name">
             {site.name}
             {site.verified && (
@@ -161,7 +161,7 @@ export default async function Home() {
                 <i className="fas fa-shield-alt" />
                 <span>HOẠT ĐỘNG</span>
               </div>
-              <span className="cyber-card-cta">
+              <span className="cyber-card-cta cyber-cta-featured">
                 <span>XEM DỊCH VỤ</span>
                 <i className="fas fa-arrow-right" />
               </span>
@@ -215,7 +215,7 @@ export default async function Home() {
                 <i className="fas fa-check-circle" />
                 <span>HOẠT ĐỘNG</span>
               </div>
-              <span className="cyber-card-cta">
+              <span className="cyber-card-cta cyber-cta-featured">
                 <span>XEM DỊCH VỤ</span>
                 <i className="fas fa-arrow-right" />
               </span>
@@ -223,7 +223,7 @@ export default async function Home() {
           </Link>
 
           {/* CARD 4: OTHER */}
-          <Link href="/other" className="cyber-card cyber-card-other" aria-label="Xem dịch vụ khác">
+          <div className="cyber-card cyber-card-other cyber-card-disabled" aria-label="Dịch vụ khác đang cập nhật">
             <div className="cyber-card-inner">
               <div className="cyber-card-img-wrap">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -242,12 +242,12 @@ export default async function Home() {
                 <i className="fas fa-spinner fa-spin-pulse" />
                 <span>ĐANG CẬP NHẬT</span>
               </div>
-              <span className="cyber-card-cta">
-                <span>XEM DỊCH VỤ</span>
-                <i className="fas fa-arrow-right" />
+              <span className="cyber-card-cta cyber-cta-disabled" aria-disabled="true">
+                <span>SẮP RA MẮT</span>
+                <i className="fas fa-clock" />
               </span>
             </div>
-          </Link>
+          </div>
 
           {/* CARD 5: NUÔI TÔI (DONATE) */}
           <Link href="/donate" className="cyber-card cyber-card-donate" aria-label="Ủng hộ tác giả dự án Nuôi Tôi">
@@ -269,7 +269,7 @@ export default async function Home() {
                 <i className="fas fa-heart" />
                 <span>ỦNG HỘ</span>
               </div>
-              <span className="cyber-card-cta">
+              <span className="cyber-card-cta cyber-cta-donate">
                 <span>DONATE NGAY</span>
                 <i className="fas fa-arrow-right" />
               </span>

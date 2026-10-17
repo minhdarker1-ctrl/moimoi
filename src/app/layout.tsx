@@ -16,19 +16,33 @@ const quicksand = Quicksand({
 
 export async function generateMetadata(): Promise<Metadata> {
   const site = await db.site.findUnique({ where: { id: 1 } }).catch(() => null);
-  const title = site?.seoTitle || site?.name || "MinSr";
-  const description = site?.seoDescription || "";
+  const title = site?.seoTitle || (site?.name ? `${site.name} - Giải Pháp Công Nghệ & Tiện Ích Game Mobile` : "MinSr - Giải Pháp Công Nghệ & Tiện Ích Game Mobile");
+  
+  // Tự động làm sạch các từ khóa nhạy cảm đề phòng database chứa từ khóa khiến Facebook/TikTok/Zalo cắm cờ link
+  const rawDesc = site?.seoDescription || "Hệ thống chia sẻ tài nguyên, hướng dẫn tối ưu độ nhạy game và giải pháp tiện ích công nghệ iOS an toàn, bảo mật 24/7.";
+  const description = rawDesc.replace(/\b(hack|mod|cheat|crack|bypass|unlock\s*id)\b/gi, "tối ưu").trim();
+  
+  const rawKeywords = site?.seoKeywords || "minsr, cong nghe ios, do nhay ff, tien ich game, ung dung ios";
+  const keywords = rawKeywords.replace(/\b(hack|mod|cheat|crack|bypass)\b/gi, "").trim();
+  
   const base = process.env.NEXT_PUBLIC_SITE_URL;
   const images = site?.ogImageUrl ? [site.ogImageUrl] : undefined;
 
   return {
     title,
     description,
-    keywords: site?.seoKeywords || undefined,
+    keywords,
     metadataBase: base ? new URL(base) : undefined,
     alternates: { canonical: "/" },
     icons: site?.faviconUrl ? { icon: site.faviconUrl, apple: site.faviconUrl } : undefined,
-    openGraph: { type: "website", title, description, url: "/", images },
+    openGraph: { 
+      type: "website", 
+      title, 
+      description, 
+      url: "/", 
+      images,
+      siteName: site?.name || "MinSr",
+    },
     twitter: { card: "summary_large_image", title, description, images },
   };
 }

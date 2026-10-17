@@ -2999,7 +2999,8 @@ body.vthangios-dark .mdarker-music-minimize-btn {
 .mdarker-music-minimized {
   position: fixed;
   bottom: 24px;
-  right: 84px;
+  left: 24px;
+  right: auto;
   z-index: 1200;
   display: flex;
   align-items: center;
@@ -3149,7 +3150,8 @@ body.vthangios-dark .mdarker-music-mini-dot {
 @media (max-width: 480px) {
   .mdarker-music-minimized {
     bottom: 16px;
-    right: 74px;
+    left: 16px;
+    right: auto;
     gap: 8px;
     padding: 5px 10px 5px 5px;
     max-width: 230px;
@@ -11521,7 +11523,7 @@ body.vthangios-dark .cyber-user-arrow {
   width: 100%;
   max-width: 1140px;
   margin: 0 auto;
-  padding: 72px 16px 36px;
+  padding: 72px 16px 96px;
   text-align: center;
 }
 
@@ -12072,6 +12074,50 @@ body.vthangios-dark .cyber-card-cta:hover {
   border-color: rgba(168, 85, 247, 0.6);
   box-shadow: 0 4px 14px rgba(168, 85, 247, 0.3);
   color: #fff !important;
+}
+
+/* CTA - DONATE (HỒNG/ĐỎ ẤM ÁP) */
+.cyber-card-cta.cyber-cta-donate {
+  background: linear-gradient(135deg, rgba(244, 63, 94, 0.18), rgba(236, 72, 153, 0.22)) !important;
+  border-color: rgba(244, 63, 94, 0.5) !important;
+  color: #fb7185 !important;
+  box-shadow: 0 4px 12px rgba(244, 63, 94, 0.15) !important;
+}
+
+.cyber-card:hover .cyber-card-cta.cyber-cta-donate,
+.cyber-card-cta.cyber-cta-donate:hover {
+  background: linear-gradient(135deg, #f43f5e, #ec4899) !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+  box-shadow: 0 6px 20px rgba(244, 63, 94, 0.45) !important;
+}
+
+/* CTA - DỊCH VỤ CHỦ LỰC (FEATURED NEON GLOW) */
+.cyber-card-cta.cyber-cta-featured {
+  border-color: rgba(99, 102, 241, 0.45) !important;
+  box-shadow: 0 0 14px rgba(99, 102, 241, 0.2) !important;
+}
+
+/* CARD & CTA - DISABLED (SẮP RA MẮT / ĐANG CẬP NHẬT) */
+.cyber-card.cyber-card-disabled {
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
+.cyber-card.cyber-card-disabled:hover {
+  transform: none !important;
+  box-shadow: none !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.cyber-card-cta.cyber-cta-disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #94a3b8 !important;
+  box-shadow: none !important;
 }
 
 /* TRUST METRICS BAR */
