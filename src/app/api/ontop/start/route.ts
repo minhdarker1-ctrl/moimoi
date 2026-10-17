@@ -81,12 +81,15 @@ export async function POST(req: Request) {
 
     const response = NextResponse.json({
       success: true,
+      link: result.url,
+      url: result.url,
       redirectUrl: result.url,
       step: currentStep,
       gateway: result.gateway,
       earnedCount: pass.count,
       availableCredits,
     });
+
 
     response.cookies.set(ONTOP_COOKIE_NAME, signedToken, {
       path: "/",

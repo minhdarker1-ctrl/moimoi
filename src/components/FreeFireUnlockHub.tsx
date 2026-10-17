@@ -300,12 +300,14 @@ export default function FreeFireUnlockHub({
         body: JSON.stringify({ service: "freefire", uid: cleanUid }),
       });
       const json = await res.json();
-      if (json.success && json.link) {
-        window.location.href = json.link;
+      const targetLink = json.link || json.redirectUrl || json.url;
+      if (json.success && targetLink) {
+        window.location.href = targetLink;
       } else {
         setIsRedirecting(false);
         setErrorMsg(json.error || "Không thể tạo liên kết vượt link lúc này. Vui lòng thử lại sau!");
       }
+
     } catch {
       setIsRedirecting(false);
       setErrorMsg("Lỗi kết nối khi khởi tạo liên kết. Vui lòng thử lại!");

@@ -170,8 +170,9 @@ Cài DNS khi Gold chưa xuất hiện sẽ chỉ giữ trạng thái chưa có G
         body: JSON.stringify({ service: "locket", target: cleanTarget }),
       });
       const json = await res.json();
-      if (json.success && json.link) {
-        window.location.href = json.link;
+      const targetLink = json.link || json.redirectUrl || json.url;
+      if (json.success && targetLink) {
+        window.location.href = targetLink;
       } else {
         setIsRedirecting(false);
         setResult({
@@ -179,6 +180,7 @@ Cài DNS khi Gold chưa xuất hiện sẽ chỉ giữ trạng thái chưa có G
           error: json.error || "Không thể tạo liên kết vượt link lúc này. Vui lòng thử lại sau!",
         });
       }
+
     } catch {
       setIsRedirecting(false);
       setResult({
