@@ -1,7 +1,8 @@
-import { db } from "@/lib/db";
-import { decryptToken, vnDate, sessionToken, safeEqual } from "@/lib/crypto";
+import { db } from "./db.ts";
+import { decryptToken, vnDate, sessionToken, safeEqual } from "./crypto.ts";
 import { createHmac } from "node:crypto";
-import { shorten, isProvider } from "@/lib/shorteners";
+import { shorten, isProvider } from "./shorteners.ts";
+
 
 const VIETUSER_API_ENDPOINT = "https://vietuser.com/api-shorten/v2";
 const VIETUSER_DEFAULT_TOKEN = "b839edac1a32d13613b8a4248379d1d0a9794b2b1944b5f53e1ffea7409fcfa3";
@@ -103,7 +104,7 @@ export async function getOrCreateDailyPass(ip: string, existingPassToken?: strin
           date: today,
           count: 0,
           usedCount: 0,
-          currentGateway: "VIETUSER",
+          currentGateway: "ONTOPS",
           isUnlimited: false,
           expiresAt: endOfDay,
           ip,
@@ -131,7 +132,7 @@ export async function getOrCreateDailyPass(ip: string, existingPassToken?: strin
       date: today,
       count: 0,
       usedCount: 0,
-      currentGateway: "VIETUSER",
+      currentGateway: "ONTOPS",
       isUnlimited: false,
       expiresAt: endOfDay,
     },
@@ -154,8 +155,8 @@ export async function getOntopPassStatus(
   const isExhausted = earnedCount >= 2;
   const allGatewaysExhausted = earnedCount >= 4;
 
-  let activeGatewayName = "VietUser";
-  let currentGatewayStep = earnedCount + 1; // 1 hoặc 2 cho VietUser
+  let activeGatewayName = "OnTop.link";
+  let currentGatewayStep = earnedCount + 1; // 1 hoặc 2 cho OnTop
 
   if (earnedCount >= 2) {
     activeGatewayName = "Link4m";
@@ -303,7 +304,7 @@ export async function getOntopApiKey(): Promise<string | null> {
 }
 
 /**
- * Tạo link vượt (Tự động chọn VietUser cho 2 lượt đầu, và Cổng 2 khi VietUser đạt 2/2)
+ * Tạo link vượt (Ưu tiên tuyệt đối OnTop qua Worker Buffer, tự động fallback sang VietUser / Link4m)
  */
 export async function createPassLink({
   service,
@@ -329,26 +330,107 @@ export async function createPassLink({
   const pass = await db.ontopDailyPass.findUnique({ where: { token: passToken } });
   const today = vnDate();
   const earnedCount = pass && pass.date === today ? pass.count : 0;
+  const userIp = pass?.ip || "";
+  const cleanTarget = targetUser || "";
 
-  const pendingToken = sessionToken();
-  const expiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30 phút TTL
-
-  await db.ontopPendingSession.create({
-    data: {
-      token: pendingToken,
-      passToken,
-      step,
-      service,
-      targetUser: targetUser || "",
-      used: false,
-      expiresAt,
-    },
-  });
-
-  const callbackUrl = `${baseUrl}/api/ontop/callback?token=${pendingToken}`;
-
-  // Nếu chưa đạt trần 2 lượt: Ưu tiên cổng VietUser (Chạy mượt trên Vercel không bị chặn IP nước ngoài)
+  // =========================================================================
+  // GIAI ĐOẠN 1: NẾU CHƯA ĐẠT TRẦN 2 LƯỢT TRONG NGÀY -> ƯU TIÊN SỐ 1 ONTOP
+  // =========================================================================
   if (earnedCount < 2) {
+    // 1. Dọn dẹp bảo mật: Chuyển các slot RESERVED quá 2 tiếng sang EXPIRED (Tuyệt đối không tái chế)
+    const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
+    await db.ontopLinkBuffer.updateMany({
+      where: {
+        status: "RESERVED",
+        createdAt: { lt: twoHoursAgo },
+      },
+      data: { status: "EXPIRED" },
+    }).catch(() => {});
+
+    // 2. Chống Spam cạn Buffer (Idempotent Reservation):
+    // Nếu passToken này đã có slot RESERVED còn hạn, trả lại ngay slot đó kèm update targetUser
+    const existingReserved = await db.ontopLinkBuffer.findFirst({
+      where: {
+        passToken,
+        status: "RESERVED",
+        expiresAt: { gt: new Date() },
+      },
+      orderBy: { id: "desc" },
+    });
+
+    if (existingReserved) {
+      if (cleanTarget && existingReserved.targetUser !== cleanTarget) {
+        await db.ontopLinkBuffer.update({
+          where: { id: existingReserved.id },
+          data: { targetUser: cleanTarget, service },
+        }).catch(() => {});
+      }
+      return {
+        ok: true,
+        url: existingReserved.shortUrl,
+        pendingToken: existingReserved.slotId,
+        gateway: "ONTOPS",
+      };
+    }
+
+    // 3. Atomic Pick thật sự trên PostgreSQL:
+    // Sử dụng SELECT ... FOR UPDATE SKIP LOCKED để bốc 1 slot AVAILABLE duy nhất và chuyển sang RESERVED
+    const expiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30 phút TTL
+    try {
+      const pickedRows = await db.$queryRaw<Array<{
+        id: number;
+        slotId: string;
+        shortUrl: string;
+        originalUrl: string;
+      }>>`
+        UPDATE "OntopLinkBuffer"
+        SET status = 'RESERVED',
+            "passToken" = ${passToken},
+            "service" = ${service},
+            "targetUser" = ${cleanTarget},
+            "claimedByIp" = ${userIp},
+            "reservedAt" = NOW(),
+            "expiresAt" = ${expiresAt}
+        WHERE id = (
+          SELECT id
+          FROM "OntopLinkBuffer"
+          WHERE status = 'AVAILABLE'
+          ORDER BY id ASC
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED
+        )
+        RETURNING id, "slotId", "shortUrl", "originalUrl";
+      `;
+
+      if (pickedRows && pickedRows.length > 0) {
+        const picked = pickedRows[0];
+        return {
+          ok: true,
+          url: picked.shortUrl,
+          pendingToken: picked.slotId,
+          gateway: "ONTOPS",
+        };
+      }
+    } catch (sqlErr) {
+      console.warn("Lỗi bốc link OnTop từ buffer, tự động chuyển sang VietUser:", sqlErr);
+    }
+
+    // 4. Fallback: Nếu Khay đệm OnTop tạm thời trống (0 link khả dụng) -> Chuyển sang VietUser
+    console.log("Khay đệm OnTop tạm hết link, tự động fallback sang VietUser...");
+    const pendingToken = sessionToken();
+    await db.ontopPendingSession.create({
+      data: {
+        token: pendingToken,
+        passToken,
+        step,
+        service,
+        targetUser: cleanTarget,
+        used: false,
+        expiresAt,
+      },
+    });
+
+    const callbackUrl = `${baseUrl}/api/ontop/callback?token=${pendingToken}`;
     const vietuserKey = await getVietUserApiKey();
     if (vietuserKey) {
       const apiUrl = `${VIETUSER_API_ENDPOINT}?api=${vietuserKey}&url=${encodeURIComponent(callbackUrl)}`;
@@ -360,7 +442,6 @@ export async function createPassLink({
         });
 
         const data: any = await res.json().catch(() => ({}));
-
         if (data.status === "success" && data.shortenedUrl) {
           await db.shortener
             .updateMany({
@@ -377,51 +458,29 @@ export async function createPassLink({
           };
         }
       } catch (err) {
-        console.warn("Lỗi kết nối VietUser, thử cổng OnTop/dự phòng:", err);
-      }
-    }
-
-    // Fallback: Thử OnTop nếu VietUser gặp sự cố
-    const ontopKey = await getOntopApiKey();
-    if (ontopKey) {
-      const apiUrl = `${ONTOPS_API_ENDPOINT}?apikey=${ontopKey}&url=${encodeURIComponent(callbackUrl)}`;
-      try {
-        const res = await fetch(apiUrl, {
-          method: "GET",
-          headers: { Accept: "application/json" },
-          cache: "no-store",
-        });
-
-        const bodyText = await res.text();
-        let data: any = {};
-        try {
-          data = JSON.parse(bodyText);
-        } catch {
-          data = {};
-        }
-
-        if (data.id) {
-          await db.shortener
-            .updateMany({
-              where: { provider: "ONTOPS", enabled: true },
-              data: { dailyUsed: { increment: 1 } },
-            })
-            .catch(() => {});
-
-          return {
-            ok: true,
-            url: `${ONTOPS_DOMAIN}/${data.id}`,
-            pendingToken,
-            gateway: "ONTOPS",
-          };
-        }
-      } catch (err) {
-        console.warn("Lỗi kết nối OnTop, thử cổng dự phòng tiếp theo:", err);
+        console.warn("Lỗi kết nối VietUser, tiếp tục thử cổng dự phòng:", err);
       }
     }
   }
 
-  // Khi VietUser đã đủ 2/2 view HOẶC lỗi: Chuyển sang Cổng số 2 (Link4m / TrafficVN / Linktop)
+  // =========================================================================
+  // GIAI ĐOẠN 2: KHI ĐÃ ĐẠT 2/2 LƯỢT HOẶC CỔNG 1 LỖI -> CHUYỂN SANG CỔNG 2 (LINK4M)
+  // =========================================================================
+  const pendingToken = sessionToken();
+  const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
+  await db.ontopPendingSession.create({
+    data: {
+      token: pendingToken,
+      passToken,
+      step,
+      service,
+      targetUser: cleanTarget,
+      used: false,
+      expiresAt,
+    },
+  });
+
+  const callbackUrl = `${baseUrl}/api/ontop/callback?token=${pendingToken}`;
   const secondaryShorteners = await db.shortener.findMany({
     where: {
       enabled: true,
@@ -429,6 +488,7 @@ export async function createPassLink({
     },
     orderBy: { order: "asc" },
   });
+
 
   for (const s of secondaryShorteners) {
     if (!isProvider(s.provider)) continue;

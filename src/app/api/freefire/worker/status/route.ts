@@ -14,16 +14,22 @@ export async function GET() {
     const isOnline = diffMs < 60_000; // Coi là Online nếu có nhịp tim trong vòng 60 giây gần nhất
     const lastSeenSeconds = Math.max(0, Math.floor(diffMs / 1000));
 
+    const ontopBufferAvailable = await db.ontopLinkBuffer.count({
+      where: { status: "AVAILABLE" },
+    });
+
     return NextResponse.json({
       success: true,
       isOnline,
       lastSeenSeconds,
+      ontopBufferAvailable,
       adminWakeupUrl:
         config?.adminWakeupUrl || config?.teleBotLink || "https://t.me/mdarker_bot",
       wakeupMessage:
         config?.wakeupMessage ||
         "Bot chợp mắt 1 tý, ai dùng thì kêu admin gọi bot dậy nha",
     });
+
   } catch (error) {
     return NextResponse.json({
       success: false,

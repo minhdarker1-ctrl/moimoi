@@ -503,5 +503,28 @@ model OntopPendingSession {
   @@index([passToken])
 }
 
+model OntopLinkBuffer {
+  id          Int       @id @default(autoincrement())
+  slotId      String    @unique // Mã định danh duy nhất cho từng slot link
+  originalUrl String    // URL đích: https://domain/api/ontop/claim?slot=slotId
+  shortUrl    String    // URL OnTop đã rút gọn: https://ontops.link/...
+  status      String    @default("AVAILABLE") // AVAILABLE | RESERVED | COMPLETED | EXPIRED
+  claimedByIp String?
+  passToken   String?
+  service     String?   @default("freefire")
+  targetUser  String?   @default("")
+  reservedAt  DateTime?
+  completedAt DateTime?
+  expiresAt   DateTime? // TTL khi ở trạng thái RESERVED
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([status])
+  @@index([slotId])
+  @@index([passToken])
+  @@index([claimedByIp])
+}
+
+
 
 
