@@ -35,31 +35,18 @@ body.vthangios-dark {
   --vi-shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.70), 0 4px 16px rgba(0, 0, 0, 0.40);
 }
 
+/* ========================================================
+   1. TỐI ƯU NỀN BODY (TRIỆT TIÊU REPAINT KHI CUỘN)
+   ======================================================== */
 body {
   font-family: var(--vi-font);
   margin: 0;
-  background-color: #f8fafc;
-  background-image:
-    /* Cyber dot matrix grid pattern */
-    radial-gradient(circle at center, rgba(99, 102, 241, 0.14) 1.2px, transparent 1.2px),
-    /* Center Hero Aurora Glow (Electric Indigo/Cyan) */
-    radial-gradient(circle 650px at 50% 12%, rgba(99, 102, 241, 0.20) 0%, rgba(168, 85, 247, 0.12) 45%, transparent 70%),
-    /* Top-Left Cyan Cyber Aura */
-    radial-gradient(ellipse 600px 500px at 10% 20%, rgba(56, 189, 248, 0.20) 0%, transparent 65%),
-    /* Top-Right Neon Pink Aura */
-    radial-gradient(ellipse 550px 450px at 90% 15%, rgba(236, 72, 153, 0.14) 0%, transparent 65%),
-    /* Center-Bottom Cyber Amber/Gold Aura around Services */
-    radial-gradient(ellipse 700px 500px at 50% 68%, rgba(245, 158, 11, 0.14) 0%, transparent 70%),
-    /* Deep Bottom Indigo Glow */
-    radial-gradient(circle 800px at 80% 92%, rgba(79, 70, 229, 0.12) 0%, transparent 65%),
-    /* Base soft white-to-light gradient */
-    linear-gradient(180deg, #ffffff 0%, #f1f5f9 50%, #e2e8f0 100%);
-  background-size: 28px 28px, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
-  background-position: 0 0, center top, left top, right top, center 68%, right bottom, 0 0;
-  background-attachment: fixed;
+  background-color: var(--vi-bg);
+  background-image: none;
   color: var(--vi-text);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
 /* body::before old navbar compensation removed to fix page shifting down */
@@ -71,36 +58,8 @@ body::before {
 
 [data-theme="dark"] body,
 body.vthangios-dark {
-  background: #030c18;
-  background-image:
-    radial-gradient(ellipse 100% 45% at 40% 0, rgba(50, 80, 220, 0.18) 0, transparent 65%),
-    radial-gradient(ellipse 70% 35% at 78% 12%, rgba(90, 30, 170, 0.14) 0, transparent 58%),
-    radial-gradient(ellipse 50% 30% at 10% 60%, rgba(30, 90, 180, 0.1) 0, transparent 52%),
-    radial-gradient(ellipse 40% 25% at 85% 75%, rgba(60, 20, 140, 0.09) 0, transparent 50%),
-    radial-gradient(1.5px 1.5px at 8% 9%, #fff 0, transparent 100%),
-    radial-gradient(2px 2px at 22% 5%, #fff 0, transparent 100%),
-    radial-gradient(1px 1px at 35% 18%, rgba(255, 255, 255, 0.75) 0, transparent 100%),
-    radial-gradient(1.5px 1.5px at 48% 11%, #fff 0, transparent 100%),
-    radial-gradient(1px 1px at 60% 6%, rgba(255, 255, 255, 0.8) 0, transparent 100%),
-    radial-gradient(2px 2px at 71% 14%, #fff 0, transparent 100%),
-    radial-gradient(1px 1px at 84% 8%, rgba(255, 255, 255, 0.7) 0, transparent 100%),
-    radial-gradient(1.5px 1.5px at 93% 21%, #fff 0, transparent 100%),
-    radial-gradient(1px 1px at 14% 35%, rgba(255, 255, 255, 0.6) 0, transparent 100%),
-    radial-gradient(1.5px 1.5px at 27% 42%, rgba(255, 255, 255, 0.75) 0, transparent 100%),
-    radial-gradient(1px 1px at 41% 38%, rgba(255, 255, 255, 0.55) 0, transparent 100%),
-    radial-gradient(1px 1px at 53% 48%, rgba(255, 255, 255, 0.65) 0, transparent 100%),
-    radial-gradient(2px 2px at 66% 31%, rgba(255, 255, 255, 0.8) 0, transparent 100%),
-    radial-gradient(1px 1px at 77% 44%, rgba(255, 255, 255, 0.55) 0, transparent 100%),
-    radial-gradient(1.5px 1.5px at 90% 37%, rgba(255, 255, 255, 0.7) 0, transparent 100%),
-    radial-gradient(1px 1px at 6% 62%, rgba(255, 255, 255, 0.5) 0, transparent 100%),
-    radial-gradient(1px 1px at 18% 75%, rgba(255, 255, 255, 0.65) 0, transparent 100%),
-    radial-gradient(1.5px 1.5px at 32% 68%, rgba(255, 255, 255, 0.75) 0, transparent 100%),
-    radial-gradient(1px 1px at 46% 82%, rgba(255, 255, 255, 0.55) 0, transparent 100%),
-    radial-gradient(2px 2px at 59% 71%, rgba(255, 255, 255, 0.8) 0, transparent 100%),
-    radial-gradient(1px 1px at 73% 88%, rgba(255, 255, 255, 0.5) 0, transparent 100%),
-    radial-gradient(1.5px 1.5px at 88% 63%, rgba(255, 255, 255, 0.7) 0, transparent 100%),
-    radial-gradient(1px 1px at 97% 80%, rgba(255, 255, 255, 0.6) 0, transparent 100%);
-  background-attachment: fixed;
+  background-color: var(--vi-bg);
+  background-image: none;
 }
 
 /* Glassmorphism hiệu ứng màng sương tuyết nhẹ cho thẻ card ở cả Light & Dark Mode */
@@ -117,16 +76,34 @@ body.vthangios-dark {
 }
 
 /* ========================================================
-   SCENIC LANDSCAPE CANVAS (DAY & NIGHT MODES)
+   2. CÔ LẬP LAYOUT AN TOÀN (KHÔNG LÀM MẤT HIỆU ỨNG TRÀN VIỀN)
    ======================================================== */
-
-.scenic-canvas-container {
+.scenic-canvas-container,
+.mdarker-snow-container {
   position: fixed;
-  inset: 0;
-  z-index: 0;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100lvh; /* Chống giật khi thanh địa chỉ mobile ẩn/hiện */
+  contain: layout style paint;
+  transform: translateZ(0);
   pointer-events: none;
   overflow: hidden;
-  contain: strict;
+}
+
+.scenic-canvas-container {
+  z-index: 0;
+}
+
+.mdarker-snow-container {
+  z-index: 10;
+}
+
+/* Chỉ cô lập layout/style cho lớp con, KHÔNG dùng contain: paint để tránh cắt mất tia nắng/bóng đổ */
+.scenic-stars-layer,
+.scenic-fireflies-layer {
+  contain: layout style;
 }
 
 .scenic-scene {
@@ -805,12 +782,6 @@ body.vthangios-dark .scenic-night {
 /* ---------- BÔNG TUYẾT RƠI MÙA ĐÔNG (SNOW EFFECT - CHỈ HIỆN Ở DARK MODE) ---------- */
 .mdarker-snow-container {
   display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 10;
-  pointer-events: none;
-  overflow: hidden;
-  contain: strict;
 }
 
 [data-theme="dark"] .mdarker-snow-container,
@@ -2607,6 +2578,67 @@ body.vthangios-dark .mdarker-header-right-actions .mdarker-header-clock {
   border-radius: 999px;
 }
 
+/* ========================================================
+   3. TỐI ƯU HIỆU NĂNG MOBILE (<= 768px)
+   ======================================================== */
+@media (max-width: 768px) {
+  /* Giữ lại 30/90 ngôi sao nhưng RẢI ĐỀU khắp bầu trời (ẩn 2/3 xen kẽ) */
+  .scenic-stars-layer .mdarker-star:nth-child(3n),
+  .scenic-stars-layer .mdarker-star:nth-child(3n+2) {
+    display: none !important;
+  }
+
+  /* Giữ 5 đom đóm rải đều */
+  .scenic-fireflies-layer .scenic-firefly:nth-child(n+6) {
+    display: none !important;
+  }
+
+  /* Giữ 15 bông tuyết rải đều */
+  .mdarker-snow-container .mdarker-snow-flake:nth-child(n+16) {
+    display: none !important;
+  }
+
+  /* Tối ưu mặt trời: Bỏ filter blur trực tiếp trên phần tử đang xoay */
+  .scenic-sunbeams {
+    width: 260px;
+    height: 260px;
+    filter: none !important;
+    opacity: 0.75;
+  }
+
+  /* Giữ blur nhẹ cho các thanh điều hướng/banner đơn lẻ */
+  .mdarker-yt-banner,
+  .mdarker-filter-tabs,
+  .mdarker-empty-search {
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
+  }
+
+  /* Tối ưu danh sách thẻ lặp lại: Tăng độ đậm nền (0.88) & giảm tải GPU khi cuộn */
+  .mdarker-app-item,
+  .mdarker-linkbox,
+  .mdarker-stats,
+  .mdarker-pill,
+  .vt-card {
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+    background-color: rgba(255, 255, 255, 0.88) !important;
+  }
+
+  [data-theme="dark"] .mdarker-app-item,
+  [data-theme="dark"] .mdarker-linkbox,
+  [data-theme="dark"] .mdarker-stats,
+  [data-theme="dark"] .mdarker-pill,
+  [data-theme="dark"] .vt-card,
+  body.vthangios-dark .mdarker-app-item,
+  body.vthangios-dark .vt-card {
+    background-color: rgba(18, 23, 38, 0.88) !important;
+  }
+}
+
+/* ========================================================
+   4. HỖ TRỢ THIẾT BỊ YẾU / TIẾT KIỆM PIN
+   ======================================================== */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -2614,6 +2646,18 @@ body.vthangios-dark .mdarker-header-right-actions .mdarker-header-clock {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
+  }
+
+  .scenic-twilight-layer,
+  .scenic-twilight-sky,
+  .scenic-twilight-sun {
+    transition-duration: 0.2s !important;
+    animation-duration: 0.2s !important;
+  }
+
+  .mdarker-snow-container,
+  .scenic-fireflies-layer {
+    display: none !important;
   }
 }
 
