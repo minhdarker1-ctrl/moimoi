@@ -10,11 +10,18 @@ import { vnDate } from "@/lib/crypto";
 export const dynamic = "force-dynamic";
 
 function getBaseUrl(req: Request): string {
+  const host = req.headers.get("x-forwarded-host") || req.headers.get("host");
+  const proto = req.headers.get("x-forwarded-proto") || "https";
+  if (host && !host.includes("localhost") && !host.includes("127.0.0.1")) {
+    return `${proto}://${host}`.replace(/\/$/, "");
+  }
   const env = process.env.NEXT_PUBLIC_SITE_URL;
-  if (env) return env.replace(/\/$/, "");
+  if (env && !env.includes("thedarker")) return env.replace(/\/$/, "");
+  if (host) return `${proto}://${host}`.replace(/\/$/, "");
   const url = new URL(req.url);
-  return `${url.protocol}//${url.host}`;
+  return `${url.protocol}//${url.host}`.replace(/\/$/, "");
 }
+
 
 export async function GET(req: Request) {
   const reqUrl = new URL(req.url);
