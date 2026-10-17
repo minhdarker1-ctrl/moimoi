@@ -36,7 +36,16 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json().catch(() => ({}));
-    const service = body.service === "locket" ? "locket" : "freefire";
+    const reqUrl = new URL(req.url);
+    const serviceParam = body.service || reqUrl.searchParams.get("service") || "freefire";
+    const service = serviceParam === "locket" ? "locket" : "freefire";
+    const targetUser = String(
+      body.uid ||
+      body.target ||
+      reqUrl.searchParams.get("uid") ||
+      reqUrl.searchParams.get("target") ||
+      ""
+    ).trim();
 
     const rawCookie = cookieStore.get(ONTOP_COOKIE_NAME)?.value;
     const parsedCookie = verifyPassPayload(rawCookie);
@@ -52,6 +61,7 @@ export async function POST(req: Request) {
       baseUrl,
       passToken: pass.token,
       step: currentStep,
+      targetUser,
     });
 
     if (!result.ok) {

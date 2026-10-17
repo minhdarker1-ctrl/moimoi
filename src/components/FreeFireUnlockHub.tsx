@@ -65,6 +65,55 @@ export default function FreeFireUnlockHub({
   const [pasteToast, setPasteToast] = useState("");
   const [copiedUid, setCopiedUid] = useState(false);
   const [recentLogs, setRecentLogs] = useState<RecentLog[]>([]);
+  const [toastMsg, setToastMsg] = useState("");
+  const [isRedirecting, setIsRedirecting] = useState(false);
+
+  // Khôi phục UID 2 lớp (URL query param + localStorage) & Làm sạch thanh địa chỉ
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const sp = new URLSearchParams(window.location.search);
+    const urlUid = sp.get("uid")?.trim().replace(/\D/g, "");
+
+    if (urlUid) {
+      setUid(urlUid);
+      try {
+        localStorage.setItem(
+          "ff_saved_uid",
+          JSON.stringify({ uid: urlUid, exp: Date.now() + 30 * 60 * 1000 })
+        );
+      } catch {}
+    } else {
+      try {
+        const raw = localStorage.getItem("ff_saved_uid");
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed?.uid && parsed?.exp > Date.now()) {
+            setUid(parsed.uid);
+          }
+        }
+      } catch {}
+    }
+
+    if (sp.get("ontop") === "success") {
+      const credits = sp.get("credits") || "1";
+      setToastMsg(`🎉 VƯỢT LINK THÀNH CÔNG! Bạn đã nhận được +1 lượt Verify UID (Số dư: ${credits} lượt).`);
+      setTimeout(() => setToastMsg(""), 8000);
+    }
+
+    // Dọn sạch URL query param để tránh "bóng ma" toast ảo khi F5
+    if (sp.has("ontop") || sp.has("uid") || sp.has("credits") || sp.has("step") || sp.has("unlimited")) {
+      try {
+        const cleanUrl = new URL(window.location.href);
+        cleanUrl.searchParams.delete("ontop");
+        cleanUrl.searchParams.delete("step");
+        cleanUrl.searchParams.delete("credits");
+        cleanUrl.searchParams.delete("uid");
+        cleanUrl.searchParams.delete("unlimited");
+        window.history.replaceState(null, "", cleanUrl.toString());
+      } catch {}
+    }
+  }, []);
 
   const [successResult, setSuccessResult] = useState<{
     uid: string;
@@ -110,6 +159,9 @@ export default function FreeFireUnlockHub({
         }
 
         if (event.data.success) {
+          try {
+            localStorage.removeItem("ff_saved_uid");
+          } catch {}
           setStatus("success");
           setProgressPct(100);
           setStepMessage("Xác minh thành công!");
@@ -194,11 +246,53 @@ export default function FreeFireUnlockHub({
     }, 1200);
   }
 
-  // Gửi xác minh UID
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (isBusy) return;
+  const earnedCount = ontopPass?.earnedCount ?? ontopPass?.count ?? 0;
+  const activeGatewayName = ontopPass?.activeGatewayName || (earnedCount >= 2 ? "Link4m" : "OnTop");
+  const currentGatewayStep = ontopPass?.currentGatewayStep || (earnedCount < 2 ? earnedCount + 1 : (earnedCount - 2) + 1);
+  const allGatewaysExhausted = Boolean(ontopPass?.allGatewaysExhausted || earnedCount >= 4);
 
+  // Chuyển hướng sang trang Vượt Link (Bảo toàn UID 2 lớp & Kiểm tra định dạng trước)
+  async function handleRedirectToBypassLink() {
+    const cleanUid = uid.trim().replace(/\D/g, "");
+    if (cleanUid && (cleanUid.length < 5 || cleanUid.length > 15)) {
+      setErrorMsg("UID không hợp lệ. Vui lòng nhập từ 5–15 chữ số trước khi vượt link.");
+      return;
+    }
+
+    setIsRedirecting(true);
+    setErrorMsg("");
+
+    // Lớp 2: Lưu localStorage phòng trường hợp mở tab mới
+    if (cleanUid) {
+      try {
+        localStorage.setItem(
+          "ff_saved_uid",
+          JSON.stringify({ uid: cleanUid, exp: Date.now() + 30 * 60 * 1000 })
+        );
+      } catch {}
+    }
+
+    try {
+      const res = await fetch("/api/ontop/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ service: "freefire", uid: cleanUid }),
+      });
+      const json = await res.json();
+      if (json.success && json.link) {
+        window.location.href = json.link;
+      } else {
+        setIsRedirecting(false);
+        setErrorMsg(json.error || "Không thể tạo liên kết vượt link lúc này. Vui lòng thử lại sau!");
+      }
+    } catch {
+      setIsRedirecting(false);
+      setErrorMsg("Lỗi kết nối khi khởi tạo liên kết. Vui lòng thử lại!");
+    }
+  }
+
+  // Thực thi Verify UID khi đã có Credit khả dụng
+  async function handleExecuteVerify() {
     // Chặn Bot honeypot
     if (honeypot.trim()) {
       setStatus("error");
@@ -208,7 +302,7 @@ export default function FreeFireUnlockHub({
 
     const cleanUid = uid.trim().replace(/\D/g, "");
 
-    // Trạng thái 1 & 2: Kiểm tra UID
+    // Kiểm tra UID
     setStatus("validating");
 
     if (!cleanUid) {
@@ -223,14 +317,9 @@ export default function FreeFireUnlockHub({
       return;
     }
 
-    // Bắt buộc có credit mới cho phép gửi yêu cầu
     if (!canVerify) {
       setStatus("error");
-      setErrorMsg("Bạn chưa có lượt Verify khả dụng. Vui lòng hoàn thành vượt link ở khung phía trên để nhận lượt!");
-      const widget = document.getElementById("pass-widget");
-      if (widget) {
-        widget.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
+      setErrorMsg("Bạn chưa có lượt Verify khả dụng. Vui lòng hoàn thành vượt link ở nút bên dưới để nhận lượt!");
       return;
     }
 
@@ -264,12 +353,6 @@ export default function FreeFireUnlockHub({
       if (!res.ok || !data.success) {
         setStatus("error");
         setErrorMsg(data.error || "Không thể xử lý UID lúc này. Vui lòng thử lại sau!");
-        if (data.requirePass) {
-          const widget = document.getElementById("pass-widget");
-          if (widget) {
-            widget.scrollIntoView({ behavior: "smooth", block: "center" });
-          }
-        }
         return;
       }
 
@@ -327,6 +410,9 @@ export default function FreeFireUnlockHub({
                 clearInterval(activePollRef.current);
                 activePollRef.current = null;
               }
+              try {
+                localStorage.removeItem("ff_saved_uid");
+              } catch {}
               setStatus("success");
               setProgressPct(100);
               setSuccessResult({
@@ -366,6 +452,9 @@ export default function FreeFireUnlockHub({
                 resultMessage: `Đã nạp Whitelist thành công cho bản ${currentPortLabel}!`,
               }),
             });
+            try {
+              localStorage.removeItem("ff_saved_uid");
+            } catch {}
           } catch {}
         }
 
@@ -381,6 +470,23 @@ export default function FreeFireUnlockHub({
     } catch {
       setStatus("error");
       setErrorMsg("Lỗi kết nối máy chủ. Vui lòng kiểm tra đường truyền và thử lại!");
+    }
+  }
+
+  // Điều phối Submit Form: Khi có credit thì Verify, khi chưa có thì vượt link
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (isBusy || isRedirecting) return;
+
+    if (allGatewaysExhausted && availableCredits === 0) {
+      setErrorMsg("Bạn đã đạt giới hạn vượt link tối đa trong ngày (4 lượt). Vui lòng quay lại sau 00:00!");
+      return;
+    }
+
+    if (availableCredits > 0) {
+      await handleExecuteVerify();
+    } else {
+      await handleRedirectToBypassLink();
     }
   }
 
@@ -589,6 +695,16 @@ export default function FreeFireUnlockHub({
             </span>
           </div>
 
+          {/* BANNER BÁO SẴN SÀNG VERIFY KHI CÓ CREDIT */}
+          {availableCredits > 0 && !isBusy && (
+            <div className="ontop-ready-banner">
+              <i className="fa-solid fa-circle-check" />
+              <span>
+                Bạn đang có <strong>{availableCredits} lượt Verify khả dụng</strong>. Nhập UID và bấm <strong>VERIFY UID NGAY</strong> bên dưới!
+              </span>
+            </div>
+          )}
+
           {/* THÔNG BÁO LỖI (NẾU CÓ) */}
           {errorMsg && (
             <div className="kps-error-banner" role="alert">
@@ -656,36 +772,76 @@ export default function FreeFireUnlockHub({
               </a>
             </div>
           ) : (
-            /* NÚT SUBMIT CHÍNH VERIFY UID */
+            /* NÚT SUBMIT CHÍNH (SINGLE DYNAMIC ACTION CTA) */
             <div className="kps-btn-wrap">
-              <button
-                type="submit"
-                className={`kps-verify-btn ${!canVerify ? "kps-btn-locked" : ""}`}
-                disabled={isBusy || !uid.trim() || !canVerify}
-              >
-                {isBusy ? (
-                  <>
-                    <i className="fa-solid fa-bolt fa-spin" />
-                    <span>⚡ ĐANG XÁC MINH...</span>
-                  </>
-                ) : !canVerify ? (
-                  <>
-                    <i className="fa-solid fa-lock" />
-                    <span>🔒 VƯỢT LINK ĐỂ NHẬN LƯỢT VERIFY UID</span>
-                  </>
-                ) : (
-                  <>
+              {isBusy ? (
+                <button type="button" className="kps-verify-btn" disabled>
+                  <i className="fa-solid fa-bolt fa-spin" />
+                  <span>⚡ ĐANG XÁC MINH...</span>
+                </button>
+              ) : isRedirecting ? (
+                <button type="button" className="kps-verify-btn bypass-mode" disabled>
+                  <i className="fa-solid fa-spinner fa-spin" />
+                  <span>ĐANG TẠO LIÊN KẾT ({activeGatewayName})...</span>
+                </button>
+              ) : availableCredits > 0 ? (
+                /* STATE D: CÓ LƯỢT KHẢ DỤNG -> NÚT VERIFY CHUẨN XANH NEON */
+                <>
+                  <button
+                    type="submit"
+                    className="kps-verify-btn ready-mode"
+                    disabled={!uid.trim()}
+                  >
                     <i className="fa-solid fa-shield-halved" />
-                    <span>VERIFY UID ({availableCredits} LƯỢT KHẢ DỤNG)</span>
-                  </>
-                )}
-              </button>
-
-              {!canVerify && (
-                <p className="kps-btn-subnote">
-                  <i className="fa-solid fa-circle-exclamation" />{" "}
-                  Mỗi lượt vượt link mở khóa 1 lần Verify UID. Vui lòng bấm nhận lượt ở khung phía trên!
-                </p>
+                    <span>🛡️ VERIFY UID NGAY ({availableCredits} LƯỢT KHẢ DỤNG)</span>
+                  </button>
+                  <p className="kps-btn-subnote" style={{ color: "#34d399" }}>
+                    <i className="fa-solid fa-circle-check" /> Sẵn sàng! Bấm để kích hoạt Whitelist cho UID của bạn.
+                  </p>
+                </>
+              ) : allGatewaysExhausted ? (
+                /* STATE E: TOÀN BỘ CỔNG ĐÃ HẾT LƯỢT TRONG NGÀY */
+                <>
+                  <button
+                    type="button"
+                    className="kps-verify-btn exhausted-mode"
+                    disabled
+                  >
+                    <i className="fa-solid fa-hourglass-half" />
+                    <span>⏳ ĐÃ ĐẠT GIỚI HẠN HÔM NAY (QUAY LẠI SAU 00:00)</span>
+                  </button>
+                  <p className="kps-btn-subnote" style={{ color: "#94a3b8" }}>
+                    <i className="fa-solid fa-circle-info" /> Bạn đã vượt đủ 4/4 lượt hôm nay. Hạn mức sẽ tự động mở lại sau 00:00!
+                  </p>
+                </>
+              ) : (
+                /* STATE A/B/C: CHƯA CÓ CREDIT -> NÚT VƯỢT LINK ĐỘNG THEO CỔNG */
+                <>
+                  <button
+                    type="submit"
+                    className="kps-verify-btn bypass-mode"
+                  >
+                    {earnedCount === 0 ? (
+                      <>
+                        <i className="fa-solid fa-rocket" />
+                        <span>🚀 VƯỢT LINK ĐỂ VERIFY UID (LƯỢT 1/2)</span>
+                      </>
+                    ) : earnedCount === 1 ? (
+                      <>
+                        <i className="fa-solid fa-bolt" />
+                        <span>⚡ VƯỢT LINK ONTOP (LƯỢT 2/2) ĐỂ VERIFY</span>
+                      </>
+                    ) : (
+                      <>
+                        <i className="fa-solid fa-arrows-rotate" />
+                        <span>🔄 VƯỢT LINK {activeGatewayName.toUpperCase()} (LƯỢT {currentGatewayStep}/2) ĐỂ VERIFY</span>
+                      </>
+                    )}
+                  </button>
+                  <p className="kps-btn-subnote">
+                    <i className="fa-solid fa-circle-info" /> Nhập UID ở trên (không bắt buộc) rồi bấm để vượt link nhận lượt Verify.
+                  </p>
+                </>
               )}
             </div>
           )}

@@ -14,6 +14,9 @@ export type PassStatus = {
   usedCount: number;         // Số lượt đã tiêu dùng để Verify UID
   availableCredits: number;  // Math.max(0, earnedCount - usedCount)
   currentGateway: string;    // "ONTOPS" | "LINK4M" | "TRAFFICVN"...
+  activeGatewayName: string; // Tên hiển thị cổng hiện tại: "OnTop" | "Link4m"
+  currentGatewayStep: number;// Nấc lượt hiện tại của cổng (1 hoặc 2)
+  allGatewaysExhausted: boolean; // true khi đã hết sạch mọi cổng hôm nay (count >= 4)
   isExhausted: boolean;      // Đã đạt trần 2/2 lượt OnTop trong ngày
   passToken?: string;
   date?: string;
@@ -147,6 +150,18 @@ export async function getOntopPassStatus(
   const usedCount = pass.usedCount;
   const availableCredits = Math.max(0, earnedCount - usedCount);
   const isExhausted = earnedCount >= 2;
+  const allGatewaysExhausted = earnedCount >= 4;
+
+  let activeGatewayName = "OnTop";
+  let currentGatewayStep = earnedCount + 1; // 1 hoặc 2 cho OnTop
+
+  if (earnedCount >= 2) {
+    activeGatewayName = "Link4m";
+    currentGatewayStep = (earnedCount - 2) + 1; // 1 hoặc 2 cho Link4m
+  }
+  if (allGatewaysExhausted) {
+    currentGatewayStep = 2;
+  }
 
   let currentGateway = pass.currentGateway;
   if (isExhausted && currentGateway === "ONTOPS") {
@@ -159,6 +174,9 @@ export async function getOntopPassStatus(
     usedCount,
     availableCredits,
     currentGateway,
+    activeGatewayName,
+    currentGatewayStep,
+    allGatewaysExhausted,
     isExhausted,
     passToken: pass.token,
     date: pass.date,
@@ -272,11 +290,13 @@ export async function createPassLink({
   baseUrl,
   passToken,
   step,
+  targetUser = "",
 }: {
   service: "freefire" | "locket" | "all";
   baseUrl: string;
   passToken: string;
   step: number;
+  targetUser?: string;
 }): Promise<{
   ok: true;
   url: string;
@@ -299,6 +319,7 @@ export async function createPassLink({
       passToken,
       step,
       service,
+      targetUser: targetUser || "",
       used: false,
       expiresAt,
     },
@@ -393,6 +414,7 @@ export async function verifyOntopCallback(token: string): Promise<{
   success: boolean;
   error?: string;
   service?: string;
+  targetUser?: string;
   step?: number;
   earnedCount?: number;
   usedCount?: number;
@@ -487,6 +509,7 @@ export async function verifyOntopCallback(token: string): Promise<{
   return {
     success: true,
     service: pending.service,
+    targetUser: pending.targetUser || "",
     step: newEarned,
     earnedCount: newEarned,
     usedCount: currentUsed,

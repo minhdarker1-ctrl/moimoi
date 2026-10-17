@@ -37,10 +37,11 @@ export async function GET(req: Request) {
   const stepNum = result.earnedCount || result.step || 1;
   const credits = result.availableCredits ?? 1;
 
+  const targetUserParam = result.targetUser ? encodeURIComponent(result.targetUser) : "";
   if (result.service === "freefire") {
-    returnPath = `/freefire?tab=unlock&ontop=success&step=${stepNum}&credits=${credits}`;
+    returnPath = `/freefire?tab=unlock&ontop=success&step=${stepNum}&credits=${credits}${targetUserParam ? `&uid=${targetUserParam}` : ""}`;
   } else if (result.service === "locket") {
-    returnPath = `/locket?ontop=success&step=${stepNum}&credits=${credits}`;
+    returnPath = `/locket?ontop=success&step=${stepNum}&credits=${credits}${targetUserParam ? `&target=${targetUserParam}` : ""}`;
   }
 
   const redirectUrl = new URL(returnPath, baseUrl);

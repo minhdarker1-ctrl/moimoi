@@ -24,6 +24,61 @@ export default function LocketClient() {
   const canActivate = availableCredits > 0;
   const [copiedInfo, setCopiedInfo] = useState(false);
   const [dark, setDark] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
+  const [toastMsg, setToastMsg] = useState("");
+
+  const earnedCount = ontopPass?.earnedCount ?? ontopPass?.count ?? 0;
+  const activeGatewayName = ontopPass?.activeGatewayName || (earnedCount >= 2 ? "Link4m" : "OnTop");
+  const currentGatewayStep = ontopPass?.currentGatewayStep || (earnedCount < 2 ? earnedCount + 1 : (earnedCount - 2) + 1);
+  const allGatewaysExhausted = Boolean(ontopPass?.allGatewaysExhausted || earnedCount >= 4);
+
+  // Khôi phục Target 2 lớp (URL query param + localStorage) & Làm sạch thanh URL
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const sp = new URLSearchParams(window.location.search);
+    const urlTarget = sp.get("target")?.trim() || sp.get("uid")?.trim();
+
+    if (urlTarget) {
+      setTarget(urlTarget);
+      try {
+        localStorage.setItem(
+          "locket_saved_target",
+          JSON.stringify({ target: urlTarget, exp: Date.now() + 30 * 60 * 1000 })
+        );
+      } catch {}
+    } else {
+      try {
+        const raw = localStorage.getItem("locket_saved_target");
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed?.target && parsed?.exp > Date.now()) {
+            setTarget(parsed.target);
+          }
+        }
+      } catch {}
+    }
+
+    if (sp.get("ontop") === "success") {
+      const credits = sp.get("credits") || "1";
+      setToastMsg(`🎉 VƯỢT LINK THÀNH CÔNG! Bạn đã nhận được +1 lượt Buff Gold (Số dư: ${credits} lượt).`);
+      setTimeout(() => setToastMsg(""), 8000);
+    }
+
+    // Dọn sạch URL query param để tránh "bóng ma" toast ảo khi F5
+    if (sp.has("ontop") || sp.has("target") || sp.has("uid") || sp.has("credits") || sp.has("step") || sp.has("unlimited")) {
+      try {
+        const cleanUrl = new URL(window.location.href);
+        cleanUrl.searchParams.delete("ontop");
+        cleanUrl.searchParams.delete("step");
+        cleanUrl.searchParams.delete("credits");
+        cleanUrl.searchParams.delete("target");
+        cleanUrl.searchParams.delete("uid");
+        cleanUrl.searchParams.delete("unlimited");
+        window.history.replaceState(null, "", cleanUrl.toString());
+      } catch {}
+    }
+  }, []);
 
   useEffect(() => {
     try {
@@ -92,20 +147,63 @@ Cài DNS khi Gold chưa xuất hiện sẽ chỉ giữ trạng thái chưa có G
     } catch {}
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  // Chuyển hướng vượt link (Bảo toàn target 2 lớp)
+  async function handleRedirectToBypassLink() {
     const cleanTarget = target.trim();
-    if (!cleanTarget) return;
+    setIsRedirecting(true);
+    setResult(null);
+
+    // Lớp 2: Lưu localStorage phòng rủi ro mở tab mới
+    if (cleanTarget) {
+      try {
+        localStorage.setItem(
+          "locket_saved_target",
+          JSON.stringify({ target: cleanTarget, exp: Date.now() + 30 * 60 * 1000 })
+        );
+      } catch {}
+    }
+
+    try {
+      const res = await fetch("/api/ontop/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ service: "locket", target: cleanTarget }),
+      });
+      const json = await res.json();
+      if (json.success && json.link) {
+        window.location.href = json.link;
+      } else {
+        setIsRedirecting(false);
+        setResult({
+          success: false,
+          error: json.error || "Không thể tạo liên kết vượt link lúc này. Vui lòng thử lại sau!",
+        });
+      }
+    } catch {
+      setIsRedirecting(false);
+      setResult({
+        success: false,
+        error: "Lỗi kết nối khi khởi tạo liên kết. Vui lòng thử lại!",
+      });
+    }
+  }
+
+  // Thực thi kích hoạt Locket Gold khi đã có Credit khả dụng
+  async function handleExecuteActivate() {
+    const cleanTarget = target.trim();
+    if (!cleanTarget) {
+      setResult({
+        success: false,
+        error: "Vui lòng nhập thông tin tài khoản Locket (Username / Link invite).",
+      });
+      return;
+    }
 
     if (!canActivate) {
       setResult({
         success: false,
-        error: "Bạn chưa có lượt buff Locket Gold khả dụng. Vui lòng hoàn thành vượt link ở khung phía trên để nhận lượt!",
+        error: "Bạn chưa có lượt buff Locket Gold khả dụng. Vui lòng hoàn thành vượt link ở nút bên dưới để nhận lượt!",
       });
-      const widget = document.getElementById("pass-widget");
-      if (widget) {
-        widget.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
       return;
     }
 
@@ -128,6 +226,9 @@ Cài DNS khi Gold chưa xuất hiện sẽ chỉ giữ trạng thái chưa có G
       clearTimeout(stepTimer2);
       setResult(data);
       if (data.success) {
+        try {
+          localStorage.removeItem("locket_saved_target");
+        } catch {}
         const now = new Date();
         const pad = (n: number) => n.toString().padStart(2, "0");
         const formatted = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())} · ${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()}`;
@@ -155,6 +256,26 @@ Cài DNS khi Gold chưa xuất hiện sẽ chỉ giữ trạng thái chưa có G
     } finally {
       setLoading(false);
       setStep(0);
+    }
+  }
+
+  // Điều phối Submit Form: Khi có credit thì Kích hoạt, khi chưa có thì vượt link
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (loading || isRedirecting) return;
+
+    if (allGatewaysExhausted && availableCredits === 0) {
+      setResult({
+        success: false,
+        error: "Bạn đã đạt giới hạn vượt link tối đa hôm nay (4 lượt). Vui lòng quay lại sau 00:00!",
+      });
+      return;
+    }
+
+    if (availableCredits > 0) {
+      await handleExecuteActivate();
+    } else {
+      await handleRedirectToBypassLink();
     }
   }
 
@@ -488,8 +609,33 @@ Cài DNS khi Gold chưa xuất hiện sẽ chỉ giữ trạng thái chưa có G
 
         {/* ACTIVATION FORM CARD */}
         <div className="locket-card">
-          {/* THẺ TIẾN ĐỘ VƯỢT LINK ONTOP.LINK MỞ KHÓA VÔ HẠN */}
+          {/* TOAST THÔNG BÁO VƯỢT LINK THÀNH CÔNG */}
+          {toastMsg && (
+            <div className="ontop-toast-banner success">
+              <i className="fa-solid fa-circle-check" />
+              <span>{toastMsg}</span>
+              <button
+                type="button"
+                className="ontop-toast-close"
+                onClick={() => setToastMsg("")}
+              >
+                ×
+              </button>
+            </div>
+          )}
+
+          {/* THẺ TIẾN ĐỘ VƯỢT LINK CỔNG */}
           <OntopPassWidget service="locket" onStatusChange={setOntopPass} />
+
+          {/* BANNER BÁO SẴN SÀNG BUFF GOLD KHI CÓ CREDIT */}
+          {availableCredits > 0 && !loading && (
+            <div className="ontop-ready-banner">
+              <i className="fa-solid fa-circle-check" />
+              <span>
+                Bạn đang có <strong>{availableCredits} lượt Buff Gold khả dụng</strong>. Nhập tài khoản và bấm <strong>KÍCH HOẠT LOCKET GOLD NGAY</strong> bên dưới!
+              </span>
+            </div>
+          )}
 
           {!result?.success ? (
             <form onSubmit={handleSubmit} className="locket-form">
@@ -576,35 +722,75 @@ Cài DNS khi Gold chưa xuất hiện sẽ chỉ giữ trạng thái chưa có G
                 </div>
               )}
 
-              {/* SUBMIT BUTTON */}
-              <button
-                type="submit"
-                disabled={loading || !target.trim() || !canActivate}
-                className={`locket-submit-btn ${loading ? "is-loading" : ""} ${!canActivate ? "is-locked" : ""}`}
-              >
-                {loading ? (
-                  <>
-                    <span className="locket-spinner" />
-                    <span>Đang kích hoạt gói Gold...</span>
-                  </>
-                ) : !canActivate ? (
-                  <>
-                    <i className="fas fa-lock" />
-                    <span>🔒 VƯỢT LINK ĐỂ NHẬN LƯỢT BUFF GOLD</span>
-                  </>
-                ) : (
-                  <>
+              {/* SUBMIT BUTTON (SINGLE DYNAMIC ACTION CTA) */}
+              {loading ? (
+                <button type="button" className="locket-submit-btn is-loading" disabled>
+                  <span className="locket-spinner" />
+                  <span>Đang kích hoạt gói Gold...</span>
+                </button>
+              ) : isRedirecting ? (
+                <button type="button" className="locket-submit-btn bypass-mode" disabled>
+                  <i className="fa-solid fa-spinner fa-spin" />
+                  <span>ĐANG TẠO LIÊN KẾT ({activeGatewayName})...</span>
+                </button>
+              ) : availableCredits > 0 ? (
+                /* STATE D: CÓ LƯỢT KHẢ DỤNG -> NÚT KÍCH HOẠT CHUẨN XANH NEON */
+                <>
+                  <button
+                    type="submit"
+                    className="locket-submit-btn ready-mode"
+                    disabled={!target.trim()}
+                  >
                     <i className="fas fa-bolt" />
-                    <span>KÍCH HOẠT LOCKET GOLD ({availableCredits} LƯỢT CÒN)</span>
-                  </>
-                )}
-              </button>
-
-              {!canActivate && (
-                <p className="kps-btn-subnote" style={{ marginTop: "10px" }}>
-                  <i className="fa-solid fa-circle-exclamation" />{" "}
-                  Mỗi lượt vượt link mở khóa 1 lần Buff Gold. Vui lòng bấm nhận lượt ở khung phía trên!
-                </p>
+                    <span>⚡ KÍCH HOẠT LOCKET GOLD NGAY ({availableCredits} LƯỢT KHẢ DỤNG)</span>
+                  </button>
+                  <p className="kps-btn-subnote" style={{ color: "#34d399", marginTop: "10px" }}>
+                    <i className="fa-solid fa-circle-check" /> Sẵn sàng! Bấm nút để tiến hành mở khóa Gold cho tài khoản.
+                  </p>
+                </>
+              ) : allGatewaysExhausted ? (
+                /* STATE E: TOÀN BỘ CỔNG ĐÃ HẾT LƯỢT TRONG NGÀY */
+                <>
+                  <button
+                    type="button"
+                    className="locket-submit-btn exhausted-mode"
+                    disabled
+                  >
+                    <i className="fa-solid fa-hourglass-half" />
+                    <span>⏳ ĐÃ ĐẠT GIỚI HẠN HÔM NAY (QUAY LẠI SAU 00:00)</span>
+                  </button>
+                  <p className="kps-btn-subnote" style={{ color: "#94a3b8", marginTop: "10px" }}>
+                    <i className="fa-solid fa-circle-info" /> Bạn đã vượt đủ 4/4 lượt hôm nay. Hạn mức sẽ tự động mở lại sau 00:00!
+                  </p>
+                </>
+              ) : (
+                /* STATE A/B/C: CHƯA CÓ CREDIT -> NÚT VƯỢT LINK ĐỘNG THEO CỔNG */
+                <>
+                  <button
+                    type="submit"
+                    className="locket-submit-btn bypass-mode"
+                  >
+                    {earnedCount === 0 ? (
+                      <>
+                        <i className="fa-solid fa-rocket" />
+                        <span>🚀 VƯỢT LINK ĐỂ KÍCH HOẠT LOCKET GOLD (LƯỢT 1/2)</span>
+                      </>
+                    ) : earnedCount === 1 ? (
+                      <>
+                        <i className="fa-solid fa-bolt" />
+                        <span>⚡ VƯỢT LINK ONTOP (LƯỢT 2/2) ĐỂ KÍCH HOẠT</span>
+                      </>
+                    ) : (
+                      <>
+                        <i className="fa-solid fa-arrows-rotate" />
+                        <span>🔄 VƯỢT LINK {activeGatewayName.toUpperCase()} (LƯỢT {currentGatewayStep}/2) ĐỂ KÍCH HOẠT</span>
+                      </>
+                    )}
+                  </button>
+                  <p className="kps-btn-subnote" style={{ marginTop: "10px" }}>
+                    <i className="fa-solid fa-circle-info" /> Nhập thông tin tài khoản ở trên (không bắt buộc) rồi bấm để vượt link nhận lượt Buff Gold.
+                  </p>
+                </>
               )}
             </form>
           ) : (

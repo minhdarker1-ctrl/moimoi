@@ -35,6 +35,9 @@ export async function GET() {
       usedCount: status.usedCount,
       availableCredits: status.availableCredits,
       currentGateway: status.currentGateway,
+      activeGatewayName: status.activeGatewayName,
+      currentGatewayStep: status.currentGatewayStep,
+      allGatewaysExhausted: status.allGatewaysExhausted,
       isExhausted: status.isExhausted,
       target: 2,
       // Tương thích ngược với các component cũ

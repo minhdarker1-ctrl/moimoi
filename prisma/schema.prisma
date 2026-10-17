@@ -489,14 +489,15 @@ model OntopDailyPass {
 }
 
 model OntopPendingSession {
-  id        Int      @id @default(autoincrement())
-  token     String   @unique
-  passToken String
-  step      Int      // 1 hoặc 2
-  service   String   // "freefire" | "locket" | "all"
-  used      Boolean  @default(false)
-  expiresAt DateTime // TTL 30 phút
-  createdAt DateTime @default(now())
+  id         Int      @id @default(autoincrement())
+  token      String   @unique
+  passToken  String
+  step       Int      // 1 hoặc 2
+  service    String   // "freefire" | "locket" | "all"
+  targetUser String   @default("") // UID Free Fire hoặc username Locket để callback trả về
+  used       Boolean  @default(false)
+  expiresAt  DateTime // TTL 30 phút
+  createdAt  DateTime @default(now())
 
   @@index([token])
   @@index([passToken])
