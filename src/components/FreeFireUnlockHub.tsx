@@ -18,6 +18,7 @@ interface RecentLog {
   maskedUid: string;
   server: string;
   timeAgo: string;
+  source?: "WEB" | "TELEGRAM";
 }
 
 export type ServerType = "kipas" | "astute";
@@ -408,12 +409,15 @@ export default function FreeFireUnlockHub({
         "*"
       );
 
-      // Polling kiểm tra tiến độ
-      let pollAttempts = 0;
-      const maxAttempts = 18;
+      // Polling kiểm tra tiến độ thời gian thực
+      let phase: "PENDING" | "PROCESSING" = "PENDING";
+      let phaseElapsedSeconds = 0;
+      const PENDING_TIMEOUT = 45; // Tối đa 45s chờ Worker nhận task
+      const PROCESSING_TIMEOUT = 35; // Tối đa 35s chờ Worker giải và nạp Whitelist
+      const POLL_INTERVAL_MS = 2000;
 
       activePollRef.current = setInterval(async () => {
-        pollAttempts++;
+        phaseElapsedSeconds += POLL_INTERVAL_MS / 1000;
 
         try {
           const statusRes = await fetch(`/api/freefire/unlock?jobId=${jobId}`);
@@ -421,12 +425,33 @@ export default function FreeFireUnlockHub({
 
           if (statusData.success) {
             if (statusData.status === "PROCESSING") {
+              if (phase !== "PROCESSING") {
+                // Worker vừa chuyển từ PENDING sang PROCESSING -> Reset đồng hồ cho phase này
+                phase = "PROCESSING";
+                phaseElapsedSeconds = 0;
+              }
               setStatus("processing");
-              setProgressPct(Math.min(85, 45 + pollAttempts * 4));
+              const pct = Math.min(
+                85,
+                45 + Math.round((phaseElapsedSeconds / PROCESSING_TIMEOUT) * 40)
+              );
+              setProgressPct(pct);
               setStepMessage(
                 `Đang nạp UID ${cleanUid} vào hệ thống ${
                   statusData.serverLabel || currentPortLabel
-                }...`
+                }... (${Math.round(phaseElapsedSeconds)}s)`
+              );
+            } else if (statusData.status === "PENDING") {
+              setStatus("queued");
+              const pct = Math.min(
+                40,
+                15 + Math.round((phaseElapsedSeconds / PENDING_TIMEOUT) * 25)
+              );
+              setProgressPct(pct);
+              setStepMessage(
+                `Đang xếp hàng chờ Worker tiếp nhận... (${Math.round(
+                  phaseElapsedSeconds
+                )}s)`
               );
             } else if (statusData.status === "SUCCESS") {
               if (activePollRef.current) {
@@ -454,42 +479,69 @@ export default function FreeFireUnlockHub({
               }
               setStatus("error");
               setErrorMsg(
-                statusData.resultMessage || "Máy chủ báo lỗi khi xử lý kích hoạt UID."
+                statusData.resultMessage ||
+                  "Máy chủ báo lỗi khi xử lý kích hoạt UID. Lượt Verify đã được hoàn trả!"
               );
+              // Phục hồi lượt hiển thị trên UI
+              try {
+                const refreshRes = await fetch("/api/ontop/status");
+                const refreshData = await refreshRes.json();
+                if (refreshData.success) {
+                  setOntopPass(refreshData);
+                } else {
+                  setOntopPass((prev) =>
+                    prev
+                      ? {
+                          ...prev,
+                          usedCount: Math.max(0, prev.usedCount - 1),
+                          availableCredits: prev.availableCredits + 1,
+                          hasAccess: true,
+                        }
+                      : null
+                  );
+                }
+              } catch {
+                setOntopPass((prev) =>
+                  prev
+                    ? {
+                        ...prev,
+                        usedCount: Math.max(0, prev.usedCount - 1),
+                        availableCredits: prev.availableCredits + 1,
+                        hasAccess: true,
+                      }
+                    : null
+                );
+              }
               return;
             }
           }
         } catch {}
 
-        // Fallback tự động hoàn tất sau 5 nhịp nếu worker đã xong ngầm
-        if (pollAttempts === 5) {
-          setProgressPct(90);
-          setStepMessage(`Đang hoàn tất đồng bộ danh sách cổng ${currentPortLabel}...`);
-          try {
-            await fetch("/api/freefire/queue/complete", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                jobId,
-                status: "SUCCESS",
-                resultMessage: `Đã nạp Whitelist thành công cho bản ${currentPortLabel}!`,
-              }),
-            });
-            try {
-              localStorage.removeItem("ff_saved_uid");
-            } catch {}
-          } catch {}
-        }
-
-        if (pollAttempts >= maxAttempts) {
+        // Kiểm tra timeout theo từng giai đoạn
+        if (
+          (phase === "PENDING" && phaseElapsedSeconds >= PENDING_TIMEOUT) ||
+          (phase === "PROCESSING" && phaseElapsedSeconds >= PROCESSING_TIMEOUT)
+        ) {
           if (activePollRef.current) {
             clearInterval(activePollRef.current);
             activePollRef.current = null;
           }
           setStatus("error");
-          setErrorMsg("Hết thời gian chờ phản hồi. Vui lòng bấm thử lại sau giây lát!");
+          setErrorMsg(
+            phase === "PENDING"
+              ? "Worker đang bận hoặc tạm nghỉ. Yêu cầu chưa kịp xử lý và lượt của bạn đã được bảo lưu an toàn. Vui lòng thử lại sau ít phút!"
+              : "Hết thời gian kết nối tới máy chủ game. Hệ thống đang dọn dẹp và sẽ tự động hoàn lại lượt Verify cho bạn nếu thất bại!"
+          );
+          // Đồng bộ lại lượt thực tế
+          try {
+            const refreshRes = await fetch("/api/ontop/status");
+            const refreshData = await refreshRes.json();
+            if (refreshData.success) {
+              setOntopPass(refreshData);
+            }
+          } catch {}
         }
-      }, 1500);
+      }, POLL_INTERVAL_MS);
     } catch {
       setStatus("error");
       setErrorMsg("Lỗi kết nối máy chủ. Vui lòng kiểm tra đường truyền và thử lại!");
@@ -980,7 +1032,14 @@ export default function FreeFireUnlockHub({
                 <span className="recent-uid">
                   <i className="fa-solid fa-user-shield" /> {item.maskedUid}
                 </span>
-                <span className="recent-server">{item.server}</span>
+                <span className="recent-server">
+                  {item.server}
+                  {item.source === "TELEGRAM" && (
+                    <span className="kps-source-tele" title="Kích hoạt từ Telegram Bot @mdarker_bot">
+                      ⚡ Tele
+                    </span>
+                  )}
+                </span>
                 <span className="recent-time">{item.timeAgo}</span>
               </div>
             ))}

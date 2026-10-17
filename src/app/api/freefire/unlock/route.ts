@@ -120,6 +120,9 @@ export async function POST(req: Request) {
             timestamp: Date.now(),
             clientAgent: userAgent.slice(0, 150),
             retries: 0,
+            passId: creditResult.passId,
+            source: body.source || "WEB",
+            chatId: body.chatId || null,
           }),
         },
       });
@@ -240,6 +243,7 @@ export async function GET(req: Request) {
         serviceName: true,
         status: true,
         createdAt: true,
+        metadata: true,
       },
     });
 
@@ -250,12 +254,18 @@ export async function GET(req: Request) {
           ? uid.slice(0, 3) + "***" + uid.slice(-2)
           : uid.slice(0, 2) + "***";
 
+      let meta: Record<string, any> = {};
+      try {
+        meta = JSON.parse(log.metadata || "{}");
+      } catch {}
+
       const isAstute = log.serviceName.includes("Astute");
       return {
         id: log.id,
         maskedUid: masked,
         server: isAstute ? "Astute" : "FF Kipas",
         status: log.status,
+        source: meta.source || "WEB",
         timeAgo: getTimeAgo(log.createdAt),
       };
     });

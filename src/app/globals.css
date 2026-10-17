@@ -6156,6 +6156,19 @@ body.vthangios-dark .mdarker-music-mini-dot {
 .kps-recent-item .recent-server {
   font-weight: 700;
   color: #38bdf8;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.kps-recent-item .kps-source-tele {
+  font-size: 9.5px;
+  background: rgba(14, 165, 233, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(14, 165, 233, 0.35);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-family: monospace;
 }
 
 .kps-recent-item .recent-time {

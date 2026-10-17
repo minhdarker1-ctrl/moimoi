@@ -425,11 +425,14 @@ model ServiceUsageLog {
   targetUser  String   @default("") // username Locket ('tminh_238'), Ingame ID, device name, account ID
   ip          String   @default("")
   device      String   @default("") // iPhone, Android, Windows...
-  status      String   @default("SUCCESS") // "SUCCESS" | "FAILED" | "PENDING"
+  status      String   @default("SUCCESS") // "SUCCESS" | "FAILED" | "PENDING" | "PROCESSING"
+  refunded    Boolean  @default(false)     // Chống hoàn tiền kép
   metadata    String   @default("{}") // JSON string: { uid, expiresDate, key, error... }
   createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt // Theo dõi task treo Zombie
 
-  @@index([serviceType])
+  @@index([serviceType, status])
+  @@index([status, updatedAt])
   @@index([createdAt])
   @@index([userId])
 }
