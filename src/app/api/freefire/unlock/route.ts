@@ -3,7 +3,14 @@ import { db } from "@/lib/db";
 import { clientIp, rateLimit } from "@/lib/guard";
 import { getCurrentUser } from "@/lib/auth";
 import { sendFreeFireUnlockTelegramAlert } from "@/lib/telegram";
-import { checkOntopUnlimited } from "@/lib/ontop";
+import {
+  consumeCredit,
+  refundCredit,
+  signPassPayload,
+  ONTOP_COOKIE_NAME,
+  getOntopPassStatus,
+} from "@/lib/ontop";
+import { vnDate } from "@/lib/crypto";
 
 export const dynamic = "force-dynamic";
 
@@ -58,39 +65,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // Kiểm tra quyền Vô Hạn từ thẻ OnTop Daily Pass (2/2 lần trong ngày)
-    const cookieHeader = req.headers.get("cookie") || "";
-    const ontopCookieMatch = cookieHeader.match(/ontop_daily_pass=([^;]+)/);
-    const ontopCookieVal = ontopCookieMatch ? decodeURIComponent(ontopCookieMatch[1]) : undefined;
-    const isOntopUnlimited = await checkOntopUnlimited(ip, ontopCookieVal);
-
-    // Chống gửi trùng UID liên tiếp trong 60 giây (nếu chưa có thẻ vô hạn)
-    if (!isOntopUnlimited) {
-      const oneMinuteAgo = new Date(Date.now() - 60_000);
-      const existingRecentTask = await db.serviceUsageLog.findFirst({
-        where: {
-          serviceType: "FREE_FIRE",
-          targetUser: rawUid,
-          createdAt: { gte: oneMinuteAgo },
-          status: { in: ["PENDING", "PROCESSING", "SUCCESS"] },
-        },
-        orderBy: { createdAt: "desc" },
-      });
-
-      if (existingRecentTask) {
-        return NextResponse.json({
-          success: true,
-          jobId: existingRecentTask.id,
-          uid: rawUid,
-          server,
-          serverLabel,
-          status: existingRecentTask.status,
-          message:
-            "UID của bạn đã được tiếp nhận gần đây và đang trong quá trình đồng bộ. Vui lòng không gửi liên tiếp!",
-        });
-      }
-    }
-
     // 4. Lấy cấu hình hệ thống
     const config = await db.freeFireConfig.findUnique({ where: { id: 1 } });
     if (config && !config.unlockEnabled) {
@@ -103,29 +77,24 @@ export async function POST(req: Request) {
       );
     }
 
-    // 5. Kiểm tra yêu cầu Key (nếu admin bật unlockRequireKey và user CHƯA có thẻ Vô Hạn OnTop)
-    if (config?.unlockRequireKey && !isOntopUnlimited) {
-      const providedKey = String(body.key ?? "").trim();
-      const validStaticKey = config.staticKey?.trim();
+    // 5. BẮT BUỘC KIỂM TRA & TRỪ CREDIT NGUYÊN TỬ (Atomic Concurrency Control)
+    const cookieHeader = req.headers.get("cookie") || "";
+    const ontopCookieMatch = cookieHeader.match(/ontop_daily_pass=([^;]+)/);
+    const ontopCookieVal = ontopCookieMatch ? decodeURIComponent(ontopCookieMatch[1]) : undefined;
 
-      let keyValid = false;
-      if (validStaticKey && providedKey === validStaticKey) {
-        keyValid = true;
-      }
-
-      if (!keyValid) {
-        return NextResponse.json(
-          {
-            success: false,
-            requireKey: true,
-            error: "Hệ thống yêu cầu Key kích hoạt hoặc vượt 2 lần link OnTop để mở khóa VÔ HẠN.",
-          },
-          { status: 403 }
-        );
-      }
+    const creditResult = await consumeCredit(ip, ontopCookieVal);
+    if (!creditResult.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          requirePass: true,
+          error: creditResult.error || "Bạn chưa có lượt Verify khả dụng. Vui lòng hoàn thành vượt link để nhận lượt!",
+        },
+        { status: 403 }
+      );
     }
 
-    // 6. Tạo Task Hàng Đợi (Status = PENDING) để Extension Worker nhận việc
+    // 6. Tiếp nhận Task Hàng Đợi (Status = PENDING) để Extension Worker nhận việc
     const user = await getCurrentUser();
     const userAgent = req.headers.get("user-agent") || "";
     let deviceName = "Khác";
@@ -134,26 +103,39 @@ export async function POST(req: Request) {
     else if (/windows/i.test(userAgent)) deviceName = "Windows PC";
     else if (/macintosh/i.test(userAgent)) deviceName = "Mac";
 
-    const task = await db.serviceUsageLog.create({
-      data: {
-        userId: user?.id ?? null,
-        serviceType: "FREE_FIRE",
-        serviceName: `Free Fire Unlock (${serverLabel})`,
-        targetUser: rawUid,
-        ip,
-        device: deviceName,
-        status: "PENDING",
-        metadata: JSON.stringify({
-          server,
-          serverLabel,
-          timestamp: Date.now(),
-          clientAgent: userAgent.slice(0, 150),
-          retries: 0,
-        }),
-      },
-    });
+    let task;
+    try {
+      task = await db.serviceUsageLog.create({
+        data: {
+          userId: user?.id ?? null,
+          serviceType: "FREE_FIRE",
+          serviceName: `Free Fire Unlock (${serverLabel})`,
+          targetUser: rawUid,
+          ip,
+          device: deviceName,
+          status: "PENDING",
+          metadata: JSON.stringify({
+            server,
+            serverLabel,
+            timestamp: Date.now(),
+            clientAgent: userAgent.slice(0, 150),
+            retries: 0,
+          }),
+        },
+      });
+    } catch (taskErr) {
+      console.error("Lỗi tạo Task hàng đợi, tiến hành hoàn lại credit:", taskErr);
+      await refundCredit(creditResult.passId);
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Máy chủ đang quá tải. Lượt Verify của bạn đã được hoàn lại an toàn, vui lòng thử lại sau!",
+        },
+        { status: 500 }
+      );
+    }
 
-    // Bắn thông báo về Telegram tự động theo Phương án 3 (chạy nền, không chặn phản hồi)
+    // Bắn thông báo về Telegram tự động (chạy nền, không chặn phản hồi)
     sendFreeFireUnlockTelegramAlert({
       uid: rawUid,
       server,
@@ -163,15 +145,36 @@ export async function POST(req: Request) {
       status: "PENDING",
     }).catch((e) => console.error("Telegram notify failed:", e));
 
-    return NextResponse.json({
+    const freshStatus = await getOntopPassStatus(ip, creditResult.passToken);
+    const today = vnDate();
+    const response = NextResponse.json({
       success: true,
       jobId: task.id,
       uid: rawUid,
       server,
       serverLabel,
       status: "PENDING",
+      remainingCredits: creditResult.remainingCredits,
       message: "Yêu cầu mở khóa đã được tiếp nhận. Đang đồng bộ danh sách Whitelist lên máy chủ...",
     });
+
+    // Cập nhật cookie mới với số credit đã trừ
+    const signedToken = signPassPayload({
+      passToken: creditResult.passToken,
+      date: freshStatus.date || today,
+      earnedCount: freshStatus.earnedCount,
+      usedCount: freshStatus.usedCount,
+      availableCredits: freshStatus.availableCredits,
+    });
+
+    response.cookies.set(ONTOP_COOKIE_NAME, signedToken, {
+      path: "/",
+      maxAge: 86400,
+      httpOnly: true,
+      sameSite: "lax",
+    });
+
+    return response;
   } catch (error) {
     console.error("FF Unlock Error:", error);
     return NextResponse.json(

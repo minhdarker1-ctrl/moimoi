@@ -4,7 +4,7 @@ import { clientIp, rateLimit } from "@/lib/guard";
 import {
   getOrCreateDailyPass,
   verifyPassPayload,
-  createOntopLink,
+  createPassLink,
   signPassPayload,
   ONTOP_COOKIE_NAME,
 } from "@/lib/ontop";
@@ -24,8 +24,8 @@ export async function POST(req: Request) {
     const cookieStore = await cookies();
     const ip = clientIp(h);
 
-    // Chống spam gọi API tạo link OnTop
-    if (await rateLimit("ontop-start", ip, 12, 60_000)) {
+    // Chống spam gọi API tạo link
+    if (await rateLimit("ontop-start", ip, 15, 60_000)) {
       return NextResponse.json(
         {
           success: false,
@@ -42,20 +42,12 @@ export async function POST(req: Request) {
     const parsedCookie = verifyPassPayload(rawCookie);
 
     const pass = await getOrCreateDailyPass(ip, parsedCookie.passToken);
-
-    // Nếu đã kích hoạt Vô Hạn hôm nay rồi thì không cần vượt tiếp
-    if (pass.isUnlimited) {
-      return NextResponse.json({
-        success: true,
-        alreadyUnlimited: true,
-        message: "Bạn đã mở khóa chế độ VÔ HẠN hôm nay! Có thể sử dụng dịch vụ ngay.",
-      });
-    }
+    const availableCredits = Math.max(0, pass.count - pass.usedCount);
 
     const currentStep = pass.count + 1;
     const baseUrl = getBaseUrl(req);
 
-    const result = await createOntopLink({
+    const result = await createPassLink({
       service,
       baseUrl,
       passToken: pass.token,
@@ -72,15 +64,18 @@ export async function POST(req: Request) {
     const signedToken = signPassPayload({
       passToken: pass.token,
       date: pass.date,
-      count: pass.count,
-      isUnlimited: pass.isUnlimited,
+      earnedCount: pass.count,
+      usedCount: pass.usedCount,
+      availableCredits,
     });
 
     const response = NextResponse.json({
       success: true,
       redirectUrl: result.url,
       step: currentStep,
-      target: 2,
+      gateway: result.gateway,
+      earnedCount: pass.count,
+      availableCredits,
     });
 
     response.cookies.set(ONTOP_COOKIE_NAME, signedToken, {
@@ -95,7 +90,7 @@ export async function POST(req: Request) {
     return NextResponse.json(
       {
         success: false,
-        error: error?.message || "Lỗi tạo phiên vượt link OnTop.link",
+        error: error?.message || "Lỗi tạo phiên vượt link",
       },
       { status: 500 }
     );

@@ -472,15 +472,17 @@ model AovConfig {
 // ---------- Thẻ Vô Hạn Ngày OnTop.link (Unlock ID & Locket) ----------
 
 model OntopDailyPass {
-  id          Int      @id @default(autoincrement())
-  token       String   @unique // Token định danh thiết bị / phiên người dùng
-  ip          String
-  date        String   // YYYY-MM-DD theo giờ Việt Nam
-  count       Int      @default(0) // Số lượt đã vượt: 0, 1, 2
-  isUnlimited Boolean  @default(false) // true khi count >= 2
-  expiresAt   DateTime // Hết hạn lúc 23:59:59 của ngày
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id             Int      @id @default(autoincrement())
+  token          String   @unique // Token định danh thiết bị / phiên người dùng
+  ip             String
+  date           String   // YYYY-MM-DD theo giờ Việt Nam
+  count          Int      @default(0) // Số lượt đã vượt (earnedCount): 0, 1, 2
+  usedCount      Int      @default(0) // Số lượt đã tiêu dùng để Verify UID
+  currentGateway String   @default("ONTOPS") // Cổng hiện tại: ONTOPS, LINK4M...
+  isUnlimited    Boolean  @default(false) // Giữ tương thích ngược
+  expiresAt      DateTime // Hết hạn lúc 23:59:59 của ngày
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   @@index([ip, date])
   @@index([token])

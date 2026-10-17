@@ -1,10 +1,23 @@
 import { db } from "@/lib/db";
-import { decryptToken, vnDate, sessionToken, fingerprint, safeEqual } from "@/lib/crypto";
+import { decryptToken, vnDate, sessionToken, safeEqual } from "@/lib/crypto";
 import { createHmac } from "node:crypto";
+import { shorten, isProvider } from "@/lib/shorteners";
 
 const ONTOPS_API_ENDPOINT = "https://api-management.ontops.link/api/public/create-short-link";
 const ONTOPS_DOMAIN = "https://ontops.link";
 export const ONTOP_COOKIE_NAME = "ontop_daily_pass";
+
+/** Trạng thái thẻ lượt trong ngày */
+export type PassStatus = {
+  hasAccess: boolean;         // Có ít nhất 1 credit khả dụng
+  earnedCount: number;       // Số lượt đã vượt hôm nay (0, 1, 2...)
+  usedCount: number;         // Số lượt đã tiêu dùng để Verify UID
+  availableCredits: number;  // Math.max(0, earnedCount - usedCount)
+  currentGateway: string;    // "ONTOPS" | "LINK4M" | "TRAFFICVN"...
+  isExhausted: boolean;      // Đã đạt trần 2/2 lượt OnTop trong ngày
+  passToken?: string;
+  date?: string;
+};
 
 /** Tính thời điểm 23:59:59 của ngày hôm nay theo giờ Việt Nam */
 export function getEndOfVnDay(dateStr: string = vnDate()): Date {
@@ -15,8 +28,9 @@ export function getEndOfVnDay(dateStr: string = vnDate()): Date {
 export function signPassPayload(data: {
   passToken: string;
   date: string;
-  count: number;
-  isUnlimited: boolean;
+  earnedCount: number;
+  usedCount: number;
+  availableCredits: number;
 }): string {
   const secret = process.env.SESSION_SECRET || "moimoi-default-secret-key-min-32-chars";
   const body = Buffer.from(JSON.stringify(data)).toString("base64url");
@@ -31,8 +45,9 @@ export function verifyPassPayload(
   valid: boolean;
   passToken?: string;
   date?: string;
-  count?: number;
-  isUnlimited?: boolean;
+  earnedCount?: number;
+  usedCount?: number;
+  availableCredits?: number;
 } {
   if (!cookieVal) return { valid: false };
   const parts = cookieVal.split(".");
@@ -52,8 +67,9 @@ export function verifyPassPayload(
       valid: true,
       passToken: data.passToken,
       date: data.date,
-      count: Number(data.count) || 0,
-      isUnlimited: Boolean(data.isUnlimited),
+      earnedCount: Number(data.earnedCount ?? data.count) || 0,
+      usedCount: Number(data.usedCount) || 0,
+      availableCredits: Number(data.availableCredits) || 0,
     };
   } catch {
     return { valid: false };
@@ -81,6 +97,8 @@ export async function getOrCreateDailyPass(ip: string, existingPassToken?: strin
         data: {
           date: today,
           count: 0,
+          usedCount: 0,
+          currentGateway: "ONTOPS",
           isUnlimited: false,
           expiresAt: endOfDay,
           ip,
@@ -107,40 +125,126 @@ export async function getOrCreateDailyPass(ip: string, existingPassToken?: strin
       ip,
       date: today,
       count: 0,
+      usedCount: 0,
+      currentGateway: "ONTOPS",
       isUnlimited: false,
       expiresAt: endOfDay,
     },
   });
 }
 
-/** Kiểm tra nhanh quyền Vô Hạn OnTop của request */
+/**
+ * Tra cứu trạng thái thẻ lượt (Zero-Trust: luôn đối soát Database)
+ */
+export async function getOntopPassStatus(
+  ip: string,
+  cookieToken?: string
+): Promise<PassStatus> {
+  const parsed = verifyPassPayload(cookieToken);
+  const pass = await getOrCreateDailyPass(ip, parsed.passToken);
+
+  const earnedCount = pass.count;
+  const usedCount = pass.usedCount;
+  const availableCredits = Math.max(0, earnedCount - usedCount);
+  const isExhausted = earnedCount >= 2;
+
+  let currentGateway = pass.currentGateway;
+  if (isExhausted && currentGateway === "ONTOPS") {
+    currentGateway = "LINK4M";
+  }
+
+  return {
+    hasAccess: availableCredits > 0,
+    earnedCount,
+    usedCount,
+    availableCredits,
+    currentGateway,
+    isExhausted,
+    passToken: pass.token,
+    date: pass.date,
+  };
+}
+
+/**
+ * Tiêu thụ 1 credit nguyên tử (Atomic Consumption chống Race Condition & Double Spending)
+ */
+export async function consumeCredit(
+  ip: string,
+  cookieToken?: string
+): Promise<{
+  success: boolean;
+  remainingCredits: number;
+  passId: number;
+  passToken: string;
+  error?: string;
+}> {
+  const today = vnDate();
+  const parsed = verifyPassPayload(cookieToken);
+  const pass = await getOrCreateDailyPass(ip, parsed.passToken);
+
+  // Atomic Update: Chỉ tăng usedCount khi count > usedCount (tức availableCredits > 0)
+  const updateResult = await db.ontopDailyPass.updateMany({
+    where: {
+      id: pass.id,
+      date: today,
+      count: { gt: pass.usedCount },
+    },
+    data: {
+      usedCount: { increment: 1 },
+    },
+  });
+
+  if (updateResult.count === 0) {
+    const fresh = await db.ontopDailyPass.findUnique({ where: { id: pass.id } });
+    const credits = fresh ? Math.max(0, fresh.count - fresh.usedCount) : 0;
+    return {
+      success: false,
+      remainingCredits: credits,
+      passId: pass.id,
+      passToken: pass.token,
+      error: "Bạn chưa có lượt Verify khả dụng hoặc lượt của bạn đã được sử dụng. Vui lòng vượt link để nhận lượt mới!",
+    };
+  }
+
+  const updatedPass = await db.ontopDailyPass.findUnique({ where: { id: pass.id } });
+  const remaining = updatedPass ? Math.max(0, updatedPass.count - updatedPass.usedCount) : 0;
+
+  return {
+    success: true,
+    remainingCredits: remaining,
+    passId: pass.id,
+    passToken: pass.token,
+  };
+}
+
+/**
+ * Hoàn lại 1 lượt (Refund) khi tác vụ Verify UID hoặc Buff Locket gặp lỗi máy chủ
+ */
+export async function refundCredit(passId: number): Promise<boolean> {
+  try {
+    const pass = await db.ontopDailyPass.findUnique({ where: { id: passId } });
+    if (!pass || pass.usedCount <= 0) return false;
+
+    await db.ontopDailyPass.update({
+      where: { id: passId },
+      data: {
+        usedCount: { decrement: 1 },
+      },
+    });
+    return true;
+  } catch (err) {
+    console.error("Lỗi hoàn trả credit pass:", err);
+    return false;
+  }
+}
+
+/** Kiểm tra nhanh quyền (Tương thích ngược, kiểm tra credit > 0) */
 export async function checkOntopUnlimited(
   ip: string,
   cookieToken?: string
 ): Promise<boolean> {
-  const today = vnDate();
-
-  // Kiểm tra cookie đã ký trước để tối ưu tốc độ
-  if (cookieToken) {
-    const parsed = verifyPassPayload(cookieToken);
-    if (parsed.valid && parsed.date === today && parsed.isUnlimited) {
-      return true;
-    }
-  }
-
-  // Đối soát database
-  const pass = await db.ontopDailyPass.findFirst({
-    where: {
-      date: today,
-      isUnlimited: true,
-      OR: [
-        ...(cookieToken ? [{ token: cookieToken }] : []),
-        { ip },
-      ],
-    },
-  });
-
-  return Boolean(pass?.isUnlimited);
+  const status = await getOntopPassStatus(ip, cookieToken);
+  return status.availableCredits > 0;
 }
 
 /** Lấy API key của cổng OnTop.link */
@@ -160,8 +264,10 @@ export async function getOntopApiKey(): Promise<string | null> {
   }
 }
 
-/** Tạo link rút gọn OnTop.link cho phiên vượt link */
-export async function createOntopLink({
+/**
+ * Tạo link vượt (Tự động chọn OnTop cho 2 lượt đầu, và Cổng 2 khi OnTop đạt 2/2)
+ */
+export async function createPassLink({
   service,
   baseUrl,
   passToken,
@@ -171,14 +277,18 @@ export async function createOntopLink({
   baseUrl: string;
   passToken: string;
   step: number;
-}): Promise<{ ok: true; url: string; pendingToken: string } | { ok: false; error: string }> {
-  const apiKey = await getOntopApiKey();
-  if (!apiKey) {
-    return {
-      ok: false,
-      error: "Hệ thống chưa cấu hình hoặc cổng OnTop.link đang tạm tắt. Vui lòng liên hệ Admin!",
-    };
-  }
+}): Promise<{
+  ok: true;
+  url: string;
+  pendingToken: string;
+  gateway: string;
+} | {
+  ok: false;
+  error: string;
+}> {
+  const pass = await db.ontopDailyPass.findUnique({ where: { token: passToken } });
+  const today = vnDate();
+  const earnedCount = pass && pass.date === today ? pass.count : 0;
 
   const pendingToken = sessionToken();
   const expiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30 phút TTL
@@ -195,61 +305,98 @@ export async function createOntopLink({
   });
 
   const callbackUrl = `${baseUrl}/api/ontop/callback?token=${pendingToken}`;
-  const apiUrl = `${ONTOPS_API_ENDPOINT}?apikey=${apiKey}&url=${encodeURIComponent(callbackUrl)}`;
 
-  try {
-    const res = await fetch(apiUrl, {
-      method: "GET",
-      headers: { Accept: "application/json" },
-      cache: "no-store",
-    });
+  // Nếu chưa đạt trần 2 lượt OnTop: Ưu tiên cổng OnTop
+  if (earnedCount < 2) {
+    const ontopKey = await getOntopApiKey();
+    if (ontopKey) {
+      const apiUrl = `${ONTOPS_API_ENDPOINT}?apikey=${ontopKey}&url=${encodeURIComponent(callbackUrl)}`;
+      try {
+        const res = await fetch(apiUrl, {
+          method: "GET",
+          headers: { Accept: "application/json" },
+          cache: "no-store",
+        });
 
-    const bodyText = await res.text();
-    let data: any = {};
-    try {
-      data = JSON.parse(bodyText);
-    } catch {
-      return {
-        ok: false,
-        error: `Phản hồi từ OnTop không đúng định dạng: ${bodyText.slice(0, 100)}`,
-      };
+        const bodyText = await res.text();
+        let data: any = {};
+        try {
+          data = JSON.parse(bodyText);
+        } catch {
+          data = {};
+        }
+
+        if (data.id) {
+          await db.shortener
+            .updateMany({
+              where: { provider: "ONTOPS", enabled: true },
+              data: { dailyUsed: { increment: 1 } },
+            })
+            .catch(() => {});
+
+          return {
+            ok: true,
+            url: `${ONTOPS_DOMAIN}/${data.id}`,
+            pendingToken,
+            gateway: "ONTOPS",
+          };
+        }
+      } catch (err) {
+        console.warn("Lỗi kết nối OnTop, thử cổng dự phòng:", err);
+      }
     }
-
-    if (!data.id) {
-      return {
-        ok: false,
-        error: data.message || data.err || data.error || "Cổng OnTop không trả về mã link rút gọn.",
-      };
-    }
-
-    // Tăng dailyUsed của shortener
-    await db.shortener
-      .updateMany({
-        where: { provider: "ONTOPS", enabled: true },
-        data: { dailyUsed: { increment: 1 } },
-      })
-      .catch(() => {});
-
-    return {
-      ok: true,
-      url: `${ONTOPS_DOMAIN}/${data.id}`,
-      pendingToken,
-    };
-  } catch (err: any) {
-    return {
-      ok: false,
-      error: `Lỗi kết nối tới máy chủ OnTop.link: ${err?.message || String(err)}`,
-    };
   }
+
+  // Khi OnTop đã đủ 2/2 view HOẶC OnTop lỗi: Chuyển sang Cổng số 2 (Link4m / TrafficVN / Linktop)
+  const secondaryShorteners = await db.shortener.findMany({
+    where: {
+      enabled: true,
+      provider: { not: "ONTOPS" },
+    },
+    orderBy: { order: "asc" },
+  });
+
+  for (const s of secondaryShorteners) {
+    if (!isProvider(s.provider)) continue;
+    try {
+      const token = decryptToken(s.tokenEnc);
+      const url = await shorten(s.provider, token, callbackUrl, `${baseUrl}/${service}`);
+      await db.shortener
+        .update({
+          where: { id: s.id },
+          data: { dailyUsed: { increment: 1 } },
+        })
+        .catch(() => {});
+
+      return {
+        ok: true,
+        url,
+        pendingToken,
+        gateway: s.name || s.provider,
+      };
+    } catch (err) {
+      console.error(`Lỗi tạo link qua cổng dự phòng ${s.provider}:`, err);
+    }
+  }
+
+  return {
+    ok: false,
+    error: "Hiện tại các cổng vượt link đang tạm bảo trì. Vui lòng thử lại sau giây lát!",
+  };
 }
 
-/** Xác minh sau khi OnTop chuyển hướng về callback */
+/** Tương thích ngược: Alias cho createPassLink */
+export const createOntopLink = createPassLink;
+
+/** Xác minh sau khi vượt link chuyển hướng về callback */
 export async function verifyOntopCallback(token: string): Promise<{
   success: boolean;
   error?: string;
   service?: string;
   step?: number;
-  isUnlimited?: boolean;
+  earnedCount?: number;
+  usedCount?: number;
+  availableCredits?: number;
   passToken?: string;
   date?: string;
 }> {
@@ -300,17 +447,21 @@ export async function verifyOntopCallback(token: string): Promise<{
     };
   }
 
-  // Tăng số lượt (tối đa ghi nhận 2 lượt)
-  const currentCount = pass.date === today ? pass.count : 0;
-  const newCount = Math.min(2, currentCount + 1);
-  const isUnlimited = newCount >= 2;
+  // Tăng số lượt đã vượt
+  const currentEarned = pass.date === today ? pass.count : 0;
+  const currentUsed = pass.date === today ? pass.usedCount : 0;
+  const newEarned = currentEarned + 1;
+  const newCredits = Math.max(0, newEarned - currentUsed);
+  const nextGateway = newEarned >= 2 ? "LINK4M" : "ONTOPS";
 
   await db.ontopDailyPass.update({
     where: { id: pass.id },
     data: {
       date: today,
-      count: newCount,
-      isUnlimited,
+      count: newEarned,
+      usedCount: currentUsed,
+      currentGateway: nextGateway,
+      isUnlimited: false,
       expiresAt: getEndOfVnDay(today),
     },
   });
@@ -319,14 +470,15 @@ export async function verifyOntopCallback(token: string): Promise<{
   await db.serviceUsageLog.create({
     data: {
       serviceType: "ONTOP_PASS",
-      serviceName: `OnTop Pass (${pending.service.toUpperCase()})`,
+      serviceName: `Link Pass (${pending.service.toUpperCase()})`,
       targetUser: pass.ip,
       ip: pass.ip,
       status: "SUCCESS",
       metadata: JSON.stringify({
-        step: newCount,
-        isUnlimited,
+        earnedCount: newEarned,
+        availableCredits: newCredits,
         service: pending.service,
+        gateway: nextGateway,
         date: today,
       }),
     },
@@ -335,8 +487,10 @@ export async function verifyOntopCallback(token: string): Promise<{
   return {
     success: true,
     service: pending.service,
-    step: newCount,
-    isUnlimited,
+    step: newEarned,
+    earnedCount: newEarned,
+    usedCount: currentUsed,
+    availableCredits: newCredits,
     passToken: pass.token,
     date: today,
   };

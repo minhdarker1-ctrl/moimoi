@@ -2,7 +2,14 @@ import { NextResponse } from "next/server";
 import { clientIp, rateLimit } from "@/lib/guard";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import { checkOntopUnlimited } from "@/lib/ontop";
+import {
+  consumeCredit,
+  refundCredit,
+  signPassPayload,
+  ONTOP_COOKIE_NAME,
+  getOntopPassStatus,
+} from "@/lib/ontop";
+import { vnDate } from "@/lib/crypto";
 
 // StoreKit 2 Receipt Tokens from C:\tmauto\locket\locketgold.py
 const TOKEN_CONFIG = {
@@ -128,21 +135,20 @@ async function checkStatus(uid: string): Promise<{ active: boolean; expires?: st
 export async function POST(req: Request) {
   try {
     const ip = clientIp(req);
-    const cookieHeader = req.headers.get("cookie") || "";
-    const ontopCookieMatch = cookieHeader.match(/ontop_daily_pass=([^;]+)/);
-    const ontopCookieVal = ontopCookieMatch ? decodeURIComponent(ontopCookieMatch[1]) : undefined;
-    const isOntopUnlimited = await checkOntopUnlimited(ip, ontopCookieVal);
-
-    // Rate limit: Nếu đã có thẻ Vô Hạn OnTop Pass thì cho phép dùng liên tục, nếu chưa thì tối đa 6 lượt / 10 phút
-    if (!isOntopUnlimited && (await rateLimit("locket-activate", ip, 6, 10 * 60_000))) {
+    // Rate limit chống spam (Tối đa 10 lượt / 10 phút / IP)
+    if (await rateLimit("locket-activate", ip, 10, 10 * 60_000)) {
       return NextResponse.json(
         {
           success: false,
-          error: "Bạn thao tác quá nhanh. Vui lòng thử lại sau 10 phút hoặc vượt 2 lượt OnTop.link để mở khóa VÔ HẠN!",
+          error: "Bạn thao tác quá nhanh. Vui lòng thử lại sau ít phút!",
         },
         { status: 429 }
       );
     }
+
+    const cookieHeader = req.headers.get("cookie") || "";
+    const ontopCookieMatch = cookieHeader.match(/ontop_daily_pass=([^;]+)/);
+    const ontopCookieVal = ontopCookieMatch ? decodeURIComponent(ontopCookieMatch[1]) : undefined;
 
     const body = await req.json().catch(() => ({}));
     const target = (body.target || "").trim();
@@ -170,7 +176,22 @@ export async function POST(req: Request) {
       );
     }
 
-    // Bước 2: Gửi biên lai Apple StoreKit 2
+    // Bước 2: Kiểm tra & Trừ credit nguyên tử (Atomic Consumption)
+    const creditResult = await consumeCredit(ip, ontopCookieVal);
+    if (!creditResult.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          requirePass: true,
+          error:
+            creditResult.error ||
+            "Bạn chưa có lượt buff Locket Gold khả dụng. Vui lòng hoàn thành vượt link để nhận lượt!",
+        },
+        { status: 403 }
+      );
+    }
+
+    // Bước 3: Gửi biên lai Apple StoreKit 2
     const payload = {
       product_id: "locket_1600_1y",
       fetch_token: TOKEN_CONFIG.fetch_token,
@@ -271,13 +292,36 @@ export async function POST(req: Request) {
         },
       }).catch(() => {});
 
-      return NextResponse.json({
+      const freshStatus = await getOntopPassStatus(ip, creditResult.passToken);
+      const today = vnDate();
+      const response = NextResponse.json({
         success: true,
         uid,
         expiresDate: expiresDate || "1 Năm (Tự động đồng bộ)",
+        remainingCredits: creditResult.remainingCredits,
         message: "Kích hoạt Locket Gold thành công!",
       });
+
+      const signedToken = signPassPayload({
+        passToken: creditResult.passToken,
+        date: freshStatus.date || today,
+        earnedCount: freshStatus.earnedCount,
+        usedCount: freshStatus.usedCount,
+        availableCredits: freshStatus.availableCredits,
+      });
+
+      response.cookies.set(ONTOP_COOKIE_NAME, signedToken, {
+        path: "/",
+        maxAge: 86400,
+        httpOnly: true,
+        sameSite: "lax",
+      });
+
+      return response;
     }
+
+    // Nếu không kích hoạt được -> Hoàn trả credit an toàn
+    await refundCredit(creditResult.passId);
 
     await db.serviceUsageLog.create({
       data: {
@@ -295,7 +339,7 @@ export async function POST(req: Request) {
     return NextResponse.json(
       {
         success: false,
-        error: errorMessage,
+        error: `${errorMessage} (Lượt buff của bạn đã được hoàn trả an toàn).`,
       },
       { status: 502 }
     );

@@ -17,7 +17,7 @@ export async function GET(req: Request) {
 
   if (!token) {
     const errorUrl = new URL("/key/error", baseUrl);
-    errorUrl.searchParams.set("m", "Thiếu mã xác nhận phiên vượt link OnTop.");
+    errorUrl.searchParams.set("m", "Thiếu mã xác nhận phiên vượt link.");
     return NextResponse.redirect(errorUrl, 302);
   }
 
@@ -27,17 +27,20 @@ export async function GET(req: Request) {
     const errorUrl = new URL("/key/error", baseUrl);
     errorUrl.searchParams.set(
       "m",
-      result.error || "Xác thực phiên vượt link OnTop thất bại. Vui lòng thử lại!"
+      result.error || "Xác thực phiên vượt link thất bại. Vui lòng thử lại!"
     );
     return NextResponse.redirect(errorUrl, 302);
   }
 
-  // Tạo URL quay lại theo service
+  // Tạo URL quay lại theo service kèm số dư lượt mới
   let returnPath = "/";
+  const stepNum = result.earnedCount || result.step || 1;
+  const credits = result.availableCredits ?? 1;
+
   if (result.service === "freefire") {
-    returnPath = `/freefire?tab=unlock&ontop=success&step=${result.step}&unlimited=${result.isUnlimited ? "1" : "0"}`;
+    returnPath = `/freefire?tab=unlock&ontop=success&step=${stepNum}&credits=${credits}`;
   } else if (result.service === "locket") {
-    returnPath = `/locket?ontop=success&step=${result.step}&unlimited=${result.isUnlimited ? "1" : "0"}`;
+    returnPath = `/locket?ontop=success&step=${stepNum}&credits=${credits}`;
   }
 
   const redirectUrl = new URL(returnPath, baseUrl);
@@ -47,8 +50,9 @@ export async function GET(req: Request) {
   const signedCookie = signPassPayload({
     passToken: result.passToken,
     date: result.date,
-    count: result.step || 1,
-    isUnlimited: Boolean(result.isUnlimited),
+    earnedCount: result.earnedCount || 1,
+    usedCount: result.usedCount || 0,
+    availableCredits: credits,
   });
 
   response.cookies.set(ONTOP_COOKIE_NAME, signedCookie, {

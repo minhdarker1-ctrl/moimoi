@@ -55,6 +55,8 @@ export default function FreeFireUnlockHub({
   // State Machine
   const [status, setStatus] = useState<VerifyStatus>("idle");
   const [ontopPass, setOntopPass] = useState<OntopStatusData | null>(null);
+  const availableCredits = ontopPass?.availableCredits ?? 0;
+  const canVerify = availableCredits > 0;
   const [keyInput, setKeyInput] = useState("");
   const [honeypot, setHoneypot] = useState("");
   const [stepMessage, setStepMessage] = useState("");
@@ -221,9 +223,14 @@ export default function FreeFireUnlockHub({
       return;
     }
 
-    if (config?.unlockRequireKey && !ontopPass?.isUnlimited && !keyInput.trim()) {
+    // Bắt buộc có credit mới cho phép gửi yêu cầu
+    if (!canVerify) {
       setStatus("error");
-      setErrorMsg("Vui lòng nhập Key mở khóa hoặc vượt 2 lượt link OnTop để mở VÔ HẠN.");
+      setErrorMsg("Bạn chưa có lượt Verify khả dụng. Vui lòng hoàn thành vượt link ở khung phía trên để nhận lượt!");
+      const widget = document.getElementById("pass-widget");
+      if (widget) {
+        widget.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
       return;
     }
 
@@ -257,8 +264,26 @@ export default function FreeFireUnlockHub({
       if (!res.ok || !data.success) {
         setStatus("error");
         setErrorMsg(data.error || "Không thể xử lý UID lúc này. Vui lòng thử lại sau!");
+        if (data.requirePass) {
+          const widget = document.getElementById("pass-widget");
+          if (widget) {
+            widget.scrollIntoView({ behavior: "smooth", block: "center" });
+          }
+        }
         return;
       }
+
+      // Đã tiêu hao thành công 1 credit -> Cập nhật state cục bộ
+      setOntopPass((prev) =>
+        prev
+          ? {
+              ...prev,
+              usedCount: prev.usedCount + 1,
+              availableCredits: Math.max(0, prev.availableCredits - 1),
+              hasAccess: Math.max(0, prev.availableCredits - 1) > 0,
+            }
+          : null
+      );
 
       const jobId = data.jobId;
       setStatus("queued");
@@ -635,21 +660,33 @@ export default function FreeFireUnlockHub({
             <div className="kps-btn-wrap">
               <button
                 type="submit"
-                className="kps-verify-btn"
-                disabled={isBusy || !uid.trim()}
+                className={`kps-verify-btn ${!canVerify ? "kps-btn-locked" : ""}`}
+                disabled={isBusy || !uid.trim() || !canVerify}
               >
                 {isBusy ? (
                   <>
                     <i className="fa-solid fa-bolt fa-spin" />
                     <span>⚡ ĐANG XÁC MINH...</span>
                   </>
+                ) : !canVerify ? (
+                  <>
+                    <i className="fa-solid fa-lock" />
+                    <span>🔒 VƯỢT LINK ĐỂ NHẬN LƯỢT VERIFY UID</span>
+                  </>
                 ) : (
                   <>
                     <i className="fa-solid fa-shield-halved" />
-                    <span>VERIFY UID</span>
+                    <span>VERIFY UID ({availableCredits} LƯỢT KHẢ DỤNG)</span>
                   </>
                 )}
               </button>
+
+              {!canVerify && (
+                <p className="kps-btn-subnote">
+                  <i className="fa-solid fa-circle-exclamation" />{" "}
+                  Mỗi lượt vượt link mở khóa 1 lần Verify UID. Vui lòng bấm nhận lượt ở khung phía trên!
+                </p>
+              )}
             </div>
           )}
         </form>

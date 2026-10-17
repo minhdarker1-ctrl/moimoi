@@ -2,8 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies, headers } from "next/headers";
 import { clientIp } from "@/lib/guard";
 import {
-  getOrCreateDailyPass,
-  verifyPassPayload,
+  getOntopPassStatus,
   signPassPayload,
   ONTOP_COOKIE_NAME,
 } from "@/lib/ontop";
@@ -18,25 +17,30 @@ export async function GET() {
     const ip = clientIp(h);
 
     const rawCookie = cookieStore.get(ONTOP_COOKIE_NAME)?.value;
-    const parsedCookie = verifyPassPayload(rawCookie);
-
-    const pass = await getOrCreateDailyPass(ip, parsedCookie.passToken);
+    const status = await getOntopPassStatus(ip, rawCookie);
     const today = vnDate();
 
     const signedToken = signPassPayload({
-      passToken: pass.token,
-      date: pass.date,
-      count: pass.count,
-      isUnlimited: pass.isUnlimited,
+      passToken: status.passToken || "",
+      date: status.date || today,
+      earnedCount: status.earnedCount,
+      usedCount: status.usedCount,
+      availableCredits: status.availableCredits,
     });
 
     const response = NextResponse.json({
       success: true,
-      date: pass.date,
-      count: pass.count,
+      hasAccess: status.hasAccess,
+      earnedCount: status.earnedCount,
+      usedCount: status.usedCount,
+      availableCredits: status.availableCredits,
+      currentGateway: status.currentGateway,
+      isExhausted: status.isExhausted,
       target: 2,
-      isUnlimited: pass.isUnlimited,
-      remainingSteps: Math.max(0, 2 - pass.count),
+      // Tương thích ngược với các component cũ
+      count: status.earnedCount,
+      isUnlimited: false,
+      remainingSteps: Math.max(0, 2 - status.earnedCount),
     });
 
     // Cập nhật cookie đồng bộ
