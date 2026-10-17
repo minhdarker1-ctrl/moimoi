@@ -5410,6 +5410,277 @@ body.vthangios-dark .mdarker-music-mini-dot {
   margin-top: 2px;
 }
 
+/* ==========================================================================
+   HERO INPUT ARCHITECTURE: UID FREE FIRE
+   ========================================================================== */
+
+.kps-hero-input-container {
+  position: relative;
+  margin: 18px 0 16px;
+  padding: 16px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.85) 0%, rgba(10, 15, 28, 0.95) 100%);
+  border: 1.5px solid rgba(6, 182, 212, 0.4);
+  box-shadow: 0 0 25px -4px rgba(6, 182, 212, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.kps-hero-input-container:focus-within {
+  border-color: #06b6d4;
+  box-shadow: 0 0 32px rgba(6, 182, 212, 0.35), inset 0 0 15px rgba(6, 182, 212, 0.08);
+}
+
+.kps-hero-input-container.is-valid {
+  border-color: rgba(16, 185, 129, 0.55);
+  box-shadow: 0 0 28px rgba(16, 185, 129, 0.25), inset 0 0 15px rgba(16, 185, 129, 0.06);
+}
+
+.kps-hero-input-container.flash-restored {
+  animation: kps-flash-pulse 2.2s ease-out;
+}
+
+@keyframes kps-flash-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.8), 0 0 35px rgba(6, 182, 212, 0.6);
+    border-color: #22d3ee;
+  }
+  50% {
+    box-shadow: 0 0 30px 4px rgba(6, 182, 212, 0.45), 0 0 20px rgba(6, 182, 212, 0.3);
+    border-color: #06b6d4;
+  }
+  100% {
+    box-shadow: 0 0 25px -4px rgba(6, 182, 212, 0.2);
+    border-color: rgba(6, 182, 212, 0.4);
+  }
+}
+
+/* Header: Label bên trái & Badge cổng bên phải */
+.kps-hero-input-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.kps-hero-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #22d3ee;
+}
+
+.kps-hero-pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #22d3ee;
+  box-shadow: 0 0 8px #22d3ee;
+  animation: kps-dot-ping 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@keyframes kps-dot-ping {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(1.3);
+  }
+}
+
+/* Badge mini trạng thái cổng */
+.kps-hero-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #34d399;
+}
+
+.kps-hero-status-badge.offline {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #f87171;
+}
+
+.kps-hero-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 6px #10b981;
+}
+
+.kps-hero-status-badge.offline .kps-hero-status-dot {
+  background: #ef4444;
+  box-shadow: 0 0 6px #ef4444;
+}
+
+/* Ô nhập chính & Icon & Nút Dán */
+.kps-hero-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.kps-hero-input-icon {
+  position: absolute;
+  left: 16px;
+  font-size: 18px;
+  color: #38bdf8;
+  pointer-events: none;
+  z-index: 2;
+  transition: all 0.2s ease;
+}
+
+.kps-hero-input-icon.valid {
+  color: #10b981;
+  filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.6));
+}
+
+.kps-hero-input {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 58px;
+  background: rgba(8, 12, 22, 0.95);
+  border: 1.5px solid rgba(51, 65, 85, 0.7);
+  border-radius: 14px;
+  padding: 12px 140px 12px 48px;
+  font-size: 20px;
+  font-weight: 800;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  letter-spacing: 0.14em;
+  color: #ffffff;
+  transition: all 0.25s ease;
+}
+
+.kps-hero-input::placeholder {
+  font-family: var(--font-quicksand), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: normal;
+  color: #64748b;
+}
+
+.kps-hero-input:focus {
+  outline: none;
+  border-color: #22d3ee;
+  background: rgba(12, 19, 36, 0.98);
+  box-shadow: 0 0 18px rgba(6, 182, 212, 0.25);
+}
+
+.kps-hero-input-container.is-valid .kps-hero-input {
+  border-color: rgba(16, 185, 129, 0.5);
+}
+
+/* Cụm hành động bên phải input: Bộ đếm + Nút dán */
+.kps-hero-actions-right {
+  position: absolute;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 2;
+}
+
+.kps-hero-char-count {
+  font-size: 11px;
+  font-weight: 700;
+  font-family: ui-monospace, monospace;
+  padding: 3px 6px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #94a3b8;
+  letter-spacing: 0.02em;
+}
+
+.kps-hero-char-count.valid {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.kps-hero-paste-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: rgba(6, 182, 212, 0.15);
+  border: 1px solid rgba(6, 182, 212, 0.38);
+  color: #67e8f9;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.kps-hero-paste-btn:hover:not(:disabled) {
+  background: rgba(6, 182, 212, 0.28);
+  color: #ffffff;
+  border-color: #22d3ee;
+  transform: translateY(-1px);
+  box-shadow: 0 0 12px rgba(6, 182, 212, 0.3);
+}
+
+.kps-hero-paste-btn:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+/* Dòng bảo mật dịu mắt (Chống Warning Fatigue) */
+.kps-hero-security-notice {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  font-size: 11.5px;
+  color: #94a3b8;
+  line-height: 1.4;
+}
+
+.kps-hero-security-notice i {
+  color: #fbbf24;
+  font-size: 11px;
+}
+
+.kps-hero-security-notice strong {
+  color: #cbd5e1;
+}
+
+@media (max-width: 480px) {
+  .kps-hero-input {
+    font-size: 17px;
+    padding-right: 105px;
+    padding-left: 42px;
+    letter-spacing: 0.08em;
+  }
+  .kps-hero-input-icon {
+    left: 14px;
+    font-size: 16px;
+  }
+  .kps-hero-paste-btn {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+  .kps-hero-char-count {
+    display: none;
+  }
+}
+
 .kps-server-status-pill {
   display: flex;
   align-items: center;

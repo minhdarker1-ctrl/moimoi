@@ -67,6 +67,9 @@ export default function FreeFireUnlockHub({
   const [recentLogs, setRecentLogs] = useState<RecentLog[]>([]);
   const [toastMsg, setToastMsg] = useState("");
   const [isRedirecting, setIsRedirecting] = useState(false);
+  const [isRestoredFlash, setIsRestoredFlash] = useState(false);
+
+  const isUidValid = uid.length >= 8 && uid.length <= 12;
 
   // Khôi phục UID 2 lớp (URL query param + localStorage) & Làm sạch thanh địa chỉ
   useEffect(() => {
@@ -77,10 +80,12 @@ export default function FreeFireUnlockHub({
 
     if (urlUid) {
       setUid(urlUid);
+      setIsRestoredFlash(true);
+      setTimeout(() => setIsRestoredFlash(false), 2400);
       try {
         localStorage.setItem(
           "ff_saved_uid",
-          JSON.stringify({ uid: urlUid, exp: Date.now() + 30 * 60 * 1000 })
+          JSON.stringify({ uid: urlUid, exp: Date.now() + 24 * 60 * 60 * 1000 })
         );
       } catch {}
     } else {
@@ -90,6 +95,8 @@ export default function FreeFireUnlockHub({
           const parsed = JSON.parse(raw);
           if (parsed?.uid && parsed?.exp > Date.now()) {
             setUid(parsed.uid);
+            setIsRestoredFlash(true);
+            setTimeout(() => setIsRestoredFlash(false), 2400);
           }
         }
       } catch {}
@@ -207,6 +214,21 @@ export default function FreeFireUnlockHub({
     fetchRecent();
   }, [successResult]);
 
+  // Tự động lưu UID vào localStorage khi nhập/dán để người dùng không phải nhập lại
+  function handleUidChange(val: string) {
+    const clean = val.replace(/\D/g, "");
+    setUid(clean);
+    if (errorMsg) setErrorMsg("");
+    if (clean) {
+      try {
+        localStorage.setItem(
+          "ff_saved_uid",
+          JSON.stringify({ uid: clean, exp: Date.now() + 24 * 60 * 60 * 1000 })
+        );
+      } catch {}
+    }
+  }
+
   // Nút Dán UID từ Clipboard
   async function handlePaste() {
     try {
@@ -218,8 +240,7 @@ export default function FreeFireUnlockHub({
       }
       const clean = text.trim().replace(/\D/g, "");
       if (clean) {
-        setUid(clean.slice(0, 15));
-        setErrorMsg("");
+        handleUidChange(clean.slice(0, 15));
         setPasteToast("Đã dán!");
         setTimeout(() => setPasteToast(""), 1500);
       } else {
@@ -506,18 +527,6 @@ export default function FreeFireUnlockHub({
             Cổng hiện tại: {server === "astute" ? "ASTUTE" : "FF KIPAS"}
           </span>
         </div>
-
-        {onBack && (
-          <button
-            type="button"
-            className="kps-back-btn"
-            onClick={onBack}
-            title="Quay lại danh sách công cụ"
-          >
-            <i className="fa-solid fa-chevron-left" />
-            <span>Quay lại</span>
-          </button>
-        )}
       </header>
 
       {/* 2. THẺ XÁC MINH TRUNG TÂM (CENTERED CARD) */}
@@ -587,9 +596,6 @@ export default function FreeFireUnlockHub({
           </p>
         </div>
 
-        {/* THẺ TIẾN ĐỘ VƯỢT LINK ONTOP.LINK MỞ KHÓA VÔ HẠN */}
-        <OntopPassWidget service="freefire" onStatusChange={setOntopPass} />
-
         {/* 4. FORM NHẬP UID FREE FIRE */}
         <form onSubmit={handleSubmit} className="kps-verify-form" noValidate>
           {/* Honeypot chống bot tự động */}
@@ -604,54 +610,75 @@ export default function FreeFireUnlockHub({
             aria-hidden="true"
           />
 
-          <div className="kps-input-group">
-            <label htmlFor="uid" className="kps-input-label">
-              UID Free Fire
-            </label>
+          {/* CỤM HERO INPUT: UID FREE FIRE */}
+          <div className={`kps-hero-input-container ${isUidValid ? "is-valid" : ""} ${isRestoredFlash ? "flash-restored" : ""}`}>
+            {/* Header của ô Input: Label + Trạng thái kết nối gộp chung */}
+            <div className="kps-hero-input-header">
+              <label htmlFor="uid" className="kps-hero-label">
+                <span className="kps-hero-pulse-dot" aria-hidden="true" />
+                <span>Nhập UID Free Fire Cần Mở Khóa</span>
+              </label>
 
-            <div className="kps-input-wrap">
-              <span className="kps-input-icon" aria-hidden="true">
-                <i className="fa-solid fa-user" />
-              </span>
+              {/* Đưa trạng thái cổng lên góc phải để tiết kiệm diện tích */}
+              <div className={`kps-hero-status-badge ${workerStatus?.isOnline ? "online" : "offline"}`}>
+                <span className="kps-hero-status-dot" aria-hidden="true" />
+                <span>
+                  {server === "astute" ? "Astute" : "FF Kipas"}: {workerStatus?.isOnline ? "Sẵn sàng" : "Bảo trì"}
+                </span>
+              </div>
+            </div>
+
+            {/* Ô Input chính & Nút Dán & Icon */}
+            <div className="kps-hero-input-wrap">
+              <div className={`kps-hero-input-icon ${isUidValid ? "valid" : ""}`} aria-hidden="true">
+                {isUidValid ? (
+                  <i className="fa-solid fa-circle-check" />
+                ) : (
+                  <i className="fa-solid fa-user" />
+                )}
+              </div>
 
               <input
                 id="uid"
                 name="uid"
                 type="text"
                 inputMode="numeric"
-                pattern="[0-9]{5,15}"
+                pattern="[0-9]*"
                 maxLength={15}
                 autoComplete="off"
                 aria-describedby="uid-help"
-                placeholder="Nhập UID 5–15 chữ số..."
+                placeholder="VD: 1234567890..."
                 value={uid}
-                onChange={(e) => {
-                  setUid(e.target.value.replace(/\D/g, ""));
-                  if (errorMsg) setErrorMsg("");
-                }}
+                onChange={(e) => handleUidChange(e.target.value)}
                 disabled={isBusy}
-                className="kps-input"
+                className="kps-hero-input"
               />
 
-              <button
-                type="button"
-                className="kps-paste-btn"
-                onClick={handlePaste}
-                disabled={isBusy}
-                title="Dán nhanh UID từ bộ nhớ tạm"
-                aria-label="Dán UID từ bộ nhớ tạm"
-              >
-                <i className="fa-regular fa-clipboard" />
-                <span>{pasteToast || "Dán"}</span>
-              </button>
+              {/* Cụm góc phải: Bộ đếm ký tự & Nút dán ID */}
+              <div className="kps-hero-actions-right">
+                {uid.length > 0 && (
+                  <span className={`kps-hero-char-count ${isUidValid ? "valid" : ""}`}>
+                    {uid.length} số {isUidValid ? "✓" : ""}
+                  </span>
+                )}
+                <button
+                  type="button"
+                  className="kps-hero-paste-btn"
+                  onClick={handlePaste}
+                  disabled={isBusy}
+                  title="Dán nhanh UID từ bộ nhớ tạm"
+                  aria-label="Dán UID từ bộ nhớ tạm"
+                >
+                  <i className="fa-regular fa-clipboard" />
+                  <span>{pasteToast || "📋 Dán ID"}</span>
+                </button>
+              </div>
             </div>
 
-            {/* CẢNH BÁO AN TOÀN THEO YÊU CẦU KIỂM DUYỆT */}
-            <p id="uid-help" className="kps-security-notice">
+            {/* Dòng nhắc bảo mật dịu mắt (Chống Warning Fatigue) */}
+            <p id="uid-help" className="kps-hero-security-notice">
               <i className="fa-solid fa-lock" />
-              <span>
-                Chỉ nhập UID Free Fire. Không nhập mật khẩu, OTP hoặc mã khôi phục tài khoản.
-              </span>
+              <span>Chỉ nhập <strong>UID số</strong>. Tuyệt đối không nhập mật khẩu hay mã OTP.</span>
             </p>
           </div>
 
@@ -679,21 +706,8 @@ export default function FreeFireUnlockHub({
             </div>
           )}
 
-          {/* TRẠNG THÁI MÁY CHỦ SẴN SÀNG */}
-          <div className="kps-server-status-pill">
-            <span
-              className={`kps-status-dot ${
-                workerStatus?.isOnline ? "online" : "offline"
-              }`}
-            />
-            <span className="kps-status-text">
-              {server === "astute" ? "Astute: " : "FF Kipas: "}
-              {workerStatus?.isOnline ? "Sẵn sàng kết nối" : "Tạm thời không khả dụng"}
-            </span>
-            <span className="kps-status-subnote">
-              · Xác minh nhanh, không yêu cầu thao tác CAPTCHA thủ công
-            </span>
-          </div>
+          {/* THẺ TIẾN ĐỘ VƯỢT LINK ONTOP.LINK (ĐẶT NGAY TRÊN NÚT BẤM CTA ĐỂ TỐI ƯU TÂM LÝ UX) */}
+          <OntopPassWidget service="freefire" onStatusChange={setOntopPass} />
 
           {/* BANNER BÁO SẴN SÀNG VERIFY KHI CÓ CREDIT */}
           {availableCredits > 0 && !isBusy && (
