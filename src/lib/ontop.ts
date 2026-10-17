@@ -3,6 +3,8 @@ import { decryptToken, vnDate, sessionToken, safeEqual } from "@/lib/crypto";
 import { createHmac } from "node:crypto";
 import { shorten, isProvider } from "@/lib/shorteners";
 
+const VIETUSER_API_ENDPOINT = "https://vietuser.com/api-shorten/v2";
+const VIETUSER_DEFAULT_TOKEN = "b839edac1a32d13613b8a4248379d1d0a9794b2b1944b5f53e1ffea7409fcfa3";
 const ONTOPS_API_ENDPOINT = "https://api-management.ontops.link/api/public/create-short-link";
 const ONTOPS_DOMAIN = "https://ontops.link";
 export const ONTOP_COOKIE_NAME = "ontop_daily_pass";
@@ -13,11 +15,11 @@ export type PassStatus = {
   earnedCount: number;       // Số lượt đã vượt hôm nay (0, 1, 2...)
   usedCount: number;         // Số lượt đã tiêu dùng để Verify UID
   availableCredits: number;  // Math.max(0, earnedCount - usedCount)
-  currentGateway: string;    // "ONTOPS" | "LINK4M" | "TRAFFICVN"...
-  activeGatewayName: string; // Tên hiển thị cổng hiện tại: "OnTop" | "Link4m"
+  currentGateway: string;    // "VIETUSER" | "LINK4M" | "TRAFFICVN"...
+  activeGatewayName: string; // Tên hiển thị cổng hiện tại: "VietUser" | "Link4m"
   currentGatewayStep: number;// Nấc lượt hiện tại của cổng (1 hoặc 2)
   allGatewaysExhausted: boolean; // true khi đã hết sạch mọi cổng hôm nay (count >= 4)
-  isExhausted: boolean;      // Đã đạt trần 2/2 lượt OnTop trong ngày
+  isExhausted: boolean;      // Đã đạt trần 2/2 lượt VietUser trong ngày
   passToken?: string;
   date?: string;
 };
@@ -101,7 +103,7 @@ export async function getOrCreateDailyPass(ip: string, existingPassToken?: strin
           date: today,
           count: 0,
           usedCount: 0,
-          currentGateway: "ONTOPS",
+          currentGateway: "VIETUSER",
           isUnlimited: false,
           expiresAt: endOfDay,
           ip,
@@ -129,7 +131,7 @@ export async function getOrCreateDailyPass(ip: string, existingPassToken?: strin
       date: today,
       count: 0,
       usedCount: 0,
-      currentGateway: "ONTOPS",
+      currentGateway: "VIETUSER",
       isUnlimited: false,
       expiresAt: endOfDay,
     },
@@ -152,8 +154,8 @@ export async function getOntopPassStatus(
   const isExhausted = earnedCount >= 2;
   const allGatewaysExhausted = earnedCount >= 4;
 
-  let activeGatewayName = "OnTop";
-  let currentGatewayStep = earnedCount + 1; // 1 hoặc 2 cho OnTop
+  let activeGatewayName = "VietUser";
+  let currentGatewayStep = earnedCount + 1; // 1 hoặc 2 cho VietUser
 
   if (earnedCount >= 2) {
     activeGatewayName = "Link4m";
@@ -164,7 +166,7 @@ export async function getOntopPassStatus(
   }
 
   let currentGateway = pass.currentGateway;
-  if (isExhausted && currentGateway === "ONTOPS") {
+  if (isExhausted && (currentGateway === "ONTOPS" || currentGateway === "VIETUSER")) {
     currentGateway = "LINK4M";
   }
 
@@ -265,7 +267,25 @@ export async function checkOntopUnlimited(
   return status.availableCredits > 0;
 }
 
-/** Lấy API key của cổng OnTop.link */
+/** Lấy API key của cổng VietUser */
+export async function getVietUserApiKey(): Promise<string | null> {
+  const shortener = await db.shortener.findFirst({
+    where: { provider: "VIETUSER", enabled: true },
+    orderBy: { order: "asc" },
+  });
+
+  if (shortener) {
+    try {
+      return decryptToken(shortener.tokenEnc);
+    } catch (e) {
+      console.error("Lỗi giải mã token VietUser:", e);
+    }
+  }
+
+  return process.env.VIETUSER_API_KEY || VIETUSER_DEFAULT_TOKEN;
+}
+
+/** Lấy API key của cổng OnTop.link (Dự phòng) */
 export async function getOntopApiKey(): Promise<string | null> {
   const shortener = await db.shortener.findFirst({
     where: { provider: "ONTOPS", enabled: true },
@@ -283,7 +303,7 @@ export async function getOntopApiKey(): Promise<string | null> {
 }
 
 /**
- * Tạo link vượt (Tự động chọn OnTop cho 2 lượt đầu, và Cổng 2 khi OnTop đạt 2/2)
+ * Tạo link vượt (Tự động chọn VietUser cho 2 lượt đầu, và Cổng 2 khi VietUser đạt 2/2)
  */
 export async function createPassLink({
   service,
@@ -327,8 +347,41 @@ export async function createPassLink({
 
   const callbackUrl = `${baseUrl}/api/ontop/callback?token=${pendingToken}`;
 
-  // Nếu chưa đạt trần 2 lượt OnTop: Ưu tiên cổng OnTop
+  // Nếu chưa đạt trần 2 lượt: Ưu tiên cổng VietUser (Chạy mượt trên Vercel không bị chặn IP nước ngoài)
   if (earnedCount < 2) {
+    const vietuserKey = await getVietUserApiKey();
+    if (vietuserKey) {
+      const apiUrl = `${VIETUSER_API_ENDPOINT}?api=${vietuserKey}&url=${encodeURIComponent(callbackUrl)}`;
+      try {
+        const res = await fetch(apiUrl, {
+          method: "GET",
+          headers: { Accept: "application/json" },
+          cache: "no-store",
+        });
+
+        const data: any = await res.json().catch(() => ({}));
+
+        if (data.status === "success" && data.shortenedUrl) {
+          await db.shortener
+            .updateMany({
+              where: { provider: "VIETUSER", enabled: true },
+              data: { dailyUsed: { increment: 1 } },
+            })
+            .catch(() => {});
+
+          return {
+            ok: true,
+            url: data.shortenedUrl,
+            pendingToken,
+            gateway: "VIETUSER",
+          };
+        }
+      } catch (err) {
+        console.warn("Lỗi kết nối VietUser, thử cổng OnTop/dự phòng:", err);
+      }
+    }
+
+    // Fallback: Thử OnTop nếu VietUser gặp sự cố
     const ontopKey = await getOntopApiKey();
     if (ontopKey) {
       const apiUrl = `${ONTOPS_API_ENDPOINT}?apikey=${ontopKey}&url=${encodeURIComponent(callbackUrl)}`;
@@ -363,16 +416,16 @@ export async function createPassLink({
           };
         }
       } catch (err) {
-        console.warn("Lỗi kết nối OnTop, thử cổng dự phòng:", err);
+        console.warn("Lỗi kết nối OnTop, thử cổng dự phòng tiếp theo:", err);
       }
     }
   }
 
-  // Khi OnTop đã đủ 2/2 view HOẶC OnTop lỗi: Chuyển sang Cổng số 2 (Link4m / TrafficVN / Linktop)
+  // Khi VietUser đã đủ 2/2 view HOẶC lỗi: Chuyển sang Cổng số 2 (Link4m / TrafficVN / Linktop)
   const secondaryShorteners = await db.shortener.findMany({
     where: {
       enabled: true,
-      provider: { not: "ONTOPS" },
+      provider: { notIn: ["ONTOPS", "VIETUSER"] },
     },
     orderBy: { order: "asc" },
   });
@@ -474,7 +527,7 @@ export async function verifyOntopCallback(token: string): Promise<{
   const currentUsed = pass.date === today ? pass.usedCount : 0;
   const newEarned = currentEarned + 1;
   const newCredits = Math.max(0, newEarned - currentUsed);
-  const nextGateway = newEarned >= 2 ? "LINK4M" : "ONTOPS";
+  const nextGateway = newEarned >= 2 ? "LINK4M" : "VIETUSER";
 
   await db.ontopDailyPass.update({
     where: { id: pass.id },

@@ -28,7 +28,7 @@ export default function LocketClient() {
   const [toastMsg, setToastMsg] = useState("");
 
   const earnedCount = ontopPass?.earnedCount ?? ontopPass?.count ?? 0;
-  const activeGatewayName = ontopPass?.activeGatewayName || (earnedCount >= 2 ? "Link4m" : "OnTop");
+  const activeGatewayName = ontopPass?.activeGatewayName || (earnedCount >= 2 ? "Link4m" : "VietUser");
   const currentGatewayStep = ontopPass?.currentGatewayStep || (earnedCount < 2 ? earnedCount + 1 : (earnedCount - 2) + 1);
   const allGatewaysExhausted = Boolean(ontopPass?.allGatewaysExhausted || earnedCount >= 4);
 
@@ -778,7 +778,7 @@ Cài DNS khi Gold chưa xuất hiện sẽ chỉ giữ trạng thái chưa có G
                     ) : earnedCount === 1 ? (
                       <>
                         <i className="fa-solid fa-bolt" />
-                        <span>⚡ VƯỢT LINK ONTOP (LƯỢT 2/2) ĐỂ KÍCH HOẠT</span>
+                        <span>⚡ VƯỢT LINK {activeGatewayName.toUpperCase()} (LƯỢT 2/2) ĐỂ KÍCH HOẠT</span>
                       </>
                     ) : (
                       <>

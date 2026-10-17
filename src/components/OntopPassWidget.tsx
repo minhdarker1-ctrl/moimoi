@@ -50,7 +50,7 @@ export default function OntopPassWidget({
 
   const earnedCount = data?.earnedCount ?? data?.count ?? 0;
   const availableCredits = data?.availableCredits ?? 0;
-  const activeGatewayName = data?.activeGatewayName || (earnedCount >= 2 ? "Link4m" : "OnTop");
+  const activeGatewayName = data?.activeGatewayName || (earnedCount >= 2 ? "Link4m" : "VietUser");
   const currentGatewayStep = data?.currentGatewayStep || (earnedCount < 2 ? earnedCount + 1 : (earnedCount - 2) + 1);
   const allGatewaysExhausted = Boolean(data?.allGatewaysExhausted || earnedCount >= 4);
 

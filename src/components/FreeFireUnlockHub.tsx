@@ -268,7 +268,7 @@ export default function FreeFireUnlockHub({
   }
 
   const earnedCount = ontopPass?.earnedCount ?? ontopPass?.count ?? 0;
-  const activeGatewayName = ontopPass?.activeGatewayName || (earnedCount >= 2 ? "Link4m" : "OnTop");
+  const activeGatewayName = ontopPass?.activeGatewayName || (earnedCount >= 2 ? "Link4m" : "VietUser");
   const currentGatewayStep = ontopPass?.currentGatewayStep || (earnedCount < 2 ? earnedCount + 1 : (earnedCount - 2) + 1);
   const allGatewaysExhausted = Boolean(ontopPass?.allGatewaysExhausted || earnedCount >= 4);
 
@@ -843,7 +843,7 @@ export default function FreeFireUnlockHub({
                     ) : earnedCount === 1 ? (
                       <>
                         <i className="fa-solid fa-bolt" />
-                        <span>⚡ VƯỢT LINK ONTOP (LƯỢT 2/2) ĐỂ VERIFY</span>
+                        <span>⚡ VƯỢT LINK {activeGatewayName.toUpperCase()} (LƯỢT 2/2) ĐỂ VERIFY</span>
                       </>
                     ) : (
                       <>

@@ -131,6 +131,15 @@ export const PROVIDERS: ProviderDef[] = [
       (fallback ? `&fallback_type=direct&fallback_url=${enc(fallback)}` : ""),
     parse: parseStatusJson,
   },
+  {
+    id: "VIETUSER",
+    label: "VietUser (vietuser.com)",
+    supportsFallback: false,
+    dailyLimit: 0,
+    build: ({ token, url }) =>
+      `https://vietuser.com/api-shorten/v2?api=${token}&url=${enc(url)}`,
+    parse: parseStatusJson,
+  },
 ];
 
 export type Provider = string;

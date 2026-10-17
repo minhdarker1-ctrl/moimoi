@@ -19,6 +19,7 @@ test("mỗi cổng dùng đúng tên param token", () => {
   assert.match(buildApiUrl("VUOTNHANH", "T", TARGET), /[?&]api=T/);
   assert.match(buildApiUrl("LINKTOP", "T", TARGET), /[?&]api=T/);
   assert.match(buildApiUrl("LINK4M", "T", TARGET), /[?&]api=T/);
+  assert.match(buildApiUrl("VIETUSER", "T", TARGET), /[?&]api=T/);
   assert.match(buildApiUrl("TRAFFICHUB", "T", TARGET), /[?&]api_key=T/);
 });
 
