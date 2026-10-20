@@ -36,6 +36,9 @@ export default function GetKeyFreeFirePage() {
       if (botToken) {
         setAntiBotToken(botToken);
         startFlow(botToken);
+      } else {
+        // Thử kích hoạt trực tiếp (Nếu là Admin, backend sẽ mở khóa tức thì không cần AntiBot)
+        startFlow("");
       }
     }
   }, []);
@@ -67,6 +70,18 @@ export default function GetKeyFreeFirePage() {
         headers: { Accept: "application/json" },
       });
       const data = await res.json();
+
+      // ĐẶC QUYỀN ADMIN: Chuyển hướng thẳng về kết quả mở khóa
+      if (data.isDirect) {
+        setState({
+          status: "redirecting",
+          url: data.url,
+          appName: data.appName || "Độ Nhạy Free Fire",
+          countdown: 0,
+        });
+        window.location.href = data.url;
+        return;
+      }
 
       if (!res.ok || !data.ok || !data.url) {
         setState({

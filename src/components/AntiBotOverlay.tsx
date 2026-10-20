@@ -29,6 +29,18 @@ export default function AntiBotOverlay({
   const [elapsed, setElapsed] = useState(0);
   const [violations, setViolations] = useState<SecurityViolation[]>([]);
 
+  // ĐẶC QUYỀN ADMIN: Tự động phát hiện và bypass tức thì
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data?.user?.role === "ADMIN") {
+          onSuccess("admin-bypass-token", deviceInput);
+        }
+      })
+      .catch(() => {});
+  }, [onSuccess, deviceInput]);
+
   // Bộ đếm thời gian khi đang scanning
   useEffect(() => {
     let timer: NodeJS.Timeout | null = null;

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import { fingerprint, sessionToken, verifyAntiBotToken } from "@/lib/crypto";
+import { fingerprint, sessionToken, verifyAntiBotToken, generateKey, hashKey } from "@/lib/crypto";
 import { shortenWithFallback, usableShorteners } from "@/lib/getkey";
 import { clientIp, rateLimit, maybeCleanup } from "@/lib/guard";
 import { parseUserAgent, extractLocation } from "@/lib/user-agent";
@@ -48,27 +48,101 @@ export async function GET(req: Request) {
   const deviceInput = reqUrl.searchParams.get("device") || "";
   const deviceType = reqUrl.searchParams.get("type") || "";
 
-  // ĐẶC QUYỀN ADMIN: Tải App & Mod trực tiếp, bỏ qua hoàn toàn các hop link rút gọn
+  // ĐẶC QUYỀN ADMIN: Mở khóa trực tiếp mọi dịch vụ, 100% không qua hop link rút gọn
   const currentUser = await getCurrentUser().catch(() => null);
   const isAdmin = currentUser?.role === "ADMIN";
-  if (isAdmin && appIdParam) {
-    const targetAppId = Number(appIdParam);
-    if (Number.isInteger(targetAppId) && targetAppId > 0) {
-      const appRecord = await db.app.findUnique({ where: { id: targetAppId } });
-      if (appRecord) {
-        const directUrl = appRecord.downloadUrl || appRecord.getKeyUrl || baseUrl(req);
-        if (isJson) {
-          return NextResponse.json({
-            ok: true,
-            isDirect: true,
-            url: directUrl,
-            appName: appRecord.name,
-            message: "Đặc quyền Admin: Mở khóa tải trực tiếp không cần vượt link!",
-          });
+  if (isAdmin) {
+    // 1. Nhánh Tải App & Mod
+    if (appIdParam) {
+      const targetAppId = Number(appIdParam);
+      if (Number.isInteger(targetAppId) && targetAppId > 0) {
+        const appRecord = await db.app.findUnique({ where: { id: targetAppId } });
+        if (appRecord) {
+          const directUrl = appRecord.downloadUrl || appRecord.getKeyUrl || baseUrl(req);
+          if (isJson) {
+            return NextResponse.json({
+              ok: true,
+              isDirect: true,
+              url: directUrl,
+              appName: appRecord.name,
+              message: "Đặc quyền Admin: Mở khóa tải trực tiếp không cần vượt link!",
+            });
+          }
+          return NextResponse.redirect(directUrl, 302);
         }
-        return NextResponse.redirect(directUrl, 302);
       }
     }
+
+    // 2. Nhánh Free Fire (Độ Nhạy & Mã HUD)
+    if (scope === "freefire") {
+      const directUrl = `${baseUrl(req)}/freefire/result?unlocked=true`;
+      if (isJson) {
+        return NextResponse.json({
+          ok: true,
+          isDirect: true,
+          url: directUrl,
+          appName: "Độ Nhạy Free Fire",
+          message: "Đặc quyền Admin: Mở khóa Độ Nhạy & Mã HUD trực tiếp!",
+        });
+      }
+      return NextResponse.redirect(directUrl, 302);
+    }
+
+    // 3. Nhánh Đấu Trường Liên Quân AOV
+    if (scope === "aov" || scope === "lienquan") {
+      const directUrl = `${baseUrl(req)}/aov`;
+      if (isJson) {
+        return NextResponse.json({
+          ok: true,
+          isDirect: true,
+          url: directUrl,
+          appName: "Đấu Trường Liên Quân",
+          message: "Đặc quyền Admin: Bạn có vô hạn vé, không cần vượt link!",
+        });
+      }
+      return NextResponse.redirect(directUrl, 302);
+    }
+
+    // 4. Nhánh Cấp Key chung (KeyType)
+    if (keyTypeIdParam) {
+      const targetKtId = Number(keyTypeIdParam);
+      const ktRecord = await db.keyType.findUnique({ where: { id: targetKtId } });
+      const keyVal = generateKey();
+      const expiresAt = new Date(Date.now() + (ktRecord?.ttlHours || 24) * 60 * 60 * 1000);
+      await db.appKey.create({
+        data: {
+          keyHash: hashKey(keyVal),
+          prefix: keyVal.slice(0, 4),
+          keyTypeId: ktRecord?.id || 1,
+          manual: true,
+          note: "Tạo tự động cho Admin",
+          expiresAt,
+        },
+      });
+      const directUrl = `${baseUrl(req)}/freefire/result?unlocked=true&key=${keyVal}`;
+      if (isJson) {
+        return NextResponse.json({
+          ok: true,
+          isDirect: true,
+          directKey: true,
+          key: keyVal,
+          url: directUrl,
+          message: "Đặc quyền Admin: Cấp key trực tiếp không cần vượt link!",
+        });
+      }
+      return NextResponse.redirect(directUrl, 302);
+    }
+
+    // Fallback nếu không xác định scope cụ thể
+    if (isJson) {
+      return NextResponse.json({
+        ok: true,
+        isDirect: true,
+        url: baseUrl(req),
+        message: "Đặc quyền Admin: Bỏ qua vượt link thành công!",
+      });
+    }
+    return NextResponse.redirect(baseUrl(req), 302);
   }
 
   // Chỉ yêu cầu xác minh Anti-Bot & thiết bị cho riêng trang Free Fire

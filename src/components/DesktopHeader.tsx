@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import NoticeBell, { NoticeItem } from "./NoticeBell";
 import ThemeToggle from "./ThemeToggle";
+import { useCurrentUser } from "@/lib/useCurrentUser";
 
 interface DesktopHeaderProps {
   siteName: string;
@@ -31,6 +32,7 @@ export default function DesktopHeader({
   verified,
   notices,
 }: DesktopHeaderProps) {
+  const { user } = useCurrentUser();
   const [time, setTime] = useState("");
   const pathname = usePathname();
 
@@ -112,6 +114,15 @@ export default function DesktopHeader({
 
         {/* BÊN PHẢI: Đồng hồ GMT+7 thời gian thực + Chuông thông báo nổi + Nút chuyển Dark/Light mode */}
         <div className="mdarker-header-right-actions">
+          {user?.role === "ADMIN" && (
+            <Link
+              href="/admin"
+              className="cyber-admin-indicator"
+              title="Đặc quyền Admin: Bạn đang có toàn quyền vô hạn mọi dịch vụ trên website. Bấm để vào Bảng Quản Trị!"
+            >
+              <span>👑 VIP ADMIN</span>
+            </Link>
+          )}
           {time && (
             <div className="mdarker-header-clock" title="Giờ Việt Nam (GMT+7)" suppressHydrationWarning>
               <i className="bi bi-clock" aria-hidden="true" />

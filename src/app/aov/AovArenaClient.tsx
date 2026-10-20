@@ -36,6 +36,7 @@ interface AovArenaClientProps {
   claimedStock: number;
   blindBoxEnabled: boolean;
   notice: string;
+  isAdmin?: boolean;
 }
 
 // 6 Lớp giải thưởng của Vòng Quay (Mỗi ô 60 độ)
@@ -54,9 +55,10 @@ export default function AovArenaClient({
   claimedStock,
   blindBoxEnabled,
   notice,
+  isAdmin = false,
 }: AovArenaClientProps) {
-  // Trạng thái tài khoản & số vé hiện tại (lưu trên cookie của trình duyệt)
-  const [currentTickets, setCurrentTickets] = useState<number>(initialTickets);
+  // Trạng thái tài khoản & số vé hiện tại (nếu là Admin thì luôn cấp 9999 vé vô hạn)
+  const [currentTickets, setCurrentTickets] = useState<number>(isAdmin ? 9999 : initialTickets);
   const [inventory, setInventory] = useState<ClaimedAovAccount[]>([]);
 
   // Tải danh sách acc đã nhận từ LocalStorage
@@ -191,6 +193,13 @@ export default function AovArenaClient({
 
   // Hành động Lấy Ticket (Vượt Link)
   const handleGetTicket = async () => {
+    if (isAdmin) {
+      setHopError(null);
+      alert("👑 Bạn đang có Đặc quyền Quản trị viên (Admin): Vô hạn vé trải nghiệm, không cần vượt bất kỳ link rút gọn nào!");
+      setCurrentTickets(9999);
+      return;
+    }
+
     setHopError(null);
     setIsStartingHop(true);
 
@@ -225,8 +234,8 @@ export default function AovArenaClient({
     if (bagStage !== "idle") return;
     setBagError(null);
 
-    // Kiểm tra số vé
-    if (currentTickets < 1) {
+    // Kiểm tra số vé (Admin được miễn phí không giới hạn)
+    if (!isAdmin && currentTickets < 1) {
       setBagError("Bạn chưa đủ vé để xé Túi Mù (Cần 1 Vé). Vui lòng bấm 'Lấy Thêm Vé' để vượt link nạp vé!");
       return;
     }
@@ -258,7 +267,7 @@ export default function AovArenaClient({
       // Phase 4: Revealed (sau 2.8s)
       setTimeout(() => {
         setBagResultAccounts(accounts);
-        setCurrentTickets(remainingTickets);
+        setCurrentTickets(isAdmin ? 9999 : remainingTickets);
         saveToInventory(accounts);
         setBagStage("revealed");
       }, 2800);
@@ -273,8 +282,8 @@ export default function AovArenaClient({
     if (isSpinning) return;
     setSpinError(null);
 
-    // Kiểm tra vé
-    if (currentTickets < 2) {
+    // Kiểm tra vé (Admin được miễn phí không giới hạn)
+    if (!isAdmin && currentTickets < 2) {
       setSpinError("Bạn cần ít nhất 2 vé để quay Vòng Quay. Vui lòng bấm 'Lấy Thêm Vé' để vượt link nạp vé!");
       return;
     }
@@ -301,7 +310,7 @@ export default function AovArenaClient({
       // Đợi hết animation 4.5s
       setTimeout(() => {
         setIsSpinning(false);
-        setCurrentTickets(remainingTickets);
+        setCurrentTickets(isAdmin ? 9999 : remainingTickets);
         if (accounts.length > 0) {
           saveToInventory(accounts);
           triggerConfetti();
@@ -341,6 +350,7 @@ export default function AovArenaClient({
         onOpenInventory={() => setIsInventoryOpen(true)}
         onGetTicketClick={handleGetTicket}
         isStartingHop={isStartingHop}
+        isAdmin={isAdmin}
       />
 
       <div style={{ maxWidth: 1040, margin: "0 auto", padding: "16px 16px 60px" }}>

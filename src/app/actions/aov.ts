@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { headers, cookies } from "next/headers";
 import { db } from "@/lib/db";
+import { getCurrentUser } from "@/lib/auth";
 import { clientIp } from "@/lib/guard";
 
 export interface ActionResult<T = unknown> {
@@ -23,9 +24,13 @@ export interface ClaimedAovAccount {
 }
 
 /**
- * LẤY SỐ VÉ HIỆN TẠI TỪ COOKIE CỦA KHÁCH
+ * LẤY SỐ VÉ HIỆN TẠI TỪ COOKIE CỦA KHÁCH HOẶC ĐẶC QUYỀN ADMIN
  */
 export async function getAovTicketsAction(): Promise<number> {
+  const currentUser = await getCurrentUser().catch(() => null);
+  if (currentUser?.role === "ADMIN") {
+    return 9999;
+  }
   const cookieStore = await cookies();
   const val = cookieStore.get("aov_tickets")?.value;
   return Math.max(0, parseInt(val || "0", 10) || 0);
@@ -33,16 +38,19 @@ export async function getAovTicketsAction(): Promise<number> {
 
 /**
  * XÉ TÚI MÙ (Mystery Blind Bag)
- * Chi phí: 1 Vé
+ * Chi phí: 1 Vé (Miễn phí vô hạn cho Admin)
  * Phần thưởng ngẫu nhiên: 1 đến 3 acc Liên Quân Garena
  */
 export async function openBlindBagAction(): Promise<
   ActionResult<{ accounts: ClaimedAovAccount[]; remainingTickets: number }>
 > {
+  const currentUser = await getCurrentUser().catch(() => null);
+  const isAdmin = currentUser?.role === "ADMIN";
+
   const cookieStore = await cookies();
   const currentTickets = Math.max(0, parseInt(cookieStore.get("aov_tickets")?.value || "0", 10) || 0);
 
-  if (currentTickets < 1) {
+  if (!isAdmin && currentTickets < 1) {
     return {
       ok: false,
       error: "Bạn không đủ vé để xé Túi Mù (Cần 1 vé). Hãy bấm 'Lấy Thêm Vé' để vượt link nạp thêm vé nhé!",
@@ -55,6 +63,28 @@ export async function openBlindBagAction(): Promise<
   });
 
   if (availableCount <= 0) {
+    if (isAdmin) {
+      // Đặc quyền Admin: Cấp tài khoản VIP mẫu để test hiệu ứng & giao diện ngay cả khi kho trống
+      const now = new Date();
+      return {
+        ok: true,
+        data: {
+          accounts: [
+            {
+              id: 999901,
+              username: "admin_vip_aov01",
+              password: "•••••••• (Đặc Quyền Admin)",
+              rank: "Cao Thủ 50 Sao (Test Admin)",
+              skins: 188,
+              champs: 118,
+              notes: "Tài khoản VIP mẫu đặc quyền Admin để kiểm tra giao diện & tính năng",
+              claimedAt: now.toISOString(),
+            },
+          ],
+          remainingTickets: 9999,
+        },
+      };
+    }
     return {
       ok: false,
       error: "Kho tài khoản Liên Quân hiện đang tạm hết. Admin đang nạp thêm acc, vui lòng quay lại sau ít phút!",
@@ -73,53 +103,80 @@ export async function openBlindBagAction(): Promise<
   const actualCount = Math.min(desiredCount, availableCount);
 
   // Lấy các acc để trao thưởng
-  const accountsToClaim = await db.gameAccount.findMany({
+  let accountsToClaim = await db.gameAccount.findMany({
     where: { game: "AOV", status: "AVAILABLE" },
     take: actualCount,
     orderBy: { id: "asc" },
   });
 
-  if (accountsToClaim.length === 0) {
-    return { ok: false, error: "Kho tài khoản tạm hết. Vui lòng thử lại sau!" };
-  }
-
   const h = await headers();
   const ip = clientIp(h);
   const now = new Date();
-  const remainingTickets = currentTickets - 1;
+  const remainingTickets = isAdmin ? 9999 : currentTickets - 1;
 
-  cookieStore.set("aov_tickets", String(remainingTickets), {
-    path: "/",
-    maxAge: 86400 * 30,
-    httpOnly: true,
-    sameSite: "lax",
-  });
+  if (accountsToClaim.length === 0) {
+    if (isAdmin) {
+      accountsToClaim = [
+        {
+          id: 999901,
+          game: "AOV",
+          username: "admin_vip_aov01",
+          password: "•••••••• (Đặc Quyền Admin)",
+          rank: "Cao Thủ 50 Sao (Test Admin)",
+          skins: 188,
+          champs: 118,
+          notes: "Tài khoản VIP mẫu đặc quyền Admin",
+          status: "AVAILABLE",
+          claimedBy: "",
+          claimedAt: now,
+          token: "",
+          createdAt: now,
+        },
+      ];
+    } else {
+      return { ok: false, error: "Kho tài khoản tạm hết. Vui lòng thử lại sau!" };
+    }
+  }
 
-  await db.$transaction([
-    db.gameAccount.updateMany({
-      where: { id: { in: accountsToClaim.map((a) => a.id) } },
-      data: {
-        status: "CLAIMED",
-        claimedBy: `Khách (${ip})`,
-        claimedAt: now,
-      },
-    }),
-    db.serviceUsageLog.create({
-      data: {
-        serviceType: "AOV",
-        serviceName: "Xé Túi Mù Liên Quân",
-        targetUser: ip,
-        ip,
-        status: "SUCCESS",
-        metadata: JSON.stringify({
-          mode: "BLIND_BAG",
-          costTickets: 1,
-          count: accountsToClaim.length,
-          usernames: accountsToClaim.map((a) => a.username),
-        }),
-      },
-    }),
-  ]);
+  if (!isAdmin) {
+    cookieStore.set("aov_tickets", String(remainingTickets), {
+      path: "/",
+      maxAge: 86400 * 30,
+      httpOnly: true,
+      sameSite: "lax",
+    });
+  }
+
+  const realAccountIds = accountsToClaim.filter((a) => a.id < 990000).map((a) => a.id);
+
+  if (realAccountIds.length > 0) {
+    await db.$transaction([
+      db.gameAccount.updateMany({
+        where: { id: { in: realAccountIds } },
+        data: {
+          status: "CLAIMED",
+          claimedBy: isAdmin ? `Admin (${currentUser?.username || "admin"})` : `Khách (${ip})`,
+          claimedAt: now,
+        },
+      }),
+      db.serviceUsageLog.create({
+        data: {
+          serviceType: "AOV",
+          serviceName: "Xé Túi Mù Liên Quân",
+          targetUser: isAdmin ? `Admin (${currentUser?.username || "admin"})` : ip,
+          ip,
+          status: "SUCCESS",
+          metadata: JSON.stringify({
+            mode: "BLIND_BAG",
+            costTickets: isAdmin ? 0 : 1,
+            isAdmin,
+            count: accountsToClaim.length,
+            usernames: accountsToClaim.map((a) => a.username),
+          }),
+        },
+      }),
+    ]);
+  }
 
   revalidatePath("/aov");
 
@@ -154,10 +211,13 @@ export async function spinWheelAction(): Promise<
     remainingTickets: number;
   }>
 > {
+  const currentUser = await getCurrentUser().catch(() => null);
+  const isAdmin = currentUser?.role === "ADMIN";
+
   const cookieStore = await cookies();
   const currentTickets = Math.max(0, parseInt(cookieStore.get("aov_tickets")?.value || "0", 10) || 0);
 
-  if (currentTickets < 2) {
+  if (!isAdmin && currentTickets < 2) {
     return {
       ok: false,
       error: "Bạn cần ít nhất 2 vé để quay Vòng Quay May Mắn. Hãy bấm 'Lấy Thêm Vé' để vượt link nạp thêm vé nhé!",
@@ -174,7 +234,7 @@ export async function spinWheelAction(): Promise<
   let sliceIndex = 0;
   let desiredCount = 0;
 
-  if (rand < 0.25 || availableCount === 0) {
+  if (rand < 0.25 || (availableCount === 0 && !isAdmin)) {
     sliceIndex = 0;
     desiredCount = 0;
   } else if (rand < 0.70) {
@@ -195,10 +255,12 @@ export async function spinWheelAction(): Promise<
   }
 
   const actualCount = Math.min(desiredCount, availableCount);
-  if (actualCount === 0 && desiredCount > 0) {
-    sliceIndex = 0;
-  } else if (actualCount < desiredCount) {
-    sliceIndex = actualCount;
+  if (!isAdmin) {
+    if (actualCount === 0 && desiredCount > 0) {
+      sliceIndex = 0;
+    } else if (actualCount < desiredCount) {
+      sliceIndex = actualCount;
+    }
   }
 
   let accountsToClaim: any[] = [];
@@ -213,23 +275,46 @@ export async function spinWheelAction(): Promise<
   const h = await headers();
   const ip = clientIp(h);
   const now = new Date();
-  const remainingTickets = currentTickets - 2;
+  const remainingTickets = isAdmin ? 9999 : currentTickets - 2;
 
-  cookieStore.set("aov_tickets", String(remainingTickets), {
-    path: "/",
-    maxAge: 86400 * 30,
-    httpOnly: true,
-    sameSite: "lax",
-  });
+  // Nếu là Admin và kho trống nhưng trúng giải, cấp acc VIP mẫu để test giao diện
+  if (accountsToClaim.length === 0 && desiredCount > 0 && isAdmin) {
+    accountsToClaim = Array.from({ length: desiredCount }, (_, idx) => ({
+      id: 999910 + idx,
+      game: "AOV",
+      username: `admin_spin_vip0${idx + 1}`,
+      password: "•••••••• (Đặc Quyền Admin)",
+      rank: "Tinh Anh / Cao Thủ (Test Admin)",
+      skins: 150 + idx * 10,
+      champs: 115,
+      notes: "Tài khoản trúng thưởng Vòng Quay VIP Admin",
+      status: "AVAILABLE",
+      claimedBy: "",
+      claimedAt: now,
+      token: "",
+      createdAt: now,
+    }));
+  }
+
+  if (!isAdmin) {
+    cookieStore.set("aov_tickets", String(remainingTickets), {
+      path: "/",
+      maxAge: 86400 * 30,
+      httpOnly: true,
+      sameSite: "lax",
+    });
+  }
+
+  const realAccountIds = accountsToClaim.filter((a) => a.id < 990000).map((a) => a.id);
 
   await db.$transaction([
-    ...(accountsToClaim.length > 0
+    ...(realAccountIds.length > 0
       ? [
           db.gameAccount.updateMany({
-            where: { id: { in: accountsToClaim.map((a) => a.id) } },
+            where: { id: { in: realAccountIds } },
             data: {
               status: "CLAIMED",
-              claimedBy: `Khách (${ip})`,
+              claimedBy: isAdmin ? `Admin (${currentUser?.username || "admin"})` : `Khách (${ip})`,
               claimedAt: now,
             },
           }),
@@ -239,13 +324,14 @@ export async function spinWheelAction(): Promise<
       data: {
         serviceType: "AOV",
         serviceName: "Vòng Quay May Mắn Liên Quân",
-        targetUser: ip,
+        targetUser: isAdmin ? `Admin (${currentUser?.username || "admin"})` : ip,
         ip,
         status: "SUCCESS",
         metadata: JSON.stringify({
           mode: "LUCKY_WHEEL",
           sliceIndex,
-          costTickets: 2,
+          costTickets: isAdmin ? 0 : 2,
+          isAdmin,
           count: accountsToClaim.length,
           usernames: accountsToClaim.map((a) => a.username),
         }),

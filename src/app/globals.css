@@ -16175,4 +16175,30 @@ body.vthangios-dark .cyber-footer {
   box-shadow: 0 0 16px rgba(245, 158, 11, 0.15) !important;
 }
 
+/* 5. Cyber & Desktop Admin Header Indicator */
+.cyber-admin-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(217, 119, 6, 0.35));
+  border: 1px solid rgba(245, 158, 11, 0.5);
+  color: #fbbf24 !important;
+  font-size: 11.5px;
+  font-weight: 800;
+  padding: 5px 12px;
+  border-radius: 8px;
+  text-decoration: none !important;
+  letter-spacing: 0.03em;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.2);
+}
+
+.cyber-admin-indicator:hover {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #ffffff !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.45);
+}
+
+
 

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { db } from "@/lib/db";
+import { getCurrentUser } from "@/lib/auth";
 import DesktopHeader from "@/components/DesktopHeader";
 import AovArenaClient from "./AovArenaClient";
 
@@ -28,7 +29,7 @@ export default async function AovPage() {
   const cookieStore = await cookies();
   const ticketCount = Math.max(0, parseInt(cookieStore.get("aov_tickets")?.value || "0", 10) || 0);
 
-  const [site, groups, notices, aovConfig, availableStock, claimedStock] =
+  const [site, groups, notices, aovConfig, availableStock, claimedStock, currentUser] =
     await Promise.all([
       db.site.findUnique({ where: { id: 1 } }),
       db.group.findMany({
@@ -40,9 +41,12 @@ export default async function AovPage() {
       db.aovConfig.findUnique({ where: { id: 1 } }),
       db.gameAccount.count({ where: { game: "AOV", status: "AVAILABLE" } }),
       db.gameAccount.count({ where: { game: "AOV", status: "CLAIMED" } }),
+      getCurrentUser().catch(() => null),
     ]);
 
   if (!site) return null;
+
+  const isAdmin = currentUser?.role === "ADMIN";
 
   return (
     <>
@@ -67,11 +71,12 @@ export default async function AovPage() {
 
       <main style={{ minHeight: "100vh", paddingTop: 56 }}>
         <AovArenaClient
-          initialTickets={ticketCount}
+          initialTickets={isAdmin ? 9999 : ticketCount}
           availableStock={availableStock}
           claimedStock={claimedStock}
           blindBoxEnabled={aovConfig?.blindBoxEnabled ?? true}
           notice={aovConfig?.notice ?? ""}
+          isAdmin={isAdmin}
         />
 
         <footer className="mdarker-footer" style={{ marginTop: 40, paddingBottom: 40 }}>

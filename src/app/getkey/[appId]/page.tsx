@@ -22,6 +22,12 @@ export default function GetKeyLoadingPage({
   });
   const [antiBotToken, setAntiBotToken] = useState<string | null>(null);
 
+  useEffect(() => {
+    // Thử bắt đầu flow ngay lập tức khi vào trang:
+    // Nếu là Admin, hệ thống sẽ tự động kích hoạt tải trực tiếp mà không cần chờ quét AntiBot
+    startFlow();
+  }, [appId]);
+
   const startFlow = async (verifiedToken?: string) => {
     const tokenToUse = verifiedToken || antiBotToken || "";
     setState({ status: "loading", stepText: "Đang kết nối cổng vượt link an toàn..." });

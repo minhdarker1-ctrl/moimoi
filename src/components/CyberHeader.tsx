@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { NoticeItem } from "./NoticeBell";
+import { useCurrentUser } from "@/lib/useCurrentUser";
 
 interface CyberHeaderProps {
   siteName?: string;
@@ -16,6 +17,7 @@ export default function CyberHeader({
   siteName = "MinSr",
   notices = [],
 }: CyberHeaderProps) {
+  const { user } = useCurrentUser();
   const [openNotif, setOpenNotif] = useState(false);
   const [openMobileMenu, setOpenMobileMenu] = useState(false);
   const [unread, setUnread] = useState(0);
@@ -115,6 +117,17 @@ export default function CyberHeader({
 
           {/* RIGHT ACTIONS */}
           <div className="cyber-header-actions">
+            {/* ADMIN VIP BADGE */}
+            {user?.role === "ADMIN" && (
+              <Link
+                href="/admin"
+                className="cyber-admin-indicator"
+                title="Đặc quyền Admin: Bạn đang có toàn quyền vô hạn mọi dịch vụ trên website. Bấm để vào Bảng Quản Trị!"
+              >
+                <span>👑 VIP ADMIN</span>
+              </Link>
+            )}
+
             {/* NOTIFICATION BELL */}
             <button
               type="button"

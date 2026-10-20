@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { db } from "@/lib/db";
+import { getCurrentUser } from "@/lib/auth";
 import { clientIp } from "@/lib/guard";
 import { signAntiBotToken } from "@/lib/crypto";
 import { parseUserAgent, extractLocation } from "@/lib/user-agent";
@@ -35,6 +36,17 @@ export async function POST(req: Request) {
     const site = await db.site.findUnique({ where: { id: 1 } });
     const antiBotEnabled = site?.antiBotEnabled ?? true;
     const blockEmulators = site?.blockEmulators ?? true;
+
+    // 0. ĐẶC QUYỀN ADMIN: Tự động vượt qua 100% Anti-Bot & Giả Lập
+    const currentUser = await getCurrentUser().catch(() => null);
+    if (currentUser?.role === "ADMIN") {
+      const adminToken = signAntiBotToken({
+        vid: body.visitorId || "admin",
+        ip,
+        exp: Date.now() + 86400 * 1000,
+      });
+      return NextResponse.json({ ok: true, verified: true, token: adminToken, isAdmin: true });
+    }
 
     // 1. Nếu Admin tắt hoàn toàn Anti-Bot
     if (!antiBotEnabled) {
