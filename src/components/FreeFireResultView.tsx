@@ -65,19 +65,21 @@ export default function FreeFireResultView({
   device,
   type,
   config,
+  isAdmin = false,
 }: {
   device: string;
   type: "ios" | "android" | "pc";
   config: FreeFireConfigProps;
+  isAdmin?: boolean;
 }) {
-  const hasKey = Boolean(
+  const hasKey = !isAdmin && Boolean(
     (config.keyTypeId && config.keyTypeId > 0) ||
     (config.getKeyUrl && config.getKeyUrl.trim().length > 0) ||
     (config.requireKey && (config.staticKey || config.keyTypeId || config.getKeyUrl))
   );
 
-  const [isUnlocked, setIsUnlocked] = useState(!hasKey);
-  const [checkingAuth, setCheckingAuth] = useState(hasKey);
+  const [isUnlocked, setIsUnlocked] = useState(isAdmin || !hasKey);
+  const [checkingAuth, setCheckingAuth] = useState(!isAdmin && hasKey);
   const [inputKey, setInputKey] = useState("");
   const [keyError, setKeyError] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
@@ -106,7 +108,7 @@ export default function FreeFireResultView({
 
   // Kiểm tra trạng thái mở khóa khi trang load (KHÔNG lưu key ở localStorage)
   useEffect(() => {
-    if (!hasKey) {
+    if (isAdmin || !hasKey) {
       setIsUnlocked(true);
       setCheckingAuth(false);
       return;
@@ -745,7 +747,7 @@ export default function FreeFireResultView({
           </div>
 
           {/* Nút khóa lại nếu admin yêu cầu Key */}
-          {config.requireKey && (
+          {!isAdmin && config.requireKey && (
             <div style={{ textAlign: "center", marginTop: 16 }}>
               <button
                 type="button"

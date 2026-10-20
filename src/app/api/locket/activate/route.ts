@@ -176,19 +176,38 @@ export async function POST(req: Request) {
       );
     }
 
-    // Bước 2: Kiểm tra & Trừ credit nguyên tử (Atomic Consumption)
-    const creditResult = await consumeCredit(ip, ontopCookieVal);
-    if (!creditResult.success) {
-      return NextResponse.json(
-        {
-          success: false,
-          requirePass: true,
-          error:
-            creditResult.error ||
-            "Bạn chưa có lượt buff Locket Gold khả dụng. Vui lòng hoàn thành vượt link để nhận lượt!",
-        },
-        { status: 403 }
-      );
+    // Bước 2: Kiểm tra quyền Admin & Trừ credit nguyên tử (Atomic Consumption)
+    const currentUser = await getCurrentUser().catch(() => null);
+    const isAdmin = currentUser?.role === "ADMIN";
+
+    let creditResult: {
+      success: boolean;
+      remainingCredits: number;
+      passId: number | null;
+      passToken: string;
+      error?: string;
+    } = {
+      success: true,
+      remainingCredits: 9999,
+      passId: null,
+      passToken: "",
+    };
+
+    if (!isAdmin) {
+      const res = await consumeCredit(ip, ontopCookieVal);
+      if (!res.success) {
+        return NextResponse.json(
+          {
+            success: false,
+            requirePass: true,
+            error:
+              res.error ||
+              "Bạn chưa có lượt buff Locket Gold khả dụng. Vui lòng hoàn thành vượt link để nhận lượt!",
+          },
+          { status: 403 }
+        );
+      }
+      creditResult = res;
     }
 
     // Bước 3: Gửi biên lai Apple StoreKit 2
@@ -320,8 +339,10 @@ export async function POST(req: Request) {
       return response;
     }
 
-    // Nếu không kích hoạt được -> Hoàn trả credit an toàn
-    await refundCredit(creditResult.passId);
+    // Nếu không kích hoạt được -> Hoàn trả credit an toàn (nếu có passId)
+    if (creditResult.passId) {
+      await refundCredit(creditResult.passId);
+    }
 
     await db.serviceUsageLog.create({
       data: {

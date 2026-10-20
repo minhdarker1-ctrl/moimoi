@@ -15,6 +15,7 @@ export interface OntopStatusData {
   target: number;
   date?: string;
   count?: number;
+  isAdmin?: boolean;
   isUnlimited?: boolean;
   remainingSteps?: number;
 }
@@ -53,6 +54,29 @@ export default function OntopPassWidget({
   const activeGatewayName = data?.activeGatewayName || (earnedCount >= 2 ? "Link4m" : "VietUser");
   const currentGatewayStep = data?.currentGatewayStep || (earnedCount < 2 ? earnedCount + 1 : (earnedCount - 2) + 1);
   const allGatewaysExhausted = Boolean(data?.allGatewaysExhausted || earnedCount >= 4);
+
+  if (data?.isAdmin) {
+    return (
+      <div className="ontop-mini-header admin-vip" id="pass-widget" aria-label="Tiến độ lượt dùng Admin">
+        <div className="ontop-mini-header-top">
+          <div className="ontop-mini-tag-wrap">
+            <span className="ontop-mini-icon">👑</span>
+            <div className="ontop-mini-text">
+              <span className="ontop-mini-label text-amber-400 font-bold" style={{ color: "#fbbf24" }}>
+                ĐẶC QUYỀN ADMIN: KHÔNG GIỚI HẠN
+              </span>
+              <small className="ontop-mini-sub" style={{ color: "#fef3c7" }}>
+                Tài khoản Quản trị viên được dùng trực tiếp mọi dịch vụ mà không cần vượt link rút gọn.
+              </small>
+            </div>
+          </div>
+          <div className="ontop-count-pill admin-pill" style={{ background: "linear-gradient(135deg, #d97706, #b45309)", color: "#fff", borderColor: "#f59e0b" }}>
+            <span>⭐ VIP VÔ HẠN</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="ontop-mini-header" id="pass-widget" aria-label="Tiến độ lượt dùng">

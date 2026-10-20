@@ -155,8 +155,8 @@ export async function getOntopPassStatus(
   const isExhausted = earnedCount >= 2;
   const allGatewaysExhausted = earnedCount >= 4;
 
-  let activeGatewayName = "OnTop.link";
-  let currentGatewayStep = earnedCount + 1; // 1 hoặc 2 cho OnTop
+  let activeGatewayName = "VietUser";
+  let currentGatewayStep = earnedCount + 1; // 1 hoặc 2 cho VietUser
 
   if (earnedCount >= 2) {
     activeGatewayName = "Link4m";
@@ -239,20 +239,38 @@ export async function consumeCredit(
 }
 
 /**
- * Hoàn lại 1 lượt (Refund) khi tác vụ Verify UID hoặc Buff Locket gặp lỗi máy chủ
+ * Hoàn lại 1 lượt (Refund) trong một Prisma TransactionClient hiện hữu
  */
-export async function refundCredit(passId: number): Promise<boolean> {
+export async function refundCreditTx(
+  tx: any,
+  passId: number
+): Promise<boolean> {
   try {
-    const pass = await db.ontopDailyPass.findUnique({ where: { id: passId } });
+    const pass = await tx.ontopDailyPass.findUnique({ where: { id: passId } });
     if (!pass || pass.usedCount <= 0) return false;
 
-    await db.ontopDailyPass.update({
+    await tx.ontopDailyPass.update({
       where: { id: passId },
       data: {
         usedCount: { decrement: 1 },
       },
     });
     return true;
+  } catch (err) {
+    console.error("Lỗi hoàn trả credit pass trong transaction:", err);
+    return false;
+  }
+}
+
+/**
+ * Hoàn lại 1 lượt (Refund) khi tác vụ Verify UID hoặc Buff Locket gặp lỗi máy chủ
+ * Tự động bọc trong db.$transaction nguyên tử
+ */
+export async function refundCredit(passId: number): Promise<boolean> {
+  try {
+    return await db.$transaction(async (tx) => {
+      return await refundCreditTx(tx, passId);
+    });
   } catch (err) {
     console.error("Lỗi hoàn trả credit pass:", err);
     return false;
@@ -334,10 +352,58 @@ export async function createPassLink({
   const cleanTarget = targetUser || "";
 
   // =========================================================================
-  // GIAI ĐOẠN 1: NẾU CHƯA ĐẠT TRẦN 2 LƯỢT TRONG NGÀY -> ƯU TIÊN SỐ 1 ONTOP
+  // GIAI ĐOẠN 1: NẾU CHƯA ĐẠT TRẦN 2 LƯỢT TRONG NGÀY -> ƯU TIÊN SỐ 1 VIETUSER
   // =========================================================================
   if (earnedCount < 2) {
-    // 1. Dọn dẹp bảo mật: Chuyển các slot RESERVED quá 2 tiếng sang EXPIRED (Tuyệt đối không tái chế)
+    // 1. ƯU TIÊN SỐ 1: GỌI TRỰC TIẾP VIETUSER API
+    const vietuserKey = await getVietUserApiKey();
+    if (vietuserKey) {
+      const pendingToken = sessionToken();
+      const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
+      await db.ontopPendingSession.create({
+        data: {
+          token: pendingToken,
+          passToken,
+          step,
+          service,
+          targetUser: cleanTarget,
+          used: false,
+          expiresAt,
+        },
+      });
+
+      const callbackUrl = `${baseUrl}/api/ontop/callback?token=${pendingToken}`;
+      const apiUrl = `${VIETUSER_API_ENDPOINT}?api=${vietuserKey}&url=${encodeURIComponent(callbackUrl)}`;
+      try {
+        const res = await fetch(apiUrl, {
+          method: "GET",
+          headers: { Accept: "application/json" },
+          cache: "no-store",
+        });
+
+        const data: any = await res.json().catch(() => ({}));
+        if (data.status === "success" && data.shortenedUrl) {
+          await db.shortener
+            .updateMany({
+              where: { provider: "VIETUSER", enabled: true },
+              data: { dailyUsed: { increment: 1 } },
+            })
+            .catch(() => {});
+
+          return {
+            ok: true,
+            url: data.shortenedUrl,
+            pendingToken,
+            gateway: "VIETUSER",
+          };
+        }
+      } catch (err) {
+        console.warn("VietUser API tạm lỗi hoặc hết quota, tự động fallback sang khay đệm OnTop:", err);
+      }
+    }
+
+    // 2. FALLBACK 1: NẾU VIETUSER LỖI -> BỐC TỪ KHAY ĐỆM ONTOP BUFFER
+    console.log("VietUser không khả dụng, chuyển sang bốc link từ khay đệm OnTop...");
     const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
     await db.ontopLinkBuffer.updateMany({
       where: {
@@ -347,8 +413,7 @@ export async function createPassLink({
       data: { status: "EXPIRED" },
     }).catch(() => {});
 
-    // 2. Chống Spam cạn Buffer (Idempotent Reservation):
-    // Nếu passToken này đã có slot RESERVED còn hạn, trả lại ngay slot đó kèm update targetUser
+    // Chống Spam cạn Buffer (Idempotent Reservation trên OnTop)
     const existingReserved = await db.ontopLinkBuffer.findFirst({
       where: {
         passToken,
@@ -373,8 +438,7 @@ export async function createPassLink({
       };
     }
 
-    // 3. Atomic Pick thật sự trên PostgreSQL:
-    // Sử dụng SELECT ... FOR UPDATE SKIP LOCKED để bốc 1 slot AVAILABLE duy nhất và chuyển sang RESERVED
+    // Atomic Pick thật sự trên PostgreSQL
     const expiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30 phút TTL
     try {
       const pickedRows = await db.$queryRaw<Array<{
@@ -412,54 +476,7 @@ export async function createPassLink({
         };
       }
     } catch (sqlErr) {
-      console.warn("Lỗi bốc link OnTop từ buffer, tự động chuyển sang VietUser:", sqlErr);
-    }
-
-    // 4. Fallback: Nếu Khay đệm OnTop tạm thời trống (0 link khả dụng) -> Chuyển sang VietUser
-    console.log("Khay đệm OnTop tạm hết link, tự động fallback sang VietUser...");
-    const pendingToken = sessionToken();
-    await db.ontopPendingSession.create({
-      data: {
-        token: pendingToken,
-        passToken,
-        step,
-        service,
-        targetUser: cleanTarget,
-        used: false,
-        expiresAt,
-      },
-    });
-
-    const callbackUrl = `${baseUrl}/api/ontop/callback?token=${pendingToken}`;
-    const vietuserKey = await getVietUserApiKey();
-    if (vietuserKey) {
-      const apiUrl = `${VIETUSER_API_ENDPOINT}?api=${vietuserKey}&url=${encodeURIComponent(callbackUrl)}`;
-      try {
-        const res = await fetch(apiUrl, {
-          method: "GET",
-          headers: { Accept: "application/json" },
-          cache: "no-store",
-        });
-
-        const data: any = await res.json().catch(() => ({}));
-        if (data.status === "success" && data.shortenedUrl) {
-          await db.shortener
-            .updateMany({
-              where: { provider: "VIETUSER", enabled: true },
-              data: { dailyUsed: { increment: 1 } },
-            })
-            .catch(() => {});
-
-          return {
-            ok: true,
-            url: data.shortenedUrl,
-            pendingToken,
-            gateway: "VIETUSER",
-          };
-        }
-      } catch (err) {
-        console.warn("Lỗi kết nối VietUser, tiếp tục thử cổng dự phòng:", err);
-      }
+      console.warn("Lỗi bốc link OnTop từ buffer, tiếp tục fallback sang Link4m:", sqlErr);
     }
   }
 

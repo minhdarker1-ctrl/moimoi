@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { refundCredit } from "@/lib/ontop";
+import { refundCreditTx } from "@/lib/ontop";
+import { sweepStaleTasks } from "@/lib/queue-sweeper";
 import { safeEqual } from "@/lib/crypto";
 
 export const dynamic = "force-dynamic";
@@ -43,8 +44,7 @@ function verifyWorkerSecret(req: Request): boolean {
 
 /**
  * Endpoint hàng đợi 2 chiều giữa Web mDarker và Chrome Extension / Worker
- * - action=claim: Extension worker nhận việc cần xử lý (chuyển PENDING -> PROCESSING)
- *   Tích hợp Zombie Task Sweeper tự động dọn task treo và hoàn tiền
+ * - action=claim: Extension worker nhận việc cần xử lý (Atomic Claim chống race condition)
  * - action=list: Danh sách task gần nhất để theo dõi tiến độ
  */
 export async function GET(req: Request) {
@@ -61,102 +61,11 @@ export async function GET(req: Request) {
         );
       }
 
-      const now = Date.now();
+      // 1. Kích hoạt Sweeper dọn dẹp các task PENDING > 45s và PROCESSING > 60s
+      await sweepStaleTasks();
 
-      // 1. ZOMBIE TASK SWEEPER: Dọn dẹp các task PROCESSING treo > 60 giây do worker crash/ngắt kết nối
-      try {
-        const staleProcessingTasks = await db.serviceUsageLog.findMany({
-          where: {
-            serviceType: "FREE_FIRE",
-            status: "PROCESSING",
-            refunded: false,
-            updatedAt: { lt: new Date(now - 60_000) },
-          },
-          take: 10,
-        });
-
-        for (const stale of staleProcessingTasks) {
-          let meta: Record<string, any> = {};
-          try {
-            meta = JSON.parse(stale.metadata || "{}");
-          } catch {}
-
-          const updateRes = await db.serviceUsageLog.updateMany({
-            where: {
-              id: stale.id,
-              status: "PROCESSING",
-              refunded: false,
-            },
-            data: {
-              status: "FAILED",
-              refunded: true,
-              metadata: JSON.stringify({
-                ...meta,
-                resultMessage:
-                  "Worker bị ngắt kết nối quá 60s. Task đã bị hủy và hoàn lượt tự động.",
-                failedReason: "ZOMBIE_PROCESSING_TIMEOUT",
-                sweptAt: new Date().toISOString(),
-              }),
-            },
-          });
-
-          if (updateRes.count > 0 && meta.passId) {
-            await refundCredit(meta.passId);
-            console.log(
-              `[Sweeper] Tự động hoàn 1 credit (passId #${meta.passId}) cho zombie task #${stale.id}`
-            );
-          }
-        }
-
-        // Dọn dẹp thêm các task PENDING bị bỏ quên > 120s nếu worker từng offline
-        const stalePendingTasks = await db.serviceUsageLog.findMany({
-          where: {
-            serviceType: "FREE_FIRE",
-            status: "PENDING",
-            refunded: false,
-            createdAt: { lt: new Date(now - 120_000) },
-          },
-          take: 10,
-        });
-
-        for (const stale of stalePendingTasks) {
-          let meta: Record<string, any> = {};
-          try {
-            meta = JSON.parse(stale.metadata || "{}");
-          } catch {}
-
-          const updateRes = await db.serviceUsageLog.updateMany({
-            where: {
-              id: stale.id,
-              status: "PENDING",
-              refunded: false,
-            },
-            data: {
-              status: "FAILED",
-              refunded: true,
-              metadata: JSON.stringify({
-                ...meta,
-                resultMessage:
-                  "Không có Worker khả dụng tiếp nhận sau 120s. Đã tự động hoàn lượt.",
-                failedReason: "PENDING_QUEUE_TIMEOUT",
-                sweptAt: new Date().toISOString(),
-              }),
-            },
-          });
-
-          if (updateRes.count > 0 && meta.passId) {
-            await refundCredit(meta.passId);
-            console.log(
-              `[Sweeper] Tự động hoàn 1 credit (passId #${meta.passId}) cho pending timeout task #${stale.id}`
-            );
-          }
-        }
-      } catch (sweepErr) {
-        console.warn("[Sweeper Warning]:", sweepErr);
-      }
-
-      // 2. Lấy task PENDING cũ nhất để giao cho worker
-      const pendingTask = await db.serviceUsageLog.findFirst({
+      // 2. Tìm task PENDING cũ nhất
+      const candidateTask = await db.serviceUsageLog.findFirst({
         where: {
           serviceType: "FREE_FIRE",
           status: "PENDING",
@@ -164,7 +73,7 @@ export async function GET(req: Request) {
         orderBy: { createdAt: "asc" },
       });
 
-      if (!pendingTask) {
+      if (!candidateTask) {
         return NextResponse.json(
           {
             success: true,
@@ -175,25 +84,42 @@ export async function GET(req: Request) {
         );
       }
 
-      // Đánh dấu là PROCESSING để không bị worker khác nhận trùng
+      // 3. Đọc và bảo toàn metadata gốc (passId, chatId, source...)
       let meta: Record<string, any> = {};
       try {
-        meta = JSON.parse(pendingTask.metadata || "{}");
+        meta = JSON.parse(candidateTask.metadata || "{}");
       } catch {}
 
       meta.claimedAt = new Date().toISOString();
 
-      await db.serviceUsageLog.update({
-        where: { id: pendingTask.id },
+      // 4. ATOMIC CLAIM: Chuyển sang PROCESSING bằng updateMany kèm cập nhật updatedAt tường minh
+      const claimResult = await db.serviceUsageLog.updateMany({
+        where: {
+          id: candidateTask.id,
+          status: "PENDING",
+        },
         data: {
           status: "PROCESSING",
+          updatedAt: new Date(),
           metadata: JSON.stringify(meta),
         },
       });
 
+      if (claimResult.count === 0) {
+        // Task đã bị luồng worker khác bốc ngay trước đó
+        return NextResponse.json(
+          {
+            success: true,
+            task: null,
+            message: "Task đã được xử lý bởi luồng khác.",
+          },
+          { headers: corsHeaders }
+        );
+      }
+
       const server =
         meta.server ||
-        (pendingTask.serviceName.includes("Astute") ? "astute" : "kipas");
+        (candidateTask.serviceName.includes("Astute") ? "astute" : "kipas");
       const serverLabel =
         meta.serverLabel ||
         (server === "astute" ? "File Astute" : "File Kipas");
@@ -202,11 +128,11 @@ export async function GET(req: Request) {
         {
           success: true,
           task: {
-            id: pendingTask.id,
-            uid: pendingTask.targetUser,
+            id: candidateTask.id,
+            uid: candidateTask.targetUser,
             server,
             serverLabel,
-            createdAt: pendingTask.createdAt,
+            createdAt: candidateTask.createdAt,
           },
         },
         { headers: corsHeaders }
@@ -279,9 +205,9 @@ export async function GET(req: Request) {
 
 /**
  * POST: Extension Worker báo cáo kết quả hoàn thành task
- * - Yêu cầu xác thực WORKER_SECRET
- * - Chống Double-Refund bằng Atomic Update: Chỉ hoàn 1 lần duy nhất khi task FAILED
- * - Hỗ trợ ghi nhận log từ Telegram Bot
+ * - Xác thực WORKER_SECRET
+ * - Bọc Database Transaction khi hoàn lượt
+ * - Bảo toàn metadata gốc và xử lý an toàn khi Worker báo SUCCESS muộn
  */
 export async function POST(req: Request) {
   try {
@@ -342,46 +268,70 @@ export async function POST(req: Request) {
       );
     }
 
+    // Bảo toàn dữ liệu metadata gốc từ DB (passId, chatId, source, clientAgent...)
     let meta: Record<string, any> = {};
     try {
       meta = JSON.parse(existing.metadata || "{}");
     } catch {}
 
+    const originalPassId = meta.passId;
     meta.completedAt = new Date().toISOString();
     meta.resultMessage = resultMessage;
 
-    if (status === "FAILED") {
-      // ATOMIC UPDATE: Chỉ đánh dấu FAILED và refunded=true nếu trạng thái hiện tại khác SUCCESS và chưa từng refunded
-      const updated = await db.serviceUsageLog.updateMany({
-        where: {
-          id,
-          status: { not: "SUCCESS" },
-          refunded: false,
-        },
-        data: {
-          status: "FAILED",
-          refunded: true,
-          metadata: JSON.stringify(meta),
-        },
-      });
+    // Trường hợp 1: Worker báo SUCCESS MUỘN cho một task đã bị Sweeper đánh dấu FAILED và hoàn tiền
+    if (status === "SUCCESS" && existing.status === "FAILED" && existing.refunded) {
+      meta.workerLateSuccess = true;
+      meta.workerCompletedAt = new Date().toISOString();
+      meta.auditNote =
+        "Worker báo SUCCESS muộn sau khi task đã bị Sweeper hủy/hoàn lượt. Giữ nguyên trạng thái hoàn lượt để đối soát.";
 
-      // Nếu cập nhật thành công (tức là lần đầu tiên thất bại) và có passId -> Hoàn trả credit
-      if (updated.count > 0 && meta.passId) {
-        await refundCredit(meta.passId);
-        console.log(
-          `[Queue POST] Đã hoàn 1 credit cho passId #${meta.passId} của task #${id}`
-        );
-      }
+      await db.serviceUsageLog.update({
+        where: { id },
+        data: { metadata: JSON.stringify(meta) },
+      });
 
       return NextResponse.json(
         {
           success: true,
-          message: "Task marked as FAILED and credit refunded if applicable",
+          message: "Ghi nhận Late SUCCESS từ Worker (bảo toàn đối soát hoàn tiền)",
+        },
+        { headers: corsHeaders }
+      );
+    }
+
+    // Trường hợp 2: Task báo FAILED -> Bọc Transaction cập nhật FAILED & hoàn tiền nguyên tử
+    if (status === "FAILED") {
+      await db.$transaction(async (tx) => {
+        const updated = await tx.serviceUsageLog.updateMany({
+          where: {
+            id,
+            status: { not: "SUCCESS" },
+            refunded: false,
+          },
+          data: {
+            status: "FAILED",
+            refunded: true,
+            metadata: JSON.stringify(meta),
+          },
+        });
+
+        if (updated.count > 0 && originalPassId) {
+          await refundCreditTx(tx, originalPassId);
+          console.log(
+            `[Queue POST] Đã hoàn 1 credit cho passId #${originalPassId} của task #${id}`
+          );
+        }
+      });
+
+      return NextResponse.json(
+        {
+          success: true,
+          message: "Task marked as FAILED and credit refunded atomically",
         },
         { headers: corsHeaders }
       );
     } else {
-      // SUCCESS
+      // Trường hợp 3: Task báo SUCCESS bình thường
       await db.serviceUsageLog.update({
         where: { id },
         data: {

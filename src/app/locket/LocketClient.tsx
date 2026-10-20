@@ -236,17 +236,19 @@ Cài DNS khi Gold chưa xuất hiện sẽ chỉ giữ trạng thái chưa có G
         const formatted = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())} · ${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()}`;
         setCompletedAt(formatted);
 
-        // Giảm credit cục bộ
-        setOntopPass((prev) =>
-          prev
-            ? {
-                ...prev,
-                usedCount: prev.usedCount + 1,
-                availableCredits: Math.max(0, prev.availableCredits - 1),
-                hasAccess: Math.max(0, prev.availableCredits - 1) > 0,
-              }
-            : null
-        );
+        // Giảm credit cục bộ (chỉ áp dụng cho người dùng thường, không trừ Admin)
+        if (!ontopPass?.isAdmin) {
+          setOntopPass((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  usedCount: prev.usedCount + 1,
+                  availableCredits: Math.max(0, prev.availableCredits - 1),
+                  hasAccess: Math.max(0, prev.availableCredits - 1) > 0,
+                }
+              : null
+          );
+        }
       }
     } catch {
       clearTimeout(stepTimer1);
@@ -736,18 +738,25 @@ Cài DNS khi Gold chưa xuất hiện sẽ chỉ giữ trạng thái chưa có G
                   <span>ĐANG TẠO LIÊN KẾT ({activeGatewayName})...</span>
                 </button>
               ) : availableCredits > 0 ? (
-                /* STATE D: CÓ LƯỢT KHẢ DỤNG -> NÚT KÍCH HOẠT CHUẨN XANH NEON */
+                /* STATE D: CÓ LƯỢT KHẢ DỤNG -> NÚT KÍCH HOẠT CHUẨN XANH NEON HOẶC ĐẶC QUYỀN ADMIN */
                 <>
                   <button
                     type="submit"
-                    className="locket-submit-btn ready-mode"
+                    className={`locket-submit-btn ready-mode ${ontopPass?.isAdmin ? "admin-mode" : ""}`}
                     disabled={!target.trim()}
                   >
                     <i className="fas fa-bolt" />
-                    <span>⚡ KÍCH HOẠT LOCKET GOLD NGAY ({availableCredits} LƯỢT KHẢ DỤNG)</span>
+                    <span>
+                      {ontopPass?.isAdmin
+                        ? "⚡ KÍCH HOẠT LOCKET GOLD (ADMIN VÔ HẠN)"
+                        : `⚡ KÍCH HOẠT LOCKET GOLD NGAY (${availableCredits} LƯỢT KHẢ DỤNG)`}
+                    </span>
                   </button>
-                  <p className="kps-btn-subnote" style={{ color: "#34d399", marginTop: "10px" }}>
-                    <i className="fa-solid fa-circle-check" /> Sẵn sàng! Bấm nút để tiến hành mở khóa Gold cho tài khoản.
+                  <p className="kps-btn-subnote" style={{ color: ontopPass?.isAdmin ? "#fbbf24" : "#34d399", marginTop: "10px" }}>
+                    <i className="fa-solid fa-circle-check" />{" "}
+                    {ontopPass?.isAdmin
+                      ? "Đặc quyền Quản trị viên: Kích hoạt không giới hạn, không cần vượt link rút gọn!"
+                      : "Sẵn sàng! Bấm nút để tiến hành mở khóa Gold cho tài khoản."}
                   </p>
                 </>
               ) : allGatewaysExhausted ? (

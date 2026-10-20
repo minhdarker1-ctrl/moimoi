@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { getCurrentUser } from "@/lib/auth";
 import { fingerprint, sessionToken, verifyAntiBotToken } from "@/lib/crypto";
 import { shortenWithFallback, usableShorteners } from "@/lib/getkey";
 import { clientIp, rateLimit, maybeCleanup } from "@/lib/guard";
@@ -46,6 +47,29 @@ export async function GET(req: Request) {
   const vid = reqUrl.searchParams.get("vid") || reqUrl.searchParams.get("visitorId") || "";
   const deviceInput = reqUrl.searchParams.get("device") || "";
   const deviceType = reqUrl.searchParams.get("type") || "";
+
+  // ĐẶC QUYỀN ADMIN: Tải App & Mod trực tiếp, bỏ qua hoàn toàn các hop link rút gọn
+  const currentUser = await getCurrentUser().catch(() => null);
+  const isAdmin = currentUser?.role === "ADMIN";
+  if (isAdmin && appIdParam) {
+    const targetAppId = Number(appIdParam);
+    if (Number.isInteger(targetAppId) && targetAppId > 0) {
+      const appRecord = await db.app.findUnique({ where: { id: targetAppId } });
+      if (appRecord) {
+        const directUrl = appRecord.downloadUrl || appRecord.getKeyUrl || baseUrl(req);
+        if (isJson) {
+          return NextResponse.json({
+            ok: true,
+            isDirect: true,
+            url: directUrl,
+            appName: appRecord.name,
+            message: "Đặc quyền Admin: Mở khóa tải trực tiếp không cần vượt link!",
+          });
+        }
+        return NextResponse.redirect(directUrl, 302);
+      }
+    }
+  }
 
   // Chỉ yêu cầu xác minh Anti-Bot & thiết bị cho riêng trang Free Fire
   if (scope === "freefire") {

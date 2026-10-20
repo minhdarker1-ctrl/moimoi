@@ -75,7 +75,10 @@ export default function AdminNav({ current }: Props) {
         </div>
 
         <div className="admin-nav-top-actions">
-          <Link href="/" className="admin-nav-btn-link" title="Xem trang chủ ngoài">
+          <Link href="/freefire" className="admin-nav-btn-link admin-vip-quick" title="Kiểm tra đặc quyền Admin (Mở khóa vô hạn)" target="_blank">
+            <span style={{ fontSize: 13 }}>👑 Xem Web (Quyền Admin)</span>
+          </Link>
+          <Link href="/" className="admin-nav-btn-link" title="Xem trang chủ ngoài" target="_blank">
             <Home size={15} />
             <span>Trang chủ</span>
           </Link>

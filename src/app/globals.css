@@ -15766,3 +15766,413 @@ body.vthangios-dark .cyber-footer {
   text-decoration: underline;
 }
 
+/* ==========================================================================
+   ADMIN REDESIGN & DISTRIBUTED SYSTEM MONITORING STYLES
+   ========================================================================== */
+
+/* 1. System Health Bar */
+.admin-health-bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 12px;
+  background: var(--vi-card);
+  border: 1px solid var(--vi-border);
+  border-radius: 16px;
+  padding: 14px 18px;
+  margin-bottom: 24px;
+  box-shadow: var(--vi-shadow-sm);
+}
+
+.health-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.health-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.health-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.health-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--vi-muted);
+}
+
+.health-status {
+  font-size: 12.5px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.health-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.health-status.online {
+  color: #10b981;
+}
+.health-status.online .health-dot {
+  background: #10b981;
+  box-shadow: 0 0 8px #10b981;
+}
+
+.health-status.warning {
+  color: #f59e0b;
+}
+.health-status.warning .health-dot {
+  background: #f59e0b;
+  box-shadow: 0 0 8px #f59e0b;
+}
+
+.health-status.offline {
+  color: #ef4444;
+}
+.health-status.offline .health-dot {
+  background: #ef4444;
+  box-shadow: 0 0 8px #ef4444;
+}
+
+.admin-vip-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(217, 119, 6, 0.3));
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #fbbf24;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 12.5px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  margin-left: auto;
+}
+
+.admin-vip-link-btn:hover {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35);
+}
+
+.admin-vip-quick {
+  background: rgba(245, 158, 11, 0.12) !important;
+  color: #fbbf24 !important;
+  border: 1px solid rgba(245, 158, 11, 0.3) !important;
+}
+
+/* 2. Admin Charts System */
+.admin-charts-wrapper {
+  margin-top: 8px;
+}
+
+.admin-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.admin-section-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.admin-section-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--vi-text);
+  margin: 0;
+}
+
+.admin-section-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(99, 102, 241, 0.15);
+  color: #818cf8;
+}
+
+.admin-chart-card {
+  background: var(--vi-card);
+  border: 1px solid var(--vi-border);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: var(--vi-shadow-sm);
+  position: relative;
+}
+
+.admin-chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.admin-chart-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--vi-text);
+  margin: 0 0 4px;
+}
+
+.admin-chart-subtitle {
+  font-size: 12px;
+  color: var(--vi-muted);
+  margin: 0;
+}
+
+.admin-stat-pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.admin-pill-tag {
+  font-size: 11.5px;
+  padding: 4px 10px;
+  border-radius: 8px;
+}
+
+.admin-pill-tag.max {
+  background: rgba(99, 102, 241, 0.12);
+  color: #818cf8;
+}
+
+.admin-pill-tag.avg {
+  background: rgba(16, 185, 129, 0.12);
+  color: #34d399;
+}
+
+.admin-svg-container {
+  position: relative;
+  width: 100%;
+}
+
+.admin-svg-chart {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.admin-chart-tooltip {
+  position: absolute;
+  top: 10px;
+  background: rgba(15, 23, 42, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+  padding: 8px 14px;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.tooltip-date {
+  font-size: 11.5px;
+  color: #94a3b8;
+}
+
+.tooltip-value {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.admin-charts-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.admin-chart-legend {
+  display: flex;
+  gap: 10px;
+  font-size: 11.5px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--vi-muted);
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.admin-donut-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 10px 0;
+}
+
+.admin-donut-visual {
+  width: 150px;
+  height: 150px;
+  flex-shrink: 0;
+}
+
+.admin-donut-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.admin-donut-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-width: 180px;
+}
+
+.admin-legend-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  transition: background 0.15s ease;
+}
+
+.admin-legend-row:hover,
+.admin-legend-row.active {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.legend-color-box {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+.legend-name {
+  color: var(--vi-text);
+  font-weight: 500;
+}
+
+.legend-count {
+  font-weight: 700;
+  color: var(--vi-text);
+}
+
+.legend-pct {
+  font-size: 11.5px;
+  color: var(--vi-muted);
+}
+
+/* 3. Live Activity Table */
+.admin-activity-table-wrapper {
+  overflow-x: auto;
+}
+
+.admin-activity-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.admin-activity-table th {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--vi-muted);
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--vi-border);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.admin-activity-table td {
+  padding: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  font-size: 13px;
+}
+
+.admin-status-pill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+.admin-status-pill.success {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.admin-status-pill.failed {
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.admin-status-pill.pending {
+  background: rgba(245, 158, 11, 0.12);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+/* 4. VIP Admin Button Modes */
+.kps-verify-btn.admin-mode,
+.locket-submit-btn.admin-mode {
+  background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+  color: #ffffff !important;
+  border: 1px solid #fbbf24 !important;
+  box-shadow: 0 4px 18px rgba(245, 158, 11, 0.4) !important;
+}
+
+.kps-verify-btn.admin-mode:hover,
+.locket-submit-btn.admin-mode:hover {
+  background: linear-gradient(135deg, #fbbf24, #d97706) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 22px rgba(245, 158, 11, 0.5) !important;
+}
+
+.ontop-mini-header.admin-vip {
+  background: linear-gradient(135deg, rgba(217, 119, 6, 0.16), rgba(180, 83, 9, 0.06)) !important;
+  border: 1px solid rgba(245, 158, 11, 0.4) !important;
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.15) !important;
+}
+
+

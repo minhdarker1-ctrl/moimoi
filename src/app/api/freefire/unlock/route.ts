@@ -10,9 +10,35 @@ import {
   ONTOP_COOKIE_NAME,
   getOntopPassStatus,
 } from "@/lib/ontop";
-import { vnDate } from "@/lib/crypto";
+import { sweepStaleTasks } from "@/lib/queue-sweeper";
+import { safeEqual, vnDate } from "@/lib/crypto";
 
 export const dynamic = "force-dynamic";
+
+function verifyWorkerSecret(req: Request): boolean {
+  const expectedSecret =
+    process.env.WORKER_SECRET || "xdarker_worker_token_2026_moimoi";
+
+  const headerSecret = req.headers.get("x-worker-secret");
+  if (headerSecret && safeEqual(headerSecret.trim(), expectedSecret.trim())) {
+    return true;
+  }
+
+  const authHeader = req.headers.get("authorization") || "";
+  if (authHeader.startsWith("Bearer ")) {
+    const bearerToken = authHeader.slice(7).trim();
+    if (safeEqual(bearerToken, expectedSecret.trim())) {
+      return true;
+    }
+  }
+
+  const host = req.headers.get("host") || "";
+  if (host.includes("localhost") || host.includes("127.0.0.1")) {
+    return true;
+  }
+
+  return false;
+}
 
 export async function POST(req: Request) {
   try {
@@ -46,8 +72,22 @@ export async function POST(req: Request) {
     const serverParam = String(body.server ?? "kipas").toLowerCase().trim();
     const server = serverParam === "astute" ? "astute" : "kipas";
     const serverLabel = server === "astute" ? "Astute" : "FF Kipas";
+    const requestSource = String(body.source || "WEB").toUpperCase();
 
-    // 3. Kiểm tra tính hợp lệ của UID Free Fire (5 đến 15 chữ số theo chuẩn kiểm duyệt)
+    // 3. CHỐNG GIẢ DANH TELEGRAM: Bắt buộc xác thực Worker Secret
+    if (requestSource === "TELEGRAM") {
+      if (!verifyWorkerSecret(req)) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Yêu cầu không hợp lệ. Nguồn Telegram không được phép truy cập trái phép!",
+          },
+          { status: 401 }
+        );
+      }
+    }
+
+    // 4. Kiểm tra tính hợp lệ của UID Free Fire (5 đến 15 chữ số theo chuẩn kiểm duyệt)
     if (!rawUid) {
       return NextResponse.json(
         { success: false, error: "Vui lòng nhập UID Free Fire của bạn." },
@@ -65,7 +105,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // 4. Lấy cấu hình hệ thống
+    // 5. Lấy cấu hình hệ thống
     const config = await db.freeFireConfig.findUnique({ where: { id: 1 } });
     if (config && !config.unlockEnabled) {
       return NextResponse.json(
@@ -77,25 +117,44 @@ export async function POST(req: Request) {
       );
     }
 
-    // 5. BẮT BUỘC KIỂM TRA & TRỪ CREDIT NGUYÊN TỬ (Atomic Concurrency Control)
-    const cookieHeader = req.headers.get("cookie") || "";
-    const ontopCookieMatch = cookieHeader.match(/ontop_daily_pass=([^;]+)/);
-    const ontopCookieVal = ontopCookieMatch ? decodeURIComponent(ontopCookieMatch[1]) : undefined;
+    // 6. PHÂN QUYỀN ADMIN & TRỪ CREDIT NGUYÊN TỬ
+    const user = await getCurrentUser();
+    const isAdmin = user?.role === "ADMIN";
 
-    const creditResult = await consumeCredit(ip, ontopCookieVal);
-    if (!creditResult.success) {
-      return NextResponse.json(
-        {
-          success: false,
-          requirePass: true,
-          error: creditResult.error || "Bạn chưa có lượt Verify khả dụng. Vui lòng hoàn thành vượt link để nhận lượt!",
-        },
-        { status: 403 }
-      );
+    let creditResult: {
+      success: boolean;
+      remainingCredits: number;
+      passId: number | null;
+      passToken: string;
+      error?: string;
+    } = {
+      success: true,
+      remainingCredits: 9999,
+      passId: null,
+      passToken: "",
+    };
+
+    // Chỉ trừ credit đối với user thông thường (Admin và Telegram Bot hợp lệ được miễn trừ)
+    if (!isAdmin && requestSource !== "TELEGRAM") {
+      const cookieHeader = req.headers.get("cookie") || "";
+      const ontopCookieMatch = cookieHeader.match(/ontop_daily_pass=([^;]+)/);
+      const ontopCookieVal = ontopCookieMatch ? decodeURIComponent(ontopCookieMatch[1]) : undefined;
+
+      const res = await consumeCredit(ip, ontopCookieVal);
+      if (!res.success) {
+        return NextResponse.json(
+          {
+            success: false,
+            requirePass: true,
+            error: res.error || "Bạn chưa có lượt Verify khả dụng. Vui lòng hoàn thành vượt link để nhận lượt!",
+          },
+          { status: 403 }
+        );
+      }
+      creditResult = res;
     }
 
-    // 6. Tiếp nhận Task Hàng Đợi (Status = PENDING) để Extension Worker nhận việc
-    const user = await getCurrentUser();
+    // 7. Tiếp nhận Task Hàng Đợi (Status = PENDING) để Extension Worker nhận việc
     const userAgent = req.headers.get("user-agent") || "";
     let deviceName = "Khác";
     if (/iphone|ipad|ipod/i.test(userAgent)) deviceName = "iOS";
@@ -121,14 +180,16 @@ export async function POST(req: Request) {
             clientAgent: userAgent.slice(0, 150),
             retries: 0,
             passId: creditResult.passId,
-            source: body.source || "WEB",
+            source: isAdmin ? "ADMIN_WEB" : (body.source || "WEB"),
             chatId: body.chatId || null,
           }),
         },
       });
     } catch (taskErr) {
       console.error("Lỗi tạo Task hàng đợi, tiến hành hoàn lại credit:", taskErr);
-      await refundCredit(creditResult.passId);
+      if (creditResult.passId) {
+        await refundCredit(creditResult.passId);
+      }
       return NextResponse.json(
         {
           success: false,
@@ -148,8 +209,6 @@ export async function POST(req: Request) {
       status: "PENDING",
     }).catch((e) => console.error("Telegram notify failed:", e));
 
-    const freshStatus = await getOntopPassStatus(ip, creditResult.passToken);
-    const today = vnDate();
     const response = NextResponse.json({
       success: true,
       jobId: task.id,
@@ -157,25 +216,32 @@ export async function POST(req: Request) {
       server,
       serverLabel,
       status: "PENDING",
-      remainingCredits: creditResult.remainingCredits,
-      message: "Yêu cầu mở khóa đã được tiếp nhận. Đang đồng bộ danh sách Whitelist lên máy chủ...",
+      isAdmin,
+      remainingCredits: isAdmin ? 9999 : creditResult.remainingCredits,
+      message: isAdmin
+        ? "Yêu cầu mở khóa (Admin Vô Hạn) đã được tiếp nhận. Đang nạp danh sách Whitelist..."
+        : "Yêu cầu mở khóa đã được tiếp nhận. Đang đồng bộ danh sách Whitelist lên máy chủ...",
     });
 
-    // Cập nhật cookie mới với số credit đã trừ
-    const signedToken = signPassPayload({
-      passToken: creditResult.passToken,
-      date: freshStatus.date || today,
-      earnedCount: freshStatus.earnedCount,
-      usedCount: freshStatus.usedCount,
-      availableCredits: freshStatus.availableCredits,
-    });
+    // Cập nhật cookie mới với số credit đã trừ nếu có passToken
+    if (creditResult.passToken) {
+      const freshStatus = await getOntopPassStatus(ip, creditResult.passToken);
+      const today = vnDate();
+      const signedToken = signPassPayload({
+        passToken: creditResult.passToken,
+        date: freshStatus.date || today,
+        earnedCount: freshStatus.earnedCount,
+        usedCount: freshStatus.usedCount,
+        availableCredits: freshStatus.availableCredits,
+      });
 
-    response.cookies.set(ONTOP_COOKIE_NAME, signedToken, {
-      path: "/",
-      maxAge: 86400,
-      httpOnly: true,
-      sameSite: "lax",
-    });
+      response.cookies.set(ONTOP_COOKIE_NAME, signedToken, {
+        path: "/",
+        maxAge: 86400,
+        httpOnly: true,
+        sameSite: "lax",
+      });
+    }
 
     return response;
   } catch (error) {
@@ -192,6 +258,7 @@ export async function POST(req: Request) {
 
 /**
  * GET: Tra cứu trạng thái Task (nếu có ?jobId=...) HOẶC danh sách các UID vừa kích hoạt gần đây
+ * Tích hợp Dual-Trigger Sweeper: Polling của Frontend tự kích hoạt giải cứu task nếu quá hạn
  */
 export async function GET(req: Request) {
   try {
@@ -202,6 +269,9 @@ export async function GET(req: Request) {
     if (jobIdParam) {
       const id = parseInt(jobIdParam, 10);
       if (!isNaN(id)) {
+        // DUAL-TRIGGER SWEEPER: Kiểm tra riêng task này xem có bị zombie/treo không
+        await sweepStaleTasks(id);
+
         const task = await db.serviceUsageLog.findUnique({
           where: { id },
         });

@@ -39,6 +39,18 @@ export default function GetKeyLoadingPage({
         return;
       }
 
+      // ĐẶC QUYỀN ADMIN: Tải trực tiếp, bỏ qua countdown
+      if (data.isDirect) {
+        setState({
+          status: "redirecting",
+          url: data.url,
+          appName: data.appName || "Ứng dụng",
+          countdown: 0,
+        });
+        window.location.href = data.url;
+        return;
+      }
+
       setState({
         status: "redirecting",
         url: data.url,

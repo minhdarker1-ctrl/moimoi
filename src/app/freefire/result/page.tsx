@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { db } from "@/lib/db";
+import { getCurrentUser } from "@/lib/auth";
 import DesktopHeader from "@/components/DesktopHeader";
 import FreeFireResultView from "@/components/FreeFireResultView";
 
@@ -32,7 +33,7 @@ export default async function FreeFireResultPage({
     | "android"
     | "pc";
 
-  const [site, groups, notices, ffConfig] = await Promise.all([
+  const [site, groups, notices, ffConfig, currentUser] = await Promise.all([
     db.site.findUnique({ where: { id: 1 } }),
     db.group.findMany({
       where: { visible: true },
@@ -41,7 +42,10 @@ export default async function FreeFireResultPage({
     }),
     db.notice.findMany({ where: { visible: true }, orderBy: { createdAt: "desc" }, take: 10 }),
     db.freeFireConfig.findUnique({ where: { id: 1 } }),
+    getCurrentUser().catch(() => null),
   ]);
+
+  const isAdmin = currentUser?.role === "ADMIN";
 
   if (!site) return null;
 
@@ -136,6 +140,7 @@ export default async function FreeFireResultPage({
           device={rawDevice}
           type={deviceType}
           config={configProps}
+          isAdmin={isAdmin}
         />
 
         <footer className="mdarker-footer" style={{ marginTop: 40 }}>

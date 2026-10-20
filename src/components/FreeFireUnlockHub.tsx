@@ -380,17 +380,19 @@ export default function FreeFireUnlockHub({
         return;
       }
 
-      // Đã tiêu hao thành công 1 credit -> Cập nhật state cục bộ
-      setOntopPass((prev) =>
-        prev
-          ? {
-              ...prev,
-              usedCount: prev.usedCount + 1,
-              availableCredits: Math.max(0, prev.availableCredits - 1),
-              hasAccess: Math.max(0, prev.availableCredits - 1) > 0,
-            }
-          : null
-      );
+      // Đã tiêu hao thành công 1 credit -> Cập nhật state cục bộ (chỉ nếu không phải Admin)
+      if (!ontopPass?.isAdmin) {
+        setOntopPass((prev) =>
+          prev
+            ? {
+                ...prev,
+                usedCount: prev.usedCount + 1,
+                availableCredits: Math.max(0, prev.availableCredits - 1),
+                hasAccess: Math.max(0, prev.availableCredits - 1) > 0,
+              }
+            : null
+        );
+      }
 
       const jobId = data.jobId;
       setStatus("queued");
@@ -412,8 +414,8 @@ export default function FreeFireUnlockHub({
       // Polling kiểm tra tiến độ thời gian thực
       let phase: "PENDING" | "PROCESSING" = "PENDING";
       let phaseElapsedSeconds = 0;
-      const PENDING_TIMEOUT = 45; // Tối đa 45s chờ Worker nhận task
-      const PROCESSING_TIMEOUT = 35; // Tối đa 35s chờ Worker giải và nạp Whitelist
+      const PENDING_TIMEOUT = 50; // Tối đa 50s chờ Worker nhận task (Sweeper dọn dẹp ở mốc 45s)
+      const PROCESSING_TIMEOUT = 65; // Tối đa 65s chờ Worker giải và nạp Whitelist (Sweeper dọn dẹp ở mốc 60s)
       const POLL_INTERVAL_MS = 2000;
 
       activePollRef.current = setInterval(async () => {
@@ -478,17 +480,37 @@ export default function FreeFireUnlockHub({
                 activePollRef.current = null;
               }
               setStatus("error");
-              setErrorMsg(
-                statusData.resultMessage ||
-                  "Máy chủ báo lỗi khi xử lý kích hoạt UID. Lượt Verify đã được hoàn trả!"
-              );
-              // Phục hồi lượt hiển thị trên UI
-              try {
-                const refreshRes = await fetch("/api/ontop/status");
-                const refreshData = await refreshRes.json();
-                if (refreshData.success) {
-                  setOntopPass(refreshData);
-                } else {
+              if (ontopPass?.isAdmin) {
+                setErrorMsg(
+                  statusData.resultMessage ||
+                    "Máy chủ báo lỗi khi xử lý kích hoạt UID."
+                );
+              } else {
+                setErrorMsg(
+                  statusData.resultMessage ||
+                    "Máy chủ báo lỗi khi xử lý kích hoạt UID. Lượt Verify đã được hoàn trả!"
+                );
+              }
+              // Phục hồi lượt hiển thị trên UI (chỉ với user thường, không cộng dồn số dư ảo 9999 của admin)
+              if (!ontopPass?.isAdmin) {
+                try {
+                  const refreshRes = await fetch("/api/ontop/status");
+                  const refreshData = await refreshRes.json();
+                  if (refreshData.success) {
+                    setOntopPass(refreshData);
+                  } else {
+                    setOntopPass((prev) =>
+                      prev
+                        ? {
+                            ...prev,
+                            usedCount: Math.max(0, prev.usedCount - 1),
+                            availableCredits: prev.availableCredits + 1,
+                            hasAccess: true,
+                          }
+                        : null
+                    );
+                  }
+                } catch {
                   setOntopPass((prev) =>
                     prev
                       ? {
@@ -500,17 +522,6 @@ export default function FreeFireUnlockHub({
                       : null
                   );
                 }
-              } catch {
-                setOntopPass((prev) =>
-                  prev
-                    ? {
-                        ...prev,
-                        usedCount: Math.max(0, prev.usedCount - 1),
-                        availableCredits: prev.availableCredits + 1,
-                        hasAccess: true,
-                      }
-                    : null
-                );
               }
               return;
             }
@@ -853,18 +864,25 @@ export default function FreeFireUnlockHub({
                   <span>ĐANG TẠO LIÊN KẾT ({activeGatewayName})...</span>
                 </button>
               ) : availableCredits > 0 ? (
-                /* STATE D: CÓ LƯỢT KHẢ DỤNG -> NÚT VERIFY CHUẨN XANH NEON */
+                /* STATE D: CÓ LƯỢT KHẢ DỤNG -> NÚT VERIFY CHUẨN XANH NEON HOẶC ĐẶC QUYỀN ADMIN */
                 <>
                   <button
                     type="submit"
-                    className="kps-verify-btn ready-mode"
+                    className={`kps-verify-btn ready-mode ${ontopPass?.isAdmin ? "admin-mode" : ""}`}
                     disabled={!uid.trim()}
                   >
                     <i className="fa-solid fa-shield-halved" />
-                    <span>🛡️ VERIFY UID NGAY ({availableCredits} LƯỢT KHẢ DỤNG)</span>
+                    <span>
+                      {ontopPass?.isAdmin
+                        ? "🛡️ VERIFY UID NGAY (ADMIN VÔ HẠN)"
+                        : `🛡️ VERIFY UID NGAY (${availableCredits} LƯỢT KHẢ DỤNG)`}
+                    </span>
                   </button>
-                  <p className="kps-btn-subnote" style={{ color: "#34d399" }}>
-                    <i className="fa-solid fa-circle-check" /> Sẵn sàng! Bấm để kích hoạt Whitelist cho UID của bạn.
+                  <p className="kps-btn-subnote" style={{ color: ontopPass?.isAdmin ? "#fbbf24" : "#34d399" }}>
+                    <i className="fa-solid fa-circle-check" />{" "}
+                    {ontopPass?.isAdmin
+                      ? "Đặc quyền Quản trị viên: Kích hoạt không giới hạn, không cần vượt link rút gọn!"
+                      : "Sẵn sàng! Bấm để kích hoạt Whitelist cho UID của bạn."}
                   </p>
                 </>
               ) : allGatewaysExhausted ? (

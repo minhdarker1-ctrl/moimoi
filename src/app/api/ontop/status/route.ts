@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies, headers } from "next/headers";
 import { clientIp } from "@/lib/guard";
+import { getCurrentUser } from "@/lib/auth";
 import {
   getOntopPassStatus,
   signPassPayload,
@@ -16,6 +17,30 @@ export async function GET() {
     const cookieStore = await cookies();
     const ip = clientIp(h);
 
+    const currentUser = await getCurrentUser();
+    const isAdmin = currentUser?.role === "ADMIN";
+
+    // ĐẶC QUYỀN ADMIN: Sử dụng vô hạn tất cả dịch vụ trên web mà không cần vượt link
+    if (isAdmin) {
+      return NextResponse.json({
+        success: true,
+        isAdmin: true,
+        hasAccess: true,
+        earnedCount: 9999,
+        usedCount: 0,
+        availableCredits: 9999,
+        currentGateway: "VIETUSER",
+        activeGatewayName: "VietUser",
+        currentGatewayStep: 1,
+        allGatewaysExhausted: false,
+        isExhausted: false,
+        target: 2,
+        count: 9999,
+        isUnlimited: true,
+        remainingSteps: 0,
+      });
+    }
+
     const rawCookie = cookieStore.get(ONTOP_COOKIE_NAME)?.value;
     const status = await getOntopPassStatus(ip, rawCookie);
     const today = vnDate();
@@ -30,6 +55,7 @@ export async function GET() {
 
     const response = NextResponse.json({
       success: true,
+      isAdmin: false,
       hasAccess: status.hasAccess,
       earnedCount: status.earnedCount,
       usedCount: status.usedCount,
