@@ -10708,6 +10708,49 @@ body.vthangios-dark .vthangios-yt-btn {
   text-align: left;
 }
 
+/* LOCKET FREE DIRECT BANNER */
+.locket-free-banner {
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: var(--vi-radius-sm);
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  text-align: left;
+  backdrop-filter: blur(10px);
+}
+
+[data-theme="dark"] .locket-free-banner {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(52, 211, 153, 0.35);
+}
+
+.locket-free-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: #059669;
+  background: rgba(16, 185, 129, 0.15);
+  padding: 3px 10px;
+  border-radius: 999px;
+  margin-bottom: 6px;
+}
+
+[data-theme="dark"] .locket-free-badge {
+  color: #34d399;
+  background: rgba(52, 211, 153, 0.2);
+}
+
+.locket-free-text {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--vi-text);
+  margin: 0;
+}
+
 /* MONTHLY SHARED DNS BANNER */
 .locket-wf-dns-banner {
   background: rgba(14, 165, 233, 0.08);

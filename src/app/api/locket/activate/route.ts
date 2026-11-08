@@ -2,14 +2,6 @@ import { NextResponse } from "next/server";
 import { clientIp, rateLimit } from "@/lib/guard";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import {
-  consumeCredit,
-  refundCredit,
-  signPassPayload,
-  ONTOP_COOKIE_NAME,
-  getOntopPassStatus,
-} from "@/lib/ontop";
-import { vnDate } from "@/lib/crypto";
 
 // StoreKit 2 Receipt Tokens from C:\tmauto\locket\locketgold.py
 const TOKEN_CONFIG = {
@@ -146,10 +138,6 @@ export async function POST(req: Request) {
       );
     }
 
-    const cookieHeader = req.headers.get("cookie") || "";
-    const ontopCookieMatch = cookieHeader.match(/ontop_daily_pass=([^;]+)/);
-    const ontopCookieVal = ontopCookieMatch ? decodeURIComponent(ontopCookieMatch[1]) : undefined;
-
     const body = await req.json().catch(() => ({}));
     const target = (body.target || "").trim();
 
@@ -176,41 +164,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // Bước 2: Kiểm tra quyền Admin & Trừ credit nguyên tử (Atomic Consumption)
-    const currentUser = await getCurrentUser().catch(() => null);
-    const isAdmin = currentUser?.role === "ADMIN";
-
-    let creditResult: {
-      success: boolean;
-      remainingCredits: number;
-      passId: number | null;
-      passToken: string;
-      error?: string;
-    } = {
-      success: true,
-      remainingCredits: 9999,
-      passId: null,
-      passToken: "",
-    };
-
-    if (!isAdmin) {
-      const res = await consumeCredit(ip, ontopCookieVal);
-      if (!res.success) {
-        return NextResponse.json(
-          {
-            success: false,
-            requirePass: true,
-            error:
-              res.error ||
-              "Bạn chưa có lượt buff Locket Gold khả dụng. Vui lòng hoàn thành vượt link để nhận lượt!",
-          },
-          { status: 403 }
-        );
-      }
-      creditResult = res;
-    }
-
-    // Bước 3: Gửi biên lai Apple StoreKit 2
+    // Bước 2: Gửi biên lai Apple StoreKit 2
     const payload = {
       product_id: "locket_1600_1y",
       fetch_token: TOKEN_CONFIG.fetch_token,
@@ -311,37 +265,12 @@ export async function POST(req: Request) {
         },
       }).catch(() => {});
 
-      const freshStatus = await getOntopPassStatus(ip, creditResult.passToken);
-      const today = vnDate();
-      const response = NextResponse.json({
+      return NextResponse.json({
         success: true,
         uid,
         expiresDate: expiresDate || "1 Năm (Tự động đồng bộ)",
-        remainingCredits: creditResult.remainingCredits,
         message: "Kích hoạt Locket Gold thành công!",
       });
-
-      const signedToken = signPassPayload({
-        passToken: creditResult.passToken,
-        date: freshStatus.date || today,
-        earnedCount: freshStatus.earnedCount,
-        usedCount: freshStatus.usedCount,
-        availableCredits: freshStatus.availableCredits,
-      });
-
-      response.cookies.set(ONTOP_COOKIE_NAME, signedToken, {
-        path: "/",
-        maxAge: 86400,
-        httpOnly: true,
-        sameSite: "lax",
-      });
-
-      return response;
-    }
-
-    // Nếu không kích hoạt được -> Hoàn trả credit an toàn (nếu có passId)
-    if (creditResult.passId) {
-      await refundCredit(creditResult.passId);
     }
 
     await db.serviceUsageLog.create({
@@ -360,7 +289,7 @@ export async function POST(req: Request) {
     return NextResponse.json(
       {
         success: false,
-        error: `${errorMessage} (Lượt buff của bạn đã được hoàn trả an toàn).`,
+        error: errorMessage,
       },
       { status: 502 }
     );
