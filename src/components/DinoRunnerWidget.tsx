@@ -12,12 +12,24 @@ interface Obstacle {
   speed: number;
 }
 
+interface Particle {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  life: number;
+  maxLife: number;
+  color: string;
+}
+
 export default function DinoRunnerWidget() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [score, setScore] = useState(0);
   const [highScore, setHighScore] = useState(1280);
-  const [isAutoPlay, setIsAutoPlay] = useState(true);
+  const [isAutoPlay] = useState(true);
   const [dayNight, setDayNight] = useState<"day" | "night">("night");
+  const [isDead, setIsDead] = useState(false);
+  const [currentSpeedDisplay, setCurrentSpeedDisplay] = useState("2.4");
 
   // Load high score from local storage
   useEffect(() => {
@@ -30,7 +42,6 @@ export default function DinoRunnerWidget() {
   const handleUserJump = useCallback(() => {
     if (!canvasRef.current) return;
     const canvas = canvasRef.current;
-    // Dispatch custom jump event to the canvas loop
     canvas.dispatchEvent(new CustomEvent("dino-jump"));
   }, []);
 
@@ -41,155 +52,242 @@ export default function DinoRunnerWidget() {
     if (!ctx) return;
 
     let animId: number;
-    const width = (canvas.width = 300);
-    const height = (canvas.height = 140);
-    const groundY = 115;
+    // TĂNG KÍCH THƯỚC TO LÊN 80% (Canvas rộng 540px, cao 240px)
+    const width = (canvas.width = 540);
+    const height = (canvas.height = 240);
+    const groundY = 195;
 
-    // Dino Physics & State
+    // Dino Physics & State (Scale to 1.8x)
     const dino = {
-      x: 28,
-      y: groundY - 26,
-      width: 22,
-      height: 26,
+      x: 48,
+      y: groundY - 48,
+      width: 40,
+      height: 48,
       vy: 0,
-      gravity: 0.58,
-      jumpStrength: -9.4,
+      gravity: 0.78,
+      jumpStrength: -12.8,
       grounded: true,
       ducking: false,
       legFrame: 0,
       legTimer: 0,
+      isFumbling: false, // Trạng thái ngẫu nhiên lỡ nhịp để die
       jump() {
-        if (this.grounded) {
+        if (this.grounded && !this.isFumbling) {
           this.vy = this.jumpStrength;
           this.grounded = false;
           this.ducking = false;
         }
       },
+      reset() {
+        this.y = groundY - 48;
+        this.vy = 0;
+        this.grounded = true;
+        this.ducking = false;
+        this.legFrame = 0;
+        this.legTimer = 0;
+        this.isFumbling = false;
+      },
     };
 
-    // Ground scrolling dashes
+    // Tốc độ ban đầu chậm rãi, thư thái (2.4 px/frame)
+    const initialSpeed = 2.4;
+    let groundSpeed = initialSpeed;
     let groundOffset = 0;
-    const groundSpeed = 3.6;
 
-    // Obstacles array
+    // Chướng ngại vật & Điểm số
     let obstacles: Obstacle[] = [];
-    let spawnTimer = 70;
+    let deathParticles: Particle[] = [];
+    let spawnTimer = 90;
     let currentScore = 0;
     let cycleTimer = 0;
     let localDayNight: "day" | "night" = "night";
 
-    // Listen for manual jump
+    // Trạng thái Game Over & Hồi sinh tự động
+    let gameOver = false;
+    let respawnCountdown = 0;
+
+    // Điểm số ngẫu nhiên cho mỗi ván sẽ bị die (từ 160 đến 520 điểm)
+    let targetDeathScore = Math.floor(Math.random() * 360) + 160;
+
+    // Lắng nghe sự kiện nhảy thủ công
     function onDinoJump() {
-      dino.jump();
+      if (gameOver) {
+        // Click để restart ngay lập tức
+        restartGame();
+      } else {
+        dino.jump();
+      }
     }
     canvas.addEventListener("dino-jump", onDinoJump);
 
     function onKeyDown(e: KeyboardEvent) {
       if (e.code === "Space" || e.code === "ArrowUp") {
         e.preventDefault();
-        dino.jump();
+        if (gameOver) {
+          restartGame();
+        } else {
+          dino.jump();
+        }
       } else if (e.code === "ArrowDown") {
         e.preventDefault();
-        if (dino.grounded) {
+        if (dino.grounded && !gameOver) {
           dino.ducking = true;
         }
       }
     }
+
     function onKeyUp(e: KeyboardEvent) {
       if (e.code === "ArrowDown") {
         dino.ducking = false;
       }
     }
+
     window.addEventListener("keydown", onKeyDown);
     window.addEventListener("keyup", onKeyUp);
 
-    // Main Game Loop
+    // Hàm khởi động lại từ đầu
+    function restartGame() {
+      gameOver = false;
+      respawnCountdown = 0;
+      setIsDead(false);
+      currentScore = 0;
+      groundSpeed = initialSpeed;
+      obstacles = [];
+      deathParticles = [];
+      spawnTimer = 90;
+      dino.reset();
+      // Đặt ngưỡng ngẫu nhiên mới cho ván sau
+      targetDeathScore = Math.floor(Math.random() * 380) + 180;
+    }
+
+    // Main Game Loop 60fps
     function loop() {
-      // 1. Update Game Cycle (Day / Night cycle: Sáng / Tối)
+      // ==========================================
+      // XỬ LÝ KHI KHỦNG LONG ĐÃ DIE (GAME OVER)
+      // ==========================================
+      if (gameOver) {
+        respawnCountdown--;
+
+        // Update death explosion particles
+        for (let p of deathParticles) {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.15; // particle gravity
+          p.life--;
+        }
+        deathParticles = deathParticles.filter((p) => p.life > 0);
+
+        // Vẽ lại canvas tĩnh và thông báo hồi sinh
+        renderScene();
+
+        // Tự động hồi sinh sau khoảng 1.8 giây (110 frames)
+        if (respawnCountdown <= 0) {
+          restartGame();
+        }
+
+        animId = requestAnimationFrame(loop);
+        return;
+      }
+
+      // ==========================================
+      // 1. CHU KỲ NGÀY / ĐÊM (DAY & NIGHT)
+      // ==========================================
       cycleTimer++;
-      if (cycleTimer > 900) {
+      if (cycleTimer > 1200) {
         cycleTimer = 0;
         localDayNight = localDayNight === "night" ? "day" : "night";
         setDayNight(localDayNight);
       }
 
-      // 2. Score Update
-      currentScore += 0.2;
+      // ==========================================
+      // 2. NHANH DẦN ĐỀU THEO THỜI GIAN & ĐIỂM SỐ
+      // Bắt đầu 2.4, tăng từ từ đều đặn đến tối đa 6.2
+      // ==========================================
+      currentScore += 0.18;
+      groundSpeed = initialSpeed + Math.min(currentScore * 0.0042, 3.8);
+
       const displayScore = Math.floor(currentScore);
-      if (displayScore % 5 === 0) {
+      if (displayScore % 4 === 0) {
         setScore(displayScore);
+        setCurrentSpeedDisplay(groundSpeed.toFixed(1));
       }
 
-      // 3. Update Dino Physics
+      // ==========================================
+      // 3. VẬT LÝ KHỦNG LONG (DINO PHYSICS)
+      // ==========================================
       dino.y += dino.vy;
       if (!dino.grounded) {
         dino.vy += dino.gravity;
       }
 
-      // Ground collision
-      const baseHeight = dino.ducking ? 15 : 26;
+      const baseHeight = dino.ducking ? 28 : 48;
       if (dino.y >= groundY - baseHeight) {
         dino.y = groundY - baseHeight;
         dino.vy = 0;
         dino.grounded = true;
       }
 
-      // Leg animation
+      // Hoạt họa nhịp chân theo tốc độ chạy
       dino.legTimer++;
-      if (dino.legTimer > 5) {
+      const legStepInterval = Math.max(2, Math.floor(6 - groundSpeed * 0.5));
+      if (dino.legTimer > legStepInterval) {
         dino.legTimer = 0;
         dino.legFrame = (dino.legFrame + 1) % 2;
       }
 
-      // 4. Update Ground
-      groundOffset = (groundOffset + groundSpeed) % 24;
+      // ==========================================
+      // 4. MẶT ĐẤT CUỘN TRÔI
+      // ==========================================
+      groundOffset = (groundOffset + groundSpeed) % 40;
 
-      // 5. Spawn Obstacles
+      // ==========================================
+      // 5. SINH CHƯỚNG NGẠI VẬT (SCALE TO 1.8X)
+      // ==========================================
       spawnTimer--;
       if (spawnTimer <= 0) {
-        spawnTimer = Math.floor(Math.random() * 65) + 65;
+        // Khoảng cách xuất hiện co giãn theo tốc độ để vừa mắt
+        const speedFactor = 3.6 / groundSpeed;
+        spawnTimer = Math.floor((Math.random() * 55 + 75) * speedFactor);
 
-        // Choose obstacle: small cactus, large cactus, double cactus, or flying bird
         const r = Math.random();
         if (r < 0.35) {
-          // Small cactus
+          // Xương rồng nhỏ (scale to 1.8x)
           obstacles.push({
-            x: width + 10,
-            y: groundY - 24,
-            width: 12,
-            height: 24,
+            x: width + 20,
+            y: groundY - 42,
+            width: 22,
+            height: 42,
             type: "cactus_small",
             speed: groundSpeed,
           });
         } else if (r < 0.62) {
-          // Double cactus
+          // Xương rồng đôi (scale to 1.8x)
           obstacles.push({
-            x: width + 10,
-            y: groundY - 26,
-            width: 22,
-            height: 26,
+            x: width + 20,
+            y: groundY - 46,
+            width: 38,
+            height: 46,
             type: "cactus_double",
             speed: groundSpeed,
           });
         } else if (r < 0.82) {
-          // Large cactus
+          // Xương rồng lớn (scale to 1.8x)
           obstacles.push({
-            x: width + 10,
-            y: groundY - 32,
-            width: 16,
-            height: 32,
+            x: width + 20,
+            y: groundY - 56,
+            width: 28,
+            height: 56,
             type: "cactus_large",
             speed: groundSpeed,
           });
         } else {
-          // Pterodactyl Bird (Chim bay sáng / tối)
-          // 2 heights: low (must jump) or mid (must duck)
-          const birdY = Math.random() < 0.5 ? groundY - 26 : groundY - 42;
+          // Chim bay Pterodactyls (scale to 1.8x, độ cao thấp hoặc vừa)
+          const birdY = Math.random() < 0.5 ? groundY - 44 : groundY - 74;
           obstacles.push({
-            x: width + 10,
+            x: width + 20,
             y: birdY,
-            width: 24,
-            height: 16,
+            width: 42,
+            height: 28,
             type: "bird",
             birdFrame: 0,
             speed: groundSpeed + 0.8,
@@ -197,179 +295,288 @@ export default function DinoRunnerWidget() {
         }
       }
 
-      // 6. Update Obstacles & AI AUTO-PLAY (Treo máy bất tử)
+      // ==========================================
+      // 6. CẬP NHẬT CHƯỚNG NGẠI VẬT & BOT AUTO-PLAY
+      // CÓ TỶ LỆ NGẪU NHIÊN DIE KHI ĐẠT TARGET SCORE!
+      // ==========================================
+      const shouldDieNow = currentScore >= targetDeathScore;
+
       for (let i = obstacles.length - 1; i >= 0; i--) {
         const obs = obstacles[i];
         obs.x -= obs.speed;
 
-        // Animate bird wings
         if (obs.type === "bird") {
-          obs.birdFrame = (Math.floor(cycleTimer / 8) % 2);
+          obs.birdFrame = Math.floor(cycleTimer / 8) % 2;
         }
 
         // ==========================================
-        // AUTO-PLAY BOT LOGIC (Canh cự ly tự nhảy)
+        // AUTO-PLAY BOT LOGIC
         // ==========================================
-        const dist = obs.x - dino.x;
-        if (dist > 0 && dist < 68) {
-          if (obs.type === "bird" && obs.y === groundY - 42) {
-            // Mid bird -> Duck!
-            dino.ducking = true;
-          } else if (dino.grounded) {
-            // Cactus or low bird -> Jump!
-            dino.jump();
+        const dist = obs.x - (dino.x + dino.width);
+
+        if (dist > -10 && dist < 110) {
+          if (shouldDieNow) {
+            // BOT LỠ NHỊP NGẪU NHIÊN ĐỂ DIE TỰ NHIÊN!
+            dino.isFumbling = true;
+            // Không nhảy hoặc không cúi để va chạm
+          } else {
+            // Bot né an toàn
+            dino.isFumbling = false;
+            if (obs.type === "bird" && obs.y === groundY - 74) {
+              // Chim bay vừa tầm đầu -> Cúi!
+              dino.ducking = true;
+            } else if (dino.grounded) {
+              // Xương rồng hoặc chim bay thấp -> Nhảy!
+              dino.jump();
+            }
           }
         }
 
-        // Remove offscreen
-        if (obs.x < -30) {
+        // ==========================================
+        // KIỂM TRA VA CHẠM THỰC SỰ (COLLISION CHECK)
+        // ==========================================
+        const dinoHitBox = {
+          x: dino.x + 8,
+          y: dino.y + 6,
+          w: (dino.ducking ? 48 : dino.width) - 12,
+          h: (dino.ducking ? 26 : dino.height) - 10,
+        };
+
+        const obsHitBox = {
+          x: obs.x + 4,
+          y: obs.y + 4,
+          w: obs.width - 8,
+          h: obs.height - 8,
+        };
+
+        // AABB Collision
+        const isColliding =
+          dinoHitBox.x < obsHitBox.x + obsHitBox.w &&
+          dinoHitBox.x + dinoHitBox.w > obsHitBox.x &&
+          dinoHitBox.y < obsHitBox.y + obsHitBox.h &&
+          dinoHitBox.y + dinoHitBox.h > obsHitBox.y;
+
+        if (isColliding) {
+          // BÙM! KHỦNG LONG DIE!
+          gameOver = true;
+          setIsDead(true);
+          respawnCountdown = 110; // ~1.8s trước khi tự hồi sinh
+
+          // Cập nhật kỷ lục điểm cao
+          const finalScore = Math.floor(currentScore);
+          setHighScore((prev) => {
+            const nextHi = Math.max(prev, finalScore);
+            try {
+              localStorage.setItem("minsr-dino-hi", String(nextHi));
+            } catch {}
+            return nextHi;
+          });
+
+          // Tạo hạt nổ pixel (Neon Explosion)
+          for (let k = 0; k < 18; k++) {
+            const angle = Math.random() * Math.PI * 2;
+            const spd = Math.random() * 4 + 1.5;
+            deathParticles.push({
+              x: dino.x + dino.width / 2,
+              y: dino.y + dino.height / 2,
+              vx: Math.cos(angle) * spd,
+              vy: Math.sin(angle) * spd - 1.5,
+              life: Math.floor(Math.random() * 30 + 30),
+              maxLife: 60,
+              color: Math.random() < 0.5 ? "#f43f5e" : "#38bdf8",
+            });
+          }
+          break;
+        }
+
+        // Xóa chướng ngại vật ra khỏi màn hình
+        if (obs.x < -60) {
           obstacles.splice(i, 1);
         }
       }
 
-      // Auto unduck if obstacle passed
-      const nearestObs = obstacles.find((o) => o.x > dino.x - 10 && o.x < dino.x + 80);
-      if (!nearestObs && dino.ducking) {
+      // Tự đứng dậy nếu chướng ngại vật đã qua
+      const nearestObs = obstacles.find(
+        (o) => o.x > dino.x - 20 && o.x < dino.x + 130
+      );
+      if (!nearestObs && dino.ducking && !dino.isFumbling) {
         dino.ducking = false;
       }
 
       // ==========================================
-      // 7. RENDER FRAMELESS CANVAS (HOÀN TOÀN TRONG SUỐT)
+      // 7. VẼ SCENE
       // ==========================================
+      renderScene();
+
+      animId = requestAnimationFrame(loop);
+    }
+
+    // Hàm render cảnh game trên Canvas
+    function renderScene() {
       if (!ctx) return;
       ctx.clearRect(0, 0, width, height);
 
-      // Theme Colors based on Day / Night Cycle (Sáng / Tối)
       const primaryColor = localDayNight === "night" ? "#38bdf8" : "#fbbf24";
-      const secondaryColor = localDayNight === "night" ? "#94a3b8" : "#cbd5e1";
-      const groundColor = "rgba(255, 255, 255, 0.25)";
+      const groundColor = "rgba(255, 255, 255, 0.28)";
 
-      // Draw Horizon Ground Line with moving dashes
+      // Đường chân trời mặt đất (Ground Line)
       ctx.strokeStyle = groundColor;
-      ctx.lineWidth = 1.5;
+      ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.moveTo(0, groundY);
       ctx.lineTo(width, groundY);
       ctx.stroke();
 
-      // Moving ground bumps
-      ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
-      for (let gx = -groundOffset; gx < width; gx += 28) {
-        ctx.fillRect(gx, groundY + 3, 6, 1.5);
-        ctx.fillRect(gx + 12, groundY + 6, 3, 1.5);
+      // Các vệt sỏi đá chuyển động trên mặt đất
+      ctx.fillStyle = "rgba(255, 255, 255, 0.45)";
+      for (let gx = -groundOffset; gx < width; gx += 46) {
+        ctx.fillRect(gx, groundY + 4, 10, 2);
+        ctx.fillRect(gx + 20, groundY + 9, 5, 2);
       }
 
-      // Draw Obstacles (Xương rồng & Chim bay)
+      // Vẽ chướng ngại vật (Xương rồng & Chim bay 1.8x)
       obstacles.forEach((obs) => {
-        ctx.fillStyle = obs.type === "bird" ? (localDayNight === "night" ? "#f43f5e" : "#f59e0b") : primaryColor;
+        ctx.fillStyle =
+          obs.type === "bird"
+            ? localDayNight === "night"
+              ? "#f43f5e"
+              : "#f59e0b"
+            : primaryColor;
         ctx.shadowColor = ctx.fillStyle;
-        ctx.shadowBlur = 6;
+        ctx.shadowBlur = 8;
 
         if (obs.type === "cactus_small") {
-          // Small Cactus
-          ctx.fillRect(obs.x + 4, obs.y, 4, obs.height);
-          ctx.fillRect(obs.x, obs.y + 6, 4, 10);
-          ctx.fillRect(obs.x + 8, obs.y + 8, 4, 10);
+          // Xương rồng nhỏ
+          ctx.fillRect(obs.x + 7, obs.y, 7, obs.height);
+          ctx.fillRect(obs.x, obs.y + 11, 7, 18);
+          ctx.fillRect(obs.x + 14, obs.y + 14, 7, 18);
         } else if (obs.type === "cactus_double") {
-          // Double Cacti
-          ctx.fillRect(obs.x + 3, obs.y + 4, 4, obs.height - 4);
-          ctx.fillRect(obs.x + 13, obs.y, 4, obs.height);
-          ctx.fillRect(obs.x, obs.y + 10, 4, 8);
-          ctx.fillRect(obs.x + 18, obs.y + 8, 4, 8);
+          // Xương rồng đôi
+          ctx.fillRect(obs.x + 5, obs.y + 7, 7, obs.height - 7);
+          ctx.fillRect(obs.x + 23, obs.y, 7, obs.height);
+          ctx.fillRect(obs.x, obs.y + 18, 7, 14);
+          ctx.fillRect(obs.x + 31, obs.y + 14, 7, 14);
         } else if (obs.type === "cactus_large") {
-          // Large Cactus
-          ctx.fillRect(obs.x + 5, obs.y, 6, obs.height);
-          ctx.fillRect(obs.x, obs.y + 8, 5, 14);
-          ctx.fillRect(obs.x + 11, obs.y + 10, 5, 14);
+          // Xương rồng lớn
+          ctx.fillRect(obs.x + 9, obs.y, 10, obs.height);
+          ctx.fillRect(obs.x, obs.y + 14, 9, 25);
+          ctx.fillRect(obs.x + 19, obs.y + 18, 9, 25);
         } else if (obs.type === "bird") {
-          // Pterodactyl Bird (Chim bay sáng / tối)
+          // Chim bay Pterodactyls
           const wingUp = obs.birdFrame === 0;
-          // Bird Body & Beak
-          ctx.fillRect(obs.x + 6, obs.y + 6, 12, 5);
-          ctx.fillRect(obs.x, obs.y + 7, 6, 3); // Beak
-          // Flapping Wings
+          // Thân & mỏ chim
+          ctx.fillRect(obs.x + 11, obs.y + 11, 22, 9);
+          ctx.fillRect(obs.x, obs.y + 13, 11, 5); // Mỏ
+          // Cánh chim vỗ lên / xuống
           if (wingUp) {
-            ctx.fillRect(obs.x + 10, obs.y, 4, 6);
-            ctx.fillRect(obs.x + 14, obs.y - 3, 4, 4);
+            ctx.fillRect(obs.x + 18, obs.y, 7, 11);
+            ctx.fillRect(obs.x + 25, obs.y - 6, 7, 7);
           } else {
-            ctx.fillRect(obs.x + 10, obs.y + 11, 4, 6);
-            ctx.fillRect(obs.x + 14, obs.y + 15, 4, 4);
+            ctx.fillRect(obs.x + 18, obs.y + 20, 7, 11);
+            ctx.fillRect(obs.x + 25, obs.y + 27, 7, 7);
           }
         }
       });
 
-      // Draw Dino (Pixel T-Rex)
-      ctx.fillStyle = "#ffffff";
-      ctx.shadowColor = primaryColor;
-      ctx.shadowBlur = 8;
+      // Vẽ hạt nổ khi Game Over
+      if (deathParticles.length > 0) {
+        deathParticles.forEach((p) => {
+          ctx.fillStyle = p.color;
+          ctx.shadowColor = p.color;
+          ctx.shadowBlur = 6;
+          ctx.fillRect(p.x, p.y, 3, 3);
+        });
+      }
+
+      // Vẽ Khủng Long Dino (Pixel T-Rex 1.8x)
+      ctx.fillStyle = gameOver ? "#f43f5e" : "#ffffff";
+      ctx.shadowColor = gameOver ? "#f43f5e" : primaryColor;
+      ctx.shadowBlur = gameOver ? 14 : 10;
+
+      const dx = dino.x;
+      const dy = dino.y;
 
       if (!dino.ducking) {
-        // Normal Running / Jumping Dino
-        const dx = dino.x;
-        const dy = dino.y;
+        // Khủng long bình thường (đứng / chạy / nhảy)
+        // Đầu & hàm
+        ctx.fillRect(dx + 18, dy, 22, 18);
+        ctx.fillRect(dx + 29, dy + 18, 11, 4); // Mõm
 
-        // Head & Jaw
-        ctx.fillRect(dx + 10, dy, 12, 10);
-        ctx.fillRect(dx + 16, dy + 10, 6, 2); // Snout
-        // Eye
-        ctx.fillStyle = "#030c18";
-        ctx.fillRect(dx + 13, dy + 2, 2, 2);
-        ctx.fillStyle = "#ffffff";
-
-        // Neck & Body
-        ctx.fillRect(dx + 6, dy + 8, 8, 12);
-        ctx.fillRect(dx + 2, dy + 12, 6, 8); // Tail base
-        ctx.fillRect(dx, dy + 10, 2, 6); // Tail tip
-
-        // Small Arm
-        ctx.fillRect(dx + 14, dy + 12, 4, 2);
-        ctx.fillRect(dx + 16, dy + 14, 2, 2);
-
-        // Legs
-        if (!dino.grounded) {
-          // Jumping legs
-          ctx.fillRect(dx + 4, dy + 20, 3, 6);
-          ctx.fillRect(dx + 10, dy + 20, 3, 6);
-        } else if (dino.legFrame === 0) {
-          // Leg 1 down, Leg 2 back
-          ctx.fillRect(dx + 5, dy + 20, 3, 6);
-          ctx.fillRect(dx + 11, dy + 20, 4, 3);
+        // Mắt khủng long: dấu X nếu Game Over, ô pixel nếu bình thường
+        if (gameOver) {
+          ctx.fillStyle = "#ffffff";
+          // Chữ X nhỏ trong mắt
+          ctx.fillRect(dx + 23, dy + 4, 2, 2);
+          ctx.fillRect(dx + 27, dy + 4, 2, 2);
+          ctx.fillRect(dx + 25, dy + 6, 2, 2);
+          ctx.fillRect(dx + 23, dy + 8, 2, 2);
+          ctx.fillRect(dx + 27, dy + 8, 2, 2);
         } else {
-          // Leg 1 back, Leg 2 down
-          ctx.fillRect(dx + 4, dy + 20, 4, 3);
-          ctx.fillRect(dx + 10, dy + 20, 3, 6);
+          ctx.fillStyle = "#030c18";
+          ctx.fillRect(dx + 24, dy + 4, 4, 4); // Con ngươi
+        }
+        ctx.fillStyle = gameOver ? "#f43f5e" : "#ffffff";
+
+        // Cổ & thân
+        ctx.fillRect(dx + 11, dy + 14, 15, 22);
+        ctx.fillRect(dx + 4, dy + 22, 11, 15); // Đuôi
+        ctx.fillRect(dx, dy + 18, 4, 11); // Chóp đuôi
+
+        // Tay nhỏ
+        ctx.fillRect(dx + 26, dy + 22, 7, 4);
+        ctx.fillRect(dx + 29, dy + 26, 4, 4);
+
+        // Chân khủng long
+        if (!dino.grounded) {
+          ctx.fillRect(dx + 7, dy + 36, 6, 11);
+          ctx.fillRect(dx + 18, dy + 36, 6, 11);
+        } else if (dino.legFrame === 0) {
+          ctx.fillRect(dx + 9, dy + 36, 6, 11);
+          ctx.fillRect(dx + 20, dy + 36, 7, 6);
+        } else {
+          ctx.fillRect(dx + 7, dy + 36, 7, 6);
+          ctx.fillRect(dx + 18, dy + 36, 6, 11);
         }
       } else {
-        // Ducking Dino (Cúi người né chim bay)
-        const dx = dino.x;
-        const dy = dino.y;
-
-        // Elongated body
-        ctx.fillRect(dx, dy + 4, 20, 8);
-        ctx.fillRect(dx + 20, dy + 2, 8, 6); // Low head
-        // Eye
+        // Khủng long cúi người né chim bay
+        ctx.fillRect(dx, dy + 7, 36, 15);
+        ctx.fillRect(dx + 36, dy + 4, 15, 11); // Đầu hạ thấp
+        // Mắt
         ctx.fillStyle = "#030c18";
-        ctx.fillRect(dx + 22, dy + 3, 2, 2);
-        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(dx + 40, dy + 6, 4, 4);
+        ctx.fillStyle = gameOver ? "#f43f5e" : "#ffffff";
 
-        // Legs
+        // Chân cúi
         if (dino.legFrame === 0) {
-          ctx.fillRect(dx + 4, dy + 12, 3, 3);
-          ctx.fillRect(dx + 12, dy + 12, 4, 3);
+          ctx.fillRect(dx + 7, dy + 22, 6, 6);
+          ctx.fillRect(dx + 22, dy + 22, 7, 6);
         } else {
-          ctx.fillRect(dx + 6, dy + 12, 4, 3);
-          ctx.fillRect(dx + 14, dy + 12, 3, 3);
+          ctx.fillRect(dx + 11, dy + 22, 7, 6);
+          ctx.fillRect(dx + 26, dy + 22, 6, 6);
         }
       }
 
-      // Draw Mini Stars & Clouds in Canvas
-      ctx.fillStyle = "rgba(255, 255, 255, 0.35)";
-      ctx.shadowBlur = 0;
-      ctx.fillRect(width * 0.25, 25, 2, 2);
-      ctx.fillRect(width * 0.72, 18, 2, 2);
-      ctx.fillRect(width * 0.88, 38, 1.5, 1.5);
+      // Thông báo khi GAME OVER (chết ngẫu nhiên & đếm lùi hồi sinh)
+      if (gameOver) {
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = "#f43f5e";
+        ctx.fillStyle = "#f43f5e";
+        ctx.font = "bold 15px monospace, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("💥 OOPS! VA CHẠM — ĐANG HỒI SINH TỰ ĐỘNG...", width / 2, 45);
 
-      animId = requestAnimationFrame(loop);
+        ctx.fillStyle = "#e2e8f0";
+        ctx.font = "12px monospace, sans-serif";
+        ctx.fillText("Khủng long sẽ chạy lại từ đầu với tốc độ ban đầu", width / 2, 68);
+        ctx.textAlign = "left";
+      }
+
+      // Mini sao lấp lánh trên canvas
+      ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
+      ctx.shadowBlur = 0;
+      ctx.fillRect(width * 0.22, 40, 3, 3);
+      ctx.fillRect(width * 0.76, 30, 3, 3);
+      ctx.fillRect(width * 0.9, 65, 2, 2);
     }
 
     animId = requestAnimationFrame(loop);
@@ -389,26 +596,29 @@ export default function DinoRunnerWidget() {
       role="button"
       tabIndex={0}
       aria-label="Khủng long Dino Runner - Bấm hoặc nhấn phím Space để nhảy"
-      title="Khủng long Dino Runner - Đang tự động nhảy khi treo máy! Bấm vào để tự nhảy."
+      title="Khủng long Dino Runner - Bấm vào để nhảy hoặc tự động hồi sinh!"
     >
-      {/* Header Info: Score & Mode Indicator */}
+      {/* Header Info: Score, Mode Indicator & Live Speed */}
       <div className="cyber-dino-info-row">
         <span className="cyber-dino-mode-tag">
-          <span className="cyber-dino-dot" />
-          {isAutoPlay ? "AUTO-DINO BOT" : "PLAYER 1"}
+          <span className={`cyber-dino-dot ${isDead ? "dead" : ""}`} />
+          {isDead ? "DEAD (RESPAWNING)" : isAutoPlay ? "AUTO-DINO BOT" : "PLAYER 1"}
         </span>
-        <div className="cyber-dino-score">
-          <span className="cyber-dino-hi">HI {String(highScore).padStart(5, "0")}</span>{" "}
-          <span className="cyber-dino-pts">{String(score).padStart(5, "0")}</span>
+        <div className="cyber-dino-metrics">
+          <span className="cyber-dino-speed-badge">⚡ {currentSpeedDisplay}x</span>
+          <div className="cyber-dino-score">
+            <span className="cyber-dino-hi">HI {String(highScore).padStart(5, "0")}</span>{" "}
+            <span className="cyber-dino-pts">{String(score).padStart(5, "0")}</span>
+          </div>
         </div>
       </div>
 
-      {/* Canvas Game (Frameless & Transparent) */}
+      {/* Canvas Game (To hơn 80%, Frameless & Transparent) */}
       <canvas ref={canvasRef} className="cyber-dino-canvas" />
 
       {/* Subtitle Hint */}
       <div className="cyber-dino-hint">
-        <span>🦖 Bấm chuột hoặc Spacebar để nhảy</span>
+        <span>🦖 Bấm chuột/Spacebar để nhảy · Nhanh dần đều &amp; tự hồi sinh</span>
         <span className="cyber-dino-cycle-badge">
           {dayNight === "night" ? "🌙 Đêm" : "☀️ Ngày"}
         </span>
