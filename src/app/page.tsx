@@ -3,9 +3,8 @@ import Link from "next/link";
 import CyberHeader from "@/components/CyberHeader";
 import TypedText from "@/components/TypedText";
 import CyberAvatar from "@/components/CyberAvatar";
-import NeonDragonCanvas from "@/components/NeonDragonCanvas";
-import CyberClockWidget from "@/components/CyberClockWidget";
-import DragonPearlMiniGame from "@/components/DragonPearlMiniGame";
+import DinoRunnerWidget from "@/components/DinoRunnerWidget";
+import FramelessClockWidget from "@/components/FramelessClockWidget";
 
 export const revalidate = 900; // 15 phút - kết hợp on-demand revalidation khi admin lưu
 
@@ -54,9 +53,6 @@ export default async function Home() {
 
   return (
     <>
-      {/* RỒNG CHÂU Á NEON (ASIAN CYBER DRAGON) BAY UỐN LƯỢN 60FPS */}
-      <NeonDragonCanvas />
-
       {/* TOP NAVIGATION TỐI GIẢN */}
       <CyberHeader
         siteName={site.name}
@@ -73,9 +69,9 @@ export default async function Home() {
         {/* SÂN KHẤU MẶT TIỀN: BỐ CỤC 3 CÁNH TOÀN CẢNH (3-WING THEATER) */}
         {/* ======================================================== */}
         <section className="cyber-command-theater" aria-label="Trung tâm điều khiển và thông tin MinSr">
-          {/* CÁNH TRÁI: TRẠM MINI-GAME LONG KHÍ & TREO MÁY */}
+          {/* CÁNH TRÁI: DINO RUNNER PIXEL MINI-GAME (HOÀN TOÀN KHÔNG KHUNG) */}
           <div className="cyber-wing cyber-wing-left">
-            <DragonPearlMiniGame />
+            <DinoRunnerWidget />
           </div>
 
           {/* TRUNG TÂM: AVATAR SIÊU TO 300px + TÊN KHỔNG LỒ + MẠNG XÃ HỘI */}
@@ -134,9 +130,9 @@ export default async function Home() {
             </div>
           </div>
 
-          {/* CÁNH PHẢI: ĐỒNG HỒ SỐ CYBER CLOCK & SERVER LIVE STATUS */}
+          {/* CÁNH PHẢI: ĐỒNG HỒ SỐ KHỔNG LỒ & LỊCH VIỆT NAM (HOÀN TOÀN KHÔNG KHUNG) */}
           <div className="cyber-wing cyber-wing-right">
-            <CyberClockWidget />
+            <FramelessClockWidget />
           </div>
         </section>
 
