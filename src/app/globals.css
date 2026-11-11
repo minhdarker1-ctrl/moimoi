@@ -12685,10 +12685,10 @@ body.vthangios-dark .cyber-headline {
 .cyber-dino-info-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   width: 100%;
   max-width: 420px;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
   padding: 0 4px;
 }
 

@@ -27,8 +27,6 @@ export default function DinoRunnerWidget() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [score, setScore] = useState(0);
   const [highScore, setHighScore] = useState(2580);
-  const [isDead, setIsDead] = useState(false);
-  const [currentSpeedDisplay, setCurrentSpeedDisplay] = useState("1.0");
 
   // Load high score from local storage
   useEffect(() => {
@@ -145,11 +143,10 @@ export default function DinoRunnerWidget() {
     window.addEventListener("keydown", onKeyDown);
     window.addEventListener("keyup", onKeyUp);
 
-    // Reset ván mới với tốc độ chill ban đầu 1.0x
+    // Reset ván mới với tốc độ chill ban đầu
     function restartGame() {
       gameOver = false;
       respawnCountdown = 0;
-      setIsDead(false);
       currentScore = 0;
       groundSpeed = initialSpeed;
       obstacles = [];
@@ -198,8 +195,6 @@ export default function DinoRunnerWidget() {
       const displayScore = Math.floor(currentScore);
       if (displayScore % 4 === 0) {
         setScore(displayScore);
-        const speedMultiplier = (groundSpeed / initialSpeed).toFixed(1);
-        setCurrentSpeedDisplay(speedMultiplier);
       }
 
       // 3. Vật lý Khủng Long
@@ -342,7 +337,6 @@ export default function DinoRunnerWidget() {
 
         if (isColliding) {
           gameOver = true;
-          setIsDead(true);
           respawnCountdown = 100;
 
           const finalScore = Math.floor(currentScore);
@@ -545,32 +539,19 @@ export default function DinoRunnerWidget() {
       onClick={handleUserJump}
       role="button"
       tabIndex={0}
-      aria-label="Khủng long Dino Runner - Bấm hoặc nhấn phím Space để nhảy"
-      title="Khủng long Dino Runner - Tốc độ 1.0x chill, bền bỉ từ 999-9999 điểm!"
+      aria-label="Khủng long Dino Runner"
+      title="Khủng long Dino Runner · Chill"
     >
-      {/* Header Info: Score, Mode Indicator & Live Speed */}
-      <div className="cyber-dino-info-row">
-        <span className="cyber-dino-mode-tag">
-          <span className={`cyber-dino-dot ${isDead ? "dead" : ""}`} />
-          {isDead ? "RESPAWNING..." : "AUTO-DINO BOT"}
-        </span>
-        <div className="cyber-dino-metrics">
-          <span className="cyber-dino-speed-badge">⚡ {currentSpeedDisplay}x CHILL</span>
-          <div className="cyber-dino-score">
-            <span className="cyber-dino-hi">HI {String(highScore).padStart(5, "0")}</span>{" "}
-            <span className="cyber-dino-pts">{String(score).padStart(5, "0")}</span>
-          </div>
+      {/* Header Info: Chỉ hiển thị HI & Score siêu clean, chuẩn Chrome Dino */}
+      <div className="cyber-dino-info-row clean">
+        <div className="cyber-dino-score">
+          <span className="cyber-dino-hi">HI {String(highScore).padStart(5, "0")}</span>{" "}
+          <span className="cyber-dino-pts">{String(score).padStart(5, "0")}</span>
         </div>
       </div>
 
-      {/* Canvas Game (Dẹt thanh thoát 480x160, Frameless) */}
+      {/* Canvas Game (Frameless, Chill) */}
       <canvas ref={canvasRef} className="cyber-dino-canvas" />
-
-      {/* Subtitle Hint */}
-      <div className="cyber-dino-hint">
-        <span>🦖 Bấm Space/chuột để nhảy · Treo máy siêu chill</span>
-        <span className="cyber-dino-cycle-badge">Mục tiêu: 999 - 9999 pts</span>
-      </div>
     </div>
   );
 }
