@@ -10,6 +10,7 @@ interface Obstacle {
   type: "cactus_small" | "cactus_large" | "cactus_double" | "bird";
   birdFrame?: number;
   speed: number;
+  jumped?: boolean;
 }
 
 interface Particle {
@@ -50,14 +51,14 @@ export default function DinoRunnerWidget() {
     if (!ctx) return;
 
     let animId: number;
-    // TỶ LỆ DẸT THANH THOÁT: RỘNG 480px, CAO 160px (Không chiếm chiều dọc)
-    const width = (canvas.width = 480);
-    const height = (canvas.height = 160);
-    const groundY = 130;
+    // TỶ LỆ DẸT THANH THOÁT ĐỐI XỨNG: RỘNG 420px, CAO 150px
+    const width = (canvas.width = 420);
+    const height = (canvas.height = 150);
+    const groundY = 122;
 
     // Dino Physics & State
     const dino = {
-      x: 40,
+      x: 36,
       y: groundY - 36,
       width: 30,
       height: 36,
@@ -99,6 +100,7 @@ export default function DinoRunnerWidget() {
     let currentScore = 0;
     let cycleTimer = 0;
     let localDayNight: "day" | "night" = "night";
+    let userHoldingDuck = false;
 
     // Trạng thái Game Over & Hồi sinh tự động
     let gameOver = false;
@@ -126,6 +128,7 @@ export default function DinoRunnerWidget() {
         }
       } else if (e.code === "ArrowDown") {
         e.preventDefault();
+        userHoldingDuck = true;
         if (dino.grounded && !gameOver) {
           dino.ducking = true;
         }
@@ -134,6 +137,7 @@ export default function DinoRunnerWidget() {
 
     function onKeyUp(e: KeyboardEvent) {
       if (e.code === "ArrowDown") {
+        userHoldingDuck = false;
         dino.ducking = false;
       }
     }
@@ -231,9 +235,9 @@ export default function DinoRunnerWidget() {
           // Xương rồng nhỏ
           obstacles.push({
             x: width + 15,
-            y: groundY - 28,
+            y: groundY - 26,
             width: 16,
-            height: 28,
+            height: 26,
             type: "cactus_small",
             speed: groundSpeed,
           });
@@ -241,9 +245,9 @@ export default function DinoRunnerWidget() {
           // Xương rồng đôi
           obstacles.push({
             x: width + 15,
-            y: groundY - 32,
+            y: groundY - 30,
             width: 28,
-            height: 32,
+            height: 30,
             type: "cactus_double",
             speed: groundSpeed,
           });
@@ -251,20 +255,20 @@ export default function DinoRunnerWidget() {
           // Xương rồng lớn
           obstacles.push({
             x: width + 15,
-            y: groundY - 38,
+            y: groundY - 36,
             width: 20,
-            height: 38,
+            height: 36,
             type: "cactus_large",
             speed: groundSpeed,
           });
         } else {
-          // Chim bay (tầm thấp hoặc tầm vừa)
-          const birdY = Math.random() < 0.5 ? groundY - 30 : groundY - 52;
+          // Chim bay (tầm thấp bay phải nhảy hoặc tầm vừa bay ngang đầu phải cúi)
+          const birdY = Math.random() < 0.5 ? groundY - 26 : groundY - 48;
           obstacles.push({
             x: width + 15,
             y: birdY,
             width: 32,
-            height: 20,
+            height: 18,
             type: "bird",
             birdFrame: 0,
             speed: groundSpeed + 0.35,
@@ -272,8 +276,10 @@ export default function DinoRunnerWidget() {
         }
       }
 
-      // 6. Cập nhật chướng ngại vật & Bot né hoàn hảo (Chỉ die khi >= 999 - 9999 điểm)
+      // 6. Cập nhật chướng ngại vật & Bot né chuẩn xác (Chỉ nhảy ĐÚNG 1 LẦN, không nhảy loạn xạ)
       const shouldDieNow = currentScore >= targetDeathScore;
+      let needDuck = false;
+      const tApex = Math.abs(dino.jumpStrength) / dino.gravity; // ~19.3 frames
 
       for (let i = obstacles.length - 1; i >= 0; i--) {
         const obs = obstacles[i];
@@ -283,21 +289,31 @@ export default function DinoRunnerWidget() {
           obs.birdFrame = Math.floor(cycleTimer / 10) % 2;
         }
 
-        // BOT AUTO-PLAY LOGIC CHUẨN XÁC 100%
+        // Cự ly tới Dino
         const dist = obs.x - (dino.x + dino.width);
 
-        if (dist > -8 && dist < 80) {
+        // Cự ly nhảy tối ưu: Đỉnh Parabol của Dino sẽ rơi vào ngay giữa chướng ngại vật
+        const idealJumpDist = Math.round(tApex * groundSpeed + (obs.width / 2) - 4);
+
+        if (dist > -obs.width - 12 && dist <= 75) {
           if (shouldDieNow) {
-            // Lỡ nhịp ngẫu nhiên khi đạt điểm cao mục tiêu!
+            // Đã đạt điểm mục tiêu (999-9999): cố tình không nhảy/cúi để va chạm tự nhiên!
             dino.isFumbling = true;
           } else {
             dino.isFumbling = false;
-            if (obs.type === "bird" && obs.y === groundY - 52) {
-              // Chim bay vừa tầm đầu -> Cúi
-              dino.ducking = true;
-            } else if (dino.grounded) {
-              // Xương rồng hoặc chim thấp -> Nhảy
-              dino.jump();
+
+            // 1. Chim bay tầm đầu: Cúi mình né mượt mà
+            if (obs.type === "bird" && obs.y === groundY - 48) {
+              if (dist <= 42 && dist > -obs.width - 6) {
+                needDuck = true;
+              }
+            }
+            // 2. Xương rồng hoặc chim tầm thấp: Nhảy ĐÚNG 1 CÚ NHẢY DUY NHẤT
+            else {
+              if (dino.grounded && !obs.jumped && dist <= idealJumpDist && dist > 0) {
+                obs.jumped = true; // ĐÁNH DẤU ĐÃ NHẢY: vĩnh viễn không nhảy thêm lần nào cho vật cản này!
+                dino.jump();
+              }
             }
           }
         }
@@ -359,11 +375,9 @@ export default function DinoRunnerWidget() {
         }
       }
 
-      const nearestObs = obstacles.find(
-        (o) => o.x > dino.x - 15 && o.x < dino.x + 100
-      );
-      if (!nearestObs && dino.ducking && !dino.isFumbling) {
-        dino.ducking = false;
+      // Tự động đứng thẳng dậy khi chim đã bay qua
+      if (!userHoldingDuck && !dino.isFumbling) {
+        dino.ducking = needDuck;
       }
 
       renderScene();

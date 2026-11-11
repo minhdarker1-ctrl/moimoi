@@ -12429,15 +12429,15 @@ body.vthangios-dark .cyber-headline {
 
 @media (min-width: 1024px) {
   .cyber-command-theater {
-    grid-template-columns: 310px 1fr 440px;
+    grid-template-columns: minmax(340px, 420px) 1fr minmax(340px, 420px);
     gap: 20px;
   }
 }
 
 @media (min-width: 1280px) {
   .cyber-command-theater {
-    grid-template-columns: 340px 1fr 480px;
-    gap: 26px;
+    grid-template-columns: 420px 1fr 420px;
+    gap: 24px;
   }
 }
 
@@ -12470,7 +12470,7 @@ body.vthangios-dark .cyber-headline {
 .cyber-frameless-clock-wrap {
   position: relative;
   width: 100%;
-  max-width: 340px;
+  max-width: 420px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -12575,7 +12575,7 @@ body.vthangios-dark .cyber-headline {
 /* Minimalist Frameless Calendar */
 .cyber-frameless-mini-cal {
   width: 100%;
-  max-width: 290px;
+  max-width: 320px;
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
@@ -12664,7 +12664,7 @@ body.vthangios-dark .cyber-headline {
 .cyber-dino-frameless-wrap {
   position: relative;
   width: 100%;
-  max-width: 480px;
+  max-width: 420px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -12687,7 +12687,7 @@ body.vthangios-dark .cyber-headline {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  max-width: 480px;
+  max-width: 420px;
   margin-bottom: 4px;
   padding: 0 4px;
 }
@@ -12754,9 +12754,9 @@ body.vthangios-dark .cyber-headline {
 
 .cyber-dino-canvas {
   width: 100%;
-  max-width: 480px;
+  max-width: 420px;
   height: auto;
-  aspect-ratio: 480 / 160;
+  aspect-ratio: 420 / 150;
   display: block;
   background: transparent !important;
   border: none !important;
@@ -12769,7 +12769,7 @@ body.vthangios-dark .cyber-headline {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  max-width: 480px;
+  max-width: 420px;
   margin-top: 4px;
   padding: 0 4px;
   font-size: 11px;
