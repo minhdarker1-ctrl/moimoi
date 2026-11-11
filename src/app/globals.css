@@ -2959,6 +2959,17 @@ body.vthangios-dark .mdarker-header-right-actions .mdarker-header-clock {
   cursor: pointer;
 }
 
+/* ---- Desktop Compact Dock ---- */
+@media (min-width: 1024px) {
+  .mdarker-music-player {
+    bottom: 10px;
+    padding: 7px 14px 7px 10px;
+    border-radius: 20px;
+    gap: 12px;
+    width: min(440px, calc(100vw - 32px));
+  }
+}
+
 /* ---- Mobile Responsive ---- */
 @media (max-width: 480px) {
   .mdarker-music-player {
@@ -12083,18 +12094,18 @@ body.vthangios-dark .cyber-user-arrow {
   position: relative;
   z-index: 5;
   width: 100%;
-  max-width: 1240px;
+  max-width: 1380px;
   margin: 0 auto;
-  padding: 68px 16px 80px;
+  padding: 50px 16px 14px;
   text-align: center;
 }
 
-/* AVATAR SIÊU TO KHỔNG LỒ NGHỆ THUẬT (280px - 320px) */
+/* AVATAR NGHỆ THUẬT CÂN ĐỐI VIEWPORT */
 .cyber-avatar-container {
   position: relative;
-  width: clamp(220px, 24vw, 300px);
-  height: clamp(220px, 24vw, 300px);
-  margin: 0 auto 14px;
+  width: clamp(140px, 14vw, 185px);
+  height: clamp(140px, 14vw, 185px);
+  margin: 0 auto 6px;
 }
 
 /* Hào quang thở Breathing Glow phía sau Avatar */
@@ -12206,9 +12217,9 @@ body.vthangios-dark .cyber-avatar-ring {
 }
 
 .cyber-iam {
-  font-size: 13px;
+  font-size: 12px;
   color: #64748b;
-  margin: 0 0 3px;
+  margin: 0 0 1px;
   font-weight: 500;
   letter-spacing: 0.3px;
 }
@@ -12219,14 +12230,19 @@ body.vthangios-dark .cyber-iam {
 }
 
 .cyber-name {
-  font-size: 26px;
+  font-size: 24px;
   font-weight: 900;
   color: #0f172a;
-  margin: 0 0 4px;
+  margin: 0 0 2px;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   letter-spacing: -0.3px;
+}
+
+.cyber-name-giant {
+  font-size: clamp(24px, 2.4vw, 32px) !important;
+  margin: 0 0 2px !important;
 }
 
 [data-theme="dark"] .cyber-name,
@@ -12241,10 +12257,15 @@ body.vthangios-dark .cyber-name {
   height: 20px;
 }
 
+.cyber-verify-badge.giant {
+  width: 24px !important;
+  height: 24px !important;
+}
+
 .cyber-headline {
-  font-size: 14px;
+  font-size: 13px;
   color: #64748b;
-  margin: 0 0 16px;
+  margin: 0 0 6px;
 }
 
 [data-theme="dark"] .cyber-headline,
@@ -12264,18 +12285,18 @@ body.vthangios-dark .cyber-headline {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
-  margin: 0 auto 20px;
+  gap: 10px;
+  margin: 0 auto 4px;
 }
 
 .cyber-social-btn {
-  width: 52px;
-  height: 52px;
-  border-radius: 17px;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
+  font-size: 16px;
   color: #fff !important;
   text-decoration: none;
   position: relative;
@@ -12397,26 +12418,26 @@ body.vthangios-dark .cyber-headline {
 .cyber-command-theater {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 24px;
+  gap: 16px;
   align-items: center;
   width: 100%;
-  max-width: 1420px;
-  margin: 10px auto 32px;
+  max-width: 1380px;
+  margin: 2px auto 8px;
   position: relative;
   z-index: 5;
 }
 
-@media (min-width: 1080px) {
+@media (min-width: 1024px) {
   .cyber-command-theater {
-    grid-template-columns: 460px 1fr 350px;
-    gap: 28px;
+    grid-template-columns: 310px 1fr 440px;
+    gap: 20px;
   }
 }
 
-@media (min-width: 1320px) {
+@media (min-width: 1280px) {
   .cyber-command-theater {
-    grid-template-columns: 540px 1fr 380px;
-    gap: 36px;
+    grid-template-columns: 340px 1fr 480px;
+    gap: 26px;
   }
 }
 
@@ -12443,13 +12464,207 @@ body.vthangios-dark .cyber-headline {
 }
 
 /* ======================================================== */
-/* CÁNH TRÁI: FRAMELESS CHROME DINO RUNNER MINI-GAME        */
-/* TO HƠN 80% — NHANH DẦN ĐỀU & NGẪU NHIÊN DIE TỰ HỒI SINH   */
+/* CÁNH TRÁI: FRAMELESS GIANT CLOCK & VIETNAM CALENDAR      */
+/* ĐỔI SANG BÊN TRÁI — SỐ TO RÕ RÀNG & LỊCH GỌN GÀNG        */
+/* ======================================================== */
+.cyber-frameless-clock-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 340px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  user-select: none;
+}
+
+.cyber-frameless-clock-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 2px;
+}
+
+.cyber-clock-region {
+  font-size: 11px;
+  font-weight: 800;
+  color: #38bdf8;
+  letter-spacing: 0.6px;
+  font-family: monospace, var(--font-quicksand), sans-serif;
+}
+
+.cyber-clock-status {
+  font-size: 9.5px;
+  font-weight: 800;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: rgba(16, 185, 129, 0.18);
+  color: #10b981;
+  letter-spacing: 0.5px;
+}
+
+.cyber-frameless-clock-time {
+  font-size: clamp(34px, 3.8vw, 44px);
+  font-weight: 900;
+  font-family: monospace, var(--font-quicksand), sans-serif;
+  letter-spacing: 1.5px;
+  font-variant-numeric: tabular-nums;
+  color: #ffffff;
+  text-shadow: 0 0 22px rgba(56, 189, 248, 0.7), 0 0 44px rgba(56, 189, 248, 0.3);
+  margin: 1px 0;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+}
+
+[data-theme="light"] .cyber-frameless-clock-time {
+  color: #0284c7;
+  text-shadow: 0 0 16px rgba(2, 132, 199, 0.4);
+}
+
+.cyber-clock-colon {
+  color: #38bdf8;
+  animation: cyberColonBlink 1s infinite;
+  margin: 0 1px;
+}
+
+@keyframes cyberColonBlink {
+  0%, 100% { opacity: 1; text-shadow: 0 0 10px #38bdf8; }
+  50% { opacity: 0.28; text-shadow: none; }
+}
+
+.cyber-clock-sec {
+  font-size: 0.72em;
+  color: #38bdf8;
+  opacity: 0.95;
+  margin-left: 2px;
+}
+
+.cyber-frameless-clock-date {
+  font-size: clamp(12.5px, 1.25vw, 14px);
+  font-weight: 700;
+  color: #e2e8f0;
+  margin-top: 1px;
+  margin-bottom: 6px;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+[data-theme="light"] .cyber-frameless-clock-date {
+  color: #334155;
+  text-shadow: none;
+}
+
+.cyber-date-weekday {
+  color: #38bdf8;
+  font-weight: 800;
+}
+
+.cyber-date-full {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+[data-theme="light"] .cyber-date-full {
+  color: #0f172a;
+}
+
+/* Minimalist Frameless Calendar */
+.cyber-frameless-mini-cal {
+  width: 100%;
+  max-width: 290px;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.cyber-cal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+  margin-bottom: 4px;
+  padding: 0 4px;
+}
+
+.cyber-cal-month {
+  color: #e2e8f0;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  font-size: 11.5px;
+}
+
+.cyber-cal-today-badge {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(56, 189, 248, 0.16);
+  color: #38bdf8;
+}
+
+.cyber-cal-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  font-size: 10.5px;
+  font-weight: 800;
+  color: #64748b;
+  text-align: center;
+  margin-bottom: 3px;
+}
+
+.cyber-cal-wd.sunday {
+  color: #f43f5e;
+}
+
+.cyber-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  text-align: center;
+}
+
+.cyber-cal-cell {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #cbd5e1;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.cyber-cal-cell.today {
+  background: #0284c7;
+  color: #ffffff;
+  font-weight: 900;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.7);
+}
+
+.cyber-cal-cell.past {
+  opacity: 0.35;
+}
+
+.cyber-cal-cell.empty {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* ======================================================== */
+/* CÁNH PHẢI: FRAMELESS CHROME DINO RUNNER MINI-GAME        */
+/* ĐỔI SANG BÊN PHẢI — TỐC ĐỘ 1.0X CHILL & RANDOM 999-9999  */
 /* ======================================================== */
 .cyber-dino-frameless-wrap {
   position: relative;
   width: 100%;
-  max-width: 540px;
+  max-width: 480px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -12472,47 +12687,47 @@ body.vthangios-dark .cyber-headline {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  max-width: 540px;
-  margin-bottom: 8px;
+  max-width: 480px;
+  margin-bottom: 4px;
   padding: 0 4px;
 }
 
 .cyber-dino-mode-tag {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  font-size: 13px;
+  gap: 6px;
+  font-size: 11.5px;
   font-weight: 800;
   font-family: monospace, var(--font-quicksand), sans-serif;
   color: #38bdf8;
-  letter-spacing: 0.8px;
+  letter-spacing: 0.6px;
 }
 
 .cyber-dino-dot {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   background: #10b981;
-  box-shadow: 0 0 10px #10b981;
+  box-shadow: 0 0 8px #10b981;
   animation: cyberPulse 1.2s infinite alternate;
 }
 
 .cyber-dino-dot.dead {
   background: #f43f5e;
-  box-shadow: 0 0 10px #f43f5e;
+  box-shadow: 0 0 8px #f43f5e;
 }
 
 .cyber-dino-metrics {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .cyber-dino-speed-badge {
-  font-size: 11.5px;
+  font-size: 10.5px;
   font-weight: 800;
-  padding: 2px 8px;
-  border-radius: 6px;
+  padding: 1px 7px;
+  border-radius: 5px;
   background: rgba(56, 189, 248, 0.16);
   color: #38bdf8;
   font-family: monospace, sans-serif;
@@ -12521,32 +12736,32 @@ body.vthangios-dark .cyber-headline {
 
 .cyber-dino-score {
   font-family: monospace, var(--font-quicksand), sans-serif;
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 700;
-  letter-spacing: 1.5px;
+  letter-spacing: 1px;
 }
 
 .cyber-dino-hi {
   color: #64748b;
-  margin-right: 5px;
+  margin-right: 4px;
 }
 
 .cyber-dino-pts {
   color: #f8fafc;
   font-weight: 900;
-  text-shadow: 0 0 10px rgba(255, 255, 255, 0.45);
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
 }
 
 .cyber-dino-canvas {
   width: 100%;
-  max-width: 540px;
+  max-width: 480px;
   height: auto;
-  aspect-ratio: 540 / 240;
+  aspect-ratio: 480 / 160;
   display: block;
   background: transparent !important;
   border: none !important;
-  border-radius: 12px;
-  filter: drop-shadow(0 0 16px rgba(56, 189, 248, 0.26));
+  border-radius: 10px;
+  filter: drop-shadow(0 0 12px rgba(56, 189, 248, 0.22));
 }
 
 .cyber-dino-hint {
@@ -12554,199 +12769,21 @@ body.vthangios-dark .cyber-headline {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  max-width: 540px;
-  margin-top: 8px;
+  max-width: 480px;
+  margin-top: 4px;
   padding: 0 4px;
-  font-size: 12.5px;
+  font-size: 11px;
   color: #94a3b8;
   font-weight: 600;
 }
 
 .cyber-dino-cycle-badge {
-  font-size: 11.5px;
+  font-size: 10px;
   font-weight: 700;
-  padding: 2px 9px;
-  border-radius: 6px;
+  padding: 1px 6px;
+  border-radius: 5px;
   background: rgba(255, 255, 255, 0.08);
   color: #e2e8f0;
-}
-
-/* ======================================================== */
-/* CÁNH PHẢI: FRAMELESS GIANT CLOCK & VIETNAM CALENDAR      */
-/* TO HƠN 30% — CHỮ SỐ KHỔNG LỒ & LỊCH THÁNG RÕ NÉT         */
-/* ======================================================== */
-.cyber-frameless-clock-wrap {
-  position: relative;
-  width: 100%;
-  max-width: 380px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  user-select: none;
-}
-
-.cyber-frameless-clock-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  margin-bottom: 4px;
-}
-
-.cyber-clock-region {
-  font-size: 13px;
-  font-weight: 800;
-  color: #38bdf8;
-  letter-spacing: 0.8px;
-  font-family: monospace, var(--font-quicksand), sans-serif;
-}
-
-.cyber-clock-status {
-  font-size: 10.5px;
-  font-weight: 800;
-  padding: 2px 7px;
-  border-radius: 5px;
-  background: rgba(16, 185, 129, 0.18);
-  color: #10b981;
-  letter-spacing: 0.5px;
-}
-
-.cyber-frameless-clock-time {
-  font-size: clamp(48px, 5.6vw, 68px);
-  font-weight: 900;
-  font-family: monospace, var(--font-quicksand), sans-serif;
-  letter-spacing: 2px;
-  font-variant-numeric: tabular-nums;
-  color: #ffffff;
-  text-shadow: 0 0 28px rgba(56, 189, 248, 0.75), 0 0 54px rgba(56, 189, 248, 0.35);
-  margin: 2px 0;
-  display: flex;
-  align-items: baseline;
-  justify-content: center;
-}
-
-[data-theme="light"] .cyber-frameless-clock-time {
-  color: #0284c7;
-  text-shadow: 0 0 20px rgba(2, 132, 199, 0.45);
-}
-
-.cyber-clock-colon {
-  color: #38bdf8;
-  animation: cyberColonBlink 1s infinite;
-  margin: 0 2px;
-}
-
-@keyframes cyberColonBlink {
-  0%, 100% { opacity: 1; text-shadow: 0 0 12px #38bdf8; }
-  50% { opacity: 0.28; text-shadow: none; }
-}
-
-.cyber-clock-sec {
-  font-size: 0.72em;
-  color: #38bdf8;
-  opacity: 0.95;
-  margin-left: 3px;
-}
-
-.cyber-frameless-clock-date {
-  font-size: clamp(16px, 1.6vw, 19px);
-  font-weight: 700;
-  color: #e2e8f0;
-  margin-top: 2px;
-  margin-bottom: 16px;
-  text-shadow: 0 0 12px rgba(255, 255, 255, 0.25);
-}
-
-[data-theme="light"] .cyber-frameless-clock-date {
-  color: #334155;
-  text-shadow: none;
-}
-
-.cyber-date-weekday {
-  color: #38bdf8;
-  font-weight: 800;
-}
-
-.cyber-date-full {
-  color: #ffffff;
-  font-weight: 700;
-}
-
-[data-theme="light"] .cyber-date-full {
-  color: #0f172a;
-}
-
-/* Minimalist Frameless Calendar (To hơn 30%) */
-.cyber-frameless-mini-cal {
-  width: 100%;
-  max-width: 350px;
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-}
-
-.cyber-cal-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 13px;
-  font-weight: 700;
-  color: #94a3b8;
-  margin-bottom: 8px;
-  padding: 0 4px;
-}
-
-.cyber-cal-month {
-  color: #e2e8f0;
-  font-weight: 800;
-  letter-spacing: 0.6px;
-  font-size: 13.5px;
-}
-
-.cyber-cal-today-badge {
-  font-size: 11.5px;
-  font-weight: 800;
-  padding: 2px 8px;
-  border-radius: 5px;
-  background: rgba(56, 189, 248, 0.18);
-  color: #38bdf8;
-}
-
-.cyber-cal-weekdays {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  font-size: 12px;
-  font-weight: 800;
-  color: #64748b;
-  text-align: center;
-  margin-bottom: 6px;
-}
-
-.cyber-cal-wd.sunday {
-  color: #f43f5e;
-}
-
-.cyber-cal-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 3px;
-  text-align: center;
-}
-
-.cyber-cal-cell {
-  font-size: 13px;
-  font-weight: 600;
-  color: #cbd5e1;
-  height: 26px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 6px;
-  transition: all 0.15s ease;
 }
 
 .cyber-cal-cell.today {
@@ -12879,9 +12916,9 @@ body.vthangios-dark .cyber-headline {
 }
 
 .cyber-divider-title {
-  font-size: 18px;
+  font-size: 14px;
   font-weight: 900;
-  letter-spacing: 2px;
+  letter-spacing: 1.5px;
   color: #0f172a;
 }
 
@@ -12892,15 +12929,16 @@ body.vthangios-dark .cyber-divider-title {
 
 .cyber-star-icon {
   color: #a855f7;
-  font-size: 13px;
+  font-size: 11px;
   filter: drop-shadow(0 0 6px rgba(168, 85, 247, 0.8));
 }
 
 .cyber-section-subtitle {
-  font-size: 13px;
+  font-size: 11px;
   color: #64748b;
-  margin: 0 auto 20px;
+  margin: 0 auto 8px;
   max-width: 500px;
+  opacity: 0.85;
 }
 
 [data-theme="dark"] .cyber-section-subtitle,
@@ -12912,8 +12950,8 @@ body.vthangios-dark .cyber-section-subtitle {
 .cyber-services-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 16px;
-  margin-bottom: 28px;
+  gap: 12px;
+  margin-bottom: 14px;
 }
 
 @media (min-width: 580px) {
@@ -12924,23 +12962,23 @@ body.vthangios-dark .cyber-section-subtitle {
 
 @media (min-width: 1024px) {
   .cyber-services-grid {
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
   }
 }
 
 @media (min-width: 1200px) {
   .cyber-services-grid {
     grid-template-columns: repeat(5, 1fr);
-    gap: 16px;
+    gap: 12px;
   }
 }
 
 .cyber-card {
   background: rgba(255, 255, 255, 0.84);
   border: 1.5px solid rgba(226, 232, 240, 0.9);
-  border-radius: 20px;
-  padding: 22px 16px 18px;
+  border-radius: 14px;
+  padding: 10px 8px 8px;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
@@ -12950,13 +12988,13 @@ body.vthangios-dark .cyber-section-subtitle {
   color: #0f172a !important;
   cursor: pointer;
   user-select: none;
-  box-shadow: 0 10px 30px rgba(99, 102, 241, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 6px 18px rgba(99, 102, 241, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04);
 }
 
 .cyber-card:hover {
-  transform: translateY(-6px);
+  transform: translateY(-4px);
   border-color: #a855f7;
-  box-shadow: 0 18px 40px rgba(168, 85, 247, 0.18), 0 0 24px rgba(168, 85, 247, 0.15);
+  box-shadow: 0 12px 28px rgba(168, 85, 247, 0.18), 0 0 18px rgba(168, 85, 247, 0.15);
   background: rgba(255, 255, 255, 0.96);
 }
 
@@ -12970,9 +13008,9 @@ body.vthangios-dark .cyber-card {
 
 [data-theme="dark"] .cyber-card:hover,
 body.vthangios-dark .cyber-card:hover {
-  transform: translateY(-6px);
+  transform: translateY(-4px);
   border-color: rgba(168, 85, 247, 0.45);
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5), 0 0 20px rgba(168, 85, 247, 0.18);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5), 0 0 16px rgba(168, 85, 247, 0.18);
   background: rgba(13, 20, 36, 0.85);
 }
 
@@ -13006,14 +13044,14 @@ body.vthangios-dark .cyber-card:hover {
 }
 
 .cyber-card-img-wrap {
-  width: 90px;
-  height: 90px;
-  border-radius: 22px;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
   overflow: hidden;
-  margin-bottom: 14px;
+  margin-bottom: 5px;
   background: rgba(241, 245, 249, 0.9);
-  border: 1.5px solid rgba(226, 232, 240, 0.9);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
   transition: transform 0.28s ease;
   display: flex;
   align-items: center;
@@ -13021,14 +13059,14 @@ body.vthangios-dark .cyber-card:hover {
 }
 
 .cyber-card:hover .cyber-card-img-wrap {
-  transform: scale(1.06);
+  transform: scale(1.05);
 }
 
 [data-theme="dark"] .cyber-card-img-wrap,
 body.vthangios-dark .cyber-card-img-wrap {
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 .cyber-card-img {
@@ -13039,10 +13077,10 @@ body.vthangios-dark .cyber-card-img-wrap {
 }
 
 .cyber-card-title {
-  font-size: 17px;
+  font-size: 13.5px;
   font-weight: 800;
   color: #0f172a;
-  margin: 0 0 6px;
+  margin: 0 0 2px;
   letter-spacing: 0.5px;
 }
 
@@ -13052,11 +13090,11 @@ body.vthangios-dark .cyber-card-title {
 }
 
 .cyber-card-desc {
-  font-size: 12px;
+  font-size: 10.5px;
   color: #64748b;
-  margin: 0 0 14px;
-  line-height: 1.4;
-  min-height: 34px;
+  margin: 0 0 5px;
+  line-height: 1.25;
+  min-height: 26px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -13070,12 +13108,12 @@ body.vthangios-dark .cyber-card-desc {
 .cyber-card-badge {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 4px 12px;
+  gap: 4px;
+  padding: 2px 7px;
   border-radius: 999px;
-  font-size: 11px;
+  font-size: 9.5px;
   font-weight: 700;
-  margin-bottom: 16px;
+  margin-bottom: 6px;
 }
 
 .cyber-card-badge.badge-active {
@@ -13138,10 +13176,11 @@ body.vthangios-dark .cyber-card-donate:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 10px 16px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(168, 85, 247, 0.08));
+  gap: 6px;
+  padding: 5px 8px;
+  font-size: 10.5px;
+  border-radius: 8px;
+  min-height: 26px;
   border: 1px solid rgba(99, 102, 241, 0.22);
   color: #4f46e5 !important;
   font-size: 13px;

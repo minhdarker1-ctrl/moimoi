@@ -69,12 +69,12 @@ export default async function Home() {
         {/* SÂN KHẤU MẶT TIỀN: BỐ CỤC 3 CÁNH TOÀN CẢNH (3-WING THEATER) */}
         {/* ======================================================== */}
         <section className="cyber-command-theater" aria-label="Trung tâm điều khiển và thông tin MinSr">
-          {/* CÁNH TRÁI: DINO RUNNER PIXEL MINI-GAME (HOÀN TOÀN KHÔNG KHUNG) */}
+          {/* CÁNH TRÁI: ĐỒNG HỒ SỐ KHỔNG LỒ & LỊCH VIỆT NAM (FRAMELESS) */}
           <div className="cyber-wing cyber-wing-left">
-            <DinoRunnerWidget />
+            <FramelessClockWidget />
           </div>
 
-          {/* TRUNG TÂM: AVATAR SIÊU TO 300px + TÊN KHỔNG LỒ + MẠNG XÃ HỘI */}
+          {/* TRUNG TÂM: AVATAR NGHỆ THUẬT + TÊN MINSR + MẠNG XÃ HỘI */}
           <div className="cyber-wing cyber-wing-center">
             <CyberAvatar
               avatarUrl={site.avatarUrl}
@@ -84,7 +84,7 @@ export default async function Home() {
 
             <p className="cyber-iam">{site.iam && site.iam !== "Hi, i am" ? site.iam : "Hi, I am"}</p>
 
-            {/* TÊN KHỔNG LỒ 50px ĐỒNG BỘ VỚI AVATAR */}
+            {/* TÊN THƯƠNG HIỆU ĐỒNG BỘ VỚI AVATAR */}
             <h1 className="cyber-name cyber-name-giant">
               {site.name}
               {site.verified && (
@@ -93,8 +93,8 @@ export default async function Home() {
                   className="cyber-verify-badge giant"
                   src="/verify.svg"
                   alt="verified"
-                  width={34}
-                  height={34}
+                  width={26}
+                  height={26}
                 />
               )}
             </h1>
@@ -130,9 +130,9 @@ export default async function Home() {
             </div>
           </div>
 
-          {/* CÁNH PHẢI: ĐỒNG HỒ SỐ KHỔNG LỒ & LỊCH VIỆT NAM (HOÀN TOÀN KHÔNG KHUNG) */}
+          {/* CÁNH PHẢI: DINO RUNNER PIXEL CHILL 1.0X (FRAMELESS) */}
           <div className="cyber-wing cyber-wing-right">
-            <FramelessClockWidget />
+            <DinoRunnerWidget />
           </div>
         </section>
 
