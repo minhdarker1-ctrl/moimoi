@@ -25,6 +25,9 @@ export default function CyberAvatar({
 
   return (
     <div className="cyber-avatar-container">
+      {/* Dynamic ambient aura glow */}
+      <div className={`cyber-avatar-aura ${hasValidFrame ? "has-frame" : ""}`} aria-hidden="true" />
+
       <div className={`cyber-avatar-ring ${hasValidFrame ? "has-frame" : ""}`}>
         {avatarUrl ? (
           /* eslint-disable-next-line @next/next/no-img-element */
@@ -33,8 +36,8 @@ export default function CyberAvatar({
             src={avatarUrl}
             alt={`Ảnh đại diện ${name}`}
             fetchPriority="high"
-            width={112}
-            height={112}
+            width={320}
+            height={320}
           />
         ) : (
           <div className="cyber-avatar-fallback">MS</div>
@@ -50,7 +53,7 @@ export default function CyberAvatar({
             onError={() => setFrameError(true)}
             style={{
               opacity: frameLoaded ? 1 : 0,
-              transition: "opacity 0.2s ease-in-out",
+              transition: "opacity 0.25s ease-in-out",
             }}
           />
         )}

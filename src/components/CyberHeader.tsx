@@ -91,29 +91,7 @@ export default function CyberHeader({
             <span className="cyber-logo-text">{siteName}</span>
           </Link>
 
-          {/* DESKTOP NAV LINKS */}
-          <nav className="cyber-nav-links" aria-label="Menu chính">
-            <Link href="/#services" className={`cyber-nav-item ${pathname === "/" ? "active" : ""}`}>
-              <i className="fas fa-layer-group" />
-              <span>Dịch Vụ</span>
-            </Link>
-            <Link href="/freefire" className={`cyber-nav-item ${pathname.startsWith("/freefire") ? "active" : ""}`}>
-              <i className="fa-solid fa-fire text-orange-500" />
-              <span>Free Fire</span>
-            </Link>
-            <Link href="/aov" className={`cyber-nav-item ${pathname === "/aov" ? "active" : ""}`}>
-              <i className="fas fa-shield-alt text-sky-400" />
-              <span>AOV</span>
-            </Link>
-            <Link href="/locket" className={`cyber-nav-item ${pathname === "/locket" ? "active" : ""}`}>
-              <i className="fas fa-crown text-amber-400" />
-              <span>Locket Gold</span>
-            </Link>
-            <Link href="/donate" className={`cyber-nav-item ${pathname === "/donate" ? "active" : ""}`}>
-              <i className="fas fa-heart text-pink-500" />
-              <span>Ủng Hộ</span>
-            </Link>
-          </nav>
+          {/* DESKTOP NAV - CLEAN & MINIMALIST (Phương án 1) */}
 
           {/* RIGHT ACTIONS */}
           <div className="cyber-header-actions">

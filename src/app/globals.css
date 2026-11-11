@@ -12059,39 +12059,83 @@ body.vthangios-dark .cyber-user-arrow {
   color: #94a3b8;
 }
 
-/* MAIN WRAP - Standardized offset matching 64px header + 8px breathing space */
+/* MAIN WRAP - Standardized offset matching 64px header + breathing space */
 .cyber-main-wrap {
   position: relative;
   z-index: 5;
   width: 100%;
   max-width: 1140px;
   margin: 0 auto;
-  padding: 72px 16px 96px;
+  padding: 68px 16px 80px;
   text-align: center;
 }
 
-/* HERO SECTION - Compact vertical rhythm to fit within first viewport */
-.cyber-hero-section {
+/* ======================================================== */
+/* TẦNG 1: MÀN HÌNH ĐẦU TIÊN (HERO & TEASER STAGE - 100vh) */
+/* ======================================================== */
+.cyber-hero-stage {
+  min-height: calc(100dvh - 84px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0 16px;
+  position: relative;
+}
+
+.cyber-hero-inner {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 18px;
+  width: 100%;
+  margin: auto 0;
 }
 
+/* AVATAR SIÊU TO KHỔNG LỒ NGHỆ THUẬT (280px - 320px) */
 .cyber-avatar-container {
   position: relative;
-  width: 106px;
-  height: 106px;
-  margin: 0 auto 10px;
+  width: clamp(220px, 24vw, 300px);
+  height: clamp(220px, 24vw, 300px);
+  margin: 0 auto 14px;
+}
+
+/* Hào quang thở Breathing Glow phía sau Avatar */
+.cyber-avatar-aura {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 106%;
+  height: 106%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(239, 68, 68, 0.45) 0%, rgba(245, 158, 11, 0.25) 50%, transparent 72%);
+  filter: blur(28px);
+  z-index: 0;
+  pointer-events: none;
+  animation: cyberAuraBreathing 4s ease-in-out infinite alternate;
+}
+
+@keyframes cyberAuraBreathing {
+  0% {
+    transform: translate(-50%, -50%) scale(0.92);
+    opacity: 0.65;
+    filter: blur(22px);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.08);
+    opacity: 1;
+    filter: blur(34px);
+  }
 }
 
 .cyber-avatar-ring {
   position: relative;
+  z-index: 1;
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  box-shadow: 0 0 24px rgba(245, 158, 11, 0.45), 0 8px 24px rgba(0, 0, 0, 0.08);
-  border: 2px solid rgba(251, 191, 36, 0.85);
+  box-shadow: 0 0 35px rgba(245, 158, 11, 0.5), 0 10px 30px rgba(0, 0, 0, 0.15);
+  border: 3px solid rgba(251, 191, 36, 0.85);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -12101,21 +12145,22 @@ body.vthangios-dark .cyber-user-arrow {
 [data-theme="dark"] .cyber-avatar-ring,
 body.vthangios-dark .cyber-avatar-ring {
   background: #030c18;
-  box-shadow: 0 0 24px rgba(245, 158, 11, 0.55), inset 0 0 16px rgba(234, 88, 12, 0.35);
+  box-shadow: 0 0 45px rgba(239, 68, 68, 0.4), inset 0 0 24px rgba(234, 88, 12, 0.35);
 }
 
 .cyber-avatar-ring.has-frame {
   border: none;
   box-shadow: none;
-  background: #ffffff;
+  background: transparent;
 }
 
 .cyber-avatar-img {
-  width: 90px;
-  height: 90px;
+  width: 86%;
+  height: 86%;
   border-radius: 50%;
   object-fit: cover;
   display: block;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
 }
 
 .cyber-avatar-ring.has-frame .cyber-avatar-img {
@@ -12132,32 +12177,33 @@ body.vthangios-dark .cyber-avatar-ring {
   height: 124%;
   pointer-events: none;
   z-index: 2;
+  filter: drop-shadow(0 14px 30px rgba(0, 0, 0, 0.55));
 }
 
 .cyber-avatar-fallback {
-  width: 90px;
-  height: 90px;
+  width: 86%;
+  height: 86%;
   border-radius: 50%;
   background: linear-gradient(135deg, #a855f7, #38bdf8);
   display: flex;
   align-items: center;
   justify-content: center;
   color: #fff;
-  font-size: 26px;
+  font-size: 48px;
   font-weight: 800;
 }
 
 .cyber-online-dot {
   position: absolute;
-  bottom: 0;
+  bottom: 4px;
   left: 50%;
   transform: translateX(-50%);
-  width: 14px;
-  height: 14px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   background: #22c55e;
-  border: 2.5px solid #030c18;
-  box-shadow: 0 0 10px #22c55e, 0 0 18px rgba(34, 197, 94, 0.6);
+  border: 3px solid #030c18;
+  box-shadow: 0 0 14px #22c55e, 0 0 22px rgba(34, 197, 94, 0.65);
   z-index: 3;
 }
 
@@ -12313,6 +12359,374 @@ body.vthangios-dark .cyber-headline {
   box-shadow: 0 12px 30px rgba(255, 0, 51, 0.75), 0 0 20px rgba(255, 0, 51, 0.45), inset 0 1px 1.5px rgba(255, 255, 255, 0.7);
 }
 
+/* ======================================================== */
+/* MINI SERVICE TRAILER - Cinematic Motion Reel (Màn hình 1) */
+/* ======================================================== */
+.cyber-teaser-container {
+  width: 100%;
+  max-width: 680px;
+  margin: 12px auto 14px;
+}
+
+.cyber-teaser-card {
+  position: relative;
+  background: rgba(13, 20, 36, 0.68);
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  overflow: hidden;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  text-align: left;
+}
+
+[data-theme="light"] .cyber-teaser-card {
+  background: rgba(255, 255, 255, 0.88);
+  border-color: rgba(226, 232, 240, 0.95);
+}
+
+.cyber-teaser-ambient {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.65;
+  transition: background 0.45s ease;
+}
+
+.cyber-teaser-video-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.cyber-teaser-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cyber-teaser-content {
+  position: relative;
+  z-index: 1;
+  padding: 18px 22px 14px;
+}
+
+.cyber-teaser-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.cyber-teaser-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 12px;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.cyber-teaser-pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fff;
+  animation: cyberPulse 1.4s infinite ease-in-out;
+}
+
+.cyber-teaser-index {
+  font-size: 12px;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 1px;
+}
+
+.cyber-teaser-body {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.cyber-teaser-icon-box {
+  flex-shrink: 0;
+  width: 66px;
+  height: 66px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.3);
+}
+
+.cyber-teaser-icon {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cyber-teaser-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.cyber-teaser-title {
+  font-size: 15px;
+  font-weight: 900;
+  color: #fff;
+  margin: 0 0 2px;
+  letter-spacing: 0.4px;
+}
+
+[data-theme="light"] .cyber-teaser-title {
+  color: #0f172a;
+}
+
+.cyber-teaser-tagline {
+  font-size: 13px;
+  font-weight: 700;
+  color: #e2e8f0;
+  margin: 0 0 4px;
+}
+
+[data-theme="light"] .cyber-teaser-tagline {
+  color: #334155;
+}
+
+.cyber-teaser-desc {
+  font-size: 12px;
+  color: #94a3b8;
+  margin: 0 0 6px;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+[data-theme="light"] .cyber-teaser-desc {
+  color: #64748b;
+}
+
+.cyber-teaser-stats {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+[data-theme="light"] .cyber-teaser-stats {
+  color: #475569;
+}
+
+.cyber-teaser-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 12px;
+  gap: 12px;
+}
+
+.cyber-teaser-dots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cyber-teaser-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.25s ease;
+}
+
+.cyber-teaser-dot.active {
+  width: 22px;
+}
+
+.cyber-teaser-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cyber-teaser-arrow-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.06);
+  color: #e2e8f0;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cyber-teaser-arrow-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+}
+
+.cyber-teaser-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 10px;
+  color: #fff !important;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-decoration: none !important;
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.cyber-teaser-cta:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.15);
+}
+
+.cyber-teaser-timeline {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  animation: cyberTimeline 4.5s linear infinite;
+  transform-origin: left;
+}
+
+@keyframes cyberTimeline {
+  0% { transform: scaleX(0); }
+  100% { transform: scaleX(1); }
+}
+
+/* ======================================================== */
+/* SCROLL PROMPT INDICATOR - "KÉO LÊN ĐỂ XEM CHI TIẾT"      */
+/* ======================================================== */
+.cyber-scroll-prompt-wrap {
+  display: flex;
+  justify-content: center;
+  margin-top: auto;
+  padding: 10px 0 4px;
+  width: 100%;
+}
+
+.cyber-scroll-prompt {
+  background: transparent;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  color: #94a3b8;
+  font-family: inherit;
+  transition: all 0.25s ease;
+  user-select: none;
+}
+
+.cyber-scroll-prompt:hover {
+  color: #fff;
+  transform: translateY(3px);
+}
+
+[data-theme="light"] .cyber-scroll-prompt {
+  color: #64748b;
+}
+
+[data-theme="light"] .cyber-scroll-prompt:hover {
+  color: #0f172a;
+}
+
+.cyber-scroll-mouse {
+  width: 22px;
+  height: 34px;
+  border: 2px solid currentColor;
+  border-radius: 12px;
+  position: relative;
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.35);
+}
+
+.cyber-scroll-wheel {
+  width: 3px;
+  height: 7px;
+  background: currentColor;
+  border-radius: 999px;
+  position: absolute;
+  top: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  animation: cyberWheelDrop 1.8s ease-in-out infinite;
+}
+
+@keyframes cyberWheelDrop {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  80% {
+    opacity: 0;
+    transform: translate(-50%, 14px);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, 0);
+  }
+}
+
+.cyber-scroll-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.cyber-scroll-arrow {
+  animation: cyberBouncing 1.5s infinite ease-in-out;
+  font-size: 10px;
+}
+
+@keyframes cyberBouncing {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(4px); }
+}
+
+/* ======================================================== */
+/* TẦNG 2: HỆ SINH THÁI DỊCH VỤ CHI TIẾT (KÉO LÊN ĐỂ XEM)   */
+/* ======================================================== */
+.cyber-details-stage {
+  padding-top: 40px;
+  scroll-margin-top: 72px;
+  width: 100%;
+}
+
 /* SECTION DIVIDER: DỊCH VỤ */
 .cyber-section-divider {
   display: flex;
@@ -12439,6 +12853,28 @@ body.vthangios-dark .cyber-card:hover {
   box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5), 0 0 20px rgba(168, 85, 247, 0.18);
   background: rgba(13, 20, 36, 0.85);
 }
+
+/* Specific Card Glow Highlights */
+.cyber-card-ff:hover {
+  border-color: #f97316 !important;
+  box-shadow: 0 16px 36px rgba(249, 115, 22, 0.28), 0 0 24px rgba(249, 115, 22, 0.2) !important;
+}
+
+.cyber-card-aov:hover {
+  border-color: #38bdf8 !important;
+  box-shadow: 0 16px 36px rgba(56, 189, 248, 0.28), 0 0 24px rgba(56, 189, 248, 0.2) !important;
+}
+
+.cyber-card-locket:hover {
+  border-color: #fbbf24 !important;
+  box-shadow: 0 16px 36px rgba(251, 191, 36, 0.28), 0 0 24px rgba(251, 191, 36, 0.2) !important;
+}
+
+.cyber-card-donate:hover {
+  border-color: #ec4899 !important;
+  box-shadow: 0 16px 36px rgba(236, 72, 153, 0.28), 0 0 24px rgba(236, 72, 153, 0.2) !important;
+}
+
 
 .cyber-card-inner {
   display: flex;
