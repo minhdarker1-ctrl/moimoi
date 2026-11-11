@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import Link from "next/link";
 import CyberHeader from "@/components/CyberHeader";
 import TypedText from "@/components/TypedText";
+import CyberAvatar from "@/components/CyberAvatar";
 
 export const revalidate = 900; // 15 phút - kết hợp on-demand revalidation khi admin lưu
 
@@ -64,27 +65,11 @@ export default async function Home() {
       <main className="cyber-main-wrap" role="main">
         {/* HERO SECTION */}
         <section className="cyber-hero-section" aria-label="Giới thiệu MinSr">
-          <div className="cyber-avatar-container">
-            <div className={`cyber-avatar-ring ${site.avatarFrameUrl ? "has-frame" : ""}`}>
-              {site.avatarUrl ? (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img
-                  className="cyber-avatar-img"
-                  src={site.avatarUrl}
-                  alt={`Ảnh đại diện ${site.name}`}
-                  fetchPriority="high"
-                  width={112}
-                  height={112}
-                />
-              ) : (
-                <div className="cyber-avatar-fallback">MS</div>
-              )}
-              {site.avatarFrameUrl && (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img className="cyber-avatar-frame-overlay" src={site.avatarFrameUrl} alt="" aria-hidden="true" />
-              )}
-            </div>
-          </div>
+          <CyberAvatar
+            avatarUrl={site.avatarUrl}
+            avatarFrameUrl={site.avatarFrameUrl}
+            name={site.name}
+          />
 
           <p className="cyber-iam">{site.iam && site.iam !== "Hi, i am" ? site.iam : "Hi, I am"}</p>
           <h1 className="cyber-name">
