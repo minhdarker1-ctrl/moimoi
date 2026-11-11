@@ -3,8 +3,9 @@ import Link from "next/link";
 import CyberHeader from "@/components/CyberHeader";
 import TypedText from "@/components/TypedText";
 import CyberAvatar from "@/components/CyberAvatar";
-import ServiceTeaserTrailer from "@/components/ServiceTeaserTrailer";
-import ScrollPromptIndicator from "@/components/ScrollPromptIndicator";
+import NeonDragonCanvas from "@/components/NeonDragonCanvas";
+import CyberClockWidget from "@/components/CyberClockWidget";
+import DragonPearlMiniGame from "@/components/DragonPearlMiniGame";
 
 export const revalidate = 900; // 15 phút - kết hợp on-demand revalidation khi admin lưu
 
@@ -53,7 +54,10 @@ export default async function Home() {
 
   return (
     <>
-      {/* CYBER TOP NAVIGATION (Phương án 1: Tối giản Logo + Admin/Chuông/Theme) */}
+      {/* RỒNG CHÂU Á NEON (ASIAN CYBER DRAGON) BAY UỐN LƯỢN 60FPS */}
+      <NeonDragonCanvas />
+
+      {/* TOP NAVIGATION TỐI GIẢN */}
       <CyberHeader
         siteName={site.name}
         notices={notices.map((n) => ({
@@ -66,11 +70,16 @@ export default async function Home() {
 
       <main className="cyber-main-wrap" role="main">
         {/* ======================================================== */}
-        {/* TẦNG 1: MÀN HÌNH ĐẦU TIÊN (HERO & TEASER STAGE - 100vh) */}
+        {/* SÂN KHẤU MẶT TIỀN: BỐ CỤC 3 CÁNH TOÀN CẢNH (3-WING THEATER) */}
         {/* ======================================================== */}
-        <section className="cyber-hero-stage" aria-label="Giới thiệu MinSr & Trailer Dịch Vụ">
-          <div className="cyber-hero-inner">
-            {/* AVATAR SIÊU TO KHỔNG LỒ NGHỆ THUẬT */}
+        <section className="cyber-command-theater" aria-label="Trung tâm điều khiển và thông tin MinSr">
+          {/* CÁNH TRÁI: TRẠM MINI-GAME LONG KHÍ & TREO MÁY */}
+          <div className="cyber-wing cyber-wing-left">
+            <DragonPearlMiniGame />
+          </div>
+
+          {/* TRUNG TÂM: AVATAR SIÊU TO 300px + TÊN KHỔNG LỒ + MẠNG XÃ HỘI */}
+          <div className="cyber-wing cyber-wing-center">
             <CyberAvatar
               avatarUrl={site.avatarUrl}
               avatarFrameUrl={site.avatarFrameUrl}
@@ -78,13 +87,22 @@ export default async function Home() {
             />
 
             <p className="cyber-iam">{site.iam && site.iam !== "Hi, i am" ? site.iam : "Hi, I am"}</p>
-            <h1 className="cyber-name">
+
+            {/* TÊN KHỔNG LỒ 50px ĐỒNG BỘ VỚI AVATAR */}
+            <h1 className="cyber-name cyber-name-giant">
               {site.name}
               {site.verified && (
                 /* eslint-disable-next-line @next/next/no-img-element */
-                <img className="cyber-verify-badge" src="/verify.svg" alt="verified" width={26} height={26} />
+                <img
+                  className="cyber-verify-badge giant"
+                  src="/verify.svg"
+                  alt="verified"
+                  width={34}
+                  height={34}
+                />
               )}
             </h1>
+
             <p className="cyber-headline">
               and I&apos;m a{" "}
               <span className="cyber-gradient-typed">
@@ -92,7 +110,7 @@ export default async function Home() {
               </span>
             </p>
 
-            {/* MẠNG XÃ HỘI DẠNG NGỌC PHÁT SÁNG */}
+            {/* 4 NÚT MẠNG XÃ HỘI 3D SÁNG BÓNG */}
             <div className="cyber-socials-row" id="contact" aria-label="Liên hệ">
               {socialLinks.map((s) => (
                 <a
@@ -114,23 +132,20 @@ export default async function Home() {
                 </a>
               ))}
             </div>
-
-            {/* MINI SERVICE TRAILER THU NHỎ NGHỆ THUẬT */}
-            <ServiceTeaserTrailer />
           </div>
 
-          {/* CHỈ DẪN CUỘN TRANG: KÉO LÊN ĐỂ XEM CHI TIẾT */}
-          <div className="cyber-scroll-prompt-wrap">
-            <ScrollPromptIndicator targetId="detailed-services" label="KÉO LÊN ĐỂ XEM CHI TIẾT" />
+          {/* CÁNH PHẢI: ĐỒNG HỒ SỐ CYBER CLOCK & SERVER LIVE STATUS */}
+          <div className="cyber-wing cyber-wing-right">
+            <CyberClockWidget />
           </div>
         </section>
 
         {/* ======================================================== */}
-        {/* TẦNG 2: HỆ SINH THÁI DỊCH VỤ CHI TIẾT (KÉO LÊN ĐỂ XEM) */}
+        {/* HỆ SINH THÁI 5 DỊCH VỤ CỐT LÕI (DÀN TRẢI ĐẦY ĐẶN 100%) */}
         {/* ======================================================== */}
-        <section className="cyber-details-stage" id="detailed-services" aria-label="Danh sách dịch vụ chi tiết">
-          {/* SECTION DIVIDER: DỊCH VỤ */}
-          <div className="cyber-section-divider">
+        <section className="cyber-services-section" aria-label="Hệ sinh thái dịch vụ">
+          {/* SECTION DIVIDER */}
+          <div className="cyber-section-divider" id="services">
             <div className="cyber-divider-line left" />
             <div className="cyber-divider-badge">
               <span className="cyber-star-icon">✦</span>
@@ -140,10 +155,10 @@ export default async function Home() {
             <div className="cyber-divider-line right" />
           </div>
           <p className="cyber-section-subtitle">
-            Hệ sinh thái tiện ích công nghệ cao - Tốc độ - An toàn - Bảo mật 24/7
+            Hệ thống tiện ích công nghệ cao - Tốc độ tức thì - Bảo mật tuyệt đối 24/7
           </p>
 
-          {/* 5 CORE SERVICES GRID (GLASSMORPHISM 2.0) */}
+          {/* 5 CORE SERVICES GRID (GLASSMORPHISM 2.0 DÀN PHỦ KÍN CHIỀU RỘNG) */}
           <div className="cyber-services-grid" aria-label="Danh sách 5 dịch vụ chính">
             {/* CARD 1: FREE FIRE */}
             <Link href="/freefire" className="cyber-card cyber-card-ff" aria-label="Xem dịch vụ Free Fire">
