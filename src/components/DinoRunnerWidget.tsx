@@ -63,8 +63,8 @@ export default function DinoRunnerWidget() {
       width: 30,
       height: 36,
       vy: 0,
-      gravity: 0.44,
-      jumpStrength: -8.5,
+      gravity: 0.30, // Trọng lực êm ái 0.30 cho cú nhảy bay bổng, xa gấp đôi
+      jumpStrength: -6.6, // Cú nhảy vừa vặn, thời gian trên không 44 frames (~88px lướt xa)
       grounded: true,
       ducking: false,
       legFrame: 0,
@@ -88,8 +88,8 @@ export default function DinoRunnerWidget() {
       },
     };
 
-    // TỐC ĐỘ 1.0X SIÊU CHILL, THƯ THÁI, MƯỢT MÀ
-    const initialSpeed = 1.0;
+    // TỐC ĐỘ CHILL THANH THOÁT, VƯỢT XƯƠNG RỒNG DỄ DÀNG
+    const initialSpeed = 2.0;
     let groundSpeed = initialSpeed;
     let groundOffset = 0;
 
@@ -193,12 +193,13 @@ export default function DinoRunnerWidget() {
 
       // 2. Tốc độ chill 1.0x tăng cực kỳ êm dịu
       currentScore += 0.12;
-      groundSpeed = initialSpeed + Math.min(currentScore * 0.00012, 0.45);
+      groundSpeed = initialSpeed + Math.min(currentScore * 0.0001, 0.45);
 
       const displayScore = Math.floor(currentScore);
       if (displayScore % 4 === 0) {
         setScore(displayScore);
-        setCurrentSpeedDisplay(groundSpeed.toFixed(1));
+        const speedMultiplier = (groundSpeed / initialSpeed).toFixed(1);
+        setCurrentSpeedDisplay(speedMultiplier);
       }
 
       // 3. Vật lý Khủng Long
@@ -227,8 +228,8 @@ export default function DinoRunnerWidget() {
       // 5. Sinh chướng ngại vật khoảng cách an toàn, thoáng đãng
       spawnTimer--;
       if (spawnTimer <= 0) {
-        const speedFactor = 1.1 / groundSpeed;
-        spawnTimer = Math.floor((Math.random() * 80 + 120) * speedFactor);
+        const speedFactor = 2.0 / groundSpeed;
+        spawnTimer = Math.floor((Math.random() * 70 + 110) * speedFactor);
 
         const r = Math.random();
         if (r < 0.35) {
@@ -308,9 +309,9 @@ export default function DinoRunnerWidget() {
                 needDuck = true;
               }
             }
-            // 2. Xương rồng hoặc chim tầm thấp: Nhảy ĐÚNG 1 CÚ NHẢY DUY NHẤT
+            // 2. Xương rồng hoặc chim tầm thấp: Nhảy ĐÚNG 1 CÚ NHẢY DUY NHẤT (cự ly 16-28px là chuẩn)
             else {
-              if (dino.grounded && !obs.jumped && dist <= idealJumpDist && dist > 0) {
+              if (dino.grounded && !obs.jumped && dist <= 28 && dist >= 8) {
                 obs.jumped = true; // ĐÁNH DẤU ĐÃ NHẢY: vĩnh viễn không nhảy thêm lần nào cho vật cản này!
                 dino.jump();
               }
@@ -320,17 +321,17 @@ export default function DinoRunnerWidget() {
 
         // Kiểm tra va chạm thực sự
         const dinoHitBox = {
-          x: dino.x + 5,
+          x: dino.x + 6,
           y: dino.y + 4,
-          w: (dino.ducking ? 36 : dino.width) - 8,
+          w: (dino.ducking ? 36 : dino.width) - 12,
           h: (dino.ducking ? 18 : dino.height) - 6,
         };
 
         const obsHitBox = {
           x: obs.x + 3,
-          y: obs.y + 3,
+          y: obs.y + 2,
           w: obs.width - 6,
-          h: obs.height - 6,
+          h: obs.height - 4,
         };
 
         const isColliding =
