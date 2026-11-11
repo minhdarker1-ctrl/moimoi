@@ -428,6 +428,25 @@ body.vthangios-dark .scenic-night {
   pointer-events: none;
 }
 
+/* Layer 3: Dragon Atmosphere - Quầng khói tinh vân rồng đỏ huyền ảo */
+.crimson-dragon-nebula {
+  position: absolute;
+  top: 15%;
+  left: 20%;
+  width: 60vw;
+  height: 50vh;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(220, 38, 38, 0.09) 0%, rgba(185, 28, 28, 0.03) 45%, transparent 70%);
+  filter: blur(65px);
+  pointer-events: none;
+  animation: crimsonNebulaPulse 12s ease-in-out infinite alternate;
+}
+
+@keyframes crimsonNebulaPulse {
+  0% { transform: scale(0.92) translate(-3%, -3%); opacity: 0.55; }
+  100% { transform: scale(1.14) translate(3%, 3%); opacity: 0.85; }
+}
+
 .mdarker-star {
   position: absolute;
   border-radius: 50%;
@@ -12084,10 +12103,10 @@ body.vthangios-dark .cyber-user-arrow {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 106%;
-  height: 106%;
+  width: 108%;
+  height: 108%;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(239, 68, 68, 0.45) 0%, rgba(245, 158, 11, 0.25) 50%, transparent 72%);
+  background: radial-gradient(circle, rgba(255, 23, 68, 0.48) 0%, rgba(220, 38, 38, 0.28) 50%, transparent 72%);
   filter: blur(28px);
   z-index: 0;
   pointer-events: none;
@@ -12413,21 +12432,21 @@ body.vthangios-dark .cyber-headline {
 /* CÁNH TRÁI: LONG KHÍ & MINI-GAME BẮT NGỌC RỒNG            */
 /* ======================================================== */
 .cyber-pearl-station {
-  background: rgba(13, 20, 36, 0.68);
-  border: 1.5px solid rgba(251, 191, 36, 0.25);
+  background: rgba(13, 20, 36, 0.72);
+  border: 1.5px solid rgba(255, 30, 66, 0.35);
   border-radius: 22px;
   padding: 18px 16px;
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35), 0 0 20px rgba(251, 191, 36, 0.1);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4), 0 0 24px rgba(255, 30, 66, 0.16);
   transition: all 0.28s ease;
   text-align: center;
 }
 
 [data-theme="light"] .cyber-pearl-station {
   background: rgba(255, 255, 255, 0.88);
-  border-color: rgba(245, 158, 11, 0.35);
-  box-shadow: 0 12px 32px rgba(245, 158, 11, 0.08);
+  border-color: rgba(220, 38, 38, 0.35);
+  box-shadow: 0 12px 32px rgba(220, 38, 38, 0.08);
 }
 
 .cyber-pearl-header {
@@ -12443,14 +12462,14 @@ body.vthangios-dark .cyber-headline {
   gap: 6px;
   font-size: 11px;
   font-weight: 800;
-  color: #fbbf24;
+  color: #ff4d6d;
   letter-spacing: 0.5px;
 }
 
 .cyber-pearl-combo {
   font-size: 11px;
   font-weight: 900;
-  color: #f43f5e;
+  color: #fbbf24;
   animation: cyberPulse 0.8s infinite alternate;
 }
 
@@ -12461,14 +12480,14 @@ body.vthangios-dark .cyber-headline {
 }
 
 .cyber-pearl-sphere {
-  width: 72px;
-  height: 72px;
+  width: 74px;
+  height: 74px;
   border-radius: 50%;
   position: relative;
-  background: radial-gradient(circle at 35% 30%, #fef08a 0%, #fbbf24 40%, #ea580c 80%, #7c2d12 100%);
+  background: radial-gradient(circle at 35% 30%, #fef08a 0%, #ff1744 45%, #991b1b 80%, #450a0a 100%);
   border: none;
   cursor: pointer;
-  box-shadow: 0 0 28px rgba(251, 191, 36, 0.65), 0 0 50px rgba(234, 88, 12, 0.35);
+  box-shadow: 0 0 30px rgba(255, 23, 68, 0.75), 0 0 54px rgba(185, 28, 28, 0.45);
   transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
   user-select: none;
   animation: cyberFloat 3.6s ease-in-out infinite alternate;
@@ -12481,7 +12500,7 @@ body.vthangios-dark .cyber-headline {
 
 .cyber-pearl-sphere:hover {
   transform: translateY(-4px) scale(1.12);
-  box-shadow: 0 0 38px rgba(251, 191, 36, 0.9), 0 0 65px rgba(234, 88, 12, 0.5);
+  box-shadow: 0 0 42px rgba(255, 23, 68, 0.95), 0 0 70px rgba(185, 28, 28, 0.6);
 }
 
 .cyber-pearl-sphere.bursting {

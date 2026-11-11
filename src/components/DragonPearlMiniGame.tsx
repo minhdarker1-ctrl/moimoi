@@ -53,11 +53,11 @@ export default function DragonPearlMiniGame() {
     setIsBursting(true);
     setTimeout(() => setIsBursting(false), 400);
 
-    // Create 12 cosmic star particles
-    const colors = ["#38bdf8", "#fbbf24", "#f43f5e", "#a855f7", "#ffffff"];
+    // Create 12 cosmic crimson fire particles
+    const colors = ["#ff1744", "#dc2626", "#fbbf24", "#f97316", "#ffffff"];
     const newParticles: BurstParticle[] = [];
-    for (let i = 0; i < 12; i++) {
-      const angle = (Math.PI * 2 * i) / 12 + Math.random() * 0.4;
+    for (let i = 0; i < 14; i++) {
+      const angle = (Math.PI * 2 * i) / 14 + Math.random() * 0.4;
       const speed = Math.random() * 45 + 25;
       newParticles.push({
         id: Date.now() + i,

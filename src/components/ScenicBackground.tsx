@@ -276,8 +276,9 @@ export default function ScenicBackground() {
           2. DARK MODE SCENE: SAO ĐÊM, SAO BĂNG, NÚI ĐÊM, ĐOM ĐÓM
           ======================================================== */}
       <div className="scenic-scene scenic-night">
-        {/* Lớp tinh vân mờ phát sáng huyền bí */}
+        {/* Lớp tinh vân mờ phát sáng huyền bí & quầng khói rồng đỏ Crimson */}
         <div className="mdarker-nebula-glow" />
+        <div className="crimson-dragon-nebula" aria-hidden="true" />
 
         {/* 2 vệt sao băng bay ngang bầu trời đêm */}
         <div className="mdarker-shooting-star star-1" />
