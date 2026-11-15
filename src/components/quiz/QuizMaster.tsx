@@ -102,6 +102,7 @@ export default function QuizMaster() {
 
   // Review mode filter on results screen
   const [reviewFilter, setReviewFilter] = useState<"all" | "wrong" | "correct">("all");
+  const [showMatrixModal, setShowMatrixModal] = useState<boolean>(false);
 
   // Load from localStorage
   useEffect(() => {
@@ -602,32 +603,34 @@ export default function QuizMaster() {
     const progressPct = Math.round(((currentIndex + 1) / activeQuestionList.length) * 100);
 
     return (
-      <div className="cyber-quiz-container">
-        {/* Quiz Top Action Bar */}
-        <div className="cyber-quiz-top-bar">
+      <div className="quiz-container">
+        {/* Sleek Integrated Top Bar */}
+        <div className="quiz-top-bar">
           <button
             type="button"
-            className="cyber-top-back-btn"
+            className="quiz-back-btn"
             onClick={exitToLobby}
-            title="Thoát về menu chính"
+            title="Thoát về trang chọn đề"
           >
-            <i className="fa-solid fa-arrow-left" /> Thoát
+            <i className="fa-solid fa-chevron-left" />
+            <span>Thoát</span>
           </button>
 
-          <div className="cyber-top-info">
-            <span className="cyber-mode-indicator">
-              {mode === "practice" && <><i className="fa-solid fa-bullseye" /> Luyện Tập</>}
-              {mode === "exam" && <><i className="fa-solid fa-clock" /> Thi Thử</>}
-              {mode === "flashcard" && <><i className="fa-solid fa-clone" /> Flashcard</>}
+          <div className="quiz-top-center">
+            <span className="quiz-mode-tag">
+              {mode === "practice" && "Luyện tập"}
+              {mode === "exam" && "Thi thử"}
+              {mode === "flashcard" && "Flashcard"}
             </span>
-            <span className="cyber-chapter-indicator">
-              {currentQ.chapterTitle}
+            <span className="quiz-chapter-tag">{currentQ.chapterTitle}</span>
+            <span className="quiz-counter-pill">
+              Câu {currentIndex + 1} / {activeQuestionList.length}
             </span>
           </div>
 
-          <div className="cyber-top-right-tools">
+          <div className="quiz-top-tools">
             {mode === "exam" && (
-              <div className={`cyber-exam-timer ${examSecondsLeft < 180 ? "urgent" : ""}`}>
+              <div className={`quiz-timer-chip ${examSecondsLeft < 180 ? "urgent" : ""}`}>
                 <i className="fa-solid fa-stopwatch" />
                 <span>{formatTime(examSecondsLeft)}</span>
               </div>
@@ -635,38 +638,32 @@ export default function QuizMaster() {
 
             <button
               type="button"
-              className={`cyber-sound-toggle-btn ${soundEnabled ? "on" : "off"}`}
+              className={`quiz-tool-btn ${soundEnabled ? "active" : ""}`}
               onClick={toggleSound}
               title={soundEnabled ? "Tắt âm thanh" : "Bật âm thanh"}
+              aria-label="Bật tắt âm thanh"
             >
               <i className={soundEnabled ? "fa-solid fa-volume-high" : "fa-solid fa-volume-xmark"} />
             </button>
 
             <button
               type="button"
-              className={`cyber-star-toggle-btn ${isStarred ? "starred" : ""}`}
+              className={`quiz-tool-btn star ${isStarred ? "starred" : ""}`}
               onClick={() => toggleBookmark(currentQ.id)}
-              title={isStarred ? "Bỏ đánh dấu câu này" : "Đánh dấu câu khó (Bookmark)"}
+              title={isStarred ? "Bỏ gắn sao câu này" : "Gắn sao câu hỏi này"}
+              aria-label="Gắn sao câu hỏi"
             >
               <i className={isStarred ? "fa-solid fa-star" : "fa-regular fa-star"} />
             </button>
           </div>
         </div>
 
-        {/* Dynamic Progress Bar */}
-        <div className="cyber-quiz-progress-bar-wrap">
-          <div className="cyber-quiz-progress-track">
-            <div className="cyber-quiz-progress-fill" style={{ width: `${progressPct}%` }} />
-          </div>
-          <div className="cyber-quiz-progress-labels">
-            <span>Câu {currentIndex + 1} / {activeQuestionList.length}</span>
-            <span>{progressPct}% hoàn thành</span>
-          </div>
+        {/* 3px Integrated Progress Line */}
+        <div className="quiz-progress-line" role="progressbar" aria-valuenow={progressPct} aria-valuemin={0} aria-valuemax={100}>
+          <div className="quiz-progress-line-fill" style={{ width: `${progressPct}%` }} />
         </div>
 
-        {/* ---------------------------------------------------- */}
-        {/* SUB-VIEW A: FLASHCARD 3D MODE                        */}
-        {/* ---------------------------------------------------- */}
+        {/* SUB-VIEW A: FLASHCARD 3D MODE */}
         {mode === "flashcard" ? (
           <div className="cyber-flashcard-wrap">
             <div
@@ -714,7 +711,7 @@ export default function QuizMaster() {
             <div className="cyber-fc-nav-controls">
               <button
                 type="button"
-                className="cyber-quiz-btn secondary"
+                className="quiz-btn secondary"
                 onClick={handlePrev}
                 disabled={currentIndex === 0}
               >
@@ -723,7 +720,7 @@ export default function QuizMaster() {
 
               <button
                 type="button"
-                className="cyber-quiz-btn danger"
+                className="quiz-btn danger"
                 onClick={() => {
                   if (!mistakes.includes(currentQ.id)) {
                     saveMistakes([...mistakes, currentQ.id]);
@@ -731,12 +728,12 @@ export default function QuizMaster() {
                   handleNext();
                 }}
               >
-                <i className="fa-solid fa-xmark" /> Chưa Nhớ (Lưu Sổ Sai)
+                <i className="fa-solid fa-xmark" /> Chưa nhớ
               </button>
 
               <button
                 type="button"
-                className="cyber-quiz-btn success"
+                className="quiz-btn success"
                 onClick={() => {
                   if (mistakes.includes(currentQ.id)) {
                     saveMistakes(mistakes.filter((id) => id !== currentQ.id));
@@ -744,12 +741,12 @@ export default function QuizMaster() {
                   handleNext();
                 }}
               >
-                <i className="fa-solid fa-check" /> Đã Thuộc Lòng
+                <i className="fa-solid fa-check" /> Đã thuộc
               </button>
 
               <button
                 type="button"
-                className="cyber-quiz-btn primary"
+                className="quiz-btn primary"
                 onClick={handleNext}
                 disabled={currentIndex === activeQuestionList.length - 1}
               >
@@ -758,57 +755,30 @@ export default function QuizMaster() {
             </div>
           </div>
         ) : (
-          /* ---------------------------------------------------- */
-          /* SUB-VIEW B: PRACTICE & EXAM 4-OPTION MODE            */
-          /* ---------------------------------------------------- */
-          <div className="cyber-quiz-card">
-            {/* Question Text & Meta Header */}
-            <div className="cyber-quiz-question-box">
-              <div className="cyber-q-meta-row">
-                <div className="cyber-q-meta-left">
-                  <span className="cyber-q-num-pill">
-                    <i className="fa-solid fa-hashtag" /> CÂU {currentIndex + 1} / {activeQuestionList.length}
-                  </span>
-                  <span className="cyber-q-chapter-badge">
-                    <i className="fa-solid fa-layer-group" /> {currentQ.chapterTitle}
-                  </span>
-                </div>
-                <div className="cyber-q-meta-right">
-                  <span className="cyber-q-kbd-hint" title="Bấm phím 1-4 hoặc A-D trên bàn phím để chọn nhanh">
-                    <i className="fa-solid fa-keyboard" /> Phím 1-4 / A-D
-                  </span>
-                  <button
-                    type="button"
-                    className={`cyber-q-star-btn ${isStarred ? "starred" : ""}`}
-                    onClick={() => toggleBookmark(currentQ.id)}
-                    title={isStarred ? "Bỏ gắn sao câu này" : "Gắn sao câu hỏi khó ⭐"}
-                  >
-                    <i className={isStarred ? "fa-solid fa-star" : "fa-regular fa-star"} />
-                    <span>{isStarred ? "Đã lưu ⭐" : "Gắn sao"}</span>
-                  </button>
-                </div>
-              </div>
-
-              <h2 className="cyber-quiz-question-title">{currentQ.question}</h2>
+          /* SUB-VIEW B: PRACTICE & EXAM 4-OPTION MODE */
+          <div className="quiz-card">
+            {/* Question Text */}
+            <div className="quiz-question-box">
+              <h2 className="quiz-question-title">{currentQ.question}</h2>
             </div>
 
-            {/* 4 Options Grid */}
-            <div className="cyber-quiz-options-grid">
+            {/* 4 Streamlined Options */}
+            <div className="quiz-options-list">
               {currentQ.options.map((optText, idx) => {
                 const isSelected = selectedOption === idx;
                 const isRight = idx === currentQ.correctIndex;
-                let optStyle = "cyber-quiz-option-btn";
+                let optStyle = "quiz-opt-btn";
 
                 if (mode === "practice" && isAnswered) {
                   if (isRight) {
-                    optStyle += " correct-revealed";
+                    optStyle += " is-correct";
                   } else if (isSelected && !isRight) {
-                    optStyle += " wrong-revealed";
+                    optStyle += " is-wrong";
                   } else {
-                    optStyle += " dim-revealed";
+                    optStyle += " is-dimmed";
                   }
                 } else if (mode === "exam" && isSelected) {
-                  optStyle += " exam-selected";
+                  optStyle += " is-selected";
                 }
 
                 return (
@@ -819,28 +789,17 @@ export default function QuizMaster() {
                     onClick={() => handleSelectOption(idx)}
                     disabled={mode === "practice" && isAnswered}
                   >
-                    <div className="cyber-option-key-wrap">
-                      <span className="cyber-option-letter">{String.fromCharCode(65 + idx)}</span>
-                      <span className="cyber-option-kbd-sub">{idx + 1}</span>
-                    </div>
-
-                    <span className="cyber-option-text">{optText}</span>
-
-                    <div className="cyber-option-status-wrap">
+                    <span className="quiz-opt-letter">{String.fromCharCode(65 + idx)}</span>
+                    <span className="quiz-opt-text">{optText}</span>
+                    <div className="quiz-opt-status-icon">
                       {mode === "practice" && isAnswered && isRight && (
-                        <span className="cyber-opt-status-tag correct">
-                          <i className="fa-solid fa-circle-check" /> ĐÁP ÁN ĐÚNG
-                        </span>
+                        <i className="fa-solid fa-check text-green" title="Đáp án đúng" />
                       )}
                       {mode === "practice" && isAnswered && isSelected && !isRight && (
-                        <span className="cyber-opt-status-tag wrong">
-                          <i className="fa-solid fa-circle-xmark" /> BẠN ĐÃ CHỌN
-                        </span>
+                        <i className="fa-solid fa-xmark text-red" title="Bạn đã chọn" />
                       )}
                       {mode === "exam" && isSelected && (
-                        <span className="cyber-opt-status-tag selected">
-                          <i className="fa-solid fa-check" /> ĐÃ CHỌN
-                        </span>
+                        <i className="fa-solid fa-check text-blue" title="Đã chọn" />
                       )}
                     </div>
                   </button>
@@ -848,91 +807,103 @@ export default function QuizMaster() {
               })}
             </div>
 
-            {/* Practice Mode: Instant Explanation Dropdown */}
+            {/* Practice Mode: Compact Docstring Explanation Callout */}
             {mode === "practice" && isAnswered && (
-              <div className={`cyber-instant-explanation ${isCorrect ? "correct" : "wrong"}`}>
-                <div className="cyber-exp-header">
-                  <div className="cyber-exp-icon-wrap">
-                    <i className={isCorrect ? "fa-solid fa-circle-check" : "fa-solid fa-circle-exclamation"} />
-                  </div>
-                  <div className="cyber-exp-title-box">
-                    <span className="cyber-exp-badge">
-                      {isCorrect ? "CHÍNH XÁC TUYỆT ĐỐI" : "HÃY GHI NHỚ KIẾN THỨC NÀY"}
-                    </span>
-                    <strong className="cyber-exp-main-status">
-                      {isCorrect ? "Chúc mừng! Bạn đã nắm chắc câu này." : "Rất tiếc! Câu trả lời chưa chính xác."}
-                    </strong>
-                  </div>
+              <div className={`quiz-explanation-callout ${isCorrect ? "correct" : "wrong"}`}>
+                <div className="quiz-exp-header">
+                  <i className={isCorrect ? "fa-solid fa-circle-check text-green" : "fa-solid fa-circle-exclamation text-red"} />
+                  <span className="quiz-exp-status-text">
+                    {isCorrect ? "Chính xác!" : "Chưa chính xác!"}
+                  </span>
+                  <span className="quiz-exp-correct-target">
+                    Đáp án: <strong>{currentQ.correctAnswerLetter}. {currentQ.correctAnswer}</strong>
+                  </span>
                 </div>
-
-                <div className="cyber-exp-callout">
-                  <span className="cyber-callout-tag">ĐÁP ÁN CHUẨN:</span>
-                  <div className="cyber-callout-content">
-                    <span className="cyber-callout-letter">{currentQ.correctAnswerLetter}</span>
-                    <span className="cyber-callout-text">{currentQ.correctAnswer}</span>
-                  </div>
-                </div>
-
                 {currentQ.explanation && (
-                  <div className="cyber-exp-body">
-                    <div className="cyber-exp-body-title">
-                      <i className="fa-solid fa-lightbulb" /> Cốt Lõi Kiến Thức Kỹ Thuật:
-                    </div>
-                    <p className="cyber-exp-body-text">{currentQ.explanation}</p>
-                  </div>
+                  <p className="quiz-exp-text">
+                    <i className="fa-solid fa-lightbulb" /> {currentQ.explanation}
+                  </p>
                 )}
               </div>
             )}
 
-            {/* Bottom Nav Controls */}
-            <div className="cyber-quiz-bottom-controls">
+            {/* Bottom Nav Controls (Always visible, non-jumping) */}
+            <div className="quiz-bottom-controls">
               <button
                 type="button"
-                className="cyber-quiz-btn secondary"
+                className="quiz-btn secondary"
                 onClick={handlePrev}
                 disabled={currentIndex === 0}
               >
-                <i className="fa-solid fa-chevron-left" /> Câu trước <span className="cyber-btn-kbd">←</span>
+                <i className="fa-solid fa-chevron-left" /> Câu trước
               </button>
 
-              {mode === "exam" && (
-                <button
-                  type="button"
-                  className="cyber-quiz-btn danger"
-                  onClick={finishQuiz}
-                >
-                  <i className="fa-solid fa-flag-checkered" /> Nộp Bài Thi
-                </button>
-              )}
+              <div className="quiz-bottom-center">
+                {mode === "exam" && (
+                  <button
+                    type="button"
+                    className="quiz-btn ghost"
+                    onClick={() => setShowMatrixModal(!showMatrixModal)}
+                  >
+                    <i className="fa-solid fa-list-ol" /> Danh sách ({Object.keys(userAnswers).length}/{activeQuestionList.length})
+                  </button>
+                )}
+              </div>
 
-              {currentIndex < activeQuestionList.length - 1 ? (
-                <button
-                  type="button"
-                  className="cyber-quiz-btn primary"
-                  onClick={handleNext}
-                >
-                  Câu tiếp <span className="cyber-btn-kbd">→</span> <i className="fa-solid fa-chevron-right" />
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  className="cyber-quiz-btn success"
-                  onClick={finishQuiz}
-                >
-                  <i className="fa-solid fa-check-double" /> Xem Kết Quả
-                </button>
-              )}
+              <div className="quiz-bottom-right">
+                {mode === "exam" && (
+                  <button
+                    type="button"
+                    className="quiz-btn danger"
+                    onClick={finishQuiz}
+                  >
+                    <i className="fa-solid fa-flag-checkered" /> Nộp bài
+                  </button>
+                )}
+
+                {currentIndex < activeQuestionList.length - 1 ? (
+                  <button
+                    type="button"
+                    className="quiz-btn primary"
+                    onClick={handleNext}
+                  >
+                    Câu tiếp <i className="fa-solid fa-chevron-right" />
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="quiz-btn success"
+                    onClick={finishQuiz}
+                  >
+                    <i className="fa-solid fa-check-double" /> Xem kết quả
+                  </button>
+                )}
+              </div>
             </div>
 
-            {/* Exam Mode Question Matrix Jump Grid */}
-            {mode === "exam" && (
-              <div className="cyber-exam-matrix">
-                <span className="cyber-matrix-title">Bảng câu hỏi:</span>
-                <div className="cyber-matrix-grid">
+            {/* Subtle Keyboard Hint */}
+            <div className="quiz-keyboard-hint">
+              <span>Phím tắt: <strong>1-4</strong> hoặc <strong>A-D</strong> để chọn · Mũi tên <strong>←</strong> <strong>→</strong> để chuyển câu</span>
+            </div>
+
+            {/* Exam Mode Question Matrix Popover / Modal */}
+            {mode === "exam" && showMatrixModal && (
+              <div className="quiz-matrix-dropdown">
+                <div className="quiz-matrix-header">
+                  <span>Bảng câu hỏi ({Object.keys(userAnswers).length}/{activeQuestionList.length} đã làm)</span>
+                  <button
+                    type="button"
+                    className="quiz-matrix-close-btn"
+                    onClick={() => setShowMatrixModal(false)}
+                  >
+                    ✕ Đóng
+                  </button>
+                </div>
+                <div className="quiz-matrix-grid">
                   {activeQuestionList.map((q, idx) => {
                     const answered = userAnswers[q.id] !== undefined;
                     const isCur = idx === currentIndex;
-                    let mClass = "cyber-matrix-cell";
+                    let mClass = "quiz-matrix-cell";
                     if (isCur) mClass += " current";
                     if (answered) mClass += " answered";
                     if (bookmarks.includes(q.id)) mClass += " starred";
@@ -942,7 +913,10 @@ export default function QuizMaster() {
                         key={q.id}
                         type="button"
                         className={mClass}
-                        onClick={() => setCurrentIndex(idx)}
+                        onClick={() => {
+                          setCurrentIndex(idx);
+                          setShowMatrixModal(false);
+                        }}
                       >
                         {idx + 1}
                       </button>
@@ -961,259 +935,221 @@ export default function QuizMaster() {
   // RENDER 3: LOBBY / CONFIGURATION SCREEN (BẢNG ĐIỀU KHIỂN)
   // ========================================================
   return (
-    <div className="cyber-quiz-container">
-      {/* Hero Welcome Banner */}
-      <div className="cyber-quiz-hero-card">
-        <div className="cyber-hero-badge">
-          <span className="cyber-hero-dot" />
-          <span>MINSR QUIZ MASTER · V2.0 PRO</span>
-        </div>
-        <h1 className="cyber-hero-title">
-          Khảo Thí &amp; Ôn Tập <span className="cyber-highlight-cyan">Cơ Khí Thông Minh</span>
-        </h1>
-        <p className="cyber-hero-desc">
-          Nền tảng ôn luyện trắc nghiệm tối ưu phương pháp khoa học <strong>Active Recall</strong> &amp;{" "}
-          <strong>Spaced Repetition</strong>. Thuộc lòng ngân hàng {MECHANICAL_QUIZ_QUESTIONS.length} câu hỏi then chốt về Công nghệ cơ khí, Dung sai lắp ghép, Cấp chính xác và Công nghệ Đúc kim loại.
-        </p>
-
-        {/* Global Stats Counter */}
-        <div className="cyber-stats-grid">
-          <div className="cyber-stat-box blue">
-            <i className="fa-solid fa-database" />
-            <div className="cyber-stat-text">
-              <strong>{MECHANICAL_QUIZ_QUESTIONS.length}</strong>
-              <span>Tổng câu hỏi</span>
-            </div>
+    <div className="quiz-container">
+      <div className="quiz-dashboard">
+        {/* Header Bar */}
+        <div className="quiz-dashboard-header">
+          <div className="quiz-dh-title-wrap">
+            <h1 className="quiz-dh-title">Trắc Nghiệm Ôn Tập Cơ Khí</h1>
+            <p className="quiz-dh-subtitle">
+              Ngân hàng 125 câu hỏi then chốt: Quá trình cơ khí, Dung sai lắp ghép &amp; Công nghệ Đúc kim loại
+            </p>
           </div>
-          <div className="cyber-stat-box gold">
-            <i className="fa-solid fa-star" />
-            <div className="cyber-stat-text">
-              <strong>{bookmarks.length}</strong>
-              <span>Đã gắn sao ⭐</span>
+          <div className="quiz-dh-chips">
+            <div className="quiz-chip">
+              <i className="fa-solid fa-database text-blue" />
+              <span><strong>{MECHANICAL_QUIZ_QUESTIONS.length}</strong> câu hỏi</span>
             </div>
-          </div>
-          <div className="cyber-stat-box red">
-            <i className="fa-solid fa-triangle-exclamation" />
-            <div className="cyber-stat-text">
-              <strong>{mistakes.length}</strong>
-              <span>Sổ tay câu sai</span>
+            <div className="quiz-chip">
+              <i className="fa-solid fa-star text-gold" />
+              <span><strong>{bookmarks.length}</strong> đã lưu ⭐</span>
             </div>
-          </div>
-          <div className="cyber-stat-box green">
-            <i className="fa-solid fa-graduation-cap" />
-            <div className="cyber-stat-text">
-              <strong>100%</strong>
-              <span>Miễn phí 24/7</span>
+            <div className="quiz-chip">
+              <i className="fa-solid fa-triangle-exclamation text-red" />
+              <span><strong>{mistakes.length}</strong> câu sai</span>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Main Configuration Card */}
-      <div className="cyber-config-card">
-        {/* Section 1: Choose Topic / Chapter */}
-        <div className="cyber-config-section">
-          <label className="cyber-config-label">
-            <i className="fa-solid fa-book-bookmark" /> 1. Chọn Chương Học / Chủ Đề
-          </label>
-          <div className="cyber-topic-grid">
-            {QUIZ_TOPICS.map((topic) => {
-              const isSelected = selectedTopic === topic.id;
-              return (
+        {/* Main 2-Column Split */}
+        <div className="quiz-dashboard-body">
+          {/* Left Column: Topics / Chapters */}
+          <div className="quiz-db-column left">
+            <div className="quiz-section-label">
+              <i className="fa-solid fa-book-bookmark text-blue" /> 1. Chọn nội dung ôn tập
+            </div>
+            <div className="quiz-topics-list">
+              {QUIZ_TOPICS.map((topic) => {
+                const isSelected = selectedTopic === topic.id;
+                return (
+                  <button
+                    key={topic.id}
+                    type="button"
+                    className={`quiz-topic-item ${isSelected ? "selected" : ""}`}
+                    onClick={() => {
+                      if (soundEnabled) playSound("click");
+                      setSelectedTopic(topic.id);
+                    }}
+                  >
+                    <div className="quiz-topic-left">
+                      <i className={`${topic.icon} quiz-topic-icon`} />
+                      <div className="quiz-topic-texts">
+                        <strong>{topic.title}</strong>
+                        <span>{topic.desc}</span>
+                      </div>
+                    </div>
+                    <span className="quiz-topic-count">{topic.badge}</span>
+                  </button>
+                );
+              })}
+
+              {/* Special Notebooks */}
+              {bookmarks.length > 0 && (
                 <button
-                  key={topic.id}
                   type="button"
-                  className={`cyber-topic-card ${isSelected ? "selected" : ""}`}
+                  className={`quiz-topic-item special gold ${selectedTopic === "bookmarks" ? "selected" : ""}`}
                   onClick={() => {
                     if (soundEnabled) playSound("click");
-                    setSelectedTopic(topic.id);
+                    setSelectedTopic("bookmarks");
                   }}
                 >
-                  <div className="cyber-topic-head">
-                    <i className={topic.icon} />
-                    <span className="cyber-topic-badge">{topic.badge}</span>
+                  <div className="quiz-topic-left">
+                    <i className="fa-solid fa-star quiz-topic-icon text-gold" />
+                    <div className="quiz-topic-texts">
+                      <strong>Câu hỏi đã gắn sao ⭐</strong>
+                      <span>Ôn lại các câu hỏi khó bạn đã lưu</span>
+                    </div>
                   </div>
-                  <strong className="cyber-topic-title">{topic.title}</strong>
-                  <p className="cyber-topic-desc">{topic.desc}</p>
+                  <span className="quiz-topic-count gold">{bookmarks.length} câu</span>
                 </button>
-              );
-            })}
+              )}
 
-            {/* Special Quick Topic: Mistakes Notebook */}
-            {mistakes.length > 0 && (
-              <button
-                type="button"
-                className={`cyber-topic-card special-mistakes ${selectedTopic === "mistakes" ? "selected" : ""}`}
-                onClick={() => {
-                  if (soundEnabled) playSound("click");
-                  setSelectedTopic("mistakes");
-                }}
-              >
-                <div className="cyber-topic-head">
-                  <i className="fa-solid fa-bolt" />
-                  <span className="cyber-topic-badge red">{mistakes.length} CÂU SAI</span>
-                </div>
-                <strong className="cyber-topic-title">Sổ Tay Câu Sai</strong>
-                <p className="cyber-topic-desc">Chinh phục toàn bộ các câu bạn đã từng trả lời sai</p>
-              </button>
-            )}
-
-            {/* Special Quick Topic: Starred Questions */}
-            {bookmarks.length > 0 && (
-              <button
-                type="button"
-                className={`cyber-topic-card special-stars ${selectedTopic === "bookmarks" ? "selected" : ""}`}
-                onClick={() => {
-                  if (soundEnabled) playSound("click");
-                  setSelectedTopic("bookmarks");
-                }}
-              >
-                <div className="cyber-topic-head">
-                  <i className="fa-solid fa-star" />
-                  <span className="cyber-topic-badge gold">{bookmarks.length} CÂU SAO</span>
-                </div>
-                <strong className="cyber-topic-title">Câu Đã Gắn Sao ⭐</strong>
-                <p className="cyber-topic-desc">Ôn lại các câu hỏi khó bạn đã lưu vào danh sách ưu tiên</p>
-              </button>
-            )}
+              {mistakes.length > 0 && (
+                <button
+                  type="button"
+                  className={`quiz-topic-item special red ${selectedTopic === "mistakes" ? "selected" : ""}`}
+                  onClick={() => {
+                    if (soundEnabled) playSound("click");
+                    setSelectedTopic("mistakes");
+                  }}
+                >
+                  <div className="quiz-topic-left">
+                    <i className="fa-solid fa-bolt quiz-topic-icon text-red" />
+                    <div className="quiz-topic-texts">
+                      <strong>Sổ tay câu sai</strong>
+                      <span>Luyện lại toàn bộ các câu từng làm sai</span>
+                    </div>
+                  </div>
+                  <span className="quiz-topic-count red">{mistakes.length} câu</span>
+                </button>
+              )}
+            </div>
           </div>
-        </div>
 
-        {/* Section 2: Choose Study Mode */}
-        <div className="cyber-config-section">
-          <label className="cyber-config-label">
-            <i className="fa-solid fa-compass" /> 2. Chọn Chế Độ Ôn Luyện
-          </label>
-          <div className="cyber-mode-grid">
-            <button
-              type="button"
-              className={`cyber-mode-btn ${mode === "practice" ? "selected" : ""}`}
-              onClick={() => {
-                if (soundEnabled) playSound("click");
-                setMode("practice");
-              }}
-            >
-              <div className="cyber-mode-icon cyan">
-                <i className="fa-solid fa-bullseye" />
-              </div>
-              <div className="cyber-mode-info">
-                <strong>Luyện Tập Tự Do</strong>
-                <span>Biết đáp án ngay, giải thích cặn kẽ từng câu, không giới hạn giờ</span>
-              </div>
-            </button>
+          {/* Right Column: Settings & Start */}
+          <div className="quiz-db-column right">
+            <div className="quiz-section-label">
+              <i className="fa-solid fa-sliders text-blue" /> 2. Cấu hình &amp; Bắt đầu
+            </div>
 
-            <button
-              type="button"
-              className={`cyber-mode-btn ${mode === "exam" ? "selected" : ""}`}
-              onClick={() => {
-                if (soundEnabled) playSound("click");
-                setMode("exam");
-              }}
-            >
-              <div className="cyber-mode-icon gold">
-                <i className="fa-solid fa-clock" />
+            {/* Mode Segmented Switcher */}
+            <div className="quiz-control-group">
+              <label className="quiz-control-label">Chế độ ôn:</label>
+              <div className="quiz-segmented-control">
+                <button
+                  type="button"
+                  className={`quiz-seg-btn ${mode === "practice" ? "active" : ""}`}
+                  onClick={() => {
+                    if (soundEnabled) playSound("click");
+                    setMode("practice");
+                  }}
+                >
+                  <i className="fa-solid fa-bullseye" /> Luyện tập
+                </button>
+                <button
+                  type="button"
+                  className={`quiz-seg-btn ${mode === "exam" ? "active" : ""}`}
+                  onClick={() => {
+                    if (soundEnabled) playSound("click");
+                    setMode("exam");
+                  }}
+                >
+                  <i className="fa-solid fa-clock" /> Thi thử
+                </button>
+                <button
+                  type="button"
+                  className={`quiz-seg-btn ${mode === "flashcard" ? "active" : ""}`}
+                  onClick={() => {
+                    if (soundEnabled) playSound("click");
+                    setMode("flashcard");
+                  }}
+                >
+                  <i className="fa-solid fa-clone" /> Flashcard
+                </button>
               </div>
-              <div className="cyber-mode-info">
-                <strong>Thi Thử Tính Giờ</strong>
-                <span>Bấm giờ đếm ngược, nộp bài tính điểm xếp loại như phòng thi thực tế</span>
-              </div>
-            </button>
+              <p className="quiz-mode-description">
+                {mode === "practice" && "✓ Biết đáp án ngay sau khi chọn, có giải thích cốt lõi từng câu, không tính giờ."}
+                {mode === "exam" && "✓ Bấm giờ đếm ngược, tự do đổi đáp án, nộp bài tính điểm xếp loại như thi thật."}
+                {mode === "flashcard" && "✓ Lật thẻ 2 mặt ghi nhớ nhanh kiến thức, tự đánh giá mức độ ghi nhớ."}
+              </p>
+            </div>
 
-            <button
-              type="button"
-              className={`cyber-mode-btn ${mode === "flashcard" ? "selected" : ""}`}
-              onClick={() => {
-                if (soundEnabled) playSound("click");
-                setMode("flashcard");
-              }}
-            >
-              <div className="cyber-mode-icon purple">
-                <i className="fa-solid fa-clone" />
-              </div>
-              <div className="cyber-mode-info">
-                <strong>Flashcard 3D</strong>
-                <span>Lật thẻ 2 mặt ghi nhớ siêu tốc, tự đánh giá mức độ thuộc bài</span>
-              </div>
-            </button>
-          </div>
-        </div>
-
-        {/* Section 3: Settings & Number of Questions */}
-        <div className="cyber-config-section">
-          <label className="cyber-config-label">
-            <i className="fa-solid fa-sliders" /> 3. Tùy Chọn Số Lượng &amp; Đảo Đề
-          </label>
-          <div className="cyber-settings-row">
-            {/* Question count selector */}
-            <div className="cyber-setting-box">
-              <span className="cyber-setting-title">Số câu ôn tập:</span>
-              <div className="cyber-count-btns">
+            {/* Number of questions */}
+            <div className="quiz-control-group">
+              <label className="quiz-control-label">Số lượng câu:</label>
+              <div className="quiz-count-pills">
                 {Array.from(new Set([10, 20, 30, 60, availableQuestions.length]))
                   .filter((cnt) => cnt > 0 && cnt <= availableQuestions.length)
                   .sort((a, b) => a - b)
                   .map((cnt) => {
                     const isAll = cnt === availableQuestions.length;
-                    const label = isAll ? `Tất cả (${cnt})` : `${cnt} câu`;
                     const isCur = questionCount === cnt || (isAll && questionCount >= cnt);
                     return (
                       <button
                         key={cnt}
                         type="button"
-                        className={`cyber-count-btn ${isCur ? "active" : ""}`}
+                        className={`quiz-count-pill ${isCur ? "active" : ""}`}
                         onClick={() => setQuestionCount(cnt)}
                       >
-                        {label}
+                        {isAll ? `Tất cả (${cnt})` : `${cnt} câu`}
                       </button>
                     );
                   })}
               </div>
             </div>
 
-            {/* Toggle Switches */}
-            <div className="cyber-toggles-box">
-              <label className="cyber-toggle-item">
-                <input
-                  type="checkbox"
-                  checked={shuffleQuestions}
-                  onChange={(e) => setShuffleQuestions(e.target.checked)}
-                />
-                <span>Xáo trộn câu hỏi ngẫu nhiên</span>
-              </label>
-
-              <label className="cyber-toggle-item">
-                <input
-                  type="checkbox"
-                  checked={shuffleOptions}
-                  onChange={(e) => setShuffleOptions(e.target.checked)}
-                />
-                <span>Xáo trộn vị trí A, B, C, D</span>
-              </label>
-
-              <label className="cyber-toggle-item">
-                <input
-                  type="checkbox"
-                  checked={soundEnabled}
-                  onChange={toggleSound}
-                />
-                <span>Âm thanh phản hồi sinh động</span>
-              </label>
+            {/* Toggles */}
+            <div className="quiz-control-group">
+              <label className="quiz-control-label">Tùy chọn:</label>
+              <div className="quiz-toggles-row">
+                <label className="quiz-toggle-item">
+                  <input
+                    type="checkbox"
+                    checked={shuffleQuestions}
+                    onChange={(e) => setShuffleQuestions(e.target.checked)}
+                  />
+                  <span>Xáo trộn câu</span>
+                </label>
+                <label className="quiz-toggle-item">
+                  <input
+                    type="checkbox"
+                    checked={shuffleOptions}
+                    onChange={(e) => setShuffleOptions(e.target.checked)}
+                  />
+                  <span>Xáo trộn đáp án</span>
+                </label>
+                <label className="quiz-toggle-item">
+                  <input
+                    type="checkbox"
+                    checked={soundEnabled}
+                    onChange={toggleSound}
+                  />
+                  <span>Âm thanh</span>
+                </label>
+              </div>
             </div>
-          </div>
-        </div>
 
-        {/* Start Action Button */}
-        <div className="cyber-start-cta-wrap">
-          <button
-            type="button"
-            className="cyber-big-start-btn"
-            onClick={() => startQuiz()}
-            disabled={availableQuestions.length === 0}
-          >
-            <span>
-              BẮT ĐẦU ÔN TẬP NGAY ({Math.min(questionCount, availableQuestions.length)} CÂU)
-            </span>
-            <i className="fa-solid fa-arrow-right" />
-          </button>
+            {/* Launch CTA */}
+            <button
+              type="button"
+              className="quiz-launch-btn"
+              onClick={() => startQuiz()}
+              disabled={availableQuestions.length === 0}
+            >
+              <span>Bắt đầu ôn tập ({Math.min(questionCount, availableQuestions.length)} câu)</span>
+              <i className="fa-solid fa-arrow-right" />
+            </button>
+          </div>
         </div>
       </div>
     </div>

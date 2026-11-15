@@ -24,8 +24,8 @@ export default function OtherPageClient({ groups, otherGroupId }: OtherPageClien
           className={`cyber-other-tab-btn ${activeTab === "quiz" ? "active" : ""}`}
         >
           <i className="fa-solid fa-graduation-cap" />
-          <span>TRẮC NGHIỆM ÔN TẬP (125 CÂU)</span>
-          <span className="cyber-tab-pill">+60 CÂU ĐÚC</span>
+          <span>Trắc Nghiệm Cơ Khí (125 câu)</span>
+          <span className="cyber-tab-pill">+60 câu Đúc</span>
         </button>
 
         <button
@@ -36,7 +36,7 @@ export default function OtherPageClient({ groups, otherGroupId }: OtherPageClien
           className={`cyber-other-tab-btn ${activeTab === "tools" ? "active" : ""}`}
         >
           <i className="fa-solid fa-toolbox" />
-          <span>KHO ỨNG DỤNG &amp; TIỆN ÍCH KHÁC</span>
+          <span>Kho Ứng Dụng &amp; Tiện Ích Khác</span>
         </button>
       </div>
 
