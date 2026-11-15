@@ -4,10 +4,10 @@ export const QUIZ_TOPICS: QuizTopic[] = [
   {
     "id": "all",
     "title": "Toàn Bộ Ngân Hàng Câu Hỏi",
-    "desc": "Tổng hợp toàn bộ 125 câu hỏi trắc nghiệm Dung sai, Cơ khí & Công nghệ Đúc",
+    "desc": "Tổng hợp toàn bộ 165 câu hỏi trắc nghiệm Dung sai, Cơ khí, Công nghệ Đúc & Gia công áp lực",
     "icon": "fa-solid fa-layer-group",
-    "badge": "125 CÂU",
-    "count": 125
+    "badge": "165 CÂU",
+    "count": 165
   },
   {
     "id": "ch1",
@@ -38,8 +38,16 @@ export const QUIZ_TOPICS: QuizTopic[] = [
     "title": "Chương 4: Công Nghệ Đúc Kim Loại",
     "desc": "Khuôn cát, khuôn kim loại, đúc áp lực, đúc ly tâm, đúc mẫu chảy & khuyết tật",
     "icon": "fa-solid fa-fire",
-    "badge": "60 CÂU MỚI",
+    "badge": "60 CÂU",
     "count": 60
+  },
+  {
+    "id": "ch5",
+    "title": "Chương 5: Công Nghệ Gia Công Áp Lực",
+    "desc": "Cán, Kéo, Ép kim loại, Dập khuôn, Dập tấm & Rèn tự do",
+    "icon": "fa-solid fa-hammer",
+    "badge": "40 CÂU MỚI",
+    "count": 40
   }
 ];
 
@@ -2043,5 +2051,645 @@ export const MECHANICAL_QUIZ_QUESTIONS: QuizQuestion[] = [
     "chapterId": "ch4",
     "chapterTitle": "Chương 4: Công Nghệ Đúc Kim Loại",
     "explanation": "Chốt định vị giữa hai nửa hòm khuôn (trên và dưới) có tác dụng định vị chính xác vị trí hai nửa khuôn, đảm bảo hai lòng khuôn không bị xê dịch lệch nhau."
+  },
+  {
+    "id": 126,
+    "question": "Thông thường, mục đích của gia công áp lực là gì?",
+    "options": [
+      "Tạo hình",
+      "Tạo hình và tăng cơ tính",
+      "Tăng cơ tính",
+      "Làm biến dạng chi tiết"
+    ],
+    "correctIndex": 1,
+    "correctAnswer": "Tạo hình và tăng cơ tính",
+    "correctAnswerLetter": "B",
+    "chapterId": "ch5",
+    "chapterTitle": "Chương 5: Công Nghệ Gia Công Áp Lực",
+    "explanation": "Gia công áp lực là phương pháp dùng ngoại lực làm kim loại biến dạng dẻo để tạo hình dáng, kích thước mong muốn, đồng thời làm sít chặt kim loại, vỡ hạt và tạo thớ giúp nâng cao cơ tính sản phẩm."
+  },
+  {
+    "id": 127,
+    "question": "Trong quá trình gia công áp lực, kim loại trong khuôn ở trạng thái nào sau đây?",
+    "options": [
+      "Biến dạng đàn hồi",
+      "Trạng thái nóng chảy",
+      "Biến dạng dẻo",
+      "Trạng thái phá hủy"
+    ],
+    "correctIndex": 2,
+    "correctAnswer": "Biến dạng dẻo",
+    "correctAnswerLetter": "C",
+    "chapterId": "ch5",
+    "chapterTitle": "Chương 5: Công Nghệ Gia Công Áp Lực",
+    "explanation": "Gia công áp lực yêu cầu kim loại phải đạt tới trạng thái biến dạng dẻo (vượt quá giới hạn đàn hồi nhưng không vượt quá giới hạn bền) để duy trì hình dạng mới sau khi thôi tác dụng lực."
+  },
+  {
+    "id": 128,
+    "question": "Đặc điểm nào sau đây của phương pháp gia công áp lực là có lợi nhất?",
+    "options": [
+      "Không bị ô xi hóa",
+      "Dễ biến cứng",
+      "Dễ nứt",
+      "Độ chính xác không cao"
+    ],
+    "correctIndex": 1,
+    "correctAnswer": "Dễ biến cứng",
+    "correctAnswerLetter": "B",
+    "chapterId": "ch5",
+    "chapterTitle": "Chương 5: Công Nghệ Gia Công Áp Lực",
+    "explanation": "Hiện tượng biến cứng (tăng độ bền, độ cứng sau khi biến dạng dẻo ở trạng thái nguội) là đặc điểm có lợi nhất, giúp chi tiết sau gia công áp lực có độ bền vượt trội."
+  },
+  {
+    "id": 129,
+    "question": "Đâu không phải là những ưu điểm của phương pháp gia công áp lực?",
+    "options": [
+      "Nâng cao cơ tính của chi tiết máy",
+      "Khử được những khuyết tật như rỗ khí, rỗ co",
+      "Nâng cao tuổi bền của chi tiết máy",
+      "Khử được ứng suất dư trong chi tiết máy"
+    ],
+    "correctIndex": 3,
+    "correctAnswer": "Khử được ứng suất dư trong chi tiết máy",
+    "correctAnswerLetter": "D",
+    "chapterId": "ch5",
+    "chapterTitle": "Chương 5: Công Nghệ Gia Công Áp Lực",
+    "explanation": "Gia công áp lực không khử được ứng suất dư mà thường sinh thêm ứng suất dư do biến dạng không đều (sau gia công thường phải ủ để khử ứng suất dư)."
+  },
+  {
+    "id": 130,
+    "question": "Đặc điểm nào sau đây không đúng với phương pháp gia công áp lực?",
+    "options": [
+      "Gia công được cả vật liệu dẻo và vật liệu giòn",
+      "Không gia công được sản phẩm có hình dáng phức tạp",
+      "Chỉ gia công được vật liệu có tính dẻo",
+      "Sản phẩm có cơ tính tốt hơn so với phương pháp đúc"
+    ],
+    "correctIndex": 0,
+    "correctAnswer": "Gia công được cả vật liệu dẻo và vật liệu giòn",
+    "correctAnswerLetter": "A",
+    "chapterId": "ch5",
+    "chapterTitle": "Chương 5: Công Nghệ Gia Công Áp Lực",
+    "explanation": "Gia công áp lực chỉ thực hiện được với vật liệu có tính dẻo (thép, đồng, nhôm...). Vật liệu giòn (như gang) không thể biến dạng dẻo mà sẽ bị nứt, vỡ vụn ngay."
+  },
+  {
+    "id": 131,
+    "question": "Phương pháp gia công áp lực làm thay đổi tính chất nào?",
+    "options": [
+      "Khối lượng riêng",
+      "Thành phần hóa học",
+      "Cơ tính",
+      "Nhiệt độ nóng chảy"
+    ],
+    "correctIndex": 2,
+    "correctAnswer": "Cơ tính",
+    "correctAnswerLetter": "C",
+    "chapterId": "ch5",
+    "chapterTitle": "Chương 5: Công Nghệ Gia Công Áp Lực",
+    "explanation": "Biến dạng dẻo làm vỡ nhỏ các hạt tinh thể và định hướng thớ kim loại, từ đó làm thay đổi rõ rệt cơ tính (tăng độ bền, độ cứng) trong khi thành phần hóa học không đổi."
+  },
+  {
+    "id": 132,
+    "question": "Để cán, người người ta lợi dụng tính chất nào của kim loại?",
+    "options": [
+      "Độ dẻo",
+      "Đàn hồi",
+      "Độ dai va chạm",
+      "Độ co"
+    ],
+    "correctIndex": 0,
+    "correctAnswer": "Độ dẻo",
+    "correctAnswerLetter": "A",
+    "chapterId": "ch5",
+    "chapterTitle": "Chương 5: Công Nghệ Gia Công Áp Lực",
+    "explanation": "Quá trình cán kim loại dựa trên tính biến dạng dẻo của kim loại dưới tác dụng của lực ép từ các trục cán quay ngược chiều nhau."
+  },
+  {
+    "id": 133,
+    "question": "Phương pháp cán kim loại phù hợp với dạng sản xuất nào?",
+    "options": [
+      "Sản xuất đơn chiếc",
+      "Sản xuất hàng khối và sản xuất hàng loạt lớn",
+      "Sản xuất hàng loạt nhỏ và sản xuất đơn chiếc",
+      "Sản xuất hàng loạt lớn và sản xuất hàng loạt nhỏ"
+    ],
+    "correctIndex": 1,
+    "correctAnswer": "Sản xuất hàng khối và sản xuất hàng loạt lớn",
+    "correctAnswerLetter": "B",
+    "chapterId": "ch5",
+    "chapterTitle": "Chương 5: Công Nghệ Gia Công Áp Lực",
+    "explanation": "Máy cán và trục cán có chi phí đầu tư rất lớn, năng suất làm việc cực cao nên chỉ phù hợp và mang lại hiệu quả kinh tế trong sản xuất hàng loạt lớn và hàng khối."
+  },
+  {
+    "id": 134,
+    "question": "Khi gia công một ống thép có đường kính 0,2m, chiều dài 6m thì nên sử dụng phương pháp nào?",
+    "options": [
+      "Đúc ly tâm",
+      "Ép kim loại",
+      "Cán",
+      "Rèn tự do"
+    ],
+    "correctIndex": 2,
+    "correctAnswer": "Cán",
+    "correctAnswerLetter": "C",
+    "chapterId": "ch5",
+    "chapterTitle": "Chương 5: Công Nghệ Gia Công Áp Lực",
+    "explanation": "Phương pháp cán ống không mối hàn (cán xuyên lỗ phôi tròn rồi cán thon/cán định cỡ) là phương pháp tối ưu và phổ biến nhất để chế tạo ống thép dài 6m, đường kính 200mm."
+  },
+  {
+    "id": 135,
+    "question": "Phương pháp gia công nào cho sản phẩm dạng tấm?",
+    "options": [
+      "Kéo",
+      "Cán",
+      "Rèn tự do",
+      "Dập thể tích"
+    ],
+    "correctIndex": 1,
+    "correctAnswer": "Cán",
+    "correctAnswerLetter": "B",
+    "chapterId": "ch5",
+    "chapterTitle": "Chương 5: Công Nghệ Gia Công Áp Lực",
+    "explanation": "Cán tấm (cán nóng, cán nguội qua các trục cán phẳng) là phương pháp chủ yếu và duy nhất chuyên dùng để sản xuất phôi dạng tấm, dải, lá kim loại."
+  },
+  {
+    "id": 136,
+    "question": "Để chế tạo ống thép hợp kim có đường kính lớn nên sử dụng phương pháp nào sau đây?",
+    "options": [
+      "Kéo",
+      "Ép",
+      "Đúc ly tâm",
+      "Cán"
+    ],
+    "correctIndex": 3,
+    "correctAnswer": "Cán",
+    "correctAnswerLetter": "D",
+    "chapterId": "ch5",
+    "chapterTitle": "Chương 5: Công Nghệ Gia Công Áp Lực",
+    "explanation": "Để sản xuất ống thép hợp kim đường kính lớn, phương pháp cán ống (hoặc cán uốn tấm rồi hàn) là phương pháp chủ đạo trong công nghiệp chế tạo ống."
+  },
+  {
+    "id": 137,
+    "question": "Trong các phương pháp gia công kim loại, phương pháp nào cho tổ chức dạng thớ?",
+    "options": [
+      "Đúc",
+      "Cán",
+      "Cắt kim loại bằng khí",
+      "Hàn"
+    ],
+    "correctIndex": 1,
+    "correctAnswer": "Cán",
+    "correctAnswerLetter": "B",
+    "chapterId": "ch5",
+    "chapterTitle": "Chương 5: Công Nghệ Gia Công Áp Lực",
+    "explanation": "Trong quá trình cán, kim loại bị kéo dài theo hướng cán, làm các hạt tinh thể và tạp chất bị kéo dài tạo thành tổ chức thớ uốn lượn liên tục dọc theo hướng cán."
+  },
+  {
+    "id": 138,
+    "question": "Chọn phương pháp gia công thích hợp để tạo phôi từ thép thanh tròn đường kính 50, chiều dài 500 thành thép thanh vuông mà không hao tổn vật liệu?",
+    "options": [
+      "Rèn khuôn",
+      "Phay",
+      "Cán",
+      "Đúc"
+    ],
+    "correctIndex": 2,
+    "correctAnswer": "Cán",
+    "correctAnswerLetter": "C",
+    "chapterId": "ch5",
+    "chapterTitle": "Chương 5: Công Nghệ Gia Công Áp Lực",
+    "explanation": "Cán qua lỗ hình vuông sẽ biến đổi tiết diện từ tròn sang vuông dọc theo chiều dài thanh mà không làm sinh phoi vụn hao tổn vật liệu như phương pháp gia công cắt gọt (phay)."
+  },
+  {
+    "id": 139,
+    "question": "Phương pháp ép kim loại phù hợp để gia công vật liệu nào sau đây?",
+    "options": [
+      "Gang",
+      "Hợp kim màu",
+      "Thép hợp kim cứng",
+      "Hợp kim cứng"
+    ],
+    "correctIndex": 1,
+    "correctAnswer": "Hợp kim màu",
+    "correctAnswerLetter": "B",
+    "chapterId": "ch5",
+    "chapterTitle": "Chương 5: Công Nghệ Gia Công Áp Lực",
+    "explanation": "Phương pháp ép chảy (extrusion) đặc biệt phù hợp và ứng dụng rộng rãi nhất cho kim loại và hợp kim màu (nhôm, đồng) nhờ độ dẻo cao và nhiệt độ gia công vừa phải."
+  },
+  {
+    "id": 140,
+    "question": "Phương pháp ép kim loại phù hợp với dạng sản xuất nào?",
+    "options": [
+      "Sản xuất đơn chiếc",
+      "Sản xuất hàng loạt nhỏ và sản xuất đơn chiếc",
+      "Sản xuất hàng khối và sản xuất hàng loạt lớn",
+      "Sản xuất hàng loạt lớn và sản xuất hàng loạt nhỏ"
+    ],
+    "correctIndex": 2,
+    "correctAnswer": "Sản xuất hàng khối và sản xuất hàng loạt lớn",
+    "correctAnswerLetter": "C",
+    "chapterId": "ch5",
+    "chapterTitle": "Chương 5: Công Nghệ Gia Công Áp Lực",
+    "explanation": "Hệ thống máy ép thủy lực và khuôn ép chuyên dùng có chi phí chế tạo lớn, chỉ phát huy hiệu quả kinh tế trong sản xuất hàng loạt lớn và hàng khối."
+  },
+  {
+    "id": 141,
+    "question": "Chọn phương pháp gia công phù hợp để chế tạo một sợi nhôm dài có đường kính 10mm?",
+    "options": [
+      "Cán",
+      "Kéo",
+      "Đúc áp lực",
+      "Ép"
+    ],
+    "correctIndex": 3,
+    "correctAnswer": "Ép",
+    "correctAnswerLetter": "D",
+    "chapterId": "ch5",
+    "chapterTitle": "Chương 5: Công Nghệ Gia Công Áp Lực",
+    "explanation": "Phương pháp ép chảy (extrusion) từ thỏi nhôm qua lỗ khuôn tròn là phương pháp năng suất cao và chính xác nhất để tạo các thanh tròn, sợi nhôm đường kính 10mm."
+  },
+  {
+    "id": 142,
+    "question": "Đâu không phải là đặc điểm của phương pháp ép kim loại?",
+    "options": [
+      "Tạo hình được nhiều loại thanh định hình, có năng suất cao",
+      "Có thể ép được nhiều loại vật liệu khác nhau",
+      "Độ chính xác và nhẵn bóng cao, nâng cao tính dẻo của sản phẩm",
+      "Kết cấu phức tạp, khuôn cần có tính chống mòn cao"
+    ],
+    "correctIndex": 1,
+    "correctAnswer": "Có thể ép được nhiều loại vật liệu khác nhau",
+    "correctAnswerLetter": "B",
+    "chapterId": "ch5",
+    "chapterTitle": "Chương 5: Công Nghệ Gia Công Áp Lực",
+    "explanation": "Ép kim loại tạo ra áp lực ma sát và ứng suất rất lớn lên khuôn, chỉ áp dụng tốt cho các vật liệu dẻo (nhôm, đồng, một số hợp kim dẻo), không thể ép tùy tiện nhiều loại vật liệu khác nhau."
+  },
+  {
+    "id": 143,
+    "question": "Để chế tạo các thanh hợp kim nhôm định hình tiết diện cắt ngang 20 mm x 20 mm nên sử dụng phương pháp nào sau đây?",
+    "options": [
+      "Cán",
+      "Kéo",
+      "Ép",
+      "Đúc áp lực"
+    ],
+    "correctIndex": 2,
+    "correctAnswer": "Ép",
+    "correctAnswerLetter": "C",
+    "chapterId": "ch5",
+    "chapterTitle": "Chương 5: Công Nghệ Gia Công Áp Lực",
+    "explanation": "Thanh nhôm định hình (profile nhôm) có tiết diện phức tạp hoặc vuông nhỏ 20x20mm chủ yếu được sản xuất bằng phương pháp ép chảy qua khuôn định hình."
+  },
+  {
+    "id": 144,
+    "question": "Đặc điểm nào sau đây không đúng với phương pháp dập khuôn?",
+    "options": [
+      "Dùng trong sản xuất hàng loạt và hàng khối",
+      "Có thể tạo sản phẩm có hình dạng phức tạp",
+      "Chất lượng sản phẩm cao, đồng đều",
+      "Độ chính xác và chất lượng bề mặt không cao"
+    ],
+    "correctIndex": 3,
+    "correctAnswer": "Độ chính xác và chất lượng bề mặt không cao",
+    "correctAnswerLetter": "D",
+    "chapterId": "ch5",
+    "chapterTitle": "Chương 5: Công Nghệ Gia Công Áp Lực",
+    "explanation": "Dập khuôn (dập thể tích) cho sản phẩm có độ chính xác kích thước và độ nhẵn bóng bề mặt cao hơn rất nhiều so với rèn tự do, nên nhận định 'độ chính xác không cao' là sai."
+  },
+  {
+    "id": 145,
+    "question": "Đâu không phải là đặc điểm của phương pháp dập khuôn?",
+    "options": [
+      "Độ chính xác và độ bóng bề mặt phôi cao",
+      "Chất lượng các phần chi tiết không đồng đều, phụ thuộc vào tay nghề công nhân",
+      "Có thể tạo phôi có hình dạng phức tạp",
+      "Năng suất cao, dễ cơ khí hóa và tự động hóa"
+    ],
+    "correctIndex": 1,
+    "correctAnswer": "Chất lượng các phần chi tiết không đồng đều, phụ thuộc vào tay nghề công nhân",
+    "correctAnswerLetter": "B",
+    "chapterId": "ch5",
+    "chapterTitle": "Chương 5: Công Nghệ Gia Công Áp Lực",
+    "explanation": "Trong dập khuôn, lòng khuôn quyết định chính xác hình dáng kích thước sản phẩm và máy ép thực hiện tự động, do đó chất lượng rất đồng đều, ít phụ thuộc tay nghề công nhân."
+  },
+  {
+    "id": 146,
+    "question": "Phương pháp dập khuôn thường qua các nguyên công nào?",
+    "options": [
+      "Dập thô, dập tinh",
+      "Dập định hình, dập lần cuối",
+      "Dập sơ bộ, dập bán tinh, dập tinh",
+      "Tạo hình sản phẩm thông qua một lần dập"
+    ],
+    "correctIndex": 2,
+    "correctAnswer": "Dập sơ bộ, dập bán tinh, dập tinh",
+    "correctAnswerLetter": "C",
+    "chapterId": "ch5",
+    "chapterTitle": "Chương 5: Công Nghệ Gia Công Áp Lực",
+    "explanation": "Quy trình dập khuôn nhiều bước gồm các lòng khuôn: dập sơ bộ (chuẩn bị phôi), dập bán tinh (tạo hình dáng sơ bộ), và dập tinh (hoàn thiện kích thước chính xác)."
+  },
+  {
+    "id": 147,
+    "question": "Phương pháp dập khuôn phù hợp với dạng sản xuất nào?",
+    "options": [
+      "Sản xuất đơn chiếc",
+      "Sản xuất hàng loạt nhỏ và sản xuất đơn chiếc",
+      "Sản xuất hàng khối và sản xuất hàng loạt lớn",
+      "Sản xuất hàng loạt lớn và sản xuất hàng loạt nhỏ"
+    ],
+    "correctIndex": 2,
+    "correctAnswer": "Sản xuất hàng khối và sản xuất hàng loạt lớn",
+    "correctAnswerLetter": "C",
+    "chapterId": "ch5",
+    "chapterTitle": "Chương 5: Công Nghệ Gia Công Áp Lực",
+    "explanation": "Bộ khuôn dập thể tích gia công rất đắt tiền và chế tạo phức tạp, chỉ đem lại hiệu quả kinh tế khi số lượng sản phẩm lớn (hàng loạt lớn và hàng khối)."
+  },
+  {
+    "id": 148,
+    "question": "Phương pháp dập tấm phù hợp với dạng sản xuất nào nhất?",
+    "options": [
+      "Sản xuất đơn chiếc",
+      "Sản xuất hàng khối và sản xuất hàng loạt lớn",
+      "Sản xuất hàng loạt nhỏ và sản xuất đơn chiếc",
+      "Sản xuất hàng loạt lớn và sản xuất hàng loạt nhỏ"
+    ],
+    "correctIndex": 1,
+    "correctAnswer": "Sản xuất hàng khối và sản xuất hàng loạt lớn",
+    "correctAnswerLetter": "B",
+    "chapterId": "ch5",
+    "chapterTitle": "Chương 5: Công Nghệ Gia Công Áp Lực",
+    "explanation": "Khuôn dập tấm (chày, cối) và máy dập tốc độ cao có năng suất cực lớn, phù hợp và hiệu quả nhất trong sản xuất hàng khối và hàng loạt lớn."
+  },
+  {
+    "id": 149,
+    "question": "Đâu không phải là đặc điểm của phương pháp dập tấm?",
+    "options": [
+      "Chất lượng sản phẩm không ổn định",
+      "Năng suất cao",
+      "Dễ tự động hóa",
+      "Dễ vận hành"
+    ],
+    "correctIndex": 0,
+    "correctAnswer": "Chất lượng sản phẩm không ổn định",
+    "correctAnswerLetter": "A",
+    "chapterId": "ch5",
+    "chapterTitle": "Chương 5: Công Nghệ Gia Công Áp Lực",
+    "explanation": "Dập tấm cho sản phẩm có độ đồng đều kích thước rất cao, bề mặt nhẵn bóng và chất lượng vô cùng ổn định giữa các sản phẩm."
+  },
+  {
+    "id": 150,
+    "question": "Khẳng định nào dưới đây mô tả các nhóm nguyên công của phương pháp dập tấm?",
+    "options": [
+      "Cắt đứt, dập sơ bộ, dập tinh",
+      "Cắt đứt, dập tạo hình",
+      "Cắt đứt, dập thô, dập tinh",
+      "Cắt đứt, dập sơ bộ, dập tạo hình"
+    ],
+    "correctIndex": 1,
+    "correctAnswer": "Cắt đứt, dập tạo hình",
+    "correctAnswerLetter": "B",
+    "chapterId": "ch5",
+    "chapterTitle": "Chương 5: Công Nghệ Gia Công Áp Lực",
+    "explanation": "Các nguyên công dập tấm được chia thành hai nhóm chính: nhóm nguyên công cắt đứt (cắt phôi, đột lỗ) và nhóm nguyên công dập tạo hình (uốn, vuốt, dập nổi, tóp mép)."
+  },
+  {
+    "id": 151,
+    "question": "Phương pháp dập tấm thường ứng dụng phổ biến trong ngành công nghiệp nào?",
+    "options": [
+      "Chế tạo bồn bể",
+      "Sản xuất thân vỏ ô tô",
+      "Chế tạo đường ống",
+      "Công nghiệp chế tạo khung vỏ xe máy"
+    ],
+    "correctIndex": 1,
+    "correctAnswer": "Sản xuất thân vỏ ô tô",
+    "correctAnswerLetter": "B",
+    "chapterId": "ch5",
+    "chapterTitle": "Chương 5: Công Nghệ Gia Công Áp Lực",
+    "explanation": "Ngành công nghiệp ô tô là lĩnh vực ứng dụng dập tấm lớn nhất (chế tạo nắp capo, cánh cửa, nóc xe, các tấm ốp thân vỏ ngoài xe ô tô)."
+  },
+  {
+    "id": 152,
+    "question": "Trong các phương pháp gia công kim loại sau, phương pháp nào tạo được tính chất dạng thớ?",
+    "options": [
+      "Đúc",
+      "Hàn",
+      "Dập khuôn",
+      "Nhiệt luyện"
+    ],
+    "correctIndex": 2,
+    "correctAnswer": "Dập khuôn",
+    "correctAnswerLetter": "C",
+    "chapterId": "ch5",
+    "chapterTitle": "Chương 5: Công Nghệ Gia Công Áp Lực",
+    "explanation": "Dập khuôn (gia công áp lực) làm kim loại biến dạng dẻo trong lòng khuôn kín, các hạt tinh thể và tạp chất bị uốn lượn theo biên dạng chi tiết tạo thành tổ chức thớ liên tục, nâng cao khả năng chịu tải."
+  },
+  {
+    "id": 153,
+    "question": "Phương pháp gia công áp lực nào sau đây là gia công nguội?",
+    "options": [
+      "Dập thể tích",
+      "Ép kim loại",
+      "Rèn tự do",
+      "Dập cắt nóng"
+    ],
+    "correctIndex": 1,
+    "correctAnswer": "Ép kim loại",
+    "correctAnswerLetter": "B",
+    "chapterId": "ch5",
+    "chapterTitle": "Chương 5: Công Nghệ Gia Công Áp Lực",
+    "explanation": "Theo phân loại bài học, ép kim loại (ép chảy nguội - cold extrusion các hợp kim dẻo như nhôm, đồng) được tiến hành ở nhiệt độ môi trường, dưới nhiệt độ kết tinh lại."
+  },
+  {
+    "id": 154,
+    "question": "Đặc điểm nào sau đây không đúng với phương pháp rèn tự do?",
+    "options": [
+      "Chất lượng sản phẩm phụ thuộc vào tay nghề của công nhân",
+      "Thiết bị và dụng cụ rèn tự do đơn giản",
+      "Chất lượng và tính chất kim loại từng phần của chi tiết đồng đều",
+      "Độ chính xác, độ bóng bề mặt chi tiết không cao, năng suất thấp"
+    ],
+    "correctIndex": 2,
+    "correctAnswer": "Chất lượng và tính chất kim loại từng phần của chi tiết đồng đều",
+    "correctAnswerLetter": "C",
+    "chapterId": "ch5",
+    "chapterTitle": "Chương 5: Công Nghệ Gia Công Áp Lực",
+    "explanation": "Trong rèn tự do, mức độ biến dạng ở từng vị trí trên phôi là khác nhau nên tổ chức hạt và tính chất cơ học không đồng đều giữa các phần của chi tiết."
+  },
+  {
+    "id": 155,
+    "question": "Nguyên công chồn dùng để:",
+    "options": [
+      "Tăng chiều ngang, giảm chiều cao",
+      "Tăng chiều cao, giảm chiều ngang",
+      "Tăng chiều dài, giảm chiều rộng",
+      "Tăng chiều rộng, giảm chiều dài"
+    ],
+    "correctIndex": 0,
+    "correctAnswer": "Tăng chiều ngang, giảm chiều cao",
+    "correctAnswerLetter": "A",
+    "chapterId": "ch5",
+    "chapterTitle": "Chương 5: Công Nghệ Gia Công Áp Lực",
+    "explanation": "Chồn (upsetting) là nguyên công làm giảm chiều cao của phôi dưới tác dụng của tải trọng ép dọc trục nhằm làm tăng diện tích tiết diện ngang (chiều ngang/đường kính)."
+  },
+  {
+    "id": 156,
+    "question": "Nguyên công vuốt phẳng dùng để:",
+    "options": [
+      "Tăng chiều rộng, giảm chiều dài",
+      "Tăng chiều dài, giảm chiều cao",
+      "Tăng chiều dài, giảm chiều rộng",
+      "Tăng chiều rộng, giảm chiều dài"
+    ],
+    "correctIndex": 1,
+    "correctAnswer": "Tăng chiều dài, giảm chiều cao",
+    "correctAnswerLetter": "B",
+    "chapterId": "ch5",
+    "chapterTitle": "Chương 5: Công Nghệ Gia Công Áp Lực",
+    "explanation": "Vuốt (drawing out) là nguyên công rèn làm tăng chiều dài phôi và giảm diện tích tiết diện ngang (giảm chiều cao, chiều dày phôi)."
+  },
+  {
+    "id": 157,
+    "question": "Phương pháp rèn tự do phù hợp với dạng sản xuất nào?",
+    "options": [
+      "Sản xuất hàng loạt nhỏ và loạt lớn",
+      "Sản xuất hàng loạt lớn và hàng khối",
+      "Sản xuất đơn chiếc và loạt nhỏ",
+      "Sản xuất hàng khối"
+    ],
+    "correctIndex": 2,
+    "correctAnswer": "Sản xuất đơn chiếc và loạt nhỏ",
+    "correctAnswerLetter": "C",
+    "chapterId": "ch5",
+    "chapterTitle": "Chương 5: Công Nghệ Gia Công Áp Lực",
+    "explanation": "Rèn tự do có trang thiết bị đơn giản, năng suất thấp nhưng linh hoạt cao, không tốn tiền khuôn nên thích hợp nhất cho dạng sản xuất đơn chiếc và hàng loạt nhỏ."
+  },
+  {
+    "id": 158,
+    "question": "Chọn phương pháp gia công để tăng đường kính ống thép Φ200, L = 500 mà không hao phí vật liệu?",
+    "options": [
+      "Tiện",
+      "Kéo",
+      "Rèn tự do",
+      "Rèn khuôn"
+    ],
+    "correctIndex": 2,
+    "correctAnswer": "Rèn tự do",
+    "correctAnswerLetter": "C",
+    "chapterId": "ch5",
+    "chapterTitle": "Chương 5: Công Nghệ Gia Công Áp Lực",
+    "explanation": "Rèn tự do sử dụng nguyên công nong lỗ/nong ống (lồng ống lên trục đe rồi rèn xung quanh) làm mỏng thành ống và tăng đường kính ống mà không làm phoi vụn hao tổn kim loại."
+  },
+  {
+    "id": 159,
+    "question": "Những dụng cụ đo như dưỡng, thước lá, compa thường dùng trong quá trình gia công của phương pháp nào?",
+    "options": [
+      "Dập khuôn",
+      "Rèn tự do",
+      "Dập tấm",
+      "Cán kim loại"
+    ],
+    "correctIndex": 1,
+    "correctAnswer": "Rèn tự do",
+    "correctAnswerLetter": "B",
+    "chapterId": "ch5",
+    "chapterTitle": "Chương 5: Công Nghệ Gia Công Áp Lực",
+    "explanation": "Do không có lòng khuôn định hình cố định, thợ rèn tự do phải liên tục sử dụng các dụng cụ đo thủ công như dưỡng, thước lá, compa để kiểm tra kích thước phôi rèn."
+  },
+  {
+    "id": 160,
+    "question": "Phương pháp gia công nào chất lượng sản phẩm phụ thuộc nhiều vào tay nghề công nhân?",
+    "options": [
+      "Dập khuôn",
+      "Dập tấm",
+      "Ép kim loại",
+      "Rèn tự do"
+    ],
+    "correctIndex": 3,
+    "correctAnswer": "Rèn tự do",
+    "correctAnswerLetter": "D",
+    "chapterId": "ch5",
+    "chapterTitle": "Chương 5: Công Nghệ Gia Công Áp Lực",
+    "explanation": "Rèn tự do không có khuôn khống chế hình dạng, mọi thao tác vung búa, xoay lật phôi đều do công nhân điều khiển nên chất lượng phụ thuộc hoàn toàn vào tay nghề thợ."
+  },
+  {
+    "id": 161,
+    "question": "Những dụng cụ công nghệ cơ bản như các loại đe, búa, bàn là, bàn tóp, sấn, chặt, mũi đột thường dùng trong phương pháp gia công nào?",
+    "options": [
+      "Dập khuôn",
+      "Dập tấm",
+      "Ép kim loại",
+      "Rèn tự do"
+    ],
+    "correctIndex": 3,
+    "correctAnswer": "Rèn tự do",
+    "correctAnswerLetter": "D",
+    "chapterId": "ch5",
+    "chapterTitle": "Chương 5: Công Nghệ Gia Công Áp Lực",
+    "explanation": "Đe, búa, bàn là phẳng, bàn tóp, dao xấn, dao chặt, mũi đột là bộ trang bị dụng cụ gia công truyền thống của phương pháp rèn tự do."
+  },
+  {
+    "id": 162,
+    "question": "Phương pháp gia công nào chuẩn bị gia công đơn giản nhất?",
+    "options": [
+      "Dập khuôn",
+      "Dập tấm",
+      "Rèn tự do",
+      "Ép kim loại"
+    ],
+    "correctIndex": 2,
+    "correctAnswer": "Rèn tự do",
+    "correctAnswerLetter": "C",
+    "chapterId": "ch5",
+    "chapterTitle": "Chương 5: Công Nghệ Gia Công Áp Lực",
+    "explanation": "Rèn tự do chỉ sử dụng các công cụ vạn năng sẵn có (lò nung, búa, đe), không mất thời gian và chi phí thiết kế, gia công lòng khuôn đắt tiền nên chuẩn bị sản xuất đơn giản nhất."
+  },
+  {
+    "id": 163,
+    "question": "Phương pháp gia công nào phù hợp với sản xuất đơn chiếc?",
+    "options": [
+      "Dập khuôn",
+      "Rèn tự do",
+      "Dập tấm",
+      "Ép kim loại"
+    ],
+    "correctIndex": 1,
+    "correctAnswer": "Rèn tự do",
+    "correctAnswerLetter": "B",
+    "chapterId": "ch5",
+    "chapterTitle": "Chương 5: Công Nghệ Gia Công Áp Lực",
+    "explanation": "Rèn tự do có tính linh hoạt cao, chế tạo được phôi có kích thước lớn với số lượng ít mà không cần chế tạo khuôn mẫu đắt đỏ."
+  },
+  {
+    "id": 164,
+    "question": "Trong các phương pháp gia công sau, phương pháp gia công nào sản phẩm có độ chính xác, độ bóng bề mặt chi tiết không cao, năng suất thấp nhất?",
+    "options": [
+      "Dập khuôn",
+      "Dập tấm",
+      "Ép kim loại",
+      "Rèn tự do"
+    ],
+    "correctIndex": 3,
+    "correctAnswer": "Rèn tự do",
+    "correctAnswerLetter": "D",
+    "chapterId": "ch5",
+    "chapterTitle": "Chương 5: Công Nghệ Gia Công Áp Lực",
+    "explanation": "Rèn tự do thao tác thủ công, phôi nung bị oxy hóa tạo vảy và không có lòng khuôn khống chế nên độ chính xác, độ bóng bề mặt và năng suất đều thấp nhất."
+  },
+  {
+    "id": 165,
+    "question": "Trong gia công nóng, phôi được gia nhiệt đến nhiệt độ nào?",
+    "options": [
+      "Gần bằng nhiệt độ nóng chảy",
+      "Lớn hơn nhiệt độ kết tinh lại",
+      "Nhỏ hơn nhiệt độ kết tinh lại",
+      "Bằng nhiệt độ kết tinh lại"
+    ],
+    "correctIndex": 1,
+    "correctAnswer": "Lớn hơn nhiệt độ kết tinh lại",
+    "correctAnswerLetter": "B",
+    "chapterId": "ch5",
+    "chapterTitle": "Chương 5: Công Nghệ Gia Công Áp Lực",
+    "explanation": "Gia công áp lực nóng là quá trình biến dạng dẻo được thực hiện ở nhiệt độ cao hơn nhiệt độ kết tinh lại của kim loại (T > T_ktl), giúp kim loại liên tục kết tinh lại, triệt tiêu biến cứng và duy trì độ dẻo cao."
   }
 ];

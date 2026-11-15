@@ -24,8 +24,8 @@ export default function OtherPageClient({ groups, otherGroupId }: OtherPageClien
           className={`cyber-other-tab-btn ${activeTab === "quiz" ? "active" : ""}`}
         >
           <i className="fa-solid fa-graduation-cap" />
-          <span>Trắc Nghiệm Cơ Khí (125 câu)</span>
-          <span className="cyber-tab-pill">+60 câu Đúc</span>
+          <span>Trắc Nghiệm Cơ Khí (165 câu)</span>
+          <span className="cyber-tab-pill">+40 câu Áp Lực</span>
         </button>
 
         <button
