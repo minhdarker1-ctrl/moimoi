@@ -383,8 +383,8 @@ export default function DinoRunnerWidget() {
       if (!ctx) return;
       ctx.clearRect(0, 0, width, height);
 
-      const primaryColor = localDayNight === "night" ? "#38bdf8" : "#fbbf24";
-      const groundColor = "rgba(255, 255, 255, 0.25)";
+      const primaryColor = localDayNight === "night" ? "#007acc" : "#0e639c";
+      const groundColor = "#3c3c3c";
 
       // Đường chân trời
       ctx.strokeStyle = groundColor;
@@ -449,10 +449,10 @@ export default function DinoRunnerWidget() {
         });
       }
 
-      // Vẽ Khủng Long Dino
-      ctx.fillStyle = gameOver ? "#f43f5e" : "#ffffff";
-      ctx.shadowColor = gameOver ? "#f43f5e" : primaryColor;
-      ctx.shadowBlur = gameOver ? 12 : 8;
+      // Vẽ Khủng Long Dino (VS Code Palette)
+      ctx.fillStyle = gameOver ? "#f14c4c" : "#d4d4d4";
+      ctx.shadowColor = gameOver ? "#f14c4c" : primaryColor;
+      ctx.shadowBlur = gameOver ? 8 : 4;
 
       const dx = dino.x;
       const dy = dino.y;
@@ -469,10 +469,10 @@ export default function DinoRunnerWidget() {
           ctx.fillRect(dx + 17, dy + 7, 2, 2);
           ctx.fillRect(dx + 20, dy + 7, 2, 2);
         } else {
-          ctx.fillStyle = "#030c18";
+          ctx.fillStyle = "#1e1e1e";
           ctx.fillRect(dx + 18, dy + 3, 3, 3);
         }
-        ctx.fillStyle = gameOver ? "#f43f5e" : "#ffffff";
+        ctx.fillStyle = gameOver ? "#f14c4c" : "#d4d4d4";
 
         ctx.fillRect(dx + 8, dy + 11, 11, 16);
         ctx.fillRect(dx + 3, dy + 17, 8, 11);
@@ -494,9 +494,9 @@ export default function DinoRunnerWidget() {
       } else {
         ctx.fillRect(dx, dy + 5, 27, 11);
         ctx.fillRect(dx + 27, dy + 3, 11, 8);
-        ctx.fillStyle = "#030c18";
+        ctx.fillStyle = "#1e1e1e";
         ctx.fillRect(dx + 30, dy + 4, 3, 3);
-        ctx.fillStyle = gameOver ? "#f43f5e" : "#ffffff";
+        ctx.fillStyle = gameOver ? "#f14c4c" : "#d4d4d4";
 
         if (dino.legFrame === 0) {
           ctx.fillRect(dx + 5, dy + 16, 4, 4);
@@ -508,12 +508,12 @@ export default function DinoRunnerWidget() {
       }
 
       if (gameOver) {
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = "#f43f5e";
-        ctx.fillStyle = "#f43f5e";
-        ctx.font = "bold 13px monospace, sans-serif";
+        ctx.shadowBlur = 6;
+        ctx.shadowColor = "#f14c4c";
+        ctx.fillStyle = "#f14c4c";
+        ctx.font = "bold 13px ui-monospace, 'Cascadia Code', monospace, sans-serif";
         ctx.textAlign = "center";
-        ctx.fillText("💥 VA CHẠM! ĐANG TỰ ĐỘNG HỒI SINH...", width / 2, 35);
+        ctx.fillText("💥 TERMINAL FAULT · ĐANG TỰ ĐỘNG HỒI SINH...", width / 2, 35);
         ctx.textAlign = "left";
       }
 

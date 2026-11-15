@@ -114,11 +114,11 @@ export default function FramelessClockWidget() {
         <span className="cyber-clock-status">LIVE TIME</span>
       </div>
 
-      {/* Giant Clock Numbers */}
+      {/* Giant Clock Numbers (VS Code Syntax Token Styling) */}
       <div className="cyber-frameless-clock-time" title="Giờ Việt Nam thời gian thực">
-        <span className="cyber-clock-num">{timeState.hours}</span>
+        <span className="cyber-clock-num cyber-clock-hour">{timeState.hours}</span>
         <span className="cyber-clock-colon">:</span>
-        <span className="cyber-clock-num">{timeState.minutes}</span>
+        <span className="cyber-clock-num cyber-clock-min">{timeState.minutes}</span>
         <span className="cyber-clock-colon">:</span>
         <span className="cyber-clock-num cyber-clock-sec">{timeState.seconds}</span>
       </div>
