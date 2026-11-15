@@ -9,7 +9,7 @@ export const revalidate = 60;
 export async function generateMetadata(): Promise<Metadata> {
   return {
     title: "Trắc Nghiệm Ôn Tập & Ứng Dụng Khác - OTHER | MinSr",
-    description: "Ngân hàng câu hỏi trắc nghiệm ôn tập Cơ khí & Dung sai 65 câu cùng các ứng dụng, tiện ích từ MinSr.",
+    description: "Ngân hàng 125 câu hỏi trắc nghiệm ôn tập Cơ khí, Dung sai & Công nghệ Đúc kim loại cùng các tiện ích từ MinSr.",
   };
 }
 

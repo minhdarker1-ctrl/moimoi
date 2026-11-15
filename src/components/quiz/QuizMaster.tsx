@@ -868,7 +868,7 @@ export default function QuizMaster() {
         </h1>
         <p className="cyber-hero-desc">
           Nền tảng ôn luyện trắc nghiệm tối ưu phương pháp khoa học <strong>Active Recall</strong> &amp;{" "}
-          <strong>Spaced Repetition</strong>. Thuộc lòng 65 câu hỏi then chốt về Công nghệ cơ khí, Dung sai lắp ghép và Cấp chính xác.
+          <strong>Spaced Repetition</strong>. Thuộc lòng ngân hàng {MECHANICAL_QUIZ_QUESTIONS.length} câu hỏi then chốt về Công nghệ cơ khí, Dung sai lắp ghép, Cấp chính xác và Công nghệ Đúc kim loại.
         </p>
 
         {/* Global Stats Counter */}
@@ -876,7 +876,7 @@ export default function QuizMaster() {
           <div className="cyber-stat-box blue">
             <i className="fa-solid fa-database" />
             <div className="cyber-stat-text">
-              <strong>65</strong>
+              <strong>{MECHANICAL_QUIZ_QUESTIONS.length}</strong>
               <span>Tổng câu hỏi</span>
             </div>
           </div>
@@ -1043,20 +1043,24 @@ export default function QuizMaster() {
             <div className="cyber-setting-box">
               <span className="cyber-setting-title">Số câu ôn tập:</span>
               <div className="cyber-count-btns">
-                {[10, 20, 30, availableQuestions.length].map((cnt, idx) => {
-                  const label = idx === 3 ? `Tất cả (${cnt})` : `${cnt} câu`;
-                  const isCur = questionCount === cnt || (idx === 3 && questionCount >= cnt);
-                  return (
-                    <button
-                      key={cnt}
-                      type="button"
-                      className={`cyber-count-btn ${isCur ? "active" : ""}`}
-                      onClick={() => setQuestionCount(cnt)}
-                    >
-                      {label}
-                    </button>
-                  );
-                })}
+                {Array.from(new Set([10, 20, 30, 60, availableQuestions.length]))
+                  .filter((cnt) => cnt > 0 && cnt <= availableQuestions.length)
+                  .sort((a, b) => a - b)
+                  .map((cnt) => {
+                    const isAll = cnt === availableQuestions.length;
+                    const label = isAll ? `Tất cả (${cnt})` : `${cnt} câu`;
+                    const isCur = questionCount === cnt || (isAll && questionCount >= cnt);
+                    return (
+                      <button
+                        key={cnt}
+                        type="button"
+                        className={`cyber-count-btn ${isCur ? "active" : ""}`}
+                        onClick={() => setQuestionCount(cnt)}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
               </div>
             </div>
 
