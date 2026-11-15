@@ -942,7 +942,7 @@ export default function QuizMaster() {
           <div className="quiz-dh-title-wrap">
             <h1 className="quiz-dh-title">Trắc Nghiệm Ôn Tập Cơ Khí</h1>
             <p className="quiz-dh-subtitle">
-              Ngân hàng {MECHANICAL_QUIZ_QUESTIONS.length} câu hỏi then chốt: Cơ khí, Dung sai, Công nghệ Đúc &amp; Gia công áp lực
+              Ngân hàng {MECHANICAL_QUIZ_QUESTIONS.length} câu hỏi then chốt: Cơ khí, Dung sai, Đúc, Gia công áp lực &amp; Hàn kim loại
             </p>
           </div>
           <div className="quiz-dh-chips">

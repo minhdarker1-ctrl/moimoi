@@ -4,10 +4,10 @@ export const QUIZ_TOPICS: QuizTopic[] = [
   {
     "id": "all",
     "title": "Toàn Bộ Ngân Hàng Câu Hỏi",
-    "desc": "Tổng hợp toàn bộ 165 câu hỏi trắc nghiệm Dung sai, Cơ khí, Công nghệ Đúc & Gia công áp lực",
+    "desc": "Tổng hợp toàn bộ 205 câu hỏi trắc nghiệm Dung sai, Cơ khí, Đúc, Gia công áp lực & Hàn cắt kim loại",
     "icon": "fa-solid fa-layer-group",
-    "badge": "165 CÂU",
-    "count": 165
+    "badge": "205 CÂU",
+    "count": 205
   },
   {
     "id": "ch1",
@@ -46,6 +46,14 @@ export const QUIZ_TOPICS: QuizTopic[] = [
     "title": "Chương 5: Công Nghệ Gia Công Áp Lực",
     "desc": "Cán, Kéo, Ép kim loại, Dập khuôn, Dập tấm & Rèn tự do",
     "icon": "fa-solid fa-hammer",
+    "badge": "40 CÂU",
+    "count": 40
+  },
+  {
+    "id": "ch6",
+    "title": "Chương 6: Công Nghệ Hàn & Cắt Kim Loại",
+    "desc": "Hàn hồ quang, hàn khí O2-C2H2, TIG, MIG, hàn tiếp xúc, hàn ma sát & biến dạng hàn",
+    "icon": "fa-solid fa-fire-burner",
     "badge": "40 CÂU MỚI",
     "count": 40
   }
@@ -2691,5 +2699,645 @@ export const MECHANICAL_QUIZ_QUESTIONS: QuizQuestion[] = [
     "chapterId": "ch5",
     "chapterTitle": "Chương 5: Công Nghệ Gia Công Áp Lực",
     "explanation": "Gia công áp lực nóng là quá trình biến dạng dẻo được thực hiện ở nhiệt độ cao hơn nhiệt độ kết tinh lại của kim loại (T > T_ktl), giúp kim loại liên tục kết tinh lại, triệt tiêu biến cứng và duy trì độ dẻo cao."
+  },
+  {
+    "id": 166,
+    "question": "Vị trí không gian của mối hàn nào sau đây gọi là hàn trần?",
+    "options": [
+      "Góc nghiêng tầm hàn so với mặt phẳng φ=120-180º, que hàn nằm dưới , tấm hàn nằm trên",
+      "Góc nghiêng tầm hàn so với mặt phẳng φ=110-180º, que hàn nằm dưới , tấm hàn nằm trên",
+      "Góc nghiêng tầm hàn so với mặt phẳng φ=100-160º, que hàn nằm dưới , tấm hàn nằm trên",
+      "Góc nghiêng tầm hàn so với mặt phẳng φ=120-160º, que hàn nằm dưới , tấm hàn nằm trên"
+    ],
+    "correctIndex": 0,
+    "correctAnswer": "Góc nghiêng tầm hàn so với mặt phẳng φ=120-180º, que hàn nằm dưới , tấm hàn nằm trên",
+    "correctAnswerLetter": "A",
+    "chapterId": "ch6",
+    "chapterTitle": "Chương 6: Công Nghệ Hàn & Cắt Kim Loại",
+    "explanation": "Hàn trần (hàn ngửa) là vị trí hàn khó nhất, góc nghiêng so với mặt phẳng nằm ngang φ = 120º - 180º, que hàn nằm bên dưới hướng lên tấm hàn nằm phía trên."
+  },
+  {
+    "id": 167,
+    "question": "Đặc điểm nào sau đây không đúng với phương pháp hàn?",
+    "options": [
+      "Tiết kiệm kim loại so với các phương pháp khác",
+      "Tốn nhiều vật liệu so với phương pháp khác",
+      "Tiết kiệm chi phí hơn so với các phương pháp khác",
+      "Chế tạo được các kết cấu phức tạp mà các phương pháp khác không làm được"
+    ],
+    "correctIndex": 1,
+    "correctAnswer": "Tốn nhiều vật liệu so với phương pháp khác",
+    "correctAnswerLetter": "B",
+    "chapterId": "ch6",
+    "chapterTitle": "Chương 6: Công Nghệ Hàn & Cắt Kim Loại",
+    "explanation": "Hàn là phương pháp nối liền kim loại không thể tháo rời, giúp tiết kiệm 10 - 25% khối lượng kim loại so với tán đinh hoặc đúc/gia công cơ. Nhận định 'tốn nhiều vật liệu' là không đúng."
+  },
+  {
+    "id": 168,
+    "question": "Các phương pháp hàn được phân loại thành mấy nhóm chính?",
+    "options": [
+      "3",
+      "4",
+      "2",
+      "5"
+    ],
+    "correctIndex": 2,
+    "correctAnswer": "2",
+    "correctAnswerLetter": "C",
+    "chapterId": "ch6",
+    "chapterTitle": "Chương 6: Công Nghệ Hàn & Cắt Kim Loại",
+    "explanation": "Các phương pháp hàn được phân loại thành 2 nhóm chính: Nhóm hàn nóng chảy (fusion welding) và nhóm hàn áp lực (pressure welding)."
+  },
+  {
+    "id": 169,
+    "question": "Phương pháp nào sau đây thuộc nhóm phương pháp hàn nóng chảy?",
+    "options": [
+      "Hàn hồ quang",
+      "Hàn điện tiếp xúc",
+      "Hàn ma sát",
+      "Hàn siêu âm"
+    ],
+    "correctIndex": 0,
+    "correctAnswer": "Hàn hồ quang",
+    "correctAnswerLetter": "A",
+    "chapterId": "ch6",
+    "chapterTitle": "Chương 6: Công Nghệ Hàn & Cắt Kim Loại",
+    "explanation": "Hàn hồ quang sử dụng nhiệt lượng của hồ quang điện đốt nóng chảy kim loại vật hàn và que hàn tại vũng hàn, thuộc nhóm hàn nóng chảy. Hàn tiếp xúc, ma sát, siêu âm thuộc nhóm hàn áp lực."
+  },
+  {
+    "id": 170,
+    "question": "Phương pháp nào sau đây thuộc nhóm phương pháp hàn áp lực?",
+    "options": [
+      "Hàn hồ quang",
+      "Hàn điện tiếp xúc",
+      "Hàn khí",
+      "Hàn điện xỉ"
+    ],
+    "correctIndex": 1,
+    "correctAnswer": "Hàn điện tiếp xúc",
+    "correctAnswerLetter": "B",
+    "chapterId": "ch6",
+    "chapterTitle": "Chương 6: Công Nghệ Hàn & Cắt Kim Loại",
+    "explanation": "Hàn điện tiếp xúc (tiếp xúc điểm, tiếp xúc đường, tiếp xúc giáp mối) sử dụng nhiệt điện trở kết hợp với lực ép cơ học để ép dính kim loại ở trạng thái dẻo, thuộc nhóm hàn áp lực."
+  },
+  {
+    "id": 171,
+    "question": "Phương pháp hàn nào kim loại tại vị trí mối hàn không ở trạng thái nóng chảy trong quá trình hàn?",
+    "options": [
+      "Hàn hồ quang",
+      "Hàn MIG",
+      "Hàn điện tiếp xúc",
+      "Hàn TIG"
+    ],
+    "correctIndex": 2,
+    "correctAnswer": "Hàn điện tiếp xúc",
+    "correctAnswerLetter": "C",
+    "chapterId": "ch6",
+    "chapterTitle": "Chương 6: Công Nghệ Hàn & Cắt Kim Loại",
+    "explanation": "Trong hàn điện tiếp xúc (hoặc hàn ma sát), kim loại vùng tiếp xúc được nung nóng đến trạng thái dẻo rồi ép chặt lại bằng lực ép cơ học chứ không nóng chảy hoàn toàn thành vũng lỏng."
+  },
+  {
+    "id": 172,
+    "question": "Phương pháp hàn hồ quang tay được ứng dụng chủ yếu trong lĩnh vực nào?",
+    "options": [
+      "Trong công nghiệp ô tô",
+      "Trong công nghiệp chế tạo máy",
+      "Trong công nghiệp sản xuất khung xe máy",
+      "Ứng dụng trong cơ khí xây dựng"
+    ],
+    "correctIndex": 3,
+    "correctAnswer": "Ứng dụng trong cơ khí xây dựng",
+    "correctAnswerLetter": "D",
+    "chapterId": "ch6",
+    "chapterTitle": "Chương 6: Công Nghệ Hàn & Cắt Kim Loại",
+    "explanation": "Hàn hồ quang tay (SMAW) có tính vạn năng cao, thiết bị gọn nhẹ cơ động nên được ứng dụng phổ biến và chủ yếu nhất trong cơ khí xây dựng, dựng lắp khung nhà xưởng và kết cấu thép."
+  },
+  {
+    "id": 173,
+    "question": "Hàn điện tiếp xúc được ứng dụng chủ yếu trong lĩnh vực nào?",
+    "options": [
+      "Trong công nghiệp ô tô",
+      "Ứng dụng trong cơ khí xây dựng",
+      "Trong công nghiệp chế tạo máy",
+      "Trong công nghiệp sản xuất khung xe máy"
+    ],
+    "correctIndex": 0,
+    "correctAnswer": "Trong công nghiệp ô tô",
+    "correctAnswerLetter": "A",
+    "chapterId": "ch6",
+    "chapterTitle": "Chương 6: Công Nghệ Hàn & Cắt Kim Loại",
+    "explanation": "Hàn điện tiếp xúc (hàn điểm tự động bằng robot) là công nghệ then chốt chiếm tỷ trọng lớn nhất trong dây chuyền sản xuất thân vỏ xe ô tô từ các tấm thép mỏng."
+  },
+  {
+    "id": 174,
+    "question": "Tác dụng của thuốc hàn hay khí bảo vệ là:",
+    "options": [
+      "Làm cho nhiệt hàn cao",
+      "Bảo vệ mối hàn không tiếp xúc với oxy",
+      "Bảo vệ mối hàn không bị thoát nhiệt",
+      "Bảo vệ cho vật liệu nóng chảy tại mối hàn không rơi vãi ra xung quanh"
+    ],
+    "correctIndex": 1,
+    "correctAnswer": "Bảo vệ mối hàn không tiếp xúc với oxy",
+    "correctAnswerLetter": "B",
+    "chapterId": "ch6",
+    "chapterTitle": "Chương 6: Công Nghệ Hàn & Cắt Kim Loại",
+    "explanation": "Khí bảo vệ (Ar, CO2) hoặc thuốc hàn bọc tạo môi trường cách ly vũng kim loại lỏng khỏi tác động oxy hóa và nitơ hóa của không khí xung quanh, chống rỗ khí và xỉ."
+  },
+  {
+    "id": 175,
+    "question": "Khí bảo vệ khi hàn có đặc điểm nào sau đây?",
+    "options": [
+      "Tác dụng được với kim loại nền",
+      "Tác dụng được với kim loại của que hàn",
+      "Là một loại khí trơ",
+      "Tác dụng với các loại khí ở môi trường xung quanh"
+    ],
+    "correctIndex": 2,
+    "correctAnswer": "Là một loại khí trơ",
+    "correctAnswerLetter": "C",
+    "chapterId": "ch6",
+    "chapterTitle": "Chương 6: Công Nghệ Hàn & Cắt Kim Loại",
+    "explanation": "Khí bảo vệ trong hàn TIG/MIG (như Argon, Heli) là khí trơ, hoàn toàn không phản ứng hay tác dụng hóa học với kim loại nóng chảy ở nhiệt độ cao."
+  },
+  {
+    "id": 176,
+    "question": "Vật liệu nào sau đây có tính hàn tốt nhất?",
+    "options": [
+      "Thép",
+      "Hợp kim đồng",
+      "Hợp kim nhôm",
+      "Gang"
+    ],
+    "correctIndex": 0,
+    "correctAnswer": "Thép",
+    "correctAnswerLetter": "A",
+    "chapterId": "ch6",
+    "chapterTitle": "Chương 6: Công Nghệ Hàn & Cắt Kim Loại",
+    "explanation": "Thép carbon thấp (C < 0,25%) có tính hàn tốt nhất, mối hàn dẻo dai, không bị tôi cứng nứt nẻ. Trong khi đó gang và hợp kim màu khó hàn hơn nhiều."
+  },
+  {
+    "id": 177,
+    "question": "Phương pháp hàn TIG dùng loại điện cực hàn nào:",
+    "options": [
+      "Cuộn dây thép",
+      "Điện cực Vonphram",
+      "Que hàn thép",
+      "Điện cực đồng"
+    ],
+    "correctIndex": 1,
+    "correctAnswer": "Điện cực Vonphram",
+    "correctAnswerLetter": "B",
+    "chapterId": "ch6",
+    "chapterTitle": "Chương 6: Công Nghệ Hàn & Cắt Kim Loại",
+    "explanation": "Hàn TIG (Tungsten Inert Gas) sử dụng điện cực không nóng chảy bằng kim loại Vonfram (W) có nhiệt độ nóng chảy rất cao (~3422°C)."
+  },
+  {
+    "id": 178,
+    "question": "Đâu không phải là ưu điểm của phương pháp hàn hồ quang tay?",
+    "options": [
+      "Có tính vạn năng, linh hoạt, tiện lợi",
+      "Cho phép thực hiện được các mối hàn ở các vị trí khác nhau trong không gian",
+      "Thiết bị đơn giản, dễ vận hành, sửa chữa, chi phí đầu tư không cao",
+      "Năng suất cao, chất lượng mối hàn tốt"
+    ],
+    "correctIndex": 3,
+    "correctAnswer": "Năng suất cao, chất lượng mối hàn tốt",
+    "correctAnswerLetter": "D",
+    "chapterId": "ch6",
+    "chapterTitle": "Chương 6: Công Nghệ Hàn & Cắt Kim Loại",
+    "explanation": "Hàn hồ quang tay có năng suất thấp do tốc độ chậm và phải dừng thay que hàn, đồng thời chất lượng phụ thuộc vào tay nghề thợ hàn. Do đó đây không phải là ưu điểm."
+  },
+  {
+    "id": 179,
+    "question": "Đâu không phải là nhược điểm của phương pháp hàn hồ quang tay?",
+    "options": [
+      "Thiết bị hàn tương đối đắt",
+      "Chất lượng và năng suất hàn phụ thuộc vào trình độ tay nghề của người thợ hàn",
+      "Năng suất tương đối thấp",
+      "Điều kiện làm việc của thợ hàn không tốt, nguy hiểm và độc hại"
+    ],
+    "correctIndex": 0,
+    "correctAnswer": "Thiết bị hàn tương đối đắt",
+    "correctAnswerLetter": "A",
+    "chapterId": "ch6",
+    "chapterTitle": "Chương 6: Công Nghệ Hàn & Cắt Kim Loại",
+    "explanation": "Máy hàn hồ quang tay có cấu tạo rất đơn giản, giá thành rẻ nhất trong các thiết bị hàn, do đó 'thiết bị tương đối đắt' không phải là nhược điểm của nó."
+  },
+  {
+    "id": 180,
+    "question": "Đâu không phải là một dạng mối hàn?",
+    "options": [
+      "Mối hàn đối đầu",
+      "Mối hàn sấp",
+      "Mối hàn gấp mép",
+      "Mối hàn chồng"
+    ],
+    "correctIndex": 1,
+    "correctAnswer": "Mối hàn sấp",
+    "correctAnswerLetter": "B",
+    "chapterId": "ch6",
+    "chapterTitle": "Chương 6: Công Nghệ Hàn & Cắt Kim Loại",
+    "explanation": "Hàn sấp (hàn bằng) là vị trí không gian của mối hàn. Các dạng liên kết mối hàn gồm có: giáp mối (đối đầu), hàn chồng, hàn góc, hàn gấp mép."
+  },
+  {
+    "id": 181,
+    "question": "Đặc điểm đường chuyển động nào sau đây không mô tả dạng đường chạy đầu que hàn?",
+    "options": [
+      "Hình thoi",
+      "Hình tam giác",
+      "Hình vuông",
+      "Hình số 8"
+    ],
+    "correctIndex": 2,
+    "correctAnswer": "Hình vuông",
+    "correctAnswerLetter": "C",
+    "chapterId": "ch6",
+    "chapterTitle": "Chương 6: Công Nghệ Hàn & Cắt Kim Loại",
+    "explanation": "Các dạng dao động ngang của đầu que hàn gồm: ziczac, răng cưa, hình số 8, tam giác, hình thoi/xoắn ốc. Không sử dụng chuyển động gấp khúc góc vuông (hình vuông)."
+  },
+  {
+    "id": 182,
+    "question": "Đặc điểm đường chuyển động nào sau đây không mô tả dạng đường chạy đầu que hàn?",
+    "options": [
+      "Đường cong",
+      "Đường thẳng",
+      "Đường zic zắc",
+      "Đường răng cưa"
+    ],
+    "correctIndex": 0,
+    "correctAnswer": "Đường cong",
+    "correctAnswerLetter": "A",
+    "chapterId": "ch6",
+    "chapterTitle": "Chương 6: Công Nghệ Hàn & Cắt Kim Loại",
+    "explanation": "Trong kỹ thuật hàn que, các đường chạy tiêu chuẩn là: đường thẳng, đường ziczac, đường răng cưa, đường vòng xoắn. 'Đường cong' không phải là thuật ngữ kỹ thuật chỉ kiểu dao động đầu que hàn."
+  },
+  {
+    "id": 183,
+    "question": "Phương pháp hàn nào sau đây có điện cực không nóng chảy?",
+    "options": [
+      "Hàn MIG",
+      "Hàn MAG",
+      "Hàn SAW",
+      "Hàn TIG"
+    ],
+    "correctIndex": 3,
+    "correctAnswer": "Hàn TIG",
+    "correctAnswerLetter": "D",
+    "chapterId": "ch6",
+    "chapterTitle": "Chương 6: Công Nghệ Hàn & Cắt Kim Loại",
+    "explanation": "Hàn TIG sử dụng điện cực Vonfram không nóng chảy. Hàn MIG, MAG, SAW đều dùng cuộn dây kim loại nóng chảy liên tục thành mối hàn."
+  },
+  {
+    "id": 184,
+    "question": "Hàn hồ quang tay thường không được ứng dụng hàn ở đâu?",
+    "options": [
+      "Thép các bon và thép hợp kim",
+      "Kim loại màu và hợp kim màu",
+      "Công nghiệp sửa chữa và phục hồi",
+      "Sản xuất kết cấu thép có chiều dày nhỏ và trung bình"
+    ],
+    "correctIndex": 1,
+    "correctAnswer": "Kim loại màu và hợp kim màu",
+    "correctAnswerLetter": "B",
+    "chapterId": "ch6",
+    "chapterTitle": "Chương 6: Công Nghệ Hàn & Cắt Kim Loại",
+    "explanation": "Hàn hồ quang tay khó hàn kim loại màu (nhôm, đồng, titan) vì thuốc bọc thông thường không bảo vệ tốt kim loại màu khỏi oxy hóa nhanh ở nhiệt độ cao (thường phải dùng hàn TIG/MIG)."
+  },
+  {
+    "id": 185,
+    "question": "Phương pháp hàn hơi dùng nhiệt từ hỗn hợp cháy giữa:",
+    "options": [
+      "Ôxi và axêtilen",
+      "Ôxi và Hidro",
+      "Ôxi và Etilen",
+      "Oxi và khí Gas"
+    ],
+    "correctIndex": 0,
+    "correctAnswer": "Ôxi và axêtilen",
+    "correctAnswerLetter": "A",
+    "chapterId": "ch6",
+    "chapterTitle": "Chương 6: Công Nghệ Hàn & Cắt Kim Loại",
+    "explanation": "Hàn hơi (hàn khí) phổ biến nhất sử dụng nhiệt phản ứng cháy giữa khí Ôxi (O2) và Axêtilen (C2H2) cho nhiệt độ ngọn lửa cao nhất (~3150°C)."
+  },
+  {
+    "id": 186,
+    "question": "Đặc điểm nào không phải là đặc điểm của hàn khí?",
+    "options": [
+      "Hàn được nhiều loại kim loại và hợp kim, có thể hàn được tấm mỏng",
+      "Vật hàn bị nung nóng nhiều dẫn đến cơ tính giảm",
+      "Năng suất cao",
+      "Thiết bị gọn, nhẹ, đơn giản, vốn đầu tư thấp, không cần nguồn điện"
+    ],
+    "correctIndex": 2,
+    "correctAnswer": "Năng suất cao",
+    "correctAnswerLetter": "C",
+    "chapterId": "ch6",
+    "chapterTitle": "Chương 6: Công Nghệ Hàn & Cắt Kim Loại",
+    "explanation": "Hàn khí có tốc độ hàn chậm, vùng ảnh hưởng nhiệt rất rộng làm nung nóng vật hàn nhiều, do đó năng suất thấp chứ không thể có năng suất cao."
+  },
+  {
+    "id": 187,
+    "question": "Ngọn lửa hàn khí bình thường khi tỷ lệ giữa ô xi (O2) và axetilen (C2H2) là:",
+    "options": [
+      "Nhỏ hơn 1",
+      "Trong khoảng 1-1,2",
+      "Lớn hơn 1,2",
+      "Lớn hơn 2"
+    ],
+    "correctIndex": 1,
+    "correctAnswer": "Trong khoảng 1-1,2",
+    "correctAnswerLetter": "B",
+    "chapterId": "ch6",
+    "chapterTitle": "Chương 6: Công Nghệ Hàn & Cắt Kim Loại",
+    "explanation": "Ngọn lửa trung hòa (ngọn lửa bình thường) có tỷ lệ thể tích VO2 / VC2H2 nằm trong khoảng 1,0 đến 1,2."
+  },
+  {
+    "id": 188,
+    "question": "Ngọn lửa hàn khí các bon hóa có tỷ lệ giữa ô xi (O2) và axetilen (C2H2) là:",
+    "options": [
+      "Lớn hơn 1,2",
+      "Nhỏ hơn 1",
+      "Trong khoảng 1-1,2",
+      "Lớn hơn 2"
+    ],
+    "correctIndex": 0,
+    "correctAnswer": "Lớn hơn 1,2",
+    "correctAnswerLetter": "A",
+    "chapterId": "ch6",
+    "chapterTitle": "Chương 6: Công Nghệ Hàn & Cắt Kim Loại",
+    "explanation": "Theo đáp án ngân hàng câu hỏi môn học: Chọn 'Lớn hơn 1,2' (tính theo tỷ lệ thừa C2H2). Lưu ý lý thuyết chuẩn: nếu tính theo tỷ lệ VO2/VC2H2 thì ngọn lửa thừa cacbon có tỷ lệ < 1."
+  },
+  {
+    "id": 189,
+    "question": "Ngọn lửa hàn khí Ô xy hóa có tỷ lệ giữa ô xi (O2) và axetilen (C2H2) là:",
+    "options": [
+      "Lớn hơn 1,2",
+      "Nhỏ hơn 1",
+      "Trong khoảng 1-1,2",
+      "Lớn hơn 2"
+    ],
+    "correctIndex": 1,
+    "correctAnswer": "Nhỏ hơn 1",
+    "correctAnswerLetter": "B",
+    "chapterId": "ch6",
+    "chapterTitle": "Chương 6: Công Nghệ Hàn & Cắt Kim Loại",
+    "explanation": "Theo đáp án ngân hàng câu hỏi môn học: Chọn 'Nhỏ hơn 1'. Lưu ý lý thuyết chuẩn: nếu tính theo hệ số VO2/VC2H2 thì ngọn lửa oxy hóa có tỷ lệ > 1,2."
+  },
+  {
+    "id": 190,
+    "question": "Ngọn lửa hàn khí bình thường được phân ra làm mấy vùng?",
+    "options": [
+      "2",
+      "4",
+      "3",
+      "5"
+    ],
+    "correctIndex": 2,
+    "correctAnswer": "3",
+    "correctAnswerLetter": "C",
+    "chapterId": "ch6",
+    "chapterTitle": "Chương 6: Công Nghệ Hàn & Cắt Kim Loại",
+    "explanation": "Ngọn lửa hàn khí bình thường (ngọn lửa trung hòa) phân thành 3 vùng: Nhân ngọn lửa (sáng trắng), Vùng hoàn nguyên (vùng làm việc nhiệt độ cao nhất ~3150°C), và Đuôi ngọn lửa."
+  },
+  {
+    "id": 191,
+    "question": "Ngọn lửa hàn khí dùng để hàn khí hợp kim đồng như Latong, tỷ lệ giữa ô xi (O2) và axetilen (C2H2) nên sử dụng là:",
+    "options": [
+      "Nhỏ hơn 1",
+      "Trong khoảng 1-1,2",
+      "Sử dụng tỷ lệ nào cũng được",
+      "Lớn hơn 1,2"
+    ],
+    "correctIndex": 3,
+    "correctAnswer": "Lớn hơn 1,2",
+    "correctAnswerLetter": "D",
+    "chapterId": "ch6",
+    "chapterTitle": "Chương 6: Công Nghệ Hàn & Cắt Kim Loại",
+    "explanation": "Hàn đồng thau (Latong) dùng ngọn lửa oxy hóa (tỷ lệ > 1,2) để tạo lớp màng mỏng oxit kẽm bảo vệ bề mặt vũng hàn, ngăn chặn kẽm bốc hơi độc hại."
+  },
+  {
+    "id": 192,
+    "question": "Ngọn lửa hàn khí dùng để tẩy sạch bề mặt, tỷ lệ giữa ô xi (O2) và axetilen (C2H2) nên sử dụng là:",
+    "options": [
+      "Lớn hơn 1,2",
+      "Nhỏ hơn 1",
+      "Trong khoảng 1-1,2",
+      "Sử dụng tỷ lệ nào cũng được"
+    ],
+    "correctIndex": 0,
+    "correctAnswer": "Lớn hơn 1,2",
+    "correctAnswerLetter": "A",
+    "chapterId": "ch6",
+    "chapterTitle": "Chương 6: Công Nghệ Hàn & Cắt Kim Loại",
+    "explanation": "Dùng ngọn lửa oxy hóa thừa oxy (tỷ lệ > 1,2) để oxy hóa nhanh và thiêu đốt các lớp gỉ sét, dầu mỡ bám trên bề mặt kim loại trước khi gia công."
+  },
+  {
+    "id": 193,
+    "question": "Ngọn lửa hàn khí dùng để hàn khí thép hợp kim, tỷ lệ giữa ô xi (O2) và axetilen (C2H2) nên sử dụng là:",
+    "options": [
+      "Lớn hơn 1,2",
+      "Nhỏ hơn 1",
+      "Trong khoảng 1-1,2",
+      "Sử dụng tỷ lệ nào cũng được"
+    ],
+    "correctIndex": 1,
+    "correctAnswer": "Nhỏ hơn 1",
+    "correctAnswerLetter": "B",
+    "chapterId": "ch6",
+    "chapterTitle": "Chương 6: Công Nghệ Hàn & Cắt Kim Loại",
+    "explanation": "Hàn thép hợp kim cần ngọn lửa hoàn nguyên (tỷ lệ < 1) để tránh oxy hóa và cháy mất các nguyên tố hợp kim quý trong thép."
+  },
+  {
+    "id": 194,
+    "question": "Ngọn lửa hàn khí dùng để hàn khí thép gió, tỷ lệ giữa ô xi (O2) và axetilen (C2H2) nên sử dụng là:",
+    "options": [
+      "Lớn hơn 1,2",
+      "Trong khoảng 1-1,2",
+      "Nhỏ hơn 1",
+      "Sử dụng tỷ lệ nào cũng được"
+    ],
+    "correctIndex": 2,
+    "correctAnswer": "Nhỏ hơn 1",
+    "correctAnswerLetter": "C",
+    "chapterId": "ch6",
+    "chapterTitle": "Chương 6: Công Nghệ Hàn & Cắt Kim Loại",
+    "explanation": "Thép gió chứa nhiều W, Cr, V, C nên cần ngọn lửa hoàn nguyên (tỷ lệ < 1) để giữ nguyên hàm lượng cacbon và các nguyên tố tạo cacbit cứng."
+  },
+  {
+    "id": 195,
+    "question": "Chọn phương pháp hàn phù hợp để hàn Gang",
+    "options": [
+      "Hàn khí",
+      "Hàn hồ quang",
+      "Hàn plasma",
+      "Hàn điện tiếp xúc"
+    ],
+    "correctIndex": 0,
+    "correctAnswer": "Hàn khí",
+    "correctAnswerLetter": "A",
+    "chapterId": "ch6",
+    "chapterTitle": "Chương 6: Công Nghệ Hàn & Cắt Kim Loại",
+    "explanation": "Gang rất giòn và dễ bị nứt khi nguội nhanh. Phương pháp hàn khí có tốc độ nguội chậm và truyền nhiệt êm dịu nên rất phù hợp để hàn gang."
+  },
+  {
+    "id": 196,
+    "question": "Ngọn lửa hàn khí dùng để hàn khí gang, tỷ lệ giữa ô xi (O2) và axetilen (C2H2) nên sử dụng là:",
+    "options": [
+      "Lớn hơn 1,2",
+      "Nhỏ hơn 1",
+      "Trong khoảng 1-1,2",
+      "Sử dụng tỷ lệ nào cũng được"
+    ],
+    "correctIndex": 1,
+    "correctAnswer": "Nhỏ hơn 1",
+    "correctAnswerLetter": "B",
+    "chapterId": "ch6",
+    "chapterTitle": "Chương 6: Công Nghệ Hàn & Cắt Kim Loại",
+    "explanation": "Hàn gang cần dùng ngọn lửa cacbon hóa thừa axetylen (tỷ lệ < 1) để bổ sung thêm cacbon bù vào phần bị cháy, chống hình thành gang trắng gây giòn nứt."
+  },
+  {
+    "id": 197,
+    "question": "Phương pháp hàn ma sát có thể thực hiện trên thiết bị nào sau đây?",
+    "options": [
+      "Máy tiện",
+      "Máy phay",
+      "Máy mài",
+      "Máy bào"
+    ],
+    "correctIndex": 0,
+    "correctAnswer": "Máy tiện",
+    "correctAnswerLetter": "A",
+    "chapterId": "ch6",
+    "chapterTitle": "Chương 6: Công Nghệ Hàn & Cắt Kim Loại",
+    "explanation": "Hàn ma sát xoay cần một chi tiết quay tròn tốc độ cao và một chi tiết tịnh tiến ép sát, nguyên lý hoàn toàn phù hợp để thực hiện trên máy tiện."
+  },
+  {
+    "id": 198,
+    "question": "Năng lượng sử dụng để sinh nhiệt trong phương pháp hàn ma sát là:",
+    "options": [
+      "Năng lượng điện",
+      "Công của lực ma sát",
+      "Hồ quang điện",
+      "Nhiệt sinh ra do điện trở của vật hàn"
+    ],
+    "correctIndex": 1,
+    "correctAnswer": "Công của lực ma sát",
+    "correctAnswerLetter": "B",
+    "chapterId": "ch6",
+    "chapterTitle": "Chương 6: Công Nghệ Hàn & Cắt Kim Loại",
+    "explanation": "Nhiệt hàn sinh ra từ công của lực ma sát giữa hai bề mặt tiếp xúc chuyển động tương đối ép sát với nhau ở tốc độ cao, nung dẻo mép hàn trước khi ép dính."
+  },
+  {
+    "id": 199,
+    "question": "Năng lượng sử dụng để sinh nhiệt trong phương pháp hàn điện tiếp xúc là:",
+    "options": [
+      "Năng lượng cơ năng",
+      "Công của lực ma sát",
+      "Nhiệt sinh ra do điện trở của vật hàn",
+      "Hồ quang điện"
+    ],
+    "correctIndex": 2,
+    "correctAnswer": "Nhiệt sinh ra do điện trở của vật hàn",
+    "correctAnswerLetter": "C",
+    "chapterId": "ch6",
+    "chapterTitle": "Chương 6: Công Nghệ Hàn & Cắt Kim Loại",
+    "explanation": "Theo định luật Jun-Lenx (Q = I^2*R*t), dòng điện lớn chạy qua vùng tiếp xúc có điện trở tiếp xúc R lớn sẽ sinh ra nhiệt lượng cực lớn làm nóng dẻo kim loại hàn."
+  },
+  {
+    "id": 200,
+    "question": "Trong phương pháp hàn điện tiếp xúc, điện cực hàn thường làm bằng vật liệu gì?",
+    "options": [
+      "Thép các bon",
+      "Than chì (graphit)",
+      "Thép hợp kim",
+      "Đồng và hợp kim đồng"
+    ],
+    "correctIndex": 3,
+    "correctAnswer": "Đồng và hợp kim đồng",
+    "correctAnswerLetter": "D",
+    "chapterId": "ch6",
+    "chapterTitle": "Chương 6: Công Nghệ Hàn & Cắt Kim Loại",
+    "explanation": "Điện cực hàn tiếp xúc cần dẫn điện và dẫn nhiệt cực tốt (để không bị dính nóng chảy vào vật hàn) và có độ bền cơ học cao, do đó làm bằng đồng hoặc hợp kim đồng (Cu-Cr, Cu-Be)."
+  },
+  {
+    "id": 201,
+    "question": "Đặc điểm nào không phải là đặc điểm của phương pháp hàn điện tiếp xúc?",
+    "options": [
+      "Mối hàn chất lượng không cao, không đẹp",
+      "Thời gian hàn ngắn, năng suất cao, dễ tự động hóa",
+      "Công suất máy lớn, đầu tư đắt tiền",
+      "Thường chỉ dùng cho vật có chiều dày mỏng"
+    ],
+    "correctIndex": 0,
+    "correctAnswer": "Mối hàn chất lượng không cao, không đẹp",
+    "correctAnswerLetter": "A",
+    "chapterId": "ch6",
+    "chapterTitle": "Chương 6: Công Nghệ Hàn & Cắt Kim Loại",
+    "explanation": "Hàn điện tiếp xúc (hàn điểm, hàn đường) cho mối hàn rất chắc chắn, bề mặt phẳng đẹp và năng suất cao. Nhận định 'chất lượng không cao, không đẹp' là sai."
+  },
+  {
+    "id": 202,
+    "question": "Nguyên nhân xuất hiện ứng suất dư trong kết cấu hàn là:",
+    "options": [
+      "Nung nóng đều kim loại vật liệu hàn",
+      "Nung nóng không đều vật liệu hàn",
+      "Chịu tác dụng của ngoại lực",
+      "Nhiệt hàn quá lớn"
+    ],
+    "correctIndex": 1,
+    "correctAnswer": "Nung nóng không đều vật liệu hàn",
+    "correctAnswerLetter": "B",
+    "chapterId": "ch6",
+    "chapterTitle": "Chương 6: Công Nghệ Hàn & Cắt Kim Loại",
+    "explanation": "Khi hàn, sự phân bố nhiệt cục bộ không đồng đều khiến vùng mối hàn nóng dãn nở bị cản trở bởi vùng kim loại nguội xung quanh, khi nguội co ngót lại sinh ra ứng suất dư nội tại."
+  },
+  {
+    "id": 203,
+    "question": "Kết cấu hàn thường bị cong vênh do:",
+    "options": [
+      "Nung nóng đều kim loại vật liệu hàn",
+      "Chịu tác dụng của ngoại lực",
+      "Nung nóng không đều vật liệu hàn",
+      "Nhiệt hàn quá lớn"
+    ],
+    "correctIndex": 2,
+    "correctAnswer": "Nung nóng không đều vật liệu hàn",
+    "correctAnswerLetter": "C",
+    "chapterId": "ch6",
+    "chapterTitle": "Chương 6: Công Nghệ Hàn & Cắt Kim Loại",
+    "explanation": "Nung nóng và làm nguội không đều làm co ngót kim loại không đồng nhất, sinh ra ứng suất dư vượt quá giới hạn chảy gây biến dạng cong vênh kết cấu."
+  },
+  {
+    "id": 204,
+    "question": "Phương pháp hàn nào que hàn chỉ có nhiệm vụ gây hồ quang?",
+    "options": [
+      "Hàn TIG",
+      "Hàn MIG",
+      "Hàn MAG",
+      "Hàn hồ quang tay"
+    ],
+    "correctIndex": 0,
+    "correctAnswer": "Hàn TIG",
+    "correctAnswerLetter": "A",
+    "chapterId": "ch6",
+    "chapterTitle": "Chương 6: Công Nghệ Hàn & Cắt Kim Loại",
+    "explanation": "Trong hàn TIG, điện cực Vonfram không tự nóng chảy mà chỉ đóng vai trò phóng tia hồ quang điện để làm nóng chảy mép hàn."
+  },
+  {
+    "id": 205,
+    "question": "Phương pháp hàn nào sau đây không dùng que hàn?",
+    "options": [
+      "Hàn khí",
+      "Hàn điện tiếp xúc",
+      "Hàn hồ quang tay",
+      "Hàn hồ quang có khí bảo vệ"
+    ],
+    "correctIndex": 1,
+    "correctAnswer": "Hàn điện tiếp xúc",
+    "correctAnswerLetter": "B",
+    "chapterId": "ch6",
+    "chapterTitle": "Chương 6: Công Nghệ Hàn & Cắt Kim Loại",
+    "explanation": "Hàn điện tiếp xúc chỉ ép hai tấm kim loại vào nhau và cho dòng điện nung nóng dẻo điểm tiếp xúc rồi ép dính, hoàn toàn không cần que hàn hay kim loại phụ."
   }
 ];
