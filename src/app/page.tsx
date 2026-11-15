@@ -237,14 +237,14 @@ export default async function Home() {
               </div>
             </Link>
 
-            {/* CARD 4: OTHER */}
-            <div className="cyber-card cyber-card-other cyber-card-disabled" aria-label="Dịch vụ khác đang cập nhật">
+            {/* CARD 4: OTHER & QUIZ MASTER */}
+            <Link href="/other" className="cyber-card cyber-card-other" aria-label="Trắc nghiệm ôn tập và ứng dụng khác">
               <div className="cyber-card-inner">
                 <div className="cyber-card-img-wrap">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src="/services/other.svg"
-                    alt="Other Services"
+                    alt="Other Services & Quiz"
                     className="cyber-card-img"
                     width={96}
                     height={96}
@@ -252,17 +252,17 @@ export default async function Home() {
                   />
                 </div>
                 <h2 className="cyber-card-title">OTHER</h2>
-                <p className="cyber-card-desc">Dịch vụ khác &amp; hỗ trợ toàn bộ game</p>
-                <div className="cyber-card-badge badge-pending">
-                  <i className="fas fa-spinner fa-spin-pulse" />
-                  <span>ĐANG CẬP NHẬT</span>
+                <p className="cyber-card-desc">Ngân hàng trắc nghiệm ôn tập &amp; Tiện ích</p>
+                <div className="cyber-card-badge badge-active">
+                  <i className="fas fa-check-circle" />
+                  <span>HOẠT ĐỘNG 24/7</span>
                 </div>
-                <span className="cyber-card-cta cyber-cta-disabled" aria-disabled="true">
-                  <span>SẮP RA MẮT</span>
-                  <i className="fas fa-clock" />
+                <span className="cyber-card-cta cyber-cta-featured">
+                  <span>LÀM QUIZ NGAY</span>
+                  <i className="fas fa-arrow-right" />
                 </span>
               </div>
-            </div>
+            </Link>
 
             {/* CARD 5: NUÔI TÔI (DONATE) */}
             <Link href="/donate" className="cyber-card cyber-card-donate" aria-label="Ủng hộ tác giả dự án Nuôi Tôi">

@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { db } from "@/lib/db";
 import DesktopHeader from "@/components/DesktopHeader";
-import AppCatalog from "@/components/AppCatalog";
+import OtherPageClient from "@/components/other/OtherPageClient";
 
 export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: "Ứng Dụng & Công Cụ Khác - OTHER | MinSr",
-    description: "Khám phá các ứng dụng tiện ích, công cụ game và mod khác từ MinSr.",
+    title: "Trắc Nghiệm Ôn Tập & Ứng Dụng Khác - OTHER | MinSr",
+    description: "Ngân hàng câu hỏi trắc nghiệm ôn tập Cơ khí & Dung sai 65 câu cùng các ứng dụng, tiện ích từ MinSr.",
   };
 }
 
@@ -63,11 +63,10 @@ export default async function OtherPage() {
           </Link>
         </div>
 
-        {/* Danh mục và sản phẩm của Other */}
-        <AppCatalog
+        {/* Tabs và Nội dung: Quiz Master + Kho Công Cụ */}
+        <OtherPageClient
           groups={groups}
-          defaultGroupId={otherGroupId}
-          hideCategoryMenu={true}
+          otherGroupId={otherGroupId}
         />
 
         <footer className="mdarker-footer" style={{ marginTop: 50 }}>
