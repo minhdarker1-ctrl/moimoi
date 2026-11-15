@@ -279,6 +279,54 @@ export default function QuizMaster() {
     }
   };
 
+  // Keyboard Shortcuts Handler
+  useEffect(() => {
+    if (!isPlaying || isFinished) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't intercept if user is inside an input or editable field
+      const targetTag = (e.target as HTMLElement)?.tagName?.toLowerCase();
+      if (targetTag === "input" || targetTag === "textarea") return;
+
+      const key = e.key.toLowerCase();
+
+      // Number keys 1, 2, 3, 4
+      if (["1", "2", "3", "4"].includes(key)) {
+        e.preventDefault();
+        const optIdx = parseInt(key, 10) - 1;
+        if (mode === "practice" || mode === "exam") {
+          handleSelectOption(optIdx);
+        }
+        return;
+      }
+
+      // Letter keys A, B, C, D
+      if (["a", "b", "c", "d"].includes(key)) {
+        e.preventDefault();
+        const map: Record<string, number> = { a: 0, b: 1, c: 2, d: 3 };
+        if (mode === "practice" || mode === "exam") {
+          handleSelectOption(map[key]);
+        }
+        return;
+      }
+
+      // Navigation: Right Arrow / Enter / Space (for next or flip)
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        handleNext();
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        handlePrev();
+      } else if (e.key === " " && mode === "flashcard") {
+        e.preventDefault();
+        setIsCardFlipped((prev) => !prev);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isPlaying, isFinished, mode, currentIndex, activeQuestionList.length, revealedQuestions, currentQ]);
+
   // Finish Quiz Handler
   const finishQuiz = () => {
     setIsFinished(true);
@@ -714,9 +762,33 @@ export default function QuizMaster() {
           /* SUB-VIEW B: PRACTICE & EXAM 4-OPTION MODE            */
           /* ---------------------------------------------------- */
           <div className="cyber-quiz-card">
-            {/* Question Text */}
+            {/* Question Text & Meta Header */}
             <div className="cyber-quiz-question-box">
-              <span className="cyber-q-num-pill">Câu #{currentIndex + 1}</span>
+              <div className="cyber-q-meta-row">
+                <div className="cyber-q-meta-left">
+                  <span className="cyber-q-num-pill">
+                    <i className="fa-solid fa-hashtag" /> CÂU {currentIndex + 1} / {activeQuestionList.length}
+                  </span>
+                  <span className="cyber-q-chapter-badge">
+                    <i className="fa-solid fa-layer-group" /> {currentQ.chapterTitle}
+                  </span>
+                </div>
+                <div className="cyber-q-meta-right">
+                  <span className="cyber-q-kbd-hint" title="Bấm phím 1-4 hoặc A-D trên bàn phím để chọn nhanh">
+                    <i className="fa-solid fa-keyboard" /> Phím 1-4 / A-D
+                  </span>
+                  <button
+                    type="button"
+                    className={`cyber-q-star-btn ${isStarred ? "starred" : ""}`}
+                    onClick={() => toggleBookmark(currentQ.id)}
+                    title={isStarred ? "Bỏ gắn sao câu này" : "Gắn sao câu hỏi khó ⭐"}
+                  >
+                    <i className={isStarred ? "fa-solid fa-star" : "fa-regular fa-star"} />
+                    <span>{isStarred ? "Đã lưu ⭐" : "Gắn sao"}</span>
+                  </button>
+                </div>
+              </div>
+
               <h2 className="cyber-quiz-question-title">{currentQ.question}</h2>
             </div>
 
@@ -745,15 +817,32 @@ export default function QuizMaster() {
                     type="button"
                     className={optStyle}
                     onClick={() => handleSelectOption(idx)}
+                    disabled={mode === "practice" && isAnswered}
                   >
-                    <span className="cyber-option-letter">{String.fromCharCode(65 + idx)}</span>
+                    <div className="cyber-option-key-wrap">
+                      <span className="cyber-option-letter">{String.fromCharCode(65 + idx)}</span>
+                      <span className="cyber-option-kbd-sub">{idx + 1}</span>
+                    </div>
+
                     <span className="cyber-option-text">{optText}</span>
-                    {mode === "practice" && isAnswered && isRight && (
-                      <i className="fa-solid fa-circle-check cyber-status-icon correct" />
-                    )}
-                    {mode === "practice" && isAnswered && isSelected && !isRight && (
-                      <i className="fa-solid fa-circle-xmark cyber-status-icon wrong" />
-                    )}
+
+                    <div className="cyber-option-status-wrap">
+                      {mode === "practice" && isAnswered && isRight && (
+                        <span className="cyber-opt-status-tag correct">
+                          <i className="fa-solid fa-circle-check" /> ĐÁP ÁN ĐÚNG
+                        </span>
+                      )}
+                      {mode === "practice" && isAnswered && isSelected && !isRight && (
+                        <span className="cyber-opt-status-tag wrong">
+                          <i className="fa-solid fa-circle-xmark" /> BẠN ĐÃ CHỌN
+                        </span>
+                      )}
+                      {mode === "exam" && isSelected && (
+                        <span className="cyber-opt-status-tag selected">
+                          <i className="fa-solid fa-check" /> ĐÃ CHỌN
+                        </span>
+                      )}
+                    </div>
                   </button>
                 );
               })}
@@ -766,14 +855,30 @@ export default function QuizMaster() {
                   <div className="cyber-exp-icon-wrap">
                     <i className={isCorrect ? "fa-solid fa-circle-check" : "fa-solid fa-circle-exclamation"} />
                   </div>
-                  <div>
-                    <strong>{isCorrect ? "Chính xác tuyệt đối!" : "Rất tiếc, chưa đúng!"}</strong>
-                    <p>Đáp án đúng là: <strong>{currentQ.correctAnswerLetter}. {currentQ.correctAnswer}</strong></p>
+                  <div className="cyber-exp-title-box">
+                    <span className="cyber-exp-badge">
+                      {isCorrect ? "CHÍNH XÁC TUYỆT ĐỐI" : "HÃY GHI NHỚ KIẾN THỨC NÀY"}
+                    </span>
+                    <strong className="cyber-exp-main-status">
+                      {isCorrect ? "Chúc mừng! Bạn đã nắm chắc câu này." : "Rất tiếc! Câu trả lời chưa chính xác."}
+                    </strong>
                   </div>
                 </div>
+
+                <div className="cyber-exp-callout">
+                  <span className="cyber-callout-tag">ĐÁP ÁN CHUẨN:</span>
+                  <div className="cyber-callout-content">
+                    <span className="cyber-callout-letter">{currentQ.correctAnswerLetter}</span>
+                    <span className="cyber-callout-text">{currentQ.correctAnswer}</span>
+                  </div>
+                </div>
+
                 {currentQ.explanation && (
                   <div className="cyber-exp-body">
-                    <p><i className="fa-solid fa-lightbulb" /> {currentQ.explanation}</p>
+                    <div className="cyber-exp-body-title">
+                      <i className="fa-solid fa-lightbulb" /> Cốt Lõi Kiến Thức Kỹ Thuật:
+                    </div>
+                    <p className="cyber-exp-body-text">{currentQ.explanation}</p>
                   </div>
                 )}
               </div>
@@ -787,7 +892,7 @@ export default function QuizMaster() {
                 onClick={handlePrev}
                 disabled={currentIndex === 0}
               >
-                <i className="fa-solid fa-chevron-left" /> Câu trước
+                <i className="fa-solid fa-chevron-left" /> Câu trước <span className="cyber-btn-kbd">←</span>
               </button>
 
               {mode === "exam" && (
@@ -806,7 +911,7 @@ export default function QuizMaster() {
                   className="cyber-quiz-btn primary"
                   onClick={handleNext}
                 >
-                  Câu tiếp <i className="fa-solid fa-chevron-right" />
+                  Câu tiếp <span className="cyber-btn-kbd">→</span> <i className="fa-solid fa-chevron-right" />
                 </button>
               ) : (
                 <button
