@@ -4,10 +4,10 @@ export const QUIZ_TOPICS: QuizTopic[] = [
   {
     "id": "all",
     "title": "Toàn Bộ Ngân Hàng Câu Hỏi",
-    "desc": "Tổng hợp toàn bộ 310 câu hỏi ôn tập theo đề cương Canvas môn Công Nghệ Kim Loại",
+    "desc": "Tổng hợp trọn vẹn 335 câu hỏi ôn tập 100% giáo trình Công Nghệ Kim Loại trên Canvas",
     "icon": "fa-solid fa-layer-group",
-    "badge": "310 CÂU",
-    "count": 310
+    "badge": "335 CÂU",
+    "count": 335
   },
   {
     "id": "ch1",
@@ -54,8 +54,16 @@ export const QUIZ_TOPICS: QuizTopic[] = [
     "title": "Chương VI: Một Số Phương Pháp Gia Công Tiên Tiến",
     "desc": "Gia công tia lửa điện (EDM), laser (LBM), điện hóa (ECM), siêu âm (USM), tia nước (AJM)",
     "icon": "fa-solid fa-bolt",
-    "badge": "35 CÂU MỚI",
+    "badge": "35 CÂU",
     "count": 35
+  },
+  {
+    "id": "ch7",
+    "title": "Chương VII và VIII: Quản Lý & Sản Xuất Tinh Gọn",
+    "desc": "Chuẩn bị kỹ thuật & công nghệ, chi phí, Takt/Cycle/Lead time, 7 lãng phí & JIT",
+    "icon": "fa-solid fa-chart-line",
+    "badge": "25 CÂU MỚI",
+    "count": 25
   }
 ];
 
@@ -5019,5 +5027,405 @@ export const MECHANICAL_QUIZ_QUESTIONS: QuizQuestion[] = [
     "chapterId": "ch6",
     "chapterTitle": "Chương VI: Một Số Phương Pháp Gia Công Tiên Tiến",
     "explanation": "Phương pháp gia công tia lửa điện (EDM) có thể gia công được mọi vật liệu dẫn điện có độ cứng tùy ý (thép tôi, hợp kim cứng) và chép hình các hốc 3D phức tạp."
+  },
+  {
+    "id": 311,
+    "question": "Các nội dung sau, nội dung nào là chuẩn bị kỹ thuật của quá trình sản xuất?",
+    "options": [
+      "Thiết kế và vận hành thử quy trình công nghệ",
+      "Thiết kế sản phẩm của quá trình sản xuất",
+      "Thiết kế nhà máy và chuỗi cung ứng",
+      "Thiết kế và bóc tách bản vẽ sản phẩm"
+    ],
+    "correctIndex": 3,
+    "correctAnswer": "Thiết kế và bóc tách bản vẽ sản phẩm",
+    "correctAnswerLetter": "D",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương VII và VIII: Quản Lý & Sản Xuất Tinh Gọn",
+    "explanation": "Chuẩn bị kỹ thuật sản xuất gồm thiết kế kết cấu, tính toán sức bền, lập và bóc tách bản vẽ kỹ thuật chi tiết của sản phẩm trước khi đưa vào chế tạo."
+  },
+  {
+    "id": 312,
+    "question": "Các nội dung sau, nội dung nào là chuẩn bị công nghệ của quá trình sản xuất?",
+    "options": [
+      "Thiết kế nhà máy và chuỗi cung ứng",
+      "Thiết kế và bóc tách bản vẽ",
+      "Thiết kế và vận hành thử quy trình công nghệ",
+      "Thiết kế sản phẩm của quá trình sản xuất"
+    ],
+    "correctIndex": 2,
+    "correctAnswer": "Thiết kế và vận hành thử quy trình công nghệ",
+    "correctAnswerLetter": "C",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương VII và VIII: Quản Lý & Sản Xuất Tinh Gọn",
+    "explanation": "Chuẩn bị công nghệ bao gồm thiết kế quy trình công nghệ gia công, chọn máy, chế độ cắt, thiết kế trang bị đồ gá và vận hành thử nghiệm quy trình."
+  },
+  {
+    "id": 313,
+    "question": "Các dạng năng lượng chủ yếu trong nhà máy sản xuất cơ khí là gì?",
+    "options": [
+      "Năng lượng điện, năng lượng nhiệt, khí áp suất cao",
+      "Năng lượng điện, năng lượng hóa học",
+      "Năng lượng điện, năng lượng ánh sáng",
+      "Năng lượng điện, năng lượng cơ học"
+    ],
+    "correctIndex": 0,
+    "correctAnswer": "Năng lượng điện, năng lượng nhiệt, khí áp suất cao",
+    "correctAnswerLetter": "A",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương VII và VIII: Quản Lý & Sản Xuất Tinh Gọn",
+    "explanation": "Ba nguồn năng lượng cốt lõi trong xưởng cơ khí: Điện năng (chạy máy công cụ), Nhiệt năng (đúc, hàn, nung nhiệt luyện) và Khí nén áp suất cao (điều khiển đồ gá, súng phun khí)."
+  },
+  {
+    "id": 314,
+    "question": "Các yêu cầu đối với công tác tổ chức cung cấp năng lượng là gì?",
+    "options": [
+      "Đảm bảo yêu cầu trong tất cả các ý đã nêu",
+      "Đảm bảo tiết kiệm và an toàn",
+      "Đảm bảo tính ổn định (có phương án dự phòng khi có sự cố)",
+      "Đảm bảo kế hoạch cấp trong dài hạn"
+    ],
+    "correctIndex": 0,
+    "correctAnswer": "Đảm bảo yêu cầu trong tất cả các ý đã nêu",
+    "correctAnswerLetter": "A",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương VII và VIII: Quản Lý & Sản Xuất Tinh Gọn",
+    "explanation": "Cung cấp năng lượng phải thỏa mãn: liên tục và có dự phòng khi sự cố, an toàn tuyệt đối và tiết kiệm chi phí, cùng kế hoạch cung ứng dài hạn vững chắc."
+  },
+  {
+    "id": 315,
+    "question": "Giá thực tế của sản phẩm là gì?",
+    "options": [
+      "Là giá bán cho khách hàng",
+      "Là giá thành được tính toán trên cơ sở định mức chi phí sản xuất và số lượng sản phẩm trong kế hoạch",
+      "Là giá thành niêm yết trên sản phẩm",
+      "Là giá thành được tính trên cơ sở thực tế chi phí chia cho tổng số sản phẩm được sản xuất"
+    ],
+    "correctIndex": 3,
+    "correctAnswer": "Là giá thành được tính trên cơ sở thực tế chi phí chia cho tổng số sản phẩm được sản xuất",
+    "correctAnswerLetter": "D",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương VII và VIII: Quản Lý & Sản Xuất Tinh Gọn",
+    "explanation": "Giá thành thực tế (Actual Cost) là chi phí sản xuất thực tế phát sinh chia cho tổng sản lượng sản phẩm thực tế sản xuất được trong kỳ."
+  },
+  {
+    "id": 316,
+    "question": "Giá kế hoạch của sản phẩm là gì?",
+    "options": [
+      "Là giá bán cho khách hàng",
+      "Là giá thành được tính toán trên cơ sở định mức chi phí sản xuất và số lượng sản phẩm trong kế hoạch",
+      "Là giá thành được tính trên cơ sở thực tế chi phí chia cho tổng số sản phẩm được sản xuất",
+      "Là giá thành niêm yết trên sản phẩm"
+    ],
+    "correctIndex": 1,
+    "correctAnswer": "Là giá thành được tính toán trên cơ sở định mức chi phí sản xuất và số lượng sản phẩm trong kế hoạch",
+    "correctAnswerLetter": "B",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương VII và VIII: Quản Lý & Sản Xuất Tinh Gọn",
+    "explanation": "Giá thành kế hoạch (Planned Cost) được xác định trước đầu kỳ sản xuất dựa trên các định mức kinh tế kỹ thuật tiêu chuẩn và sản lượng mục tiêu."
+  },
+  {
+    "id": 317,
+    "question": "Đâu là chi phí trực tiếp?",
+    "options": [
+      "Chi phí cho nguyên vật liệu, nhiên liệu, dụng cụ, công nhân sản xuất",
+      "Chi phí thuê nhà xưởng, văn phòng, khấu hao thiết bị",
+      "Chi phí sửa chữa, bảo dưỡng thiết bị",
+      "Chi phí cho cán bộ quản lý gián tiếp, nhân viên văn phòng"
+    ],
+    "correctIndex": 0,
+    "correctAnswer": "Chi phí cho nguyên vật liệu, nhiên liệu, dụng cụ, công nhân sản xuất",
+    "correctAnswerLetter": "A",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương VII và VIII: Quản Lý & Sản Xuất Tinh Gọn",
+    "explanation": "Chi phí trực tiếp (Direct Costs) gắn liền trực tiếp với việc tạo ra sản phẩm: vật liệu chính/phụ, nhiên liệu công nghệ, dụng cụ cắt và tiền lương nhân công trực tiếp."
+  },
+  {
+    "id": 318,
+    "question": "Giá thành sản phẩm là gì?",
+    "options": [
+      "Là toàn bộ chi phí vật liệu, nhân công, khấu hao máy móc thiết bị và nhà xưởng",
+      "Là toàn bộ chi phí phục vụ cho quá trình sản xuất",
+      "Là tổng chi phí trực tiếp và chi phí gián tiếp",
+      "Là số tiền khách hàng sẵn sàng trả để mua sản phẩm"
+    ],
+    "correctIndex": 3,
+    "correctAnswer": "Là số tiền khách hàng sẵn sàng trả để mua sản phẩm",
+    "correctAnswerLetter": "D",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương VII và VIII: Quản Lý & Sản Xuất Tinh Gọn",
+    "explanation": "Theo quan điểm Sản xuất tinh gọn (Lean / Target Costing): Giá trị và giá thành mục tiêu được định nghĩa bởi số tiền khách hàng sẵn sàng chi trả để nhận được sản phẩm."
+  },
+  {
+    "id": 319,
+    "question": "Những chỉ tiêu quan trọng trong sản xuất cơ khí là gì?",
+    "options": [
+      "Tất cả những chỉ tiêu trên",
+      "Chỉ tiêu về doanh thu và lợi nhuận",
+      "Chỉ tiêu về thu nhập và phúc lợi của nhân công",
+      "Sản phẩm và sản lượng (loại sản phẩm và số lượng sản phẩm)"
+    ],
+    "correctIndex": 0,
+    "correctAnswer": "Tất cả những chỉ tiêu trên",
+    "correctAnswerLetter": "A",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương VII và VIII: Quản Lý & Sản Xuất Tinh Gọn",
+    "explanation": "Các chỉ tiêu sản xuất trọng yếu gồm: Chủng loại và quy mô sản lượng, Doanh thu & lợi nhuận, cùng Thu nhập và phúc lợi của người lao động."
+  },
+  {
+    "id": 320,
+    "question": "Trong sản xuất, nhịp sản xuất (takt time) phản ánh điều gì?",
+    "options": [
+      "Năng lực đáp ứng khách hàng",
+      "Tốc độ sản xuất một chi tiết hoặc một sản phẩm",
+      "Quy mô của cơ sở sản xuất đó lớn hay nhỏ",
+      "Năng lực sản xuất của một cơ sở sản xuất"
+    ],
+    "correctIndex": 3,
+    "correctAnswer": "Năng lực sản xuất của một cơ sở sản xuất",
+    "correctAnswerLetter": "D",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương VII và VIII: Quản Lý & Sản Xuất Tinh Gọn",
+    "explanation": "Theo đáp án ngân hàng câu hỏi đề thi: Takt time phản ánh năng lực sản xuất của một cơ sở sản xuất nhằm đồng bộ nhịp điệu với nhu cầu tiêu thụ."
+  },
+  {
+    "id": 321,
+    "question": "Trong sản xuất, thời gian chu kỳ (Cycle Time - C/T) phản ánh điều gì?",
+    "options": [
+      "Năng lực sản xuất của một cơ sở sản xuất",
+      "Năng lực đáp ứng khách hàng",
+      "Tốc độ sản xuất một chi tiết hoặc một sản phẩm",
+      "Quy mô của cơ sở sản xuất đó lớn hay nhỏ"
+    ],
+    "correctIndex": 0,
+    "correctAnswer": "Năng lực sản xuất của một cơ sở sản xuất",
+    "correctAnswerLetter": "A",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương VII và VIII: Quản Lý & Sản Xuất Tinh Gọn",
+    "explanation": "Thời gian chu kỳ (Cycle Time) là thời gian thực tế để một công đoạn hoàn thành một sản phẩm, phản ánh năng lực sản xuất của dây chuyền."
+  },
+  {
+    "id": 322,
+    "question": "Trong sản xuất, thời gian sản xuất (Lead Time - L/T) phản ánh điều gì?",
+    "options": [
+      "Tốc độ sản xuất một chi tiết hoặc một sản phẩm",
+      "Năng lực sản xuất của một cơ sở sản xuất",
+      "Quy mô của cơ sở sản xuất đó lớn hay nhỏ",
+      "Năng lực đáp ứng khách hàng"
+    ],
+    "correctIndex": 3,
+    "correctAnswer": "Năng lực đáp ứng khách hàng",
+    "correctAnswerLetter": "D",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương VII và VIII: Quản Lý & Sản Xuất Tinh Gọn",
+    "explanation": "Lead Time (thời gian từ lúc tiếp nhận đơn hàng đến lúc bàn giao thành phẩm) phản ánh trực tiếp năng lực đáp ứng khách hàng nhanh hay chậm của doanh nghiệp."
+  },
+  {
+    "id": 323,
+    "question": "Trong sản xuất tinh gọn, lãng phí có nghĩa là gì?",
+    "options": [
+      "Là những hoạt động không tạo ra giá trị trong quá trình sản xuất",
+      "Là những hoạt động tiêu tốn nhiều tiền",
+      "Là những hoạt động không cần thiết và không tạo ra giá trị",
+      "Là những hoạt động không tạo ra giá trị nhưng cần thiết cho quá trình sản xuất"
+    ],
+    "correctIndex": 2,
+    "correctAnswer": "Là những hoạt động không cần thiết và không tạo ra giá trị",
+    "correctAnswerLetter": "C",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương VII và VIII: Quản Lý & Sản Xuất Tinh Gọn",
+    "explanation": "Lãng phí thuần túy (Muda loại 2) là bất kỳ hoạt động nào tiêu tốn nguồn lực nhưng hoàn toàn không tạo ra giá trị gia tăng và không cần thiết cho quá trình sản xuất."
+  },
+  {
+    "id": 324,
+    "question": "Trong sản xuất tinh gọn, không đồng bộ có nghĩa là gì?",
+    "options": [
+      "Là tình trạng trình độ nhân công không phù hợp để vận hành máy móc",
+      "Là tình trạng trang bị máy móc thiết bị sản xuất không cùng một hãng",
+      "Là tình trạng trình độ công nhân không đồng đều",
+      "Là tình trạng sử dụng không hết công suất của một hoặc một số nhân công, máy móc"
+    ],
+    "correctIndex": 3,
+    "correctAnswer": "Là tình trạng sử dụng không hết công suất của một hoặc một số nhân công, máy móc",
+    "correctAnswerLetter": "D",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương VII và VIII: Quản Lý & Sản Xuất Tinh Gọn",
+    "explanation": "Sự không đồng bộ (Mura) biểu hiện ở việc dây chuyền thiếu cân bằng, dẫn đến tình trạng có trạm quá tải ùn ứ nhưng có trạm nhàn rỗi không khai thác hết công suất."
+  },
+  {
+    "id": 325,
+    "question": "Trong sản xuất tinh gọn, quá tải có nghĩa là gì?",
+    "options": [
+      "Là tình trạng một hoặc một số nhân công, máy móc làm việc vượt quá công suất",
+      "Là tình trạng trình độ nhân công cao hơn so với công nghệ của thiết bị và máy sản xuất",
+      "Là tình trạng máy móc thiết bị phải hoạt động suốt ngày đêm",
+      "Là tình trạng nhân công phải làm việc quá sức do công nghệ của thiết bị và máy sản xuất quá cao"
+    ],
+    "correctIndex": 0,
+    "correctAnswer": "Là tình trạng một hoặc một số nhân công, máy móc làm việc vượt quá công suất",
+    "correctAnswerLetter": "A",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương VII và VIII: Quản Lý & Sản Xuất Tinh Gọn",
+    "explanation": "Quá tải (Muri) là việc bắt ép máy móc hoặc con người làm việc vượt quá tải trọng hoặc công suất thiết kế, gây hỏng hóc, tai nạn và suy giảm chất lượng."
+  },
+  {
+    "id": 326,
+    "question": "Các loại lãng phí trong sản xuất tinh gọn bao gồm:",
+    "options": [
+      "Sản xuất thừa; Vận chuyển; Chờ đợi; Tồn kho; Thao tác thừa; Sản phẩm lỗi",
+      "Sản xuất thừa; Vận chuyển; Chờ đợi; Công đoạn thừa; Thao tác thừa; Sản phẩm lỗi",
+      "Sản xuất thừa; Vận chuyển; Chờ đợi; Tồn kho; Công đoạn thừa; Thao tác thừa; Sản phẩm lỗi",
+      "Sản xuất thừa; Vận chuyển; Chờ đợi; Tồn kho; Công đoạn thừa; Sản phẩm lỗi"
+    ],
+    "correctIndex": 2,
+    "correctAnswer": "Sản xuất thừa; Vận chuyển; Chờ đợi; Tồn kho; Công đoạn thừa; Thao tác thừa; Sản phẩm lỗi",
+    "correctAnswerLetter": "C",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương VII và VIII: Quản Lý & Sản Xuất Tinh Gọn",
+    "explanation": "7 lãng phí kinh điển (TIMWOOD): Sản xuất thừa (Overproduction), Tồn kho (Inventory), Vận chuyển (Transportation), Chờ đợi (Waiting), Thao tác thừa (Motion), Công đoạn thừa (Overprocessing) và Sản phẩm lỗi (Defects)."
+  },
+  {
+    "id": 327,
+    "question": "Những hoạt động nào là hoạt động gây ra lãng phí và cần loại bỏ trong sản xuất?",
+    "options": [
+      "Hoạt động không tạo ra giá trị",
+      "Hoạt động không tạo ra giá trị nhưng cần thiết",
+      "Hoạt động không tạo ra giá trị và không cần thiết",
+      "Hoạt động tạo ra giá trị"
+    ],
+    "correctIndex": 2,
+    "correctAnswer": "Hoạt động không tạo ra giá trị và không cần thiết",
+    "correctAnswerLetter": "C",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương VII và VIII: Quản Lý & Sản Xuất Tinh Gọn",
+    "explanation": "Hoạt động không tạo ra giá trị và không cần thiết (Muda loại 2) là lãng phí tuyệt đối cần phải loại trừ ngay lập tức trong sản xuất."
+  },
+  {
+    "id": 328,
+    "question": "Sản xuất kéo thực hiện theo nguyên tắc nào?",
+    "options": [
+      "Chỉ sản xuất khi cần",
+      "Sản xuất theo kế hoạch, đảm bảo luôn sẵn sàng cung ứng sản phẩm",
+      "Nguyên công sau sản xuất thật nhanh để kéo nguyên công trước làm nhanh",
+      "Sản xuất đủ không sản xuất thừa"
+    ],
+    "correctIndex": 0,
+    "correctAnswer": "Chỉ sản xuất khi cần",
+    "correctAnswerLetter": "A",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương VII và VIII: Quản Lý & Sản Xuất Tinh Gọn",
+    "explanation": "Hệ thống sản xuất kéo (Pull System) vận hành theo tín hiệu nhu cầu thực tế: Chỉ sản xuất khi có yêu cầu từ công đoạn phía sau hoặc từ đơn đặt hàng của khách."
+  },
+  {
+    "id": 329,
+    "question": "Quản lý chất lượng từ gốc có nghĩa là gì?",
+    "options": [
+      "Kiểm soát chặt chẽ vật liệu đầu vào",
+      "Kiểm soát chặt chẽ lỗi trước khi xuất xưởng",
+      "Kiểm soát chặt chẽ nguyên công đầu tiên",
+      "Kiểm soát lỗi trên mỗi nguyên công để phát hiện ra lỗi ngay khi nó phát sinh"
+    ],
+    "correctIndex": 3,
+    "correctAnswer": "Kiểm soát lỗi trên mỗi nguyên công để phát hiện ra lỗi ngay khi nó phát sinh",
+    "correctAnswerLetter": "D",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương VII và VIII: Quản Lý & Sản Xuất Tinh Gọn",
+    "explanation": "Quản lý chất lượng từ gốc (Quality at Source / Jidoka): kiểm soát chất lượng tại từng nguyên công, chặn đứng và xử lý phế phẩm ngay khi nó vừa phát sinh."
+  },
+  {
+    "id": 330,
+    "question": "Quản lý bằng trực quan có nghĩa là gì?",
+    "options": [
+      "Người quản lý chỉ dẫn trực tiếp cho công nhân thực hiện",
+      "Người quản lý làm mẫu cho những người khác làm theo",
+      "Dùng lời nói để truyền tin",
+      "Dùng ký hiệu, tín hiệu để truyền tin"
+    ],
+    "correctIndex": 3,
+    "correctAnswer": "Dùng ký hiệu, tín hiệu để truyền tin",
+    "correctAnswerLetter": "D",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương VII và VIII: Quản Lý & Sản Xuất Tinh Gọn",
+    "explanation": "Quản lý trực quan (Visual Management): dùng các tín hiệu màu sắc, đèn báo Andon, bảng biểu, ký hiệu để truyền tải thông tin sản xuất nhanh chóng, minh bạch."
+  },
+  {
+    "id": 331,
+    "question": "Những đặc điểm nào phản ánh tính ổn định của sản xuất?",
+    "options": [
+      "Nguồn cung vật liệu và nhân lực đáp ứng đủ yêu cầu sản xuất",
+      "Mức độ tiêu chuẩn hóa quy trình sản xuất và chuẩn hóa công việc của doanh nghiệp",
+      "Khả năng chuẩn bị máy móc/thiết bị phục vụ sản xuất",
+      "Tất cả những đặc điểm trên"
+    ],
+    "correctIndex": 3,
+    "correctAnswer": "Tất cả những đặc điểm trên",
+    "correctAnswerLetter": "D",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương VII và VIII: Quản Lý & Sản Xuất Tinh Gọn",
+    "explanation": "Tính ổn định sản xuất là sự kết hợp của: chuỗi cung ứng vật tư & nhân lực, chuẩn hóa công việc (Standard Work) và độ sẵn sàng của máy móc thiết bị."
+  },
+  {
+    "id": 332,
+    "question": "Trong sản xuất tinh gọn, chuẩn bị nhân lực cho sản xuất gồm những nội dung nào?",
+    "options": [
+      "Tất cả những nội dung đã nêu",
+      "Chuẩn bị nguồn lực (tuyển dụng, đào tạo nội bộ)",
+      "Cải tiến phương pháp làm việc",
+      "Ổn định tư tưởng người lao động"
+    ],
+    "correctIndex": 0,
+    "correctAnswer": "Tất cả những nội dung đã nêu",
+    "correctAnswerLetter": "A",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương VII và VIII: Quản Lý & Sản Xuất Tinh Gọn",
+    "explanation": "Chuẩn bị nhân lực Lean bao gồm: đào tạo kỹ năng đa nhiệm, cải tiến phương pháp thao tác chuẩn (Kaizen) và ổn định tư tưởng, tâm lý làm việc của công nhân."
+  },
+  {
+    "id": 333,
+    "question": "Trong sản xuất tinh gọn, chuẩn bị máy móc thiết bị cần đảm bảo nhiệm vụ gì?",
+    "options": [
+      "Đảm bảo tất cả các máy đều hoạt động, không có máy nào bị hỏng hóc",
+      "Đảm bảo đủ máy phục vụ cho sản xuất",
+      "Đảm bảo các máy đều đạt tiêu chuẩn vận hành an toàn",
+      "Đảm bảo các máy hoạt động hết công suất"
+    ],
+    "correctIndex": 3,
+    "correctAnswer": "Đảm bảo các máy hoạt động hết công suất",
+    "correctAnswerLetter": "D",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương VII và VIII: Quản Lý & Sản Xuất Tinh Gọn",
+    "explanation": "Theo đáp án ngân hàng câu hỏi môn học: Chuẩn bị máy móc thiết bị nhằm đảm bảo các máy hoạt động hết công suất theo tiến độ."
+  },
+  {
+    "id": 334,
+    "question": "Trong sản xuất tinh gọn để dòng chảy sản xuất được liên tục, việc chuẩn bị nguyên vật liệu được thực hiện như thế nào?",
+    "options": [
+      "Khi có yêu cầu thì mới đi mua vật liệu để giảm thiểu lưu kho",
+      "Nguyên liệu được cung cấp theo kế hoạch và tiến độ sản xuất",
+      "Nguyên liệu luôn sẵn sàng trong kho, khi cần là cung cấp ngay",
+      "Chỉ chuẩn bị những vật liệu chính trong kho, vật tư phụ khi cần thì mua"
+    ],
+    "correctIndex": 1,
+    "correctAnswer": "Nguyên liệu được cung cấp theo kế hoạch và tiến độ sản xuất",
+    "correctAnswerLetter": "B",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương VII và VIII: Quản Lý & Sản Xuất Tinh Gọn",
+    "explanation": "Dòng chảy sản xuất liên tục yêu cầu nguyên vật liệu được cung ứng đồng bộ theo nhịp tiến độ sản xuất thực tế, tránh ứ đọng kho bãi."
+  },
+  {
+    "id": 335,
+    "question": "Trong sản xuất tinh gọn, khái niệm Just In Time (JIT) có nghĩa là gì?",
+    "options": [
+      "Đi làm phải đúng giờ",
+      "Sản xuất vừa đúng lúc",
+      "Sản xuất trước khi có yêu cầu để có thể cấp hàng ngay",
+      "Có đầy đủ hàng hóa dự phòng để cung cấp ngay lập tức"
+    ],
+    "correctIndex": 1,
+    "correctAnswer": "Sản xuất vừa đúng lúc",
+    "correctAnswerLetter": "B",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương VII và VIII: Quản Lý & Sản Xuất Tinh Gọn",
+    "explanation": "Just In Time (JIT): Sản xuất đúng sản phẩm, đúng số lượng, vào đúng lúc cần thiết ('Sản xuất vừa đúng lúc') để loại bỏ lãng phí tồn kho."
   }
 ];
