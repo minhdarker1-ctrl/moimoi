@@ -20086,3 +20086,494 @@ body.vthangios-dark .cyber-mode-btn.selected {
   color: #cca700;
 }
 
+
+
+/* ==========================================================================
+   QUIZ EDGE-TTS AUDIO & SETTINGS STYLES (VS CODE DARK+ THEME)
+   ========================================================================== */
+
+.quiz-question-header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.quiz-question-audio-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.quiz-tts-play-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  background: #1e1e1e;
+  border: 1px solid #3c3c3c;
+  border-radius: 5px;
+  color: #569cd6;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.18s ease;
+  user-select: none;
+}
+
+.quiz-tts-play-btn:hover {
+  background: #2a2d2e;
+  border-color: #007acc;
+  color: #ffffff;
+}
+
+.quiz-tts-play-btn.playing {
+  background: rgba(0, 122, 204, 0.2);
+  border-color: #007acc;
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(0, 122, 204, 0.35);
+}
+
+.quiz-tts-play-btn.loading {
+  color: #858585;
+  cursor: wait;
+}
+
+/* 3-bar animated audio wave */
+.quiz-tts-wave {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 14px;
+}
+
+.quiz-tts-wave span {
+  display: inline-block;
+  width: 2.5px;
+  height: 100%;
+  background: #007acc;
+  border-radius: 2px;
+  animation: ttsWave 0.65s infinite ease-in-out alternate;
+}
+
+.quiz-tts-wave span:nth-child(1) {
+  animation-delay: 0s;
+  height: 6px;
+}
+
+.quiz-tts-wave span:nth-child(2) {
+  animation-delay: 0.2s;
+  height: 12px;
+}
+
+.quiz-tts-wave span:nth-child(3) {
+  animation-delay: 0.4s;
+  height: 8px;
+}
+
+@keyframes ttsWave {
+  0% {
+    transform: scaleY(0.3);
+  }
+  100% {
+    transform: scaleY(1);
+  }
+}
+
+.quiz-tool-btn.tts-active {
+  background: rgba(0, 122, 204, 0.2);
+  border-color: #007acc;
+  color: #569cd6;
+  box-shadow: 0 0 8px rgba(0, 122, 204, 0.35);
+}
+
+/* Docstring Explanation TTS Button */
+.quiz-exp-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.quiz-exp-tts-btn {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  background: #1e1e1e;
+  border: 1px solid #3c3c3c;
+  border-radius: 4px;
+  color: #858585;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s ease;
+}
+
+.quiz-exp-tts-btn:hover {
+  background: #2a2d2e;
+  border-color: #007acc;
+  color: #569cd6;
+}
+
+.quiz-exp-tts-btn.active {
+  background: #04395e;
+  border-color: #007acc;
+  color: #ffffff;
+}
+
+/* Flashcard TTS button */
+.cyber-fc-tts-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+/* TTS Settings Modal / Popover */
+.quiz-tts-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+  animation: fadeIn 0.18s ease;
+}
+
+.quiz-tts-modal {
+  width: 100%;
+  max-width: 480px;
+  background: #252526;
+  border: 1px solid #3c3c3c;
+  border-radius: 10px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.7);
+  overflow: hidden;
+  animation: scaleUp 0.18s ease;
+}
+
+.quiz-tts-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  background: #1e1e1e;
+  border-bottom: 1px solid #3c3c3c;
+}
+
+.quiz-tts-modal-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.quiz-tts-modal-title i {
+  color: #007acc;
+}
+
+.quiz-tts-modal-close {
+  background: transparent;
+  border: none;
+  color: #858585;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.quiz-tts-modal-close:hover {
+  color: #ffffff;
+  background: #2a2d2e;
+}
+
+.quiz-tts-modal-body {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: 75vh;
+  overflow-y: auto;
+}
+
+.quiz-tts-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.quiz-tts-field-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 700;
+  color: #858585;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.quiz-tts-field-hint {
+  font-size: 11px;
+  color: #6a9955;
+  text-transform: none;
+  font-weight: 500;
+}
+
+/* Voice Selector Cards */
+.quiz-tts-voice-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.quiz-tts-voice-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: #1e1e1e;
+  border: 1px solid #3c3c3c;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: all 0.15s ease;
+}
+
+.quiz-tts-voice-card:hover {
+  background: #2a2d2e;
+  border-color: #007acc;
+}
+
+.quiz-tts-voice-card.selected {
+  background: #04395e;
+  border-color: #007acc;
+}
+
+.quiz-tts-voice-card .voice-icon {
+  font-size: 18px;
+}
+
+.quiz-tts-voice-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.quiz-tts-voice-name {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.quiz-tts-voice-desc {
+  font-size: 10.5px;
+  color: #858585;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Speed chips */
+.quiz-tts-speed-chips {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.quiz-tts-speed-btn {
+  padding: 7px 4px;
+  background: #1e1e1e;
+  border: 1px solid #3c3c3c;
+  border-radius: 6px;
+  color: #d4d4d4;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+  font-family: ui-monospace, "Cascadia Code", monospace;
+  transition: all 0.15s ease;
+}
+
+.quiz-tts-speed-btn:hover {
+  background: #2a2d2e;
+  border-color: #007acc;
+  color: #ffffff;
+}
+
+.quiz-tts-speed-btn.selected {
+  background: #007acc;
+  border-color: #007acc;
+  color: #ffffff;
+}
+
+/* Scope Selector */
+.quiz-tts-scope-options {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.quiz-tts-scope-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  background: #1e1e1e;
+  border: 1px solid #3c3c3c;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+  color: #d4d4d4;
+  font-size: 12.5px;
+  transition: all 0.15s ease;
+}
+
+.quiz-tts-scope-item:hover {
+  background: #2a2d2e;
+}
+
+.quiz-tts-scope-item.selected {
+  background: #04395e;
+  border-color: #007acc;
+  color: #ffffff;
+}
+
+.quiz-tts-scope-item i {
+  color: #569cd6;
+  font-size: 14px;
+}
+
+/* Switch Row */
+.quiz-tts-switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  background: #1e1e1e;
+  border: 1px solid #3c3c3c;
+  border-radius: 6px;
+}
+
+.quiz-tts-switch-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.quiz-tts-switch-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.quiz-tts-switch-sub {
+  font-size: 11px;
+  color: #858585;
+}
+
+/* Custom CSS Switch */
+.quiz-toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.quiz-toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.quiz-toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #3c3c3c;
+  transition: 0.2s;
+  border-radius: 22px;
+}
+
+.quiz-toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 3px;
+  bottom: 3px;
+  background-color: #ffffff;
+  transition: 0.2s;
+  border-radius: 50%;
+}
+
+.quiz-toggle-switch input:checked + .quiz-toggle-slider {
+  background-color: #007acc;
+}
+
+.quiz-toggle-switch input:checked + .quiz-toggle-slider:before {
+  transform: translateX(18px);
+}
+
+.quiz-tts-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  background: #1e1e1e;
+  border-top: 1px solid #3c3c3c;
+}
+
+.quiz-tts-test-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: #252526;
+  border: 1px solid #3c3c3c;
+  border-radius: 5px;
+  color: #569cd6;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s ease;
+}
+
+.quiz-tts-test-btn:hover {
+  background: #2a2d2e;
+  border-color: #007acc;
+  color: #ffffff;
+}
+
+.quiz-tts-done-btn {
+  padding: 6px 16px;
+  background: #0e639c;
+  border: 1px solid #1177bb;
+  border-radius: 5px;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s ease;
+}
+
+.quiz-tts-done-btn:hover {
+  background: #1177bb;
+}

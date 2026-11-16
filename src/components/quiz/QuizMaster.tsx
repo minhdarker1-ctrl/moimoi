@@ -3,6 +3,8 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { QuizQuestion, QuizMode, QuizTopic, QuizResult } from "@/types/quiz";
 import { QUIZ_TOPICS, MECHANICAL_QUIZ_QUESTIONS } from "@/data/quizBank";
+import { TTSSettings, TTSSpeed, TTSStatus } from "@/types/tts";
+import { quizTTS, DEFAULT_TTS_SETTINGS } from "@/lib/ttsClient";
 
 // Helper audio synthesizer (Zero external asset dependencies)
 function playSound(type: "correct" | "wrong" | "finish" | "click") {
@@ -104,6 +106,11 @@ export default function QuizMaster() {
   const [reviewFilter, setReviewFilter] = useState<"all" | "wrong" | "correct">("all");
   const [showMatrixModal, setShowMatrixModal] = useState<boolean>(false);
 
+  // TTS Edge-TTS States
+  const [ttsSettings, setTtsSettings] = useState<TTSSettings>(DEFAULT_TTS_SETTINGS);
+  const [ttsStatus, setTtsStatus] = useState<TTSStatus>("idle");
+  const [showTtsModal, setShowTtsModal] = useState<boolean>(false);
+
   // Load from localStorage
   useEffect(() => {
     setMounted(true);
@@ -111,11 +118,34 @@ export default function QuizMaster() {
       const bm = JSON.parse(localStorage.getItem("minsr_quiz_bookmarks") || "[]");
       const mis = JSON.parse(localStorage.getItem("minsr_quiz_mistakes") || "[]");
       const snd = localStorage.getItem("minsr_quiz_sound") !== "false";
+      const savedTts = localStorage.getItem("minsr_quiz_tts_settings");
       setBookmarks(bm);
       setMistakes(mis);
       setSoundEnabled(snd);
+      if (savedTts) {
+        setTtsSettings({ ...DEFAULT_TTS_SETTINGS, ...JSON.parse(savedTts) });
+      }
     } catch {}
   }, []);
+
+  // Subscribe to TTS status changes
+  useEffect(() => {
+    const unsub = quizTTS.subscribeStatus((st) => setTtsStatus(st));
+    return () => {
+      unsub();
+      quizTTS.stop();
+    };
+  }, []);
+
+  const updateTtsSettings = (partial: Partial<TTSSettings>) => {
+    setTtsSettings((prev) => {
+      const next = { ...prev, ...partial };
+      try {
+        localStorage.setItem("minsr_quiz_tts_settings", JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  };
 
   // Save changes
   const saveBookmarks = (newBm: number[]) => {
@@ -229,6 +259,50 @@ export default function QuizMaster() {
   // Current Question
   const currentQ = activeQuestionList[currentIndex];
 
+  // TTS Play / Stop Triggers
+  const togglePlayCurrentQuestion = useCallback(() => {
+    if (!currentQ) return;
+    if (ttsStatus === "playing" || ttsStatus === "loading") {
+      quizTTS.stop();
+    } else {
+      quizTTS.speakQuestion(currentQ, ttsSettings.scope, ttsSettings);
+    }
+  }, [currentQ, ttsStatus, ttsSettings]);
+
+  const playExplanationAudio = useCallback(() => {
+    if (!currentQ || !currentQ.explanation) return;
+    if (ttsStatus === "playing" || ttsStatus === "loading") {
+      quizTTS.stop();
+    } else {
+      quizTTS.speakExplanation(currentQ.explanation, ttsSettings);
+    }
+  }, [currentQ, ttsStatus, ttsSettings]);
+
+  const handleTestTtsVoice = () => {
+    quizTTS.speakText(
+      "Xin chào, đây là giọng đọc AI Microsoft Edge trên hệ thống trắc nghiệm MinSr.",
+      ttsSettings
+    );
+  };
+
+  // Auto-read question on navigation (if enabled)
+  useEffect(() => {
+    if (!isPlaying || isFinished || !currentQ) {
+      quizTTS.stop();
+      return;
+    }
+
+    if (ttsSettings.autoReadQuestion) {
+      quizTTS.speakQuestion(currentQ, ttsSettings.scope, ttsSettings);
+    } else {
+      quizTTS.stop();
+    }
+
+    return () => {
+      quizTTS.stop();
+    };
+  }, [currentIndex, isPlaying, isFinished, ttsSettings.autoReadQuestion, ttsSettings.scope, ttsSettings.voice, ttsSettings.speed]);
+
   // Select Option Handler
   const handleSelectOption = (optIndex: number) => {
     if (!currentQ || isFinished) return;
@@ -253,6 +327,11 @@ export default function QuizMaster() {
         if (!mistakes.includes(currentQ.id)) {
           saveMistakes([...mistakes, currentQ.id]);
         }
+      }
+
+      // Auto-read feedback & explanation if enabled
+      if (ttsSettings.autoReadExplanation) {
+        quizTTS.speakFeedback(isCorrect, optIndex, currentQ, ttsSettings);
       }
     } else if (mode === "exam") {
       // In exam mode, can freely change answers until submit
@@ -311,6 +390,20 @@ export default function QuizMaster() {
         return;
       }
 
+      // Key R: Toggle TTS read/stop question
+      if (key === "r") {
+        e.preventDefault();
+        togglePlayCurrentQuestion();
+        return;
+      }
+
+      // Key E: Play explanation
+      if (key === "e") {
+        e.preventDefault();
+        playExplanationAudio();
+        return;
+      }
+
       // Navigation: Right Arrow / Enter / Space (for next or flip)
       if (e.key === "ArrowRight") {
         e.preventDefault();
@@ -330,6 +423,7 @@ export default function QuizMaster() {
 
   // Finish Quiz Handler
   const finishQuiz = () => {
+    quizTTS.stop();
     setIsFinished(true);
     setIsPlaying(false);
     if (soundEnabled) playSound("finish");
@@ -349,6 +443,7 @@ export default function QuizMaster() {
 
   // Exit back to lobby
   const exitToLobby = () => {
+    quizTTS.stop();
     if (soundEnabled) playSound("click");
     setIsPlaying(false);
     setIsFinished(false);
@@ -390,6 +485,169 @@ export default function QuizMaster() {
     const m = Math.floor(Math.max(secs, 0) / 60);
     const s = Math.max(secs, 0) % 60;
     return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  };
+
+  // Reusable Edge-TTS Audio Settings Modal
+  const renderTtsModal = () => {
+    if (!showTtsModal) return null;
+    return (
+      <div className="quiz-tts-modal-overlay" onClick={() => setShowTtsModal(false)}>
+        <div className="quiz-tts-modal" onClick={(e) => e.stopPropagation()}>
+          <div className="quiz-tts-modal-header">
+            <div className="quiz-tts-modal-title">
+              <i className="fa-solid fa-sliders" />
+              <span>Cài Đặt Giọng Đọc AI (Edge TTS)</span>
+            </div>
+            <button
+              type="button"
+              className="quiz-tts-modal-close"
+              onClick={() => setShowTtsModal(false)}
+              title="Đóng bảng cài đặt"
+            >
+              <i className="fa-solid fa-xmark" />
+            </button>
+          </div>
+
+          <div className="quiz-tts-modal-body">
+            {/* Voice selection */}
+            <div className="quiz-tts-field-group">
+              <div className="quiz-tts-field-label">
+                <span>Giọng đọc Tiếng Việt Neural</span>
+                <span className="quiz-tts-field-hint">Miễn phí · Tự nhiên</span>
+              </div>
+              <div className="quiz-tts-voice-grid">
+                <button
+                  type="button"
+                  className={`quiz-tts-voice-card ${ttsSettings.voice === "vi-VN-HoaiMyNeural" ? "selected" : ""}`}
+                  onClick={() => updateTtsSettings({ voice: "vi-VN-HoaiMyNeural" })}
+                >
+                  <span className="voice-icon">👩</span>
+                  <div className="quiz-tts-voice-info">
+                    <span className="quiz-tts-voice-name">Hoài My (Nữ)</span>
+                    <span className="quiz-tts-voice-desc">Truyền cảm, nhẹ nhàng</span>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  className={`quiz-tts-voice-card ${ttsSettings.voice === "vi-VN-NamMinhNeural" ? "selected" : ""}`}
+                  onClick={() => updateTtsSettings({ voice: "vi-VN-NamMinhNeural" })}
+                >
+                  <span className="voice-icon">👨</span>
+                  <div className="quiz-tts-voice-info">
+                    <span className="quiz-tts-voice-name">Nam Minh (Nam)</span>
+                    <span className="quiz-tts-voice-desc">Dứt khoát, đĩnh đạc</span>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            {/* Speed selection */}
+            <div className="quiz-tts-field-group">
+              <div className="quiz-tts-field-label">
+                <span>Tốc độ đọc</span>
+                <span className="quiz-tts-field-hint">Hiện tại: {ttsSettings.speed}</span>
+              </div>
+              <div className="quiz-tts-speed-chips">
+                {(["0.8x", "1.0x", "1.25x", "1.5x"] as TTSSpeed[]).map((spd) => (
+                  <button
+                    key={spd}
+                    type="button"
+                    className={`quiz-tts-speed-btn ${ttsSettings.speed === spd ? "selected" : ""}`}
+                    onClick={() => updateTtsSettings({ speed: spd })}
+                  >
+                    {spd === "1.0x" ? "1.0x (Chuẩn)" : spd}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Scope selection */}
+            <div className="quiz-tts-field-group">
+              <div className="quiz-tts-field-label">
+                <span>Phạm vi đọc khi phát câu hỏi</span>
+              </div>
+              <div className="quiz-tts-scope-options">
+                <button
+                  type="button"
+                  className={`quiz-tts-scope-item ${ttsSettings.scope === "question_and_options" ? "selected" : ""}`}
+                  onClick={() => updateTtsSettings({ scope: "question_and_options" })}
+                >
+                  <i className={ttsSettings.scope === "question_and_options" ? "fa-solid fa-circle-dot" : "fa-regular fa-circle"} />
+                  <span>Đọc câu hỏi + 4 phương án A, B, C, D</span>
+                </button>
+
+                <button
+                  type="button"
+                  className={`quiz-tts-scope-item ${ttsSettings.scope === "question_only" ? "selected" : ""}`}
+                  onClick={() => updateTtsSettings({ scope: "question_only" })}
+                >
+                  <i className={ttsSettings.scope === "question_only" ? "fa-solid fa-circle-dot" : "fa-regular fa-circle"} />
+                  <span>Chỉ đọc câu hỏi (không đọc phương án)</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Automation Toggles */}
+            <div className="quiz-tts-field-group">
+              <div className="quiz-tts-field-label">
+                <span>Tự động hóa phát âm (Rảnh tay)</span>
+              </div>
+
+              <div className="quiz-tts-switch-row">
+                <div className="quiz-tts-switch-info">
+                  <span className="quiz-tts-switch-title">Tự động đọc câu hỏi mới</span>
+                  <span className="quiz-tts-switch-sub">Tự phát giọng đọc ngay khi chuyển sang câu tiếp</span>
+                </div>
+                <label className="quiz-toggle-switch">
+                  <input
+                    type="checkbox"
+                    checked={ttsSettings.autoReadQuestion}
+                    onChange={(e) => updateTtsSettings({ autoReadQuestion: e.target.checked })}
+                  />
+                  <span className="quiz-toggle-slider" />
+                </label>
+              </div>
+
+              <div className="quiz-tts-switch-row">
+                <div className="quiz-tts-switch-info">
+                  <span className="quiz-tts-switch-title">Đọc đáp án đúng & giải thích</span>
+                  <span className="quiz-tts-switch-sub">Tự đọc kết quả và phần giải thích sau khi chọn phương án</span>
+                </div>
+                <label className="quiz-toggle-switch">
+                  <input
+                    type="checkbox"
+                    checked={ttsSettings.autoReadExplanation}
+                    onChange={(e) => updateTtsSettings({ autoReadExplanation: e.target.checked })}
+                  />
+                  <span className="quiz-toggle-slider" />
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div className="quiz-tts-modal-footer">
+            <button
+              type="button"
+              className="quiz-tts-test-btn"
+              onClick={handleTestTtsVoice}
+              title="Nghe thử giọng đọc mẫu"
+            >
+              <i className={ttsStatus === "playing" ? "fa-solid fa-stop" : "fa-solid fa-play"} />
+              <span>{ttsStatus === "playing" ? "Dừng thử" : "Nghe thử giọng"}</span>
+            </button>
+
+            <button
+              type="button"
+              className="quiz-tts-done-btn"
+              onClick={() => setShowTtsModal(false)}
+            >
+              Hoàn tất
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   if (!mounted) {
@@ -636,6 +894,34 @@ export default function QuizMaster() {
               </div>
             )}
 
+            {/* TTS Audio Speak/Stop */}
+            <button
+              type="button"
+              className={`quiz-tool-btn ${ttsStatus === "playing" ? "active tts-active" : ""}`}
+              onClick={togglePlayCurrentQuestion}
+              title={ttsStatus === "playing" ? "Dừng đọc (Phím R)" : "Đọc câu hỏi bằng AI Edge-TTS (Phím R)"}
+              aria-label="Đọc câu hỏi"
+            >
+              {ttsStatus === "loading" ? (
+                <i className="fa-solid fa-circle-notch fa-spin text-blue" />
+              ) : ttsStatus === "playing" ? (
+                <i className="fa-solid fa-stop text-blue" />
+              ) : (
+                <i className="fa-solid fa-volume-high" />
+              )}
+            </button>
+
+            {/* TTS Settings Modal Trigger */}
+            <button
+              type="button"
+              className={`quiz-tool-btn ${showTtsModal ? "active" : ""}`}
+              onClick={() => setShowTtsModal(true)}
+              title="Cài đặt giọng đọc AI (Edge TTS)"
+              aria-label="Cài đặt giọng đọc"
+            >
+              <i className="fa-solid fa-sliders" />
+            </button>
+
             <button
               type="button"
               className={`quiz-tool-btn ${soundEnabled ? "active" : ""}`}
@@ -674,7 +960,21 @@ export default function QuizMaster() {
             >
               {/* Mặt trước: Câu hỏi */}
               <div className="cyber-fc-side cyber-fc-front">
-                <span className="cyber-fc-badge">MẶT TRƯỚC · CÂU HỎI #{currentIndex + 1}</span>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                  <span className="cyber-fc-badge">MẶT TRƯỚC · CÂU HỎI #{currentIndex + 1}</span>
+                  <button
+                    type="button"
+                    className={`quiz-tts-play-btn ${ttsStatus === "playing" ? "playing" : ""}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      togglePlayCurrentQuestion();
+                    }}
+                    title="Đọc câu hỏi (Phím R)"
+                  >
+                    <i className={ttsStatus === "playing" ? "fa-solid fa-stop" : "fa-solid fa-volume-high"} />
+                    <span>{ttsStatus === "playing" ? "Dừng" : "Đọc đề"}</span>
+                  </button>
+                </div>
                 <p className="cyber-fc-question">{currentQ.question}</p>
                 <div className="cyber-fc-options-preview">
                   {currentQ.options.map((opt, idx) => (
@@ -690,7 +990,21 @@ export default function QuizMaster() {
 
               {/* Mặt sau: Đáp án & Giải thích */}
               <div className="cyber-fc-side cyber-fc-back">
-                <span className="cyber-fc-badge correct">MẶT SAU · ĐÁP ÁN ĐÚNG</span>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                  <span className="cyber-fc-badge correct">MẶT SAU · ĐÁP ÁN ĐÚNG</span>
+                  <button
+                    type="button"
+                    className={`quiz-tts-play-btn ${ttsStatus === "playing" ? "playing" : ""}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      playExplanationAudio();
+                    }}
+                    title="Đọc giải thích & ghi nhớ (Phím E)"
+                  >
+                    <i className={ttsStatus === "playing" ? "fa-solid fa-stop" : "fa-solid fa-volume-high"} />
+                    <span>{ttsStatus === "playing" ? "Dừng" : "Nghe giải thích"}</span>
+                  </button>
+                </div>
                 <div className="cyber-fc-correct-box">
                   <span className="cyber-fc-ans-letter">{currentQ.correctAnswerLetter}</span>
                   <p className="cyber-fc-ans-text">{currentQ.correctAnswer}</p>
@@ -759,7 +1073,36 @@ export default function QuizMaster() {
           <div className="quiz-card">
             {/* Question Text */}
             <div className="quiz-question-box">
-              <h2 className="quiz-question-title">{currentQ.question}</h2>
+              <div className="quiz-question-header-row">
+                <h2 className="quiz-question-title">{currentQ.question}</h2>
+                <div className="quiz-question-audio-actions">
+                  <button
+                    type="button"
+                    className={`quiz-tts-play-btn ${ttsStatus === "playing" ? "playing" : ttsStatus === "loading" ? "loading" : ""}`}
+                    onClick={togglePlayCurrentQuestion}
+                    title={ttsStatus === "playing" ? "Dừng đọc (Phím R)" : "Đọc đề bằng AI Edge-TTS (Phím R)"}
+                  >
+                    {ttsStatus === "loading" ? (
+                      <>
+                        <i className="fa-solid fa-circle-notch fa-spin" />
+                        <span>Đang tải...</span>
+                      </>
+                    ) : ttsStatus === "playing" ? (
+                      <>
+                        <span className="quiz-tts-wave">
+                          <span /><span /><span />
+                        </span>
+                        <span>Dừng</span>
+                      </>
+                    ) : (
+                      <>
+                        <i className="fa-solid fa-volume-high" />
+                        <span>Đọc đề</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
             </div>
 
             {/* 4 Streamlined Options */}
@@ -818,6 +1161,17 @@ export default function QuizMaster() {
                   <span className="quiz-exp-correct-target">
                     Đáp án: <strong>{currentQ.correctAnswerLetter}. {currentQ.correctAnswer}</strong>
                   </span>
+                  {currentQ.explanation && (
+                    <button
+                      type="button"
+                      className={`quiz-exp-tts-btn ${ttsStatus === "playing" ? "active" : ""}`}
+                      onClick={playExplanationAudio}
+                      title="Nghe giọng đọc giải thích (Phím E)"
+                    >
+                      <i className={ttsStatus === "playing" ? "fa-solid fa-stop" : "fa-solid fa-volume-high"} />
+                      <span>{ttsStatus === "playing" ? "Dừng" : "Nghe giải thích"}</span>
+                    </button>
+                  )}
                 </div>
                 {currentQ.explanation && (
                   <p className="quiz-exp-text">
@@ -883,7 +1237,7 @@ export default function QuizMaster() {
 
             {/* Subtle Keyboard Hint */}
             <div className="quiz-keyboard-hint">
-              <span>Phím tắt: <strong>1-4</strong> hoặc <strong>A-D</strong> để chọn · Mũi tên <strong>←</strong> <strong>→</strong> để chuyển câu</span>
+              <span>Phím tắt: <strong>1-4</strong> / <strong>A-D</strong> chọn đáp án · <strong>R</strong> đọc/dừng · <strong>E</strong> nghe giải thích · <strong>←</strong> <strong>→</strong> chuyển câu</span>
             </div>
 
             {/* Exam Mode Question Matrix Popover / Modal */}
@@ -927,6 +1281,9 @@ export default function QuizMaster() {
             )}
           </div>
         )}
+
+        {/* Edge-TTS Audio Settings Modal */}
+        {renderTtsModal()}
       </div>
     );
   }
@@ -1136,6 +1493,16 @@ export default function QuizMaster() {
                   />
                   <span>Âm thanh</span>
                 </label>
+                <button
+                  type="button"
+                  className="quiz-tool-btn"
+                  onClick={() => setShowTtsModal(true)}
+                  title="Cài đặt giọng đọc AI (Edge TTS)"
+                  style={{ width: "auto", padding: "4px 10px", fontSize: "12px", gap: "6px" }}
+                >
+                  <i className="fa-solid fa-volume-high text-blue" />
+                  <span>Giọng đọc AI</span>
+                </button>
               </div>
             </div>
 
@@ -1152,6 +1519,9 @@ export default function QuizMaster() {
           </div>
         </div>
       </div>
+
+      {/* Edge-TTS Audio Settings Modal */}
+      {renderTtsModal()}
     </div>
   );
 }
