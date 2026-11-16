@@ -5,6 +5,8 @@ import { QuizQuestion, QuizMode, QuizTopic, QuizResult } from "@/types/quiz";
 import { QUIZ_TOPICS, MECHANICAL_QUIZ_QUESTIONS } from "@/data/quizBank";
 import { TTSSettings, TTSSpeed, TTSStatus } from "@/types/tts";
 import { quizTTS, DEFAULT_TTS_SETTINGS } from "@/lib/ttsClient";
+import QuizLeaderboardModal from "./QuizLeaderboardModal";
+import { LeaderboardSubmitPayload } from "@/types/leaderboard";
 
 // Helper audio synthesizer (Zero external asset dependencies)
 function playSound(type: "correct" | "wrong" | "finish" | "click") {
@@ -111,6 +113,15 @@ export default function QuizMaster() {
   const [ttsStatus, setTtsStatus] = useState<TTSStatus>("idle");
   const [showTtsModal, setShowTtsModal] = useState<boolean>(false);
 
+  // Leaderboard (Bảng Vàng) States
+  const [userName, setUserName] = useState<string>("");
+  const [showLeaderboardModal, setShowLeaderboardModal] = useState<boolean>(false);
+  const [isSubmittingScore, setIsSubmittingScore] = useState<boolean>(false);
+  const [submittedRank, setSubmittedRank] = useState<number | null>(null);
+  const [submissionMessage, setSubmissionMessage] = useState<string | null>(null);
+  const [quizStartTime, setQuizStartTime] = useState<number>(0);
+  const [quizEndTime, setQuizEndTime] = useState<number>(0);
+
   // Load from localStorage
   useEffect(() => {
     setMounted(true);
@@ -119,9 +130,13 @@ export default function QuizMaster() {
       const mis = JSON.parse(localStorage.getItem("minsr_quiz_mistakes") || "[]");
       const snd = localStorage.getItem("minsr_quiz_sound") !== "false";
       const savedTts = localStorage.getItem("minsr_quiz_tts_settings");
+      const savedName = localStorage.getItem("minsr_quiz_user_name") || "";
       setBookmarks(bm);
       setMistakes(mis);
       setSoundEnabled(snd);
+      if (savedName) {
+        setUserName(savedName);
+      }
       if (savedTts) {
         setTtsSettings({ ...DEFAULT_TTS_SETTINGS, ...JSON.parse(savedTts) });
       }
@@ -159,6 +174,13 @@ export default function QuizMaster() {
     setMistakes(newMis);
     try {
       localStorage.setItem("minsr_quiz_mistakes", JSON.stringify(newMis));
+    } catch {}
+  };
+
+  const handleSaveUserName = (name: string) => {
+    setUserName(name);
+    try {
+      localStorage.setItem("minsr_quiz_user_name", name);
     } catch {}
   };
 
@@ -231,6 +253,10 @@ export default function QuizMaster() {
       setIsCardFlipped(false);
       setIsPlaying(true);
       setIsFinished(false);
+      setQuizStartTime(Date.now());
+      setQuizEndTime(0);
+      setSubmittedRank(null);
+      setSubmissionMessage(null);
 
       if (mode === "exam") {
         const timeNeeded = Math.max(pool.length * 60, 5 * 60); // 1 min/question or min 5 mins
@@ -424,6 +450,7 @@ export default function QuizMaster() {
   // Finish Quiz Handler
   const finishQuiz = () => {
     quizTTS.stop();
+    setQuizEndTime(Date.now());
     setIsFinished(true);
     setIsPlaying(false);
     if (soundEnabled) playSound("finish");
@@ -467,7 +494,9 @@ export default function QuizMaster() {
 
     const total = activeQuestionList.length || 1;
     const pct = Math.round((correct / total) * 100);
-    const spent = mode === "exam" ? examTotalSeconds - examSecondsLeft : 0;
+    const effectiveEndTime = quizEndTime > 0 ? quizEndTime : Date.now();
+    const rawElapsed = quizStartTime > 0 ? Math.floor((effectiveEndTime - quizStartTime) / 1000) : 0;
+    const spent = mode === "exam" ? Math.max(1, examTotalSeconds - examSecondsLeft) : Math.max(1, rawElapsed);
 
     return {
       totalQuestions: activeQuestionList.length,
@@ -478,7 +507,63 @@ export default function QuizMaster() {
       wrongQuestionIds: wrongIds,
       completedAt: new Date().toLocaleTimeString("vi-VN"),
     };
-  }, [activeQuestionList, userAnswers, mode, examTotalSeconds, examSecondsLeft]);
+  }, [activeQuestionList, userAnswers, mode, examTotalSeconds, examSecondsLeft, quizStartTime, quizEndTime]);
+
+  // Submit score to Leaderboard
+  const handleSubmitLeaderboard = async () => {
+    const trimmedName = userName.trim();
+    if (!trimmedName || trimmedName.length < 2) {
+      alert("Vui lòng nhập tên của bạn (từ 2 đến 30 ký tự) để ghi danh Bảng Vàng!");
+      return;
+    }
+    handleSaveUserName(trimmedName);
+    setIsSubmittingScore(true);
+    setSubmissionMessage(null);
+
+    const payload: LeaderboardSubmitPayload = {
+      userName: trimmedName,
+      mode: mode === "exam" ? "exam" : "practice",
+      scorePercentage: results.scorePercentage,
+      totalQuestions: results.totalQuestions,
+      correctCount: results.correctCount,
+      timeSpentSeconds: Math.max(1, results.timeSpentSeconds),
+      topicId: selectedTopic,
+      topicTitle: QUIZ_TOPICS.find((t) => t.id === selectedTopic)?.title || (selectedTopic === "all" ? "Toàn bộ ngân hàng" : selectedTopic),
+    };
+
+    try {
+      const res = await fetch("/api/quiz/leaderboard", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+      if (data.success && data.entry) {
+        setSubmittedRank(data.entry.rank || 1);
+        setSubmissionMessage(`🎉 Chúc mừng! Bạn đã ghi danh thành công ở Hạng #${data.entry.rank || 1} trên Bảng Vàng!`);
+      } else {
+        throw new Error(data.error || "Ghi danh thất bại");
+      }
+    } catch (err) {
+      console.warn("Leaderboard submit error:", err);
+      // Fallback to local storage
+      try {
+        const localKey = "minsr_quiz_local_leaderboard";
+        const existing = JSON.parse(localStorage.getItem(localKey) || "[]");
+        existing.push({
+          ...payload,
+          id: "local_" + Date.now(),
+          createdAt: new Date().toISOString(),
+        });
+        localStorage.setItem(localKey, JSON.stringify(existing));
+      } catch {}
+      setSubmittedRank(1);
+      setSubmissionMessage("Đã lưu kết quả thành tích vào máy của bạn!");
+    } finally {
+      setIsSubmittingScore(false);
+    }
+  };
 
   // Format seconds to MM:SS
   const formatTime = (secs: number) => {
@@ -749,6 +834,80 @@ export default function QuizMaster() {
               <i className="fa-solid fa-house" /> Về Bảng Điều Khiển
             </button>
           </div>
+
+          {/* Leaderboard Ghi Danh Card */}
+          <div className="quiz-result-lb-card">
+            <div className="quiz-result-lb-head">
+              <div className="quiz-result-lb-icon">
+                <i className="fa-solid fa-trophy" />
+              </div>
+              <div className="quiz-result-lb-info">
+                <h4>Vinh Danh Bảng Vàng</h4>
+                <p>
+                  Ghi nhận thành tích <strong>{results.scorePercentage}%</strong> ({formatTime(results.timeSpentSeconds)}) của bạn vào bảng xếp hạng toàn khóa.
+                </p>
+              </div>
+            </div>
+
+            {submittedRank !== null ? (
+              <div className="quiz-result-lb-success">
+                <i className="fa-solid fa-circle-check text-green" />
+                <span>{submissionMessage}</span>
+                <button
+                  type="button"
+                  className="quiz-lb-view-btn"
+                  onClick={() => setShowLeaderboardModal(true)}
+                >
+                  <i className="fa-solid fa-eye" /> Mở Bảng Vàng
+                </button>
+              </div>
+            ) : (
+              <div className="quiz-result-lb-form">
+                <div className="quiz-result-lb-input-wrap">
+                  <i className="fa-solid fa-user" />
+                  <input
+                    type="text"
+                    placeholder="Nhập tên của bạn (VD: Minh Cơ Khí)..."
+                    value={userName}
+                    maxLength={30}
+                    onChange={(e) => handleSaveUserName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleSubmitLeaderboard();
+                      }
+                    }}
+                  />
+                </div>
+                <button
+                  type="button"
+                  className="quiz-result-lb-submit-btn"
+                  onClick={handleSubmitLeaderboard}
+                  disabled={isSubmittingScore || !userName.trim()}
+                >
+                  {isSubmittingScore ? (
+                    <>
+                      <i className="fa-solid fa-circle-notch fa-spin" />
+                      <span>Đang ghi...</span>
+                    </>
+                  ) : (
+                    <>
+                      <i className="fa-solid fa-crown" />
+                      <span>Ghi Danh 🏆</span>
+                    </>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  className="quiz-result-lb-open-btn"
+                  onClick={() => setShowLeaderboardModal(true)}
+                  title="Xem Bảng Vàng hiện tại"
+                >
+                  <i className="fa-solid fa-list-ol" /> Bảng Vàng
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Detailed Question Review List */}
@@ -846,6 +1005,14 @@ export default function QuizMaster() {
             })}
           </div>
         </div>
+
+        {/* Quiz Leaderboard Modal */}
+        <QuizLeaderboardModal
+          isOpen={showLeaderboardModal}
+          onClose={() => setShowLeaderboardModal(false)}
+          currentUserName={userName}
+          defaultMode={mode === "exam" ? "exam" : "practice"}
+        />
       </div>
     );
   }
@@ -893,6 +1060,17 @@ export default function QuizMaster() {
                 <span>{formatTime(examSecondsLeft)}</span>
               </div>
             )}
+
+            {/* Leaderboard Trophy Trigger */}
+            <button
+              type="button"
+              className="quiz-tool-btn trophy"
+              onClick={() => setShowLeaderboardModal(true)}
+              title="Xem Bảng Vàng xếp hạng"
+              aria-label="Xem Bảng Vàng"
+            >
+              <i className="fa-solid fa-trophy text-gold" />
+            </button>
 
             {/* TTS Audio Speak/Stop */}
             <button
@@ -1284,6 +1462,14 @@ export default function QuizMaster() {
 
         {/* Edge-TTS Audio Settings Modal */}
         {renderTtsModal()}
+
+        {/* Quiz Leaderboard Modal */}
+        <QuizLeaderboardModal
+          isOpen={showLeaderboardModal}
+          onClose={() => setShowLeaderboardModal(false)}
+          currentUserName={userName}
+          defaultMode={mode === "exam" ? "exam" : "practice"}
+        />
       </div>
     );
   }
@@ -1303,6 +1489,15 @@ export default function QuizMaster() {
             </p>
           </div>
           <div className="quiz-dh-chips">
+            <button
+              type="button"
+              className="quiz-lb-trigger-btn"
+              onClick={() => setShowLeaderboardModal(true)}
+              title="Xem Bảng Vàng vinh danh"
+            >
+              <i className="fa-solid fa-trophy text-gold" />
+              <span>Bảng Vàng 🏆</span>
+            </button>
             <div className="quiz-chip">
               <i className="fa-solid fa-database text-blue" />
               <span><strong>{MECHANICAL_QUIZ_QUESTIONS.length}</strong> câu hỏi</span>
@@ -1397,6 +1592,32 @@ export default function QuizMaster() {
           <div className="quiz-db-column right">
             <div className="quiz-section-label">
               <i className="fa-solid fa-sliders text-blue" /> 2. Cấu hình &amp; Bắt đầu
+            </div>
+
+            {/* User Display Name Input for Leaderboard */}
+            <div className="quiz-control-group quiz-username-group">
+              <label className="quiz-control-label">
+                <i className="fa-solid fa-user-tag text-blue" /> Tên thí sinh (ghi danh Bảng Vàng):
+              </label>
+              <div className="quiz-username-input-wrap">
+                <input
+                  type="text"
+                  className="quiz-username-input"
+                  placeholder="Nhập tên của bạn (VD: Minh Cơ Khí)..."
+                  value={userName}
+                  maxLength={30}
+                  onChange={(e) => handleSaveUserName(e.target.value)}
+                />
+                {userName.trim() ? (
+                  <span className="quiz-username-badge success">
+                    <i className="fa-solid fa-check" /> Đã lưu
+                  </span>
+                ) : (
+                  <span className="quiz-username-badge hint">
+                    Tự động lưu
+                  </span>
+                )}
+              </div>
             </div>
 
             {/* Mode Segmented Switcher */}
@@ -1522,6 +1743,14 @@ export default function QuizMaster() {
 
       {/* Edge-TTS Audio Settings Modal */}
       {renderTtsModal()}
+
+      {/* Quiz Leaderboard Modal */}
+      <QuizLeaderboardModal
+        isOpen={showLeaderboardModal}
+        onClose={() => setShowLeaderboardModal(false)}
+        currentUserName={userName}
+        defaultMode={mode === "exam" ? "exam" : "practice"}
+      />
     </div>
   );
 }

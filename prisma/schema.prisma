@@ -531,3 +531,23 @@ model OntopLinkBuffer {
 
 
 
+
+// ---------- Bảng Vàng Trắc Nghiệm Cơ Khí ----------
+
+model QuizLeaderboard {
+  id               String   @id @default(cuid())
+  userName         String
+  scorePercentage  Int      // Điểm số 0 - 100%
+  correctCount     Int      // Số câu đúng
+  totalQuestions   Int      // Tổng số câu hỏi trong đề
+  timeSpentSeconds Int      // Thời gian làm bài (giây)
+  mode             String   // "exam" | "practice" | "flashcard"
+  topicId          String   // "all" | "ch1" | "ch2" ...
+  topicTitle       String   // Tên chương: "Chương I: Tổng Quan" ...
+  createdAt        DateTime @default(now())
+
+  @@index([mode, scorePercentage, timeSpentSeconds])
+  @@index([topicId, scorePercentage, timeSpentSeconds])
+  @@index([scorePercentage, timeSpentSeconds])
+  @@index([createdAt])
+}
