@@ -4,10 +4,10 @@ export const QUIZ_TOPICS: QuizTopic[] = [
   {
     "id": "all",
     "title": "Toàn Bộ Ngân Hàng Câu Hỏi",
-    "desc": "Tổng hợp toàn bộ 205 câu hỏi trắc nghiệm Dung sai, Cơ khí, Đúc, Gia công áp lực & Hàn cắt kim loại",
+    "desc": "Tổng hợp toàn bộ 275 câu hỏi trắc nghiệm Dung sai, Đúc, Gia công áp lực, Hàn & Cắt gọt kim loại",
     "icon": "fa-solid fa-layer-group",
-    "badge": "205 CÂU",
-    "count": 205
+    "badge": "275 CÂU",
+    "count": 275
   },
   {
     "id": "ch1",
@@ -54,8 +54,16 @@ export const QUIZ_TOPICS: QuizTopic[] = [
     "title": "Chương 6: Công Nghệ Hàn & Cắt Kim Loại",
     "desc": "Hàn hồ quang, hàn khí O2-C2H2, TIG, MIG, hàn tiếp xúc, hàn ma sát & biến dạng hàn",
     "icon": "fa-solid fa-fire-burner",
-    "badge": "40 CÂU MỚI",
+    "badge": "40 CÂU",
     "count": 40
+  },
+  {
+    "id": "ch7",
+    "title": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "desc": "Chế độ cắt (v, s, t), dụng cụ cắt, máy tiện/phay/bào/mài, đồ gá mâm cặp & luynet",
+    "icon": "fa-solid fa-screwdriver-wrench",
+    "badge": "70 CÂU MỚI",
+    "count": 70
   }
 ];
 
@@ -3339,5 +3347,1125 @@ export const MECHANICAL_QUIZ_QUESTIONS: QuizQuestion[] = [
     "chapterId": "ch6",
     "chapterTitle": "Chương 6: Công Nghệ Hàn & Cắt Kim Loại",
     "explanation": "Hàn điện tiếp xúc chỉ ép hai tấm kim loại vào nhau và cho dòng điện nung nóng dẻo điểm tiếp xúc rồi ép dính, hoàn toàn không cần que hàn hay kim loại phụ."
+  },
+  {
+    "id": 206,
+    "question": "Vật liệu của chi tiết gia công tại vị trí lưỡi cắt ở trạng thái nào?",
+    "options": [
+      "Trạng thái chảy",
+      "Trạng thái phá hủy",
+      "Trạng thái đàn hồi",
+      "Trạng thái biến dạng"
+    ],
+    "correctIndex": 1,
+    "correctAnswer": "Trạng thái phá hủy",
+    "correctAnswerLetter": "B",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Tại vị trí lưỡi cắt, ứng suất trong vật liệu vượt quá giới hạn bền phá hủy, làm kim loại bị trượt, tách rời tạo thành phoi."
+  },
+  {
+    "id": 207,
+    "question": "Chế độ cắt bao gồm các thông số sau:",
+    "options": [
+      "Chuyển động chính, chuyển động chạy dao",
+      "Vận tốc cắt, vận tốc tiến dao, chiều sâu cắt",
+      "Chuyển động chính, chuyển động chạy dao, chiều sâu cắt",
+      "Vận tốc cắt, chuyển động chính, chiều sâu cắt"
+    ],
+    "correctIndex": 1,
+    "correctAnswer": "Vận tốc cắt, vận tốc tiến dao, chiều sâu cắt",
+    "correctAnswerLetter": "B",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Chế độ cắt gồm 3 thông số cơ bản: Vận tốc cắt v (m/phút), lượng chạy dao / vận tốc tiến dao s (mm/vòng hoặc mm/phút), và chiều sâu cắt t (mm)."
+  },
+  {
+    "id": 208,
+    "question": "Năng suất và chất lượng sẽ thay đổi như thế nào khi tăng vận tốc cắt?",
+    "options": [
+      "Năng suất giảm và chất lượng giảm",
+      "Năng suất tăng và chất lượng giảm",
+      "Năng suất tăng và chất lượng sản phẩm tăng",
+      "Năng suất giảm và chất lượng tăng"
+    ],
+    "correctIndex": 2,
+    "correctAnswer": "Năng suất tăng và chất lượng sản phẩm tăng",
+    "correctAnswerLetter": "C",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Tăng vận tốc cắt v giúp bóc tách phoi nhanh hơn (tăng năng suất), đồng thời triệt tiêu lẹo dao và giảm lực cắt, làm bề mặt bóng đẹp hơn (tăng chất lượng)."
+  },
+  {
+    "id": 209,
+    "question": "Năng suất và chất lượng sẽ thay đổi như thế nào khi giảm vận tốc cắt?",
+    "options": [
+      "Năng suất giảm và chất lượng tăng",
+      "Năng suất giảm và chất lượng giảm",
+      "Năng suất tăng và chất lượng giảm",
+      "Năng suất tăng và chất lượng sản phẩm tăng"
+    ],
+    "correctIndex": 1,
+    "correctAnswer": "Năng suất giảm và chất lượng giảm",
+    "correctAnswerLetter": "B",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Giảm vận tốc cắt v làm kéo dài thời gian gia công (giảm năng suất), đồng thời dễ sinh hiện tượng lẹo dao làm bề mặt thô ráp (giảm chất lượng)."
+  },
+  {
+    "id": 210,
+    "question": "Năng suất và chất lượng sẽ thay đổi như thế nào khi tăng vận tốc tiến dao?",
+    "options": [
+      "Năng suất tăng và chất lượng giảm",
+      "Năng suất giảm và chất lượng giảm",
+      "Năng suất giảm và chất lượng tăng",
+      "Năng suất tăng và chất lượng sản phẩm tăng"
+    ],
+    "correctIndex": 0,
+    "correctAnswer": "Năng suất tăng và chất lượng giảm",
+    "correctAnswerLetter": "A",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Tăng vận tốc tiến dao s giúp rút ngắn hành trình gia công (tăng năng suất), nhưng làm chiều cao nhấp nhô bề mặt Rz tăng lên (giảm chất lượng bề mặt)."
+  },
+  {
+    "id": 211,
+    "question": "Năng suất và chất lượng sẽ thay đổi như thế nào khi giảm vận tốc tiến dao?",
+    "options": [
+      "Năng suất tăng và chất lượng giảm",
+      "Năng suất giảm và chất lượng giảm",
+      "Năng suất tăng và chất lượng sản phẩm tăng",
+      "Năng suất giảm và chất lượng tăng"
+    ],
+    "correctIndex": 3,
+    "correctAnswer": "Năng suất giảm và chất lượng tăng",
+    "correctAnswerLetter": "D",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Giảm lượng tiến dao s làm giảm các vệt gợn nhấp nhô của mũi dao trên bề mặt chi tiết (tăng độ bóng), nhưng tốc độ bóc phoi chậm hơn (giảm năng suất)."
+  },
+  {
+    "id": 212,
+    "question": "Năng suất và chất lượng sẽ thay đổi như thế nào khi tăng chiều sâu cắt?",
+    "options": [
+      "Năng suất giảm và chất lượng tăng",
+      "Năng suất giảm và chất lượng giảm",
+      "Năng suất tăng và chất lượng sản phẩm tăng",
+      "Năng suất tăng và chất lượng giảm"
+    ],
+    "correctIndex": 3,
+    "correctAnswer": "Năng suất tăng và chất lượng giảm",
+    "correctAnswerLetter": "D",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Tăng chiều sâu cắt t giúp hớt được lượng kim loại lớn trong một lượt dao (tăng năng suất), nhưng lực cắt tăng mạnh gây rung động và biến dạng đàn hồi (giảm chất lượng)."
+  },
+  {
+    "id": 213,
+    "question": "Năng suất và chất lượng sẽ thay đổi như thế nào khi giảm chiều sâu cắt?",
+    "options": [
+      "Năng suất tăng và chất lượng sản phẩm tăng",
+      "Năng suất tăng và chất lượng giảm",
+      "Năng suất giảm và chất lượng tăng",
+      "Năng suất giảm và chất lượng giảm"
+    ],
+    "correctIndex": 2,
+    "correctAnswer": "Năng suất giảm và chất lượng tăng",
+    "correctAnswerLetter": "C",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Giảm chiều sâu cắt t làm lực cắt nhỏ, giảm rung động, đạt độ chính xác kích thước và độ bóng cao (tăng chất lượng), nhưng bóc được ít phoi hơn mỗi lượt (giảm năng suất)."
+  },
+  {
+    "id": 214,
+    "question": "Điều chỉnh chế độ cắt như thế nào thì phù hợp với cắt thô?",
+    "options": [
+      "Giảm chiều sâu cắt, tăng tốc độ tiến dao, tăng vận tốc cắt",
+      "Giảm chiều sâu cắt, giảm tốc độ tiến dao, tăng vận tốc cắt",
+      "Tăng chiều sâu cắt, tăng tốc độ tiến dao, tăng vận tốc cắt",
+      "Giảm chiều sâu cắt, tăng tốc độ tiến dao, giảm vận tốc cắt"
+    ],
+    "correctIndex": 3,
+    "correctAnswer": "Giảm chiều sâu cắt, tăng tốc độ tiến dao, giảm vận tốc cắt",
+    "correctAnswerLetter": "D",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Theo đáp án ngân hàng câu hỏi môn học: Cắt thô chọn 'Giảm chiều sâu cắt, tăng tốc độ tiến dao, giảm vận tốc cắt' để nâng cao năng suất tiến dao và bảo vệ tuổi bền dụng cụ cắt."
+  },
+  {
+    "id": 215,
+    "question": "Điều chỉnh chế độ cắt như thế nào thì phù hợp với cắt tinh?",
+    "options": [
+      "Giảm chiều sâu cắt, tăng tốc độ tiến dao, tăng vận tốc cắt",
+      "Giảm chiều sâu cắt, tăng tốc độ tiến dao, giảm vận tốc cắt",
+      "Tăng chiều sâu cắt, tăng tốc độ tiến dao, tăng vận tốc cắt",
+      "Giảm chiều sâu cắt, giảm tốc độ tiến dao, tăng vận tốc cắt"
+    ],
+    "correctIndex": 3,
+    "correctAnswer": "Giảm chiều sâu cắt, giảm tốc độ tiến dao, tăng vận tốc cắt",
+    "correctAnswerLetter": "D",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Cắt tinh cần giảm chiều sâu cắt t và giảm tiến dao s để giảm nhấp nhô bề mặt, đồng thời tăng vận tốc cắt v để triệt tiêu lẹo dao và bề mặt đạt độ bóng tối đa."
+  },
+  {
+    "id": 216,
+    "question": "Điều chỉnh chế độ cắt như thế nào thì phù hợp với cắt bán tinh?",
+    "options": [
+      "Giảm chiều sâu cắt, tăng tốc độ tiến dao, giảm vận tốc cắt",
+      "Giảm chiều sâu cắt, tăng tốc độ tiến dao, tăng vận tốc cắt",
+      "Giảm chiều sâu cắt, giảm tốc độ tiến dao, tăng vận tốc cắt",
+      "Tăng chiều sâu cắt, tăng tốc độ tiến dao, tăng vận tốc cắt"
+    ],
+    "correctIndex": 3,
+    "correctAnswer": "Tăng chiều sâu cắt, tăng tốc độ tiến dao, tăng vận tốc cắt",
+    "correctAnswerLetter": "D",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Theo chuẩn đáp án trắc nghiệm môn học: Cắt bán tinh chọn 'Tăng chiều sâu cắt, tăng tốc độ tiến dao, tăng vận tốc cắt'."
+  },
+  {
+    "id": 217,
+    "question": "Nguyên công được đặc trưng bởi yếu tố nào sau đây:",
+    "options": [
+      "Thực hiện liên tục tại một vị trí làm việc",
+      "Thực hiện liên tục trên một đối tượng sản phẩm",
+      "Do một hoặc một nhóm công nhân thực hiện",
+      "Cả ba yếu tố đã nêu"
+    ],
+    "correctIndex": 3,
+    "correctAnswer": "Cả ba yếu tố đã nêu",
+    "correctAnswerLetter": "D",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Nguyên công là phần cơ bản của quá trình công nghệ được hoàn thành liên tục tại một vị trí làm việc, do một hoặc một nhóm công nhân thực hiện trên một đối tượng chi tiết."
+  },
+  {
+    "id": 218,
+    "question": "Trong quá trình gia công cắt gọt, thay đổi yếu tố nào sau đây thì sẽ chuyển sang nguyên công mới:",
+    "options": [
+      "Mặt gia công",
+      "Chế độ cắt",
+      "Chi tiết gia công",
+      "Dụng cụ cắt"
+    ],
+    "correctIndex": 2,
+    "correctAnswer": "Chi tiết gia công",
+    "correctAnswerLetter": "C",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Khi thay đổi đối tượng sản phẩm gia công hoặc chuyển sang máy khác thì quy trình công nghệ sẽ chuyển sang một nguyên công mới."
+  },
+  {
+    "id": 219,
+    "question": "Trong quá trình gia công cắt gọt, thay đổi yếu tố nào sau đây thì sẽ chuyển sang nguyên công mới:",
+    "options": [
+      "Mặt gia công",
+      "Dụng cụ cắt",
+      "Công nhân thực hiện",
+      "Chế độ cắt"
+    ],
+    "correctIndex": 2,
+    "correctAnswer": "Công nhân thực hiện",
+    "correctAnswerLetter": "C",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Nguyên công do một hoặc một nhóm công nhân phụ trách; khi thay đổi công nhân thực hiện độc lập tại trạm mới thì tính là nguyên công mới."
+  },
+  {
+    "id": 220,
+    "question": "Trong gia công cắt gọt thay đổi yếu tố nào sau đây thì sẽ chuyển sang nguyên công mới:",
+    "options": [
+      "Mặt gia công",
+      "Dụng cụ cắt",
+      "Chế độ cắt",
+      "Máy thực hiện"
+    ],
+    "correctIndex": 3,
+    "correctAnswer": "Máy thực hiện",
+    "correctAnswerLetter": "D",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Nguyên công được thực hiện tại một chỗ làm việc cố định (một máy công cụ). Khi chi tiết được chuyển sang máy khác thì chuyển sang nguyên công mới."
+  },
+  {
+    "id": 221,
+    "question": "Trong gia công cắt gọt thay đổi yếu tố nào sau đây thì sẽ chuyển sang bước mới:",
+    "options": [
+      "Chế độ cắt",
+      "Thay đổi một trong ba yếu tố trên",
+      "Thay đổi bề mặt gia công",
+      "Dụng cụ cắt"
+    ],
+    "correctIndex": 1,
+    "correctAnswer": "Thay đổi một trong ba yếu tố trên",
+    "correctAnswerLetter": "B",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Bước là một phần của nguyên công. Thay đổi bề mặt gia công, hoặc thay đổi dụng cụ cắt, hoặc thay đổi chế độ cắt đều tạo thành bước công nghệ mới."
+  },
+  {
+    "id": 222,
+    "question": "Động tác được thực hiện bởi:",
+    "options": [
+      "Tổ trưởng sản xuất",
+      "Quản đốc phân xưởng",
+      "Kỹ thuật viên",
+      "Công nhân vận hành máy"
+    ],
+    "correctIndex": 3,
+    "correctAnswer": "Công nhân vận hành máy",
+    "correctAnswerLetter": "D",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Động tác là tập hợp các cử động làm việc có mục đích của người công nhân trực tiếp vận hành máy (bật máy, gạt tay gạt, kẹp phôi)."
+  },
+  {
+    "id": 223,
+    "question": "Những yêu cầu cơ bản của vật liệu làm lưỡi cắt là:",
+    "options": [
+      "Khả năng chịu lực va đập, khả năng chịu nhiệt tốt, khả năng chịu mài mòn, dẫn nhiệt tốt",
+      "Độ cứng cao, khả năng chịu nhiệt tốt, khả năng chịu mài mòn, dẫn nhiệt tốt",
+      "Độ đàn hồi cao, khả năng chịu nhiệt tốt, khả năng chịu mài mòn, dẫn nhiệt tốt",
+      "Độ bền cao, khả năng chịu nhiệt tốt, khả năng chịu mài mòn, dẫn nhiệt tốt"
+    ],
+    "correctIndex": 1,
+    "correctAnswer": "Độ cứng cao, khả năng chịu nhiệt tốt, khả năng chịu mài mòn, dẫn nhiệt tốt",
+    "correctAnswerLetter": "B",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Vật liệu làm lưỡi cắt phải có: Độ cứng cao (>= 60 HRC), Độ bền nhiệt (chịu nhiệt), Tính chống mài mòn cao và Tính dẫn nhiệt tốt để tản nhiệt cắt."
+  },
+  {
+    "id": 224,
+    "question": "Loại dao nào có một lưỡi cắt chính?",
+    "options": [
+      "Mũi Khoét",
+      "Dao tiện",
+      "Mũi khoan",
+      "Mũi Taro"
+    ],
+    "correctIndex": 1,
+    "correctAnswer": "Dao tiện",
+    "correctAnswerLetter": "B",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Dao tiện là loại dụng cụ cắt một lưỡi điển hình (gồm 1 lưỡi cắt chính và 1 lưỡi cắt phụ). Mũi khoan có 2 lưỡi, mũi khoét có 3-4 lưỡi, taro có nhiều lưỡi."
+  },
+  {
+    "id": 225,
+    "question": "Loại dao nào có hai lưỡi cắt chính?",
+    "options": [
+      "Mũi khoan",
+      "Mũi Khoét",
+      "Dao tiện",
+      "Taro"
+    ],
+    "correctIndex": 0,
+    "correctAnswer": "Mũi khoan",
+    "correctAnswerLetter": "A",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Mũi khoan xoắn ruột gà có cấu tạo gồm 2 lưỡi cắt chính đối xứng nhau qua lõi mũi khoan."
+  },
+  {
+    "id": 226,
+    "question": "Trong các loại dao sau đây, loại nào có nhiều lưỡi cắt chính nhất?",
+    "options": [
+      "Dao xọc",
+      "Dao tiện",
+      "Dao bào",
+      "Taro"
+    ],
+    "correctIndex": 3,
+    "correctAnswer": "Taro",
+    "correctAnswerLetter": "D",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Mũi taro dùng để cắt ren trong lỗ, có từ 3 - 4 rãnh dọc và mỗi rãnh chứa nhiều răng cắt ren, do đó có số lượng lưỡi cắt nhiều nhất trong các loại dao trên."
+  },
+  {
+    "id": 227,
+    "question": "Trong các loại dao sau đây, loại nào có nhiều lưỡi cắt chính nhất?",
+    "options": [
+      "Mũi khoan",
+      "Mũi Khoét",
+      "Mũi Taro",
+      "Đá mài"
+    ],
+    "correctIndex": 3,
+    "correctAnswer": "Đá mài",
+    "correctAnswerLetter": "D",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Đá mài được cấu tạo từ hàng triệu hạt mài liên kết bằng chất dính kết, mỗi hạt mài là một lưỡi cắt siêu nhỏ độc lập (vô số lưỡi cắt)."
+  },
+  {
+    "id": 228,
+    "question": "Tính chất vật liệu trên dụng cụ cắt như thế nào là tốt nhất?",
+    "options": [
+      "Thân dao có độ cứng cao, lưỡi cắt có độ đàn hồi cao",
+      "Thân dao có độ đàn hồi, lưỡi cắt có độ đàn hồi cao",
+      "Thân dao có độ cứng cao, lưỡi cắt có độ cứng cao",
+      "Lưỡi cắt có độ cứng cao, thân dao có độ đàn hồi"
+    ],
+    "correctIndex": 3,
+    "correctAnswer": "Lưỡi cắt có độ cứng cao, thân dao có độ đàn hồi",
+    "correctAnswerLetter": "D",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Lưỡi cắt cần độ cứng rất cao để cắt gọt kim loại, trong khi phần thân dao cần độ đàn hồi và dẻo dai để chịu lực uốn và hấp thụ rung động."
+  },
+  {
+    "id": 229,
+    "question": "Khi dao tiện làm bằng cùng một loại vật liệu, khi tôi cứng nên tôi như thế nào?",
+    "options": [
+      "Chỉ tôi cứng phần lưỡi cắt",
+      "Tôi cứng toàn bộ thân giao",
+      "Tôi cứng một nửa phần chuôi dao",
+      "Tôi cứng một nửa phần lưỡi cắt"
+    ],
+    "correctIndex": 0,
+    "correctAnswer": "Chỉ tôi cứng phần lưỡi cắt",
+    "correctAnswerLetter": "A",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Chỉ tôi cứng phần đầu lưỡi cắt để đạt độ cứng cao hớt phoi, giữ cho thân dao có độ dẻo dai không bị giòn gãy khi tiện."
+  },
+  {
+    "id": 230,
+    "question": "Khi dao mũi khoan làm bằng cùng một loại vật liệu, khi tôi cứng nên tôi như thế nào?",
+    "options": [
+      "Tôi cứng một nửa phần chuôi dao",
+      "Tôi cứng toàn bộ thân giao",
+      "Tôi toàn bộ phần ruột gà",
+      "Chỉ tôi cứng phần lưỡi cắt"
+    ],
+    "correctIndex": 3,
+    "correctAnswer": "Chỉ tôi cứng phần lưỡi cắt",
+    "correctAnswerLetter": "D",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Mũi khoan chỉ cần tôi cứng phần làm việc của lưỡi cắt, phần chuôi khoan cần dẻo dai để truyền mô-men xoắn mà không gãy."
+  },
+  {
+    "id": 231,
+    "question": "Vật liệu hợp kim cứng thường được sử dụng để chế tạo phần nào của dao?",
+    "options": [
+      "Chế tạo phần thân dao",
+      "Chế tạo toàn bộ con dao",
+      "Chế tạo lưỡi cắt",
+      "Chế tạo phần chuôi dao"
+    ],
+    "correctIndex": 2,
+    "correctAnswer": "Chế tạo lưỡi cắt",
+    "correctAnswerLetter": "C",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Hợp kim cứng (carbide) rất đắt tiền và giòn, do đó chỉ được chế tạo thành các mảnh hạt dao (insert) hàn hoặc kẹp vào phần lưỡi cắt của thân dao bằng thép kết cấu."
+  },
+  {
+    "id": 232,
+    "question": "Từ \"giường\" trong tên gọi của các máy công cụ như máy bào giường, máy phay giường,... muốn nói lên điều gì?",
+    "options": [
+      "Máy đó to bằng cái giường",
+      "Máy đó được đặt nằm",
+      "Đó là một máy rất lớn",
+      "Hình dạng cái máy đó như cái giường"
+    ],
+    "correctIndex": 2,
+    "correctAnswer": "Đó là một máy rất lớn",
+    "correctAnswerLetter": "C",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Từ 'giường' chỉ các máy công cụ hạng nặng, kích thước rất lớn với băng máy dài vững chắc để gia công các chi tiết khổ lớn và nặng."
+  },
+  {
+    "id": 233,
+    "question": "Từ \"đứng\" trong tên gọi của các máy công cụ như máy tiện đứng, máy phay đứng,... muốn nói lên điều gì?",
+    "options": [
+      "Máy đó có chiều cao lớn hơn các kính thước dài rộng",
+      "Máy đó rất lớn",
+      "Máy đó rất cao",
+      "Trục chính nằm theo phương thẳng đứng"
+    ],
+    "correctIndex": 3,
+    "correctAnswer": "Trục chính nằm theo phương thẳng đứng",
+    "correctAnswerLetter": "D",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Tên gọi 'đứng' trong máy công cụ quy ước trục chính mang dao hoặc mang phôi được bố trí theo phương thẳng đứng."
+  },
+  {
+    "id": 234,
+    "question": "Từ \"ngang\" trong tên gọi của các máy công cụ như máy phay ngang,... muốn nói lên điều gì?",
+    "options": [
+      "Trục chính nằm theo phương nằm ngang",
+      "Máy đó rất dài",
+      "Máy đó rất lớn",
+      "Máy đó có chiều dài lớn hơn các kính thước chiều cao và chiều rộng"
+    ],
+    "correctIndex": 0,
+    "correctAnswer": "Trục chính nằm theo phương nằm ngang",
+    "correctAnswerLetter": "A",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Máy phay ngang có trục chính lắp dao phay nằm theo phương song song với mặt đất (phương nằm ngang)."
+  },
+  {
+    "id": 235,
+    "question": "Máy nào kém linh hoạt (gia công được nhiều loại sản phẩm) nhất?",
+    "options": [
+      "Máy tiện vạn năng",
+      "Máy phay vạn năng",
+      "Máy CNC",
+      "Máy chuyên dụng"
+    ],
+    "correctIndex": 3,
+    "correctAnswer": "Máy chuyên dụng",
+    "correctAnswerLetter": "D",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Máy chuyên dùng chỉ được chế tạo để gia công một bề mặt hoặc một chi tiết nhất định, không thể dùng linh hoạt cho các sản phẩm khác."
+  },
+  {
+    "id": 236,
+    "question": "Máy công cụ được phân loại theo mấy cách?",
+    "options": [
+      "4",
+      "3",
+      "2",
+      "5"
+    ],
+    "correctIndex": 0,
+    "correctAnswer": "4",
+    "correctAnswerLetter": "A",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Máy công cụ được phân loại theo 4 cách chính: Theo công dụng, theo cấp chính xác, theo khối lượng/kích cỡ, và theo mức độ tự động hóa."
+  },
+  {
+    "id": 237,
+    "question": "Theo Tiêu chuẩn Việt Nam quy định mấy cấp chính xác cho máy công cụ?",
+    "options": [
+      "3",
+      "4",
+      "5",
+      "6"
+    ],
+    "correctIndex": 2,
+    "correctAnswer": "5",
+    "correctAnswerLetter": "C",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "TCVN quy định 5 cấp chính xác cho máy công cụ: Cấp N (bình thường), Cấp P (chính xác), Cấp V (chính xác cao), Cấp A (đặc biệt chính xác) và Cấp S (siêu chính xác)."
+  },
+  {
+    "id": 238,
+    "question": "Kiểu truyền dẫn tập trung trong máy công cụ là:",
+    "options": [
+      "Nhiều động cơ truyền động cho một chuyển động của máy công cụ",
+      "Một động cơ truyền động cho một nhóm chuyển động trong máy công cụ",
+      "Một đồng cơ truyền động cho một chuyển động của máy công cụ",
+      "Một động cơ truyền động cho tất cả các chuyển động của máy công cụ"
+    ],
+    "correctIndex": 3,
+    "correctAnswer": "Một động cơ truyền động cho tất cả các chuyển động của máy công cụ",
+    "correctAnswerLetter": "D",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Truyền dẫn tập trung dùng duy nhất một động cơ điện chính truyền lực tới toàn bộ các cơ cấu chuyển động của máy qua các hộp số."
+  },
+  {
+    "id": 239,
+    "question": "Kiểu truyền dẫn phân nhóm trong máy công cụ là:",
+    "options": [
+      "Một đồng cơ truyền động cho một chuyển động của máy công cụ",
+      "Một động cơ truyền động cho tất cả các chuyển động của máy công cụ",
+      "Một động cơ truyền động cho một nhóm chuyển động trong máy công cụ",
+      "Nhiều động cơ truyền động cho một chuyển động của máy công cụ"
+    ],
+    "correctIndex": 2,
+    "correctAnswer": "Một động cơ truyền động cho một nhóm chuyển động trong máy công cụ",
+    "correctAnswerLetter": "C",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Truyền dẫn phân nhóm dùng từng động cơ riêng cho từng cụm nhóm chuyển động (ví dụ động cơ chuyển động chính riêng, động cơ nhóm chạy dao riêng)."
+  },
+  {
+    "id": 240,
+    "question": "Kiểu truyền dẫn độc lập trong máy công cụ là:",
+    "options": [
+      "Một động cơ truyền động cho tất cả các chuyển động của máy công cụ",
+      "Nhiều động cơ truyền động cho một chuyển động của máy công cụ",
+      "Một đồng cơ truyền động cho một chuyển động của máy công cụ",
+      "Một động cơ truyền động cho một nhóm chuyển động trong máy công cụ"
+    ],
+    "correctIndex": 2,
+    "correctAnswer": "Một đồng cơ truyền động cho một chuyển động của máy công cụ",
+    "correctAnswerLetter": "C",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Truyền dẫn độc lập trang bị động cơ riêng rẽ cho từng trục chuyển động (như các động cơ servo trong máy điều khiển số CNC)."
+  },
+  {
+    "id": 241,
+    "question": "Trong máy công cụ cần có bao nhiêu chuyển động?",
+    "options": [
+      "Tối thiểu hai chuyển động",
+      "Hai chuyển động",
+      "Ba Chuyển động",
+      "Một chuyển động"
+    ],
+    "correctIndex": 0,
+    "correctAnswer": "Tối thiểu hai chuyển động",
+    "correctAnswerLetter": "A",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Để tạo hình chi tiết cắt gọt, máy công cụ tối thiểu phải có 2 chuyển động: Chuyển động chính (tạo phoi) và Chuyển động chạy dao (duy trì quá trình cắt liên tục)."
+  },
+  {
+    "id": 242,
+    "question": "Khái niệm Máy CNC n trục, ví dụ Máy CNC 3 trục, Máy CNC 4 trục, Máy CNC 5 trục … có nghĩa là gì?",
+    "options": [
+      "Máy đó có n cái trục",
+      "Máy đó có n lưỡi cắt",
+      "Máy đó có n chuyển động",
+      "Giữa dao và phôi có khả năng thực hiện n chuyển động tương đối"
+    ],
+    "correctIndex": 3,
+    "correctAnswer": "Giữa dao và phôi có khả năng thực hiện n chuyển động tương đối",
+    "correctAnswerLetter": "D",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Số trục của máy CNC thể hiện số bậc tự do chuyển động tương đối được nội suy đồng thời giữa dụng cụ cắt và phôi (tịnh tiến X, Y, Z hoặc xoay A, B, C)."
+  },
+  {
+    "id": 243,
+    "question": "Công dụng chính của đồ gá là:",
+    "options": [
+      "Dùng để định vị phôi",
+      "Dùng để định vị và kẹp chặt dao",
+      "Dùng để kẹp chặt phôi",
+      "Dùng để xác định vị trí của phôi so với dụng cụ cắt và giữ chặt phôi ở vị trí dưới tác dụng của lực cắt trong khi gia công"
+    ],
+    "correctIndex": 3,
+    "correctAnswer": "Dùng để xác định vị trí của phôi so với dụng cụ cắt và giữ chặt phôi ở vị trí dưới tác dụng của lực cắt trong khi gia công",
+    "correctAnswerLetter": "D",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Đồ gá có 2 nhiệm vụ then chốt: Định vị (xác định tọa độ vị trí chính xác của phôi so với dao) và Kẹp chặt (cố định phôi chống lại lực cắt khi gia công)."
+  },
+  {
+    "id": 244,
+    "question": "Mâm cặp 3 chấu là đồ gá của máy nào:",
+    "options": [
+      "Máy phay",
+      "Máy tiện",
+      "Máy bào",
+      "Máy khoan"
+    ],
+    "correctIndex": 1,
+    "correctAnswer": "Máy tiện",
+    "correctAnswerLetter": "B",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Mâm cặp 3 chấu tự định tâm là đồ gá tiêu chuẩn phổ biến nhất được gắn trên trục chính máy tiện để kẹp chặt phôi tròn xoay."
+  },
+  {
+    "id": 245,
+    "question": "Trong gia công tiện, khi bề mặt định vị bị lệch tâm với bề mặt gia công ta nên chọn loại đồ gá loại đồ gá nào?",
+    "options": [
+      "Mâm cặp 4 chấu",
+      "Mâm cặp 3 chấu",
+      "Chọn mâm cặp 3 chấu hay mâm cặp 4 chấu đều được",
+      "Không dùng được mâm cặp 3 chấu hay 4 chấu"
+    ],
+    "correctIndex": 0,
+    "correctAnswer": "Mâm cặp 4 chấu",
+    "correctAnswerLetter": "A",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Mâm cặp 4 chấu có 4 chấu dịch chuyển độc lập, cho phép điều chỉnh tâm quay lệch so với bề mặt ngoài để gia công các chi tiết lệch tâm."
+  },
+  {
+    "id": 246,
+    "question": "Trong gia công tiện, khi bề mặt định vị không tròn ta chọn loại đồ gá loại đồ gá nào?",
+    "options": [
+      "Không dùng được mâm cặp 3 chấu hay 4 chấu",
+      "Mâm cặp 4 chấu",
+      "Mâm cặp 3 chấu",
+      "Chọn mâm cặp 3 chấu hay mâm cặp 4 chấu đều được"
+    ],
+    "correctIndex": 1,
+    "correctAnswer": "Mâm cặp 4 chấu",
+    "correctAnswerLetter": "B",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Phôi có tiết diện không tròn (vuông, chữ nhật, đa giác hoặc dị hình) bắt buộc dùng mâm cặp 4 chấu điều chỉnh từng chấu riêng biệt."
+  },
+  {
+    "id": 247,
+    "question": "Trong gia công tiện, khi bề mặt định vị bị tròn và đồng tâm với bề mặt gia công ta nên chọn loại đồ gá loại đồ gá nào?",
+    "options": [
+      "Chọn mâm cặp 3 chấu hay mâm cặp 4 chấu đều được",
+      "Mâm cặp 4 chấu",
+      "Không dùng được mâm cặp 3 chấu hay 4 chấu",
+      "Mâm cặp 3 chấu"
+    ],
+    "correctIndex": 3,
+    "correctAnswer": "Mâm cặp 3 chấu",
+    "correctAnswerLetter": "D",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Phôi tròn xoay đồng tâm nên dùng mâm cặp 3 chấu tự định tâm vì gá đặt nhanh, các chấu cùng tiến lùi đồng thời."
+  },
+  {
+    "id": 248,
+    "question": "Công dụng của luynet để làm gì?",
+    "options": [
+      "Dùng để đỡ những chi tiết nặng",
+      "Dùng để tăng độ cứng vững cho chi tiết gia công dạng trụ dài hoặc đỡ những chi tiết nặng",
+      "Dùng để tăng độ cứng vững cho chi tiết dài",
+      "Dùng để truyền động cho chi tiết gia công"
+    ],
+    "correctIndex": 1,
+    "correctAnswer": "Dùng để tăng độ cứng vững cho chi tiết gia công dạng trụ dài hoặc đỡ những chi tiết nặng",
+    "correctAnswerLetter": "B",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Luynet là đồ gá phụ dùng để chống võng, tăng độ cứng vững cho chi tiết dạng trục dài (L/D > 10) hoặc đỡ các phôi nặng trên máy tiện."
+  },
+  {
+    "id": 249,
+    "question": "Công dụng của luynet tĩnh để làm gì?",
+    "options": [
+      "Dùng để đỡ những chi tiết nặng",
+      "Dùng để tăng độ cứng vững cho chi tiết gia công dạng trụ dài hoặc đỡ những chi tiết nặng",
+      "Dùng để tăng độ cứng vững cho chi tiết dài",
+      "Dùng để truyền động cho chi tiết gia công"
+    ],
+    "correctIndex": 0,
+    "correctAnswer": "Dùng để đỡ những chi tiết nặng",
+    "correctAnswerLetter": "A",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Luynet tĩnh được kẹp cố định trên băng máy, có công dụng chính là để đỡ những chi tiết trục dài và nặng hoặc khi gia công mặt đầu của phôi dài."
+  },
+  {
+    "id": 250,
+    "question": "Công dụng của luynet động để làm gì?",
+    "options": [
+      "Dùng để truyền động cho chi tiết gia công",
+      "Dùng để đỡ những chi tiết nặng",
+      "Dùng để tăng độ cứng vững cho chi tiết gia công dạng trụ dài hoặc đỡ những chi tiết nặng",
+      "Dùng để tăng độ cứng vững cho chi tiết dài"
+    ],
+    "correctIndex": 3,
+    "correctAnswer": "Dùng để tăng độ cứng vững cho chi tiết dài",
+    "correctAnswerLetter": "D",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Luynet động được gắn trên bàn xe dao và di chuyển cùng dao, có tác dụng đỡ ngay sát điểm cắt để tăng độ cứng vững cho chi tiết trục dài."
+  },
+  {
+    "id": 251,
+    "question": "Khi cần tiện mặt ngoài của một chi tiết dạng trụ có đường kính nhỏ và chiều dài lớn nên sử dụng loại luynet nào?",
+    "options": [
+      "Dùng luynet động",
+      "Dùng luynet tĩnh",
+      "Dùng luynet động hay luynet tĩnh đều được",
+      "Không cần dùng luynet nào"
+    ],
+    "correctIndex": 0,
+    "correctAnswer": "Dùng luynet động",
+    "correctAnswerLetter": "A",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Tiện ngoài suốt chiều dài trục nhỏ và dài cần luynet động chạy cùng dao để chống uốn võng ngay tại vị trí tác dụng lực cắt."
+  },
+  {
+    "id": 252,
+    "question": "Khi cần tiện mặt trong của một chi tiết dạng trụ có đường kính lớn và chiều dài lớn nên sử dụng loại luynet nào?",
+    "options": [
+      "Không cần dùng luynet nào",
+      "Dùng luynet tĩnh",
+      "Dùng luynet động hay luynet tĩnh đều được",
+      "Dùng luynet động"
+    ],
+    "correctIndex": 1,
+    "correctAnswer": "Dùng luynet tĩnh",
+    "correctAnswerLetter": "B",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Khi tiện/khoét lỗ mặt trong, dao tiện phải luồn vào trong lỗ phôi nên phải dùng luynet tĩnh cố định trên băng máy để đỡ mặt ngoài chi tiết."
+  },
+  {
+    "id": 253,
+    "question": "Luynet tĩnh thường được gá đặt ở đâu?",
+    "options": [
+      "Bàn xe dao",
+      "Bàn máy",
+      "Băng máy",
+      "Ụ động"
+    ],
+    "correctIndex": 2,
+    "correctAnswer": "Băng máy",
+    "correctAnswerLetter": "C",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Luynet tĩnh được kẹp chặt cố định trên sống trượt của băng máy tiện."
+  },
+  {
+    "id": 254,
+    "question": "Luynet động thường được gá đặt ở đâu?",
+    "options": [
+      "Băng máy",
+      "Bàn xe dao",
+      "Bàn máy",
+      "Ụ động"
+    ],
+    "correctIndex": 1,
+    "correctAnswer": "Bàn xe dao",
+    "correctAnswerLetter": "B",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Luynet động được lắp cố định trên bàn xe dao để cùng tịnh tiến dọc theo phôi với dụng cụ cắt."
+  },
+  {
+    "id": 255,
+    "question": "Máy nào thường không sử dụng đồ gá Ê tô?",
+    "options": [
+      "Máy tiện",
+      "Máy phay",
+      "Máy khoan",
+      "Máy bào"
+    ],
+    "correctIndex": 0,
+    "correctAnswer": "Máy tiện",
+    "correctAnswerLetter": "A",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Máy phay, khoan, bào thường dùng êtô kẹp phôi phẳng/hộp. Máy tiện phôi quay tròn nên dùng mâm cặp hoặc chống tâm chứ không dùng êtô."
+  },
+  {
+    "id": 256,
+    "question": "Mũi chống tâm thường được gá ở đâu?",
+    "options": [
+      "Bàn máy",
+      "Bàn xe dao",
+      "Băng máy",
+      "Ụ động"
+    ],
+    "correctIndex": 3,
+    "correctAnswer": "Ụ động",
+    "correctAnswerLetter": "D",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Mũi chống tâm được lắp vào lỗ côn nòng của ụ động (ụ sau) máy tiện để chống đỡ tâm phôi."
+  },
+  {
+    "id": 257,
+    "question": "Máy công cụ có chuyển động chính là chuyển động thẳng qua lại của dao. Hỏi máy đó thuộc nhóm máy nào sau đây:",
+    "options": [
+      "Phay",
+      "Tiện",
+      "Khoan, khoét, doa",
+      "Bào, xọc"
+    ],
+    "correctIndex": 3,
+    "correctAnswer": "Bào, xọc",
+    "correctAnswerLetter": "D",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Máy bào ngang và máy xọc có chuyển động chính là chuyển động tịnh tiến thẳng khứ hồi (qua lại) của đầu dao."
+  },
+  {
+    "id": 258,
+    "question": "Máy nào có chuyển động chính và chuyển động chạy dao đều do dao thực hiện?",
+    "options": [
+      "Xọc",
+      "Tiện",
+      "Bào, xọc",
+      "Khoan"
+    ],
+    "correctIndex": 3,
+    "correctAnswer": "Khoan",
+    "correctAnswerLetter": "D",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Trên máy khoan, phôi cố định; mũi khoan vừa quay tròn (chuyển động chính) vừa tịnh tiến đi xuống (chuyển động chạy dao)."
+  },
+  {
+    "id": 259,
+    "question": "Máy nào có chuyển động chính là chuyển động quay tròn do dao thực hiện?",
+    "options": [
+      "Tiện",
+      "Bào",
+      "Xọc",
+      "Phay"
+    ],
+    "correctIndex": 3,
+    "correctAnswer": "Phay",
+    "correctAnswerLetter": "D",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Máy phay có dao phay quay tròn quanh trục chính (chuyển động chính), phôi gắn trên bàn máy tịnh tiến (chuyển động chạy dao)."
+  },
+  {
+    "id": 260,
+    "question": "Máy nào có chuyển động chính là chuyển động quay tròn do phôi thực hiện?",
+    "options": [
+      "Tiện",
+      "Xọc",
+      "Bào",
+      "Phay"
+    ],
+    "correctIndex": 0,
+    "correctAnswer": "Tiện",
+    "correctAnswerLetter": "A",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Trên máy tiện, phôi kẹp trên mâm cặp quay tròn (chuyển động chính), dao tiện dịch chuyển tịnh tiến dọc/ngang (chuyển động chạy dao)."
+  },
+  {
+    "id": 261,
+    "question": "Để gia công rãnh then cho lỗ thì chọn máy nào sau đây?",
+    "options": [
+      "Xọc",
+      "Phay",
+      "Bào",
+      "Tiện"
+    ],
+    "correctIndex": 0,
+    "correctAnswer": "Xọc",
+    "correctAnswerLetter": "A",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Rãnh then trong lỗ (moay-ơ bánh răng, puli) là không gian kín trong lỗ sâu, phương pháp gia công tối ưu nhất là dùng máy xọc (hoặc máy chuốt)."
+  },
+  {
+    "id": 262,
+    "question": "Loại máy nào sau đây không thể gia công được mặt tròn xoay?",
+    "options": [
+      "Máy phay",
+      "Máy tiện",
+      "Máy mài",
+      "Máy bào"
+    ],
+    "correctIndex": 3,
+    "correctAnswer": "Máy bào",
+    "correctAnswerLetter": "D",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Máy bào chỉ chuyển động tịnh tiến thẳng, gia công được mặt phẳng và rãnh thẳng, không thể tạo hình mặt tròn xoay kín."
+  },
+  {
+    "id": 263,
+    "question": "Máy công cụ nào sau đây có thể gia công được lỗ ren?",
+    "options": [
+      "Máy mài phẳng",
+      "Máy xọc",
+      "Máy bào ngang",
+      "Máy khoan cần"
+    ],
+    "correctIndex": 3,
+    "correctAnswer": "Máy khoan cần",
+    "correctAnswerLetter": "D",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Máy khoan cần có hộp tốc độ và cơ cấu đảo chiều quay trục chính, cho phép taro gia công các lỗ ren ren trong một cách dễ dàng."
+  },
+  {
+    "id": 264,
+    "question": "Có thể chọn nhóm máy nào sau đây để gia công ren?",
+    "options": [
+      "Máy tiện, máy phay",
+      "Máy doa, máy phay",
+      "Máy khoan, máy tiện",
+      "Máy phay, máy bào"
+    ],
+    "correctIndex": 2,
+    "correctAnswer": "Máy khoan, máy tiện",
+    "correctAnswerLetter": "C",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Máy tiện (tiện ren bằng dao tiện ren, bàn ren, taro) và máy khoan (taro ren) là hai loại máy thông dụng nhất để cắt ren."
+  },
+  {
+    "id": 265,
+    "question": "Máy phay lăn răng gia công được loại bánh răng nào sau đây?",
+    "options": [
+      "Bánh răng côn răng xoắn",
+      "Tất cả các loại bánh răng",
+      "Bánh răng trụ răng thẳng, răng nghiêng",
+      "Bánh răng côn răng thẳng"
+    ],
+    "correctIndex": 2,
+    "correctAnswer": "Bánh răng trụ răng thẳng, răng nghiêng",
+    "correctAnswerLetter": "C",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Máy phay lăn răng dùng dao phay trục vít bao hình chuyên gia công bánh răng trụ răng thẳng, bánh răng trụ răng nghiêng và bánh vít."
+  },
+  {
+    "id": 266,
+    "question": "Nhóm máy bào xọc gia công được loại bánh răng nào sau đây?",
+    "options": [
+      "Bánh răng thân khai răng thẳng",
+      "Bánh răng trụ răng nghiêng",
+      "Bánh răng trụ răng thẳng",
+      "Bánh răng côn"
+    ],
+    "correctIndex": 0,
+    "correctAnswer": "Bánh răng thân khai răng thẳng",
+    "correctAnswerLetter": "A",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Máy xọc răng bao hình chuyên gia công bánh răng trụ thân khai răng thẳng (đặc biệt là bánh răng trong và khối bánh răng liền bậc)."
+  },
+  {
+    "id": 267,
+    "question": "Loại máy nào có thể gia công được nhiều loại biên dạng nhất?",
+    "options": [
+      "Máy khoan",
+      "Máy phay",
+      "Máy tiện",
+      "Máy bào"
+    ],
+    "correctIndex": 1,
+    "correctAnswer": "Máy phay",
+    "correctAnswerLetter": "B",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Máy phay (vạn năng, phay CNC 3-5 trục) có khả năng gia công mặt phẳng, mặt nghiêng, rãnh, rãnh xoắn, bánh răng, cam và mặt cong 3D phức tạp nhất."
+  },
+  {
+    "id": 268,
+    "question": "Phương pháp nào sau đây cho độ chính xác cao nhất?",
+    "options": [
+      "Khoan",
+      "Khoét",
+      "Tiện",
+      "Doa"
+    ],
+    "correctIndex": 3,
+    "correctAnswer": "Doa",
+    "correctAnswerLetter": "D",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Trong gia công lỗ: Khoan (thô) -> Khoét (bán tinh) -> Doa (tinh đạt cấp chính xác cao nhất IT7 - IT9)."
+  },
+  {
+    "id": 269,
+    "question": "Phương pháp nào sau đây cho độ bóng cao nhất?",
+    "options": [
+      "Khoét",
+      "Khoan",
+      "Doa",
+      "Tiện"
+    ],
+    "correctIndex": 2,
+    "correctAnswer": "Doa",
+    "correctAnswerLetter": "C",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Doa lỗ bằng dao doa nhiều lưỡi hớt lớp kim loại siêu mỏng, đạt độ bóng bề mặt rất cao (Ra = 1,25 - 0,63 micromet)."
+  },
+  {
+    "id": 270,
+    "question": "Phương pháp nào sau đây cho độ chính xác cao nhất?",
+    "options": [
+      "Bào",
+      "Tiện",
+      "Mài",
+      "Phay"
+    ],
+    "correctIndex": 2,
+    "correctAnswer": "Mài",
+    "correctAnswerLetter": "C",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Mài là phương pháp gia công tinh kim loại đạt cấp chính xác cao nhất (IT6 - IT5)."
+  },
+  {
+    "id": 271,
+    "question": "Phương pháp nào sau đây cho độ bóng cao nhất?",
+    "options": [
+      "Tiện",
+      "Mài",
+      "Bào",
+      "Phay"
+    ],
+    "correctIndex": 1,
+    "correctAnswer": "Mài",
+    "correctAnswerLetter": "B",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Mài cho độ bóng bề mặt rất cao (Ra = 0,63 - 0,16 micromet), vượt trội so với tiện, phay hay bào."
+  },
+  {
+    "id": 272,
+    "question": "Để gia công rãnh then cho trục thì chọn máy nào sau đây?",
+    "options": [
+      "Bào",
+      "Xọc",
+      "Phay",
+      "Tiện"
+    ],
+    "correctIndex": 2,
+    "correctAnswer": "Phay",
+    "correctAnswerLetter": "C",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Rãnh then trên trục (then bằng, then bán nguyệt) được gia công trên máy phay bằng dao phay ngón hoặc dao phay đĩa."
+  },
+  {
+    "id": 273,
+    "question": "Có thể chọn nhóm máy nào sau đây để gia công mặt phẳng?",
+    "options": [
+      "Máy tiện, máy phay, máy bào",
+      "Máy doa, máy phay, máy bào",
+      "Máy phay, máy bào, máy mài",
+      "Máy phay, máy khoan, máy mài"
+    ],
+    "correctIndex": 2,
+    "correctAnswer": "Máy phay, máy bào, máy mài",
+    "correctAnswerLetter": "C",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Ba phương pháp cơ bản nhất để gia công bề mặt phẳng là Phay mặt phẳng, Bào mặt phẳng và Mài phẳng."
+  },
+  {
+    "id": 274,
+    "question": "Có thể chọn nhóm máy nào sau đây để gia công lỗ?",
+    "options": [
+      "Máy phay, máy khoan, máy tiện",
+      "Máy doa, máy phay, máy bào",
+      "Máy phay, máy bào, máy mài",
+      "Máy tiện, máy phay, máy bào"
+    ],
+    "correctIndex": 0,
+    "correctAnswer": "Máy phay, máy khoan, máy tiện",
+    "correctAnswerLetter": "A",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Lỗ có thể được gia công trên: Máy khoan (khoan, khoét, doa), Máy tiện (tiện lỗ trong), và Máy phay (khoan phay lỗ)."
+  },
+  {
+    "id": 275,
+    "question": "Có thể chọn nhóm máy nào sau đây để gia công rãnh có hình chữ T?",
+    "options": [
+      "Máy phay, máy tiện",
+      "Máy phay, máy bào",
+      "Máy doa, máy phay, máy bào",
+      "Máy phay, khoan"
+    ],
+    "correctIndex": 1,
+    "correctAnswer": "Máy phay, máy bào",
+    "correctAnswerLetter": "B",
+    "chapterId": "ch7",
+    "chapterTitle": "Chương 7: Phương Pháp Gia Công Cắt Gọt Kim Loại",
+    "explanation": "Rãnh chữ T được gia công trên máy phay (dao phay rãnh chữ T) hoặc máy bào (dao bào rãnh chữ T)."
   }
 ];
