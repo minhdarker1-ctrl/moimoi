@@ -112,6 +112,7 @@ export default function QuizMaster() {
   const [ttsSettings, setTtsSettings] = useState<TTSSettings>(DEFAULT_TTS_SETTINGS);
   const [ttsStatus, setTtsStatus] = useState<TTSStatus>("idle");
   const [showTtsModal, setShowTtsModal] = useState<boolean>(false);
+  const [ttsToast, setTtsToast] = useState<string | null>(null);
 
   // Leaderboard (Bảng Vàng) States
   const [userName, setUserName] = useState<string>("");
@@ -146,9 +147,19 @@ export default function QuizMaster() {
   // Subscribe to TTS status changes
   useEffect(() => {
     const unsub = quizTTS.subscribeStatus((st) => setTtsStatus(st));
+    const handleNotice = (e: Event) => {
+      const detail = (e as CustomEvent<{ message: string }>).detail;
+      if (detail?.message) {
+        setTtsToast(detail.message);
+        setTimeout(() => setTtsToast(null), 6000);
+      }
+    };
+    window.addEventListener("minsr_tts_notice", handleNotice);
+
     return () => {
       unsub();
       quizTTS.stop();
+      window.removeEventListener("minsr_tts_notice", handleNotice);
     };
   }, []);
 
@@ -304,10 +315,16 @@ export default function QuizMaster() {
     }
   }, [currentQ, ttsStatus, ttsSettings]);
 
-  const handleTestTtsVoice = () => {
+  const handleTestTtsVoice = (overrideVoice?: "vi-VN-HoaiMyNeural" | "vi-VN-NamMinhNeural") => {
+    if (ttsStatus === "playing" || ttsStatus === "loading") {
+      quizTTS.stop();
+      return;
+    }
+    const activeSettings = overrideVoice ? { ...ttsSettings, voice: overrideVoice } : ttsSettings;
+    const voiceName = activeSettings.voice === "vi-VN-NamMinhNeural" ? "Nam Minh, giọng nam" : "Hoài My, giọng nữ";
     quizTTS.speakText(
-      "Xin chào, đây là giọng đọc AI Microsoft Edge trên hệ thống trắc nghiệm MinSr.",
-      ttsSettings
+      `Xin chào, đây là ${voiceName} trên hệ thống trắc nghiệm MinSr.`,
+      activeSettings
     );
   };
 
@@ -715,11 +732,15 @@ export default function QuizMaster() {
             <button
               type="button"
               className="quiz-tts-test-btn"
-              onClick={handleTestTtsVoice}
+              onClick={() => handleTestTtsVoice()}
               title="Nghe thử giọng đọc mẫu"
             >
               <i className={ttsStatus === "playing" ? "fa-solid fa-stop" : "fa-solid fa-play"} />
-              <span>{ttsStatus === "playing" ? "Dừng thử" : "Nghe thử giọng"}</span>
+              <span>
+                {ttsStatus === "playing"
+                  ? "Dừng phát"
+                  : `Nghe thử: ${ttsSettings.voice === "vi-VN-NamMinhNeural" ? "Nam Minh (Nam)" : "Hoài My (Nữ)"}`}
+              </span>
             </button>
 
             <button
@@ -731,6 +752,24 @@ export default function QuizMaster() {
             </button>
           </div>
         </div>
+      </div>
+    );
+  };
+
+  const renderTtsToast = () => {
+    if (!ttsToast) return null;
+    return (
+      <div className="quiz-tts-floating-toast">
+        <i className="fa-solid fa-triangle-exclamation" />
+        <span>{ttsToast}</span>
+        <button
+          type="button"
+          className="quiz-tts-toast-close"
+          onClick={() => setTtsToast(null)}
+          title="Đóng thông báo"
+        >
+          ✕
+        </button>
       </div>
     );
   };
@@ -1013,6 +1052,10 @@ export default function QuizMaster() {
           currentUserName={userName}
           defaultMode={mode === "exam" ? "exam" : "practice"}
         />
+
+        {/* Edge-TTS Audio Settings Modal & Floating Toast */}
+        {renderTtsModal()}
+        {renderTtsToast()}
       </div>
     );
   }
@@ -1460,9 +1503,6 @@ export default function QuizMaster() {
           </div>
         )}
 
-        {/* Edge-TTS Audio Settings Modal */}
-        {renderTtsModal()}
-
         {/* Quiz Leaderboard Modal */}
         <QuizLeaderboardModal
           isOpen={showLeaderboardModal}
@@ -1470,6 +1510,10 @@ export default function QuizMaster() {
           currentUserName={userName}
           defaultMode={mode === "exam" ? "exam" : "practice"}
         />
+
+        {/* Edge-TTS Audio Settings Modal & Floating Toast */}
+        {renderTtsModal()}
+        {renderTtsToast()}
       </div>
     );
   }
@@ -1743,6 +1787,7 @@ export default function QuizMaster() {
 
       {/* Edge-TTS Audio Settings Modal */}
       {renderTtsModal()}
+      {renderTtsToast()}
 
       {/* Quiz Leaderboard Modal */}
       <QuizLeaderboardModal

@@ -21336,3 +21336,50 @@ body.vthangios-dark .cyber-mode-btn.selected {
 .quiz-lb-done-btn:hover {
   background: #1177bb;
 }
+
+/* TTS Floating Warning Toast */
+.quiz-tts-floating-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  background: #2a1b06;
+  border: 1px solid #cca700;
+  border-radius: 8px;
+  color: #fed7aa;
+  font-size: 13px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  animation: quizSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  max-width: 420px;
+}
+
+.quiz-tts-floating-toast i {
+  color: #cca700;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.quiz-tts-floating-toast span {
+  flex: 1;
+  line-height: 1.4;
+}
+
+.quiz-tts-toast-close {
+  background: transparent;
+  border: none;
+  color: #a8a29e;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.quiz-tts-toast-close:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}

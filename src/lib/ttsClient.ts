@@ -156,6 +156,7 @@ class QuizTTSController {
 
   /**
    * Native browser SpeechSynthesis fallback in case Edge TTS is offline.
+   * Strictly enforces Vietnamese language and adapts male/female pitch.
    */
   private fallbackWebSpeech(text: string, settings: TTSSettings) {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) {
@@ -165,8 +166,63 @@ class QuizTTSController {
 
     try {
       window.speechSynthesis.cancel();
+
+      // Retrieve available local system voices
+      const voices = window.speechSynthesis.getVoices();
+      const viVoices = voices.filter((v) => {
+        const lang = (v.lang || "").toLowerCase().replace("_", "-");
+        return lang.startsWith("vi");
+      });
+
+      // CRITICAL: If no Vietnamese voice is installed on device, do NOT read with English voice!
+      if (viVoices.length === 0) {
+        console.warn(
+          "[TTS Fallback] No Vietnamese SpeechSynthesis voice installed on this device. Aborting to avoid foreign voice reading."
+        );
+        this.setStatus("idle");
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(
+            new CustomEvent("minsr_tts_notice", {
+              detail: {
+                type: "warning",
+                message:
+                  "Thiết bị chưa có giọng đọc Tiếng Việt offline. Vui lòng kiểm tra kết nối mạng để sử dụng giọng đọc AI chuẩn.",
+              },
+            })
+          );
+        }
+        return;
+      }
+
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = "vi-VN";
+      const isMale = settings.voice === "vi-VN-NamMinhNeural";
+
+      // Match male/female voice if available in local Vietnamese voices
+      let chosenVoice = viVoices[0];
+      if (isMale) {
+        const maleVoice = viVoices.find((v) => {
+          const n = v.name.toLowerCase();
+          return n.includes("nam") || n.includes("male") || n.includes("an");
+        });
+        if (maleVoice) chosenVoice = maleVoice;
+        utterance.pitch = 0.85; // Lower pitch for masculine tone
+      } else {
+        const femaleVoice = viVoices.find((v) => {
+          const n = v.name.toLowerCase();
+          return (
+            n.includes("nu") ||
+            n.includes("nữ") ||
+            n.includes("female") ||
+            n.includes("linh") ||
+            n.includes("mai")
+          );
+        });
+        if (femaleVoice) chosenVoice = femaleVoice;
+        utterance.pitch = 1.15; // Higher pitch for feminine tone
+      }
+
+      utterance.voice = chosenVoice;
+      utterance.lang = chosenVoice.lang || "vi-VN";
 
       const speedMap: Record<string, number> = {
         "0.8x": 0.8,
