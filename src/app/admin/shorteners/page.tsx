@@ -36,7 +36,7 @@ export default async function ShortenersPage() {
       {/* FORM THÊM CỔNG MỚI */}
       <div className="vt-card" style={{ marginBottom: 24 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
-          <Plus size={18} className="text-indigo-400" />
+          <Plus size={18} style={{ color: "#4fc1ff" }} />
           <h2 style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>Thêm Cổng Rút Gọn Mới</h2>
         </div>
 

@@ -11,34 +11,10 @@ import {
   getOntopPassStatus,
 } from "@/lib/ontop";
 import { sweepStaleTasks } from "@/lib/queue-sweeper";
-import { safeEqual, vnDate } from "@/lib/crypto";
+import { vnDate } from "@/lib/crypto";
+import { verifyWorkerSecret } from "@/lib/serverUtils";
 
 export const dynamic = "force-dynamic";
-
-function verifyWorkerSecret(req: Request): boolean {
-  const expectedSecret =
-    process.env.WORKER_SECRET || "xdarker_worker_token_2026_moimoi";
-
-  const headerSecret = req.headers.get("x-worker-secret");
-  if (headerSecret && safeEqual(headerSecret.trim(), expectedSecret.trim())) {
-    return true;
-  }
-
-  const authHeader = req.headers.get("authorization") || "";
-  if (authHeader.startsWith("Bearer ")) {
-    const bearerToken = authHeader.slice(7).trim();
-    if (safeEqual(bearerToken, expectedSecret.trim())) {
-      return true;
-    }
-  }
-
-  const host = req.headers.get("host") || "";
-  if (host.includes("localhost") || host.includes("127.0.0.1")) {
-    return true;
-  }
-
-  return false;
-}
 
 export async function POST(req: Request) {
   try {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
 import { verifyFreeFireKey } from "@/app/actions";
 
@@ -94,6 +94,7 @@ export default function FreeFireResultView({
   const [copiedLink, setCopiedLink] = useState(false);
   const [activeDevice, setActiveDevice] = useState(device);
   const [activeType, setActiveType] = useState(type);
+  const verifiedUrlKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
     try {
@@ -119,6 +120,10 @@ export default function FreeFireResultView({
       const urlParams = new URLSearchParams(window.location.search);
       const keyParam = urlParams.get("unlockedKey");
       if (keyParam) {
+        if (verifiedUrlKeyRef.current === keyParam) {
+          return;
+        }
+        verifiedUrlKeyRef.current = keyParam;
         verifyFreeFireKey(keyParam).then((res) => {
           if (res.ok) {
             setIsUnlocked(true);

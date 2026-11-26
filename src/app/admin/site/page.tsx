@@ -1,5 +1,4 @@
 import { db } from "@/lib/db";
-import { vnDate } from "@/lib/crypto";
 import AdminNav from "../AdminNav";
 import { saveSite } from "../actions";
 
@@ -15,12 +14,7 @@ function lines(json: string): string {
 }
 
 export default async function SitePage() {
-  const today = vnDate();
-  const [s, counter, daily] = await Promise.all([
-    db.site.findUnique({ where: { id: 1 } }),
-    db.counter.findUnique({ where: { id: 1 } }),
-    db.dailyHit.findUnique({ where: { date: today } }),
-  ]);
+  const s = await db.site.findUnique({ where: { id: 1 } });
 
   return (
     <div className="vt-admin">
@@ -97,25 +91,6 @@ export default async function SitePage() {
         </div>
 
         <div style={{ marginTop: 14, paddingTop: 14, borderTop: "1px solid rgba(255,255,255,0.08)", marginBottom: 14 }}>
-          <strong style={{ fontSize: 14, color: "#3b82f6", display: "flex", alignItems: "center", gap: 6, marginBottom: 12 }}>
-            <i className="fa-solid fa-chart-line" />
-            <span>Thông Số Lượt Truy Cập (StatsBar Live Ngoài Trang Chủ)</span>
-          </strong>
-          <div className="vt-row">
-            <label className="vt-field">
-              <span>Tổng lượt truy cập (Total Visits)</span>
-              <input key={String(counter?.total ?? 0)} type="number" name="counterTotal" defaultValue={counter?.total ?? 3000} min={0} />
-              <small className="vt-hint">Hiển thị ở cột &quot;Tổng Truy Cập&quot; ngoài trang chủ.</small>
-            </label>
-            <label className="vt-field">
-              <span>Lượt truy cập hôm nay ({today})</span>
-              <input key={String(daily?.count ?? 0)} type="number" name="counterToday" defaultValue={daily?.count ?? 0} min={0} />
-              <small className="vt-hint">Hiển thị ở cột &quot;+ Hôm Nay&quot; ngoài trang chủ.</small>
-            </label>
-          </div>
-        </div>
-
-        <div style={{ marginTop: 14, paddingTop: 14, borderTop: "1px solid rgba(255,255,255,0.08)", marginBottom: 14 }}>
           <strong style={{ fontSize: 14, color: "#10b981", display: "flex", alignItems: "center", gap: 6, marginBottom: 12 }}>
             <i className="fa-solid fa-shield-halved" />
             <span>Hệ Thống Bảo Mật Anti-Bot & Phát Hiện Giả Lập (CreepJS & TrafficVN Pattern)</span>
@@ -142,7 +117,13 @@ export default async function SitePage() {
             </label>
             <label className="vt-field">
               <span>Cloudflare Turnstile Secret Key</span>
-              <input type="password" name="cfTurnstileSecretKey" defaultValue={s?.cfTurnstileSecretKey ?? ""} placeholder="0x4AAAAAA..." />
+              <input
+                type="password"
+                name="cfTurnstileSecretKey"
+                defaultValue=""
+                placeholder={s?.cfTurnstileSecretKey ? "•••••••• (Đã lưu — để trống nếu giữ nguyên)" : "0x4AAAAAA..."}
+                autoComplete="new-password"
+              />
             </label>
           </div>
         </div>

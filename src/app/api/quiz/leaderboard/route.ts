@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { clientIp, rateLimit } from "@/lib/guard";
 import { LeaderboardSubmitPayload } from "@/types/leaderboard";
-import { sanitizeUserName } from "@/lib/leaderboardUtils";
+import { sanitizeUserName, validateLeaderboardPayload } from "@/lib/leaderboardUtils";
+import { QUIZ_TOPICS } from "@/data/quizBank";
 
 export const runtime = "nodejs";
 
@@ -68,16 +70,39 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = clientIp(req);
+    if (await rateLimit("quiz-leaderboard", ip, 15, 60_000)) {
+      return NextResponse.json(
+        { success: false, error: "Bạn gửi kết quả quá nhanh, vui lòng thử lại sau." },
+        { status: 429 }
+      );
+    }
+
     const body: LeaderboardSubmitPayload = await req.json().catch(() => ({}));
+    const validation = validateLeaderboardPayload(body);
+    if (!validation.valid) {
+      return NextResponse.json(
+        { success: false, error: validation.error || "Dữ liệu không hợp lệ" },
+        { status: 400 }
+      );
+    }
 
     const cleanName = sanitizeUserName(body.userName);
-    const scorePct = Math.min(Math.max(Number(body.scorePercentage) || 0, 0), 100);
-    const correct = Math.max(Number(body.correctCount) || 0, 0);
-    const total = Math.max(Number(body.totalQuestions) || 1, 1);
-    const timeSpent = Math.max(Number(body.timeSpentSeconds) || 1, 1);
+    const total = Math.min(Math.max(Math.round(Number(body.totalQuestions)), 1), 500);
+    const correct = Math.min(Math.max(Math.round(Number(body.correctCount)), 0), total);
+    const scorePct = Math.round((correct / total) * 100);
+    const timeSpent = Math.min(Math.max(Math.round(Number(body.timeSpentSeconds)), 1), 86_400);
     const mode = ["exam", "practice", "flashcard"].includes(body.mode) ? body.mode : "exam";
-    const topicId = body.topicId || "all";
-    const topicTitle = body.topicTitle || "Toàn Bộ Ngân Hàng";
+
+    const rawTopicId = typeof body.topicId === "string" ? body.topicId : "all";
+    const matchedTopic = QUIZ_TOPICS.find((t) => t.id === rawTopicId);
+    const specialTopics: Record<string, string> = {
+      all: "Toàn Bộ Ngân Hàng",
+      bookmarks: "Câu Hỏi Đánh Dấu",
+      mistakes: "Sổ Tay Lỗi Sai",
+    };
+    const topicId = matchedTopic ? matchedTopic.id : rawTopicId in specialTopics ? rawTopicId : "all";
+    const topicTitle = matchedTopic?.title || specialTopics[topicId] || "Toàn Bộ Ngân Hàng";
 
     // Insert record into Neon PostgreSQL
     const newRecord = await db.quizLeaderboard.create({

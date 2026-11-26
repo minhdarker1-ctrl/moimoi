@@ -526,12 +526,12 @@ export default async function AdminFreeFirePage({
               <label className="vt-field">
                 <span>Mã Bot Token Telegram (tạo từ @BotFather)</span>
                 <input
-                  type="text"
+                  type="password"
                   name="telegramBotToken"
-                  defaultValue={config?.telegramBotToken || ""}
-                  placeholder="Ví dụ: 123456789:AAFg8ZkQ..."
+                  defaultValue=""
+                  placeholder={config?.telegramBotToken ? "•••••••• (Đã lưu — để trống nếu giữ nguyên)" : "Ví dụ: 123456789:AAFg8ZkQ..."}
                   className="vt-input"
-                  autoComplete="off"
+                  autoComplete="new-password"
                 />
               </label>
 
@@ -570,8 +570,6 @@ export default async function AdminFreeFirePage({
             <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
               {config?.telegramBotToken && config?.telegramChatId && (
                 <form action={testTelegramNotification} style={{ display: "inline" }}>
-                  <input type="hidden" name="telegramBotToken" value={config.telegramBotToken} />
-                  <input type="hidden" name="telegramChatId" value={config.telegramChatId} />
                   <button
                     type="submit"
                     className="vt-btn-sm"

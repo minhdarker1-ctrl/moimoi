@@ -14,6 +14,7 @@
  */
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import { usePathname } from "next/navigation";
 
 interface Track {
   id: number;
@@ -129,6 +130,8 @@ function ensureYouTubeApi(callback: () => void) {
 }
 
 export default function MusicPlayer() {
+  const pathname = usePathname();
+  const isAdminRoute = pathname?.startsWith("/admin") ?? false;
   const [tracks, setTracks] = useState<Track[]>([]);
   const [index, setIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
@@ -186,8 +189,9 @@ export default function MusicPlayer() {
   const prevIndexRef = useRef<number | null>(null);
   const consecutiveErrorsRef = useRef(0);
 
-  // 1. Lấy danh sách bài hát từ API
+  // 1. Lấy danh sách bài hát từ API (bỏ qua trong khu vực /admin)
   useEffect(() => {
+    if (isAdminRoute) return;
     let active = true;
     fetch("/api/music")
       .then((r) => r.json())
@@ -200,7 +204,31 @@ export default function MusicPlayer() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [isAdminRoute]);
+
+  // Lắng nghe sự kiện tạm dừng nhạc nền khi Quiz TTS phát giọng đọc
+  useEffect(() => {
+    if (isAdminRoute) {
+      if (playerRef.current) {
+        try {
+          playerRef.current.destroy();
+        } catch {}
+        playerRef.current = null;
+        isPlayerReadyRef.current = false;
+        setPlaying(false);
+      }
+      return;
+    }
+    const handlePauseMusic = () => {
+      try {
+        playerRef.current?.pauseVideo();
+      } catch {}
+    };
+    window.addEventListener("minsr_pause_music", handlePauseMusic);
+    return () => {
+      window.removeEventListener("minsr_pause_music", handlePauseMusic);
+    };
+  }, [isAdminRoute]);
 
   const nextTrack = useCallback(() => {
     if (tracksRef.current.length === 0) return;
@@ -214,7 +242,7 @@ export default function MusicPlayer() {
 
   // 2. Khởi tạo YouTube Player khi có danh sách bài
   useEffect(() => {
-    if (tracks.length === 0) return;
+    if (isAdminRoute || tracks.length === 0) return;
     let isMounted = true;
 
     ensureYouTubeApi(() => {
@@ -287,7 +315,7 @@ export default function MusicPlayer() {
     return () => {
       isMounted = false;
     };
-  }, [tracks.length, nextTrack]);
+  }, [isAdminRoute, tracks.length, nextTrack]);
 
   // 3. Đổi bài khi index thay đổi (Next/Prev hoặc hết bài)
   useEffect(() => {
@@ -364,6 +392,10 @@ export default function MusicPlayer() {
   const thumb = track
     ? `https://img.youtube.com/vi/${track.youtubeId}/mqdefault.jpg`
     : "";
+
+  if (isAdminRoute) {
+    return null;
+  }
 
   return (
     <>

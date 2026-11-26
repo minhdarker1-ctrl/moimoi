@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
+import { useState, useEffect, useRef } from "react";
 
 interface ActivateResult {
   success: boolean;
@@ -19,7 +18,14 @@ export default function LocketClient() {
   const [completedAt, setCompletedAt] = useState<string>("");
   const [customerType, setCustomerType] = useState<"new" | "returning">("new");
   const [copiedInfo, setCopiedInfo] = useState(false);
-  const [dark, setDark] = useState(false);
+  const stepTimersRef = useRef<Array<ReturnType<typeof setTimeout>>>([]);
+
+  useEffect(() => {
+    return () => {
+      stepTimersRef.current.forEach((t) => clearTimeout(t));
+      stepTimersRef.current = [];
+    };
+  }, []);
 
   // Khôi phục Target 2 lớp (URL query param + localStorage) & Làm sạch thanh URL
   useEffect(() => {
@@ -62,29 +68,6 @@ export default function LocketClient() {
       } catch {}
     }
   }, []);
-
-  useEffect(() => {
-    try {
-      const isDark =
-        document.documentElement.dataset.theme === "dark" ||
-        document.body.classList.contains("vthangios-dark");
-      setDark(isDark);
-    } catch {}
-  }, []);
-
-  function handleToggleTheme() {
-    const next = !dark;
-    setDark(next);
-    document.documentElement.dataset.theme = next ? "dark" : "light";
-    if (next) {
-      document.body.classList.add("vthangios-dark");
-    } else {
-      document.body.classList.remove("vthangios-dark");
-    }
-    try {
-      localStorage.setItem("vt-theme", next ? "dark" : "light");
-    } catch {}
-  }
 
   async function handlePaste() {
     try {
@@ -145,8 +128,10 @@ Cài DNS khi Gold chưa xuất hiện sẽ chỉ giữ trạng thái chưa có G
     setResult(null);
     setStep(1);
 
+    stepTimersRef.current.forEach((t) => clearTimeout(t));
     const stepTimer1 = setTimeout(() => setStep(2), 700);
     const stepTimer2 = setTimeout(() => setStep(3), 1500);
+    stepTimersRef.current = [stepTimer1, stepTimer2];
 
     try {
       const res = await fetch("/api/locket/activate", {
@@ -206,25 +191,7 @@ Cài DNS khi Gold chưa xuất hiện sẽ chỉ giữ trạng thái chưa có G
   }
 
   return (
-    <div className="locket-page-container">
-      {/* TOP NAVIGATION BAR */}
-      <header className="locket-top-nav">
-        <Link href="/#services" className="locket-back-btn" aria-label="Quay lại dịch vụ">
-          <span>← QUAY LẠI DỊCH VỤ</span>
-        </Link>
-        <button
-          type="button"
-          className="vthangios-theme-btn locket-theme-btn"
-          onClick={handleToggleTheme}
-          aria-label={dark ? "Chuyển sang chế độ sáng" : "Chuyển sang chế độ tối"}
-        >
-          <i
-            className={`bi ${dark ? "bi-moon-stars-fill" : "bi-sun-fill"}`}
-            aria-hidden="true"
-          />
-        </button>
-      </header>
-
+    <div className="locket-page-container" style={{ paddingTop: 68 }}>
       <main className="locket-main-content">
         {/* HERO SECTION */}
         <div className="locket-hero-section">
@@ -650,7 +617,7 @@ Cài DNS khi Gold chưa xuất hiện sẽ chỉ giữ trạng thái chưa có G
                       KÍCH HOẠT LOCKET GOLD THÀNH CÔNG!
                     </h2>
                     <p className="locket-success-sub">
-                      Tài khoản: <strong>{target}</strong> • Hoàn tất lúc: <span>{completedAt || "13:22:45 · 04/10/2026"}</span>
+                      Tài khoản: <strong>{target}</strong> • Hoàn tất lúc: <span>{completedAt || "Vừa xong"}</span>
                     </p>
                   </div>
                 </div>

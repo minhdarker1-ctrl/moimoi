@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
-import DesktopHeader from "@/components/DesktopHeader";
+import SiteHeader from "@/components/SiteHeader";
 import AppCatalog from "@/components/AppCatalog";
 import FreeFireHub from "@/components/FreeFireHub";
 
@@ -55,7 +54,11 @@ export default async function DynamicGroupPage({ params }: PageProps) {
 
   return (
     <>
-      <DesktopHeader
+      <SiteHeader
+        variant="subpage"
+        backHref="/"
+        backLabel="Trang chủ"
+        pageTitle={currentGroup.title}
         siteName={site.name}
         avatarUrl={site.avatarUrl}
         verified={site.verified}
@@ -65,27 +68,9 @@ export default async function DynamicGroupPage({ params }: PageProps) {
           body: n.body,
           createdAt: n.createdAt.toISOString(),
         }))}
-        groups={groups.map((g) => ({
-          id: g.id,
-          title: g.title,
-          slug: g.slug,
-          icon: g.icon,
-          badge: g.badge,
-        }))}
       />
 
       <main style={{ maxWidth: 1240, margin: "0 auto", padding: "76px 16px 60px" }}>
-        {/* Nút quay lại trang chủ */}
-        <div style={{ textAlign: "left", marginBottom: 16 }}>
-          <Link
-            href="/"
-            className="mdarker-empty-btn"
-            style={{ textDecoration: "none", display: "inline-flex", gap: 8, padding: "8px 16px", fontSize: 13 }}
-          >
-            <i className="fa-solid fa-arrow-left" aria-hidden="true" />
-            <span>Về trang chủ</span>
-          </Link>
-        </div>
 
         {isFreeFire ? (
           <FreeFireHub adminNote={ffConfig} />

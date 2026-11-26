@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { LeaderboardEntry } from "@/types/leaderboard";
+import { sortLeaderboardEntries } from "@/lib/leaderboardUtils";
 import { QUIZ_TOPICS } from "@/data/quizBank";
 
 interface QuizLeaderboardModalProps {
@@ -38,17 +39,46 @@ export default function QuizLeaderboardModal({
   const [totalCount, setTotalCount] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
 
+  useEffect(() => {
+    if (isOpen) {
+      setFilterMode(defaultMode);
+    }
+  }, [isOpen, defaultMode]);
+
   const fetchLeaderboard = useCallback(async () => {
     setLoading(true);
+    let serverRecords: LeaderboardEntry[] = [];
+    let serverTotal = 0;
+
     try {
       const res = await fetch(`/api/quiz/leaderboard?mode=${filterMode}&topicId=${filterTopic}&limit=50`);
       const data = await res.json();
       if (data.success && Array.isArray(data.records)) {
-        setRecords(data.records);
-        setTotalCount(data.totalCount || data.records.length);
+        serverRecords = data.records;
+        serverTotal = data.totalCount || data.records.length;
       }
     } catch (err) {
       console.warn("[Leaderboard Fetch Error]:", err);
+    }
+
+    try {
+      const localRaw = JSON.parse(localStorage.getItem("minsr_quiz_local_leaderboard") || "[]");
+      if (Array.isArray(localRaw) && localRaw.length > 0) {
+        const filteredLocal = (localRaw as LeaderboardEntry[]).filter((e) => {
+          const modeOk = filterMode === "all" || e.mode === filterMode;
+          const topicOk = filterTopic === "all" || e.topicId === filterTopic;
+          return modeOk && topicOk;
+        });
+        const merged = sortLeaderboardEntries([...serverRecords, ...filteredLocal]).slice(0, 50);
+        setRecords(merged);
+        setTotalCount(Math.max(serverTotal + filteredLocal.length, merged.length));
+      } else {
+        setRecords(serverRecords);
+        setTotalCount(serverTotal);
+      }
+    } catch {
+      setRecords(serverRecords);
+      setTotalCount(serverTotal);
     } finally {
       setLoading(false);
     }

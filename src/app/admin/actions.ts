@@ -159,11 +159,14 @@ export async function logout() {
 
 export async function saveSite(fd: FormData) {
   await requireAdmin();
+  const existing = await db.site.findUnique({ where: { id: 1 } });
   const lines = String(fd.get("typedLines") ?? "")
     .split(/\r?\n/)
     .map((s) => s.trim())
     .filter(Boolean)
     .slice(0, 10);
+
+  const submittedCfSecret = str(fd, "cfTurnstileSecretKey", 120);
 
   const data = {
     name: str(fd, "name", 80),
@@ -184,28 +187,32 @@ export async function saveSite(fd: FormData) {
     blockEmulators: bool(fd, "blockEmulators"),
     cfTurnstileEnabled: bool(fd, "cfTurnstileEnabled"),
     cfTurnstileSiteKey: str(fd, "cfTurnstileSiteKey", 120),
-    cfTurnstileSecretKey: str(fd, "cfTurnstileSecretKey", 120),
+    cfTurnstileSecretKey: submittedCfSecret || existing?.cfTurnstileSecretKey || "",
   };
 
   await db.site.upsert({ where: { id: 1 }, update: data, create: { id: 1, ...data } });
 
-  const counterTotal = num(fd, "counterTotal", -1);
-  if (counterTotal >= 0) {
-    await db.counter.upsert({
-      where: { id: 1 },
-      update: { total: counterTotal },
-      create: { id: 1, total: counterTotal },
-    });
+  if (fd.has("counterTotal")) {
+    const counterTotal = num(fd, "counterTotal", -1);
+    if (counterTotal >= 0) {
+      await db.counter.upsert({
+        where: { id: 1 },
+        update: { total: counterTotal },
+        create: { id: 1, total: counterTotal },
+      });
+    }
   }
 
-  const counterToday = num(fd, "counterToday", -1);
-  if (counterToday >= 0) {
-    const date = vnDate();
-    await db.dailyHit.upsert({
-      where: { date },
-      update: { count: counterToday },
-      create: { date, count: counterToday },
-    });
+  if (fd.has("counterToday")) {
+    const counterToday = num(fd, "counterToday", -1);
+    if (counterToday >= 0) {
+      const date = vnDate();
+      await db.dailyHit.upsert({
+        where: { date },
+        update: { count: counterToday },
+        create: { date, count: counterToday },
+      });
+    }
   }
 
   refresh("/admin/site");
@@ -245,7 +252,9 @@ export async function updateCounter(fd: FormData) {
 
 export async function saveFreeFireConfig(fd: FormData) {
   await requireAdmin();
+  const existing = await db.freeFireConfig.findUnique({ where: { id: 1 } });
   const keyTypeIdRaw = num(fd, "keyTypeId", 0);
+  const submittedTeleToken = str(fd, "telegramBotToken", 200);
   const data = {
     title: str(fd, "title", 120),
     content: str(fd, "content", 3000),
@@ -297,7 +306,7 @@ export async function saveFreeFireConfig(fd: FormData) {
 
     // Telegram Notify config (Phương án 3)
     telegramNotifyEnabled: bool(fd, "telegramNotifyEnabled"),
-    telegramBotToken: str(fd, "telegramBotToken", 200),
+    telegramBotToken: submittedTeleToken || existing?.telegramBotToken || "",
     telegramChatId: str(fd, "telegramChatId", 100),
 
     // Wake Up config khi Bot Offline
@@ -317,18 +326,19 @@ export async function saveFreeFireConfig(fd: FormData) {
   redirect("/admin/freefire?saved=1");
 }
 
-export async function testTelegramNotification(fd: FormData) {
+export async function testTelegramNotification() {
   await requireAdmin();
-  const token = str(fd, "telegramBotToken", 200);
-  const chatId = str(fd, "telegramChatId", 100);
+  const config = await db.freeFireConfig.findUnique({ where: { id: 1 } });
+  const token = config?.telegramBotToken?.trim() || "";
+  const chatId = config?.telegramChatId?.trim() || "";
 
   if (!token || !chatId) {
-    redirect("/admin/freefire?tele_err=" + encodeURIComponent("Vui lòng nhập Bot Token và Chat ID trước khi test!"));
+    redirect("/admin/freefire?tele_err=" + encodeURIComponent("Vui lòng nhập và lưu Bot Token + Chat ID trước khi test!"));
   }
 
   const { sendTelegramMessage } = await import("@/lib/telegram");
   const now = new Date().toLocaleTimeString("vi-VN");
-  const text = `🔔 <b>[TEST THÀNH CÔNG]</b>\n━━━━━━━━━━━━━━━━━━━━━\nBot Telegram đã kết nối thành công với website mDarker!\nThời gian: ${now}\n━━━━━━━━━━━━━━━━━━━━━`;
+  const text = `🔔 <b>[TEST THÀNH CÔNG]</b>\n━━━━━━━━━━━━━━━━━━━━━\nBot Telegram đã kết nối thành công với hệ thống!\nThời gian: ${now}\n━━━━━━━━━━━━━━━━━━━━━`;
 
   const res = await sendTelegramMessage(token, chatId, text);
   if (res.success) {

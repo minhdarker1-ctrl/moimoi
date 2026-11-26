@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
+import { useState } from "react";
 import { DONATE_CONFIG, PresetOption } from "@/config/donate";
 
 export default function DonateClient() {
@@ -9,33 +8,8 @@ export default function DonateClient() {
   const [customAmount, setCustomAmount] = useState<string>("");
   const [donorName, setDonorName] = useState<string>("Fan MinSr");
   const [donorMessage, setDonorMessage] = useState<string>("Cảm ơn bạn vì những công cụ hữu ích!");
-  const [dark, setDark] = useState<boolean>(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [copiedAll, setCopiedAll] = useState<boolean>(false);
-
-  // Sync theme
-  useEffect(() => {
-    try {
-      const isDark =
-        document.documentElement.dataset.theme === "dark" ||
-        document.body.classList.contains("vthangios-dark");
-      setDark(isDark);
-    } catch {}
-  }, []);
-
-  function handleToggleTheme() {
-    const next = !dark;
-    setDark(next);
-    document.documentElement.dataset.theme = next ? "dark" : "light";
-    if (next) {
-      document.body.classList.add("vthangios-dark");
-    } else {
-      document.body.classList.remove("vthangios-dark");
-    }
-    try {
-      localStorage.setItem("vt-theme", next ? "dark" : "light");
-    } catch {}
-  }
 
   // Calculate actual amount
   const actualAmount = customAmount ? parseInt(customAmount.replace(/\D/g, ""), 10) || 0 : selectedPreset;
@@ -100,26 +74,7 @@ Cảm ơn bạn rất nhiều vì đã tiếp thêm động lực cho mình! ✨
   }
 
   return (
-    <div className="donate-page-container">
-      {/* TOP NAVIGATION BAR */}
-      <header className="donate-top-nav">
-        <Link href="/#services" className="donate-back-btn" aria-label="Quay lại dịch vụ">
-          <i className="fas fa-arrow-left" />
-          <span>QUAY LẠI DỊCH VỤ</span>
-        </Link>
-        <button
-          type="button"
-          className="vthangios-theme-btn donate-theme-btn"
-          onClick={handleToggleTheme}
-          aria-label={dark ? "Chuyển sang chế độ sáng" : "Chuyển sang chế độ tối"}
-        >
-          <i
-            className={`bi ${dark ? "bi-moon-stars-fill" : "bi-sun-fill"}`}
-            aria-hidden="true"
-          />
-        </button>
-      </header>
-
+    <div className="donate-page-container" style={{ paddingTop: 68 }}>
       <main className="donate-main-content">
         {/* HERO SECTION */}
         <div className="donate-hero-section">

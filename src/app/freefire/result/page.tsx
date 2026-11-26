@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import DesktopHeader from "@/components/DesktopHeader";
+import SiteHeader from "@/components/SiteHeader";
 import FreeFireResultView from "@/components/FreeFireResultView";
 
 export const dynamic = "force-dynamic";
@@ -80,7 +80,11 @@ export default async function FreeFireResultPage({
 
   return (
     <>
-      <DesktopHeader
+      <SiteHeader
+        variant="subpage"
+        backHref="/freefire"
+        backLabel="Free Fire"
+        pageTitle="Kết quả Độ Nhạy"
         siteName={site.name}
         avatarUrl={site.avatarUrl}
         verified={site.verified}
@@ -89,13 +93,6 @@ export default async function FreeFireResultPage({
           title: n.title,
           body: n.body,
           createdAt: n.createdAt.toISOString(),
-        }))}
-        groups={groups.map((g) => ({
-          id: g.id,
-          title: g.title,
-          slug: g.slug,
-          icon: g.icon,
-          badge: g.badge,
         }))}
       />
 

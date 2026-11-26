@@ -87,20 +87,24 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   const user = await getCurrentUser();
+  if (!user) {
+    return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+  }
   try {
     const body = await req.json().catch(() => ({}));
     if (body.all) {
-      if (user) {
+      await db.notification.updateMany({
+        where: { userId: user.id },
+        data: { isRead: true },
+      });
+    } else if (body.id) {
+      const notifId = Number(body.id);
+      if (Number.isInteger(notifId) && notifId > 0) {
         await db.notification.updateMany({
-          where: { OR: [{ userId: user.id }, { userId: null }] },
+          where: { id: notifId, userId: user.id },
           data: { isRead: true },
         });
       }
-    } else if (body.id) {
-      await db.notification.updateMany({
-        where: { id: Number(body.id) },
-        data: { isRead: true },
-      });
     }
     return NextResponse.json({ success: true });
   } catch (err) {

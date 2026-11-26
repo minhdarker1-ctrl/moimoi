@@ -3,16 +3,21 @@
 import { QuizQuestion } from "@/types/quiz";
 import { TTSSettings, TTSQuestionScope } from "@/types/tts";
 
-// Default settings
 export const DEFAULT_TTS_SETTINGS: TTSSettings = {
-  voice: "vi-VN-HoaiMyNeural",
+  voice: "google-vi",
   speed: "1.0x",
   scope: "question_and_options",
   autoReadQuestion: false,
   autoReadExplanation: false,
 };
 
-// Simple hash for cache keys
+const SPEED_MAP: Record<string, number> = {
+  "0.8x": 0.8,
+  "1.0x": 1.0,
+  "1.25x": 1.25,
+  "1.5x": 1.5,
+};
+
 function hashString(str: string): string {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
@@ -25,15 +30,14 @@ function hashString(str: string): string {
 
 class QuizTTSController {
   private currentAudio: HTMLAudioElement | null = null;
-  private currentBlobUrl: string | null = null;
   private memoryCache: Map<string, string> = new Map();
   private abortController: AbortController | null = null;
+  private playSessionId = 0;
   private statusListeners: Set<(status: "idle" | "loading" | "playing" | "paused") => void> = new Set();
   private currentStatus: "idle" | "loading" | "playing" | "paused" = "idle";
 
   constructor() {
     if (typeof window !== "undefined") {
-      // Clean up on page unload
       window.addEventListener("beforeunload", () => {
         this.stop();
         this.memoryCache.forEach((url) => URL.revokeObjectURL(url));
@@ -57,23 +61,37 @@ class QuizTTSController {
     this.statusListeners.forEach((fn) => fn(status));
   }
 
+  private notifyMusicPause() {
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("minsr_pause_music"));
+    }
+  }
+
   /**
-   * Stop any ongoing speech or network fetch immediately.
+   * Immediately invalidate any active TTS session, abort inflight fetches,
+   * detach audio callbacks before clearing src (preventing spurious onerror overlap),
+   * and cancel browser SpeechSynthesis.
    */
   public stop() {
+    this.playSessionId += 1;
+
     if (this.abortController) {
       this.abortController.abort();
       this.abortController = null;
     }
 
     if (this.currentAudio) {
-      this.currentAudio.pause();
-      this.currentAudio.currentTime = 0;
-      this.currentAudio.src = "";
+      const audio = this.currentAudio;
       this.currentAudio = null;
+      audio.onplay = null;
+      audio.onended = null;
+      audio.onerror = null;
+      audio.pause();
+      audio.currentTime = 0;
+      audio.removeAttribute("src");
+      audio.load();
     }
 
-    // Also cancel native browser SpeechSynthesis if active
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       window.speechSynthesis.cancel();
     }
@@ -90,75 +108,95 @@ class QuizTTSController {
 
   public resume() {
     if (this.currentAudio && this.currentAudio.paused) {
+      this.notifyMusicPause();
       this.currentAudio.play().then(() => this.setStatus("playing")).catch(() => this.setStatus("idle"));
     }
   }
 
   /**
-   * Synthesize and play raw text using Edge TTS API with fallback to Web Speech.
+   * Synthesize and play raw text using Google Vietnamese TTS with Web Speech fallback.
    */
   public async speakText(text: string, settings: TTSSettings): Promise<void> {
     if (!text.trim()) return;
 
     this.stop();
+    const sessionId = ++this.playSessionId;
     this.setStatus("loading");
 
-    const cacheKey = `${settings.voice}_${settings.speed}_${hashString(text)}`;
+    const cacheKey = `google-vi_${hashString(text)}`;
+    const playbackRate = SPEED_MAP[settings.speed] || 1.0;
 
     try {
       let audioUrl = this.memoryCache.get(cacheKey);
 
       if (!audioUrl) {
-        this.abortController = new AbortController();
+        const controller = new AbortController();
+        this.abortController = controller;
 
         const response = await fetch("/api/quiz/tts", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             text,
-            voice: settings.voice,
+            voice: "google-vi",
             speed: settings.speed,
           }),
-          signal: this.abortController.signal,
+          signal: controller.signal,
         });
+
+        if (sessionId !== this.playSessionId) return;
 
         if (!response.ok) {
           throw new Error(`TTS API failed with status ${response.status}`);
         }
 
         const blob = await response.blob();
+        if (sessionId !== this.playSessionId) return;
+
         audioUrl = URL.createObjectURL(blob);
         this.memoryCache.set(cacheKey, audioUrl);
       }
 
-      const audio = new Audio(audioUrl);
-      this.currentAudio = audio;
-      this.currentBlobUrl = audioUrl;
+      if (sessionId !== this.playSessionId) return;
 
-      audio.onplay = () => this.setStatus("playing");
+      const audio = new Audio(audioUrl);
+      audio.defaultPlaybackRate = playbackRate;
+      audio.playbackRate = playbackRate;
+      this.currentAudio = audio;
+
+      audio.onplay = () => {
+        if (sessionId !== this.playSessionId) return;
+        this.notifyMusicPause();
+        this.setStatus("playing");
+      };
       audio.onended = () => {
-        this.setStatus("idle");
+        if (sessionId !== this.playSessionId) return;
         this.currentAudio = null;
+        this.setStatus("idle");
       };
       audio.onerror = () => {
-        this.fallbackWebSpeech(text, settings);
+        if (sessionId !== this.playSessionId) return;
+        this.currentAudio = null;
+        this.fallbackWebSpeech(text, settings, sessionId);
       };
 
       await audio.play();
     } catch (err: unknown) {
-      if ((err as Error)?.name === "AbortError") {
+      if ((err as Error)?.name === "AbortError" || sessionId !== this.playSessionId) {
         return;
       }
-      console.warn("[Edge TTS] API failed, using Web Speech fallback:", err);
-      this.fallbackWebSpeech(text, settings);
+      console.warn("[Google TTS] API failed, using Web Speech fallback:", err);
+      this.fallbackWebSpeech(text, settings, sessionId);
     }
   }
 
   /**
-   * Native browser SpeechSynthesis fallback in case Edge TTS is offline.
-   * Strictly enforces Vietnamese language and adapts male/female pitch.
+   * Native browser SpeechSynthesis fallback if Google TTS is unreachable.
+   * Strictly enforces Vietnamese language so foreign voices never speak Vietnamese text.
    */
-  private fallbackWebSpeech(text: string, settings: TTSSettings) {
+  private fallbackWebSpeech(text: string, settings: TTSSettings, sessionId: number) {
+    if (sessionId !== this.playSessionId) return;
+
     if (typeof window === "undefined" || !("speechSynthesis" in window)) {
       this.setStatus("idle");
       return;
@@ -167,74 +205,45 @@ class QuizTTSController {
     try {
       window.speechSynthesis.cancel();
 
-      // Retrieve available local system voices
       const voices = window.speechSynthesis.getVoices();
       const viVoices = voices.filter((v) => {
         const lang = (v.lang || "").toLowerCase().replace("_", "-");
         return lang.startsWith("vi");
       });
 
-      // CRITICAL: If no Vietnamese voice is installed on device, do NOT read with English voice!
       if (viVoices.length === 0) {
-        console.warn(
-          "[TTS Fallback] No Vietnamese SpeechSynthesis voice installed on this device. Aborting to avoid foreign voice reading."
-        );
         this.setStatus("idle");
-        if (typeof window !== "undefined") {
-          window.dispatchEvent(
-            new CustomEvent("minsr_tts_notice", {
-              detail: {
-                type: "warning",
-                message:
-                  "Thiết bị chưa có giọng đọc Tiếng Việt offline. Vui lòng kiểm tra kết nối mạng để sử dụng giọng đọc AI chuẩn.",
-              },
-            })
-          );
-        }
+        window.dispatchEvent(
+          new CustomEvent("minsr_tts_notice", {
+            detail: {
+              type: "warning",
+              message:
+                "Không thể kết nối giọng đọc Google và thiết bị chưa có giọng Tiếng Việt offline.",
+            },
+          })
+        );
         return;
       }
 
       const utterance = new SpeechSynthesisUtterance(text);
-      const isMale = settings.voice === "vi-VN-NamMinhNeural";
+      utterance.voice = viVoices[0];
+      utterance.lang = viVoices[0].lang || "vi-VN";
+      utterance.pitch = 1.0;
+      utterance.rate = SPEED_MAP[settings.speed] || 1.0;
 
-      // Match male/female voice if available in local Vietnamese voices
-      let chosenVoice = viVoices[0];
-      if (isMale) {
-        const maleVoice = viVoices.find((v) => {
-          const n = v.name.toLowerCase();
-          return n.includes("nam") || n.includes("male") || n.includes("an");
-        });
-        if (maleVoice) chosenVoice = maleVoice;
-        utterance.pitch = 0.85; // Lower pitch for masculine tone
-      } else {
-        const femaleVoice = viVoices.find((v) => {
-          const n = v.name.toLowerCase();
-          return (
-            n.includes("nu") ||
-            n.includes("nữ") ||
-            n.includes("female") ||
-            n.includes("linh") ||
-            n.includes("mai")
-          );
-        });
-        if (femaleVoice) chosenVoice = femaleVoice;
-        utterance.pitch = 1.15; // Higher pitch for feminine tone
-      }
-
-      utterance.voice = chosenVoice;
-      utterance.lang = chosenVoice.lang || "vi-VN";
-
-      const speedMap: Record<string, number> = {
-        "0.8x": 0.8,
-        "1.0x": 1.0,
-        "1.25x": 1.25,
-        "1.5x": 1.5,
+      utterance.onstart = () => {
+        if (sessionId !== this.playSessionId) return;
+        this.notifyMusicPause();
+        this.setStatus("playing");
       };
-      utterance.rate = speedMap[settings.speed] || 1.0;
-
-      utterance.onstart = () => this.setStatus("playing");
-      utterance.onend = () => this.setStatus("idle");
-      utterance.onerror = () => this.setStatus("idle");
+      utterance.onend = () => {
+        if (sessionId !== this.playSessionId) return;
+        this.setStatus("idle");
+      };
+      utterance.onerror = () => {
+        if (sessionId !== this.playSessionId) return;
+        this.setStatus("idle");
+      };
 
       window.speechSynthesis.speak(utterance);
     } catch {
@@ -242,9 +251,6 @@ class QuizTTSController {
     }
   }
 
-  /**
-   * Speak question content (and optionally 4 options).
-   */
   public async speakQuestion(
     question: QuizQuestion,
     scope: TTSQuestionScope,
@@ -263,9 +269,6 @@ class QuizTTSController {
     await this.speakText(speech, settings);
   }
 
-  /**
-   * Speak answer feedback + full explanation when user selects an option.
-   */
   public async speakFeedback(
     isCorrect: boolean,
     selectedOptIndex: number,
@@ -291,9 +294,6 @@ class QuizTTSController {
     await this.speakText(speech, settings);
   }
 
-  /**
-   * Speak explanation only.
-   */
   public async speakExplanation(explanation: string, settings: TTSSettings): Promise<void> {
     if (!explanation) return;
     const speech = `Giải thích chi tiết: ${explanation}`;
@@ -301,5 +301,4 @@ class QuizTTSController {
   }
 }
 
-// Global Singleton Instance
 export const quizTTS = new QuizTTSController();

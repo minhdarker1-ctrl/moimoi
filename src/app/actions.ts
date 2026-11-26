@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { hashKey } from "@/lib/crypto";
+import { hashKey, safeEqual } from "@/lib/crypto";
 
 export type UnlockResult =
   | {
@@ -13,6 +13,23 @@ export type UnlockResult =
       expiresAt?: string;
     }
   | { ok: false; error: string };
+
+async function consumeAppKeyAtomically(
+  foundId: number,
+): Promise<{ usedCount: number; maxUses: number; expiresAt: Date } | null> {
+  const rows = await db.$queryRaw<
+    Array<{ usedCount: number; maxUses: number; expiresAt: Date }>
+  >`
+    UPDATE "AppKey"
+    SET "usedCount" = "usedCount" + 1
+    WHERE id = ${foundId}
+      AND revoked = false
+      AND "expiresAt" > NOW()
+      AND ("maxUses" = 0 OR "usedCount" < "maxUses")
+    RETURNING "usedCount", "maxUses", "expiresAt"
+  `;
+  return rows?.[0] ?? null;
+}
 
 /**
  * Kiểm key rồi trả link tải. Link tải KHÔNG bao giờ render sẵn trong HTML —
@@ -38,10 +55,10 @@ export async function unlockApp(appId: number, rawKey: string): Promise<UnlockRe
     return { ok: false, error: `Key đã hết lượt sử dụng (${found.usedCount}/${found.maxUses} lượt).` };
   }
 
-  const updated = await db.appKey.update({
-    where: { id: found.id },
-    data: { usedCount: { increment: 1 } },
-  });
+  const updated = await consumeAppKeyAtomically(found.id);
+  if (!updated) {
+    return { ok: false, error: "Key đã hết lượt sử dụng hoặc hết hạn." };
+  }
   const remaining = updated.maxUses > 0 ? Math.max(0, updated.maxUses - updated.usedCount) : null;
 
   return {
@@ -82,7 +99,7 @@ export async function verifyFreeFireKey(rawKey: string): Promise<VerifyFreeFireR
 
   // 1. Kiểm tra Key tĩnh / Mật khẩu truy cập nhanh nếu admin có cấu hình
   if (config.staticKey && config.staticKey.trim()) {
-    if (key.toLowerCase() === config.staticKey.trim().toLowerCase()) {
+    if (safeEqual(key.toLowerCase(), config.staticKey.trim().toLowerCase())) {
       return { ok: true, maxUses: 0, usedCount: 1, remainingUses: null };
     }
   }
@@ -102,10 +119,10 @@ export async function verifyFreeFireKey(rawKey: string): Promise<VerifyFreeFireR
         return { ok: false, error: `Key này đã hết số lượt sử dụng (${found.usedCount}/${found.maxUses} lượt).` };
       }
 
-      const updated = await db.appKey.update({
-        where: { id: found.id },
-        data: { usedCount: { increment: 1 } },
-      });
+      const updated = await consumeAppKeyAtomically(found.id);
+      if (!updated) {
+        return { ok: false, error: "Key này đã hết số lượt sử dụng hoặc hết hạn." };
+      }
       const remaining = updated.maxUses > 0 ? Math.max(0, updated.maxUses - updated.usedCount) : null;
 
       return {

@@ -25,7 +25,7 @@ export default function AovTaskbar({
         {/* Brand / Logo */}
         <div className="aov-brand">
           <div className="aov-brand-icon">
-            <Sparkles size={18} className="text-amber-400" />
+            <Sparkles size={18} style={{ color: "#fbbf24" }} />
           </div>
           <div className="aov-brand-info">
             <span className="aov-brand-title">AOV ARENA</span>
@@ -41,7 +41,7 @@ export default function AovTaskbar({
             style={isAdmin ? { border: "1px solid rgba(245, 158, 11, 0.5)", background: "rgba(245, 158, 11, 0.15)" } : undefined}
             title={isAdmin ? "Đặc quyền Admin: Vô hạn vé trải nghiệm" : "Số vé của bạn (dùng để xé túi mù hoặc quay vòng quay)"}
           >
-            <Ticket size={16} className="text-amber-400" />
+            <Ticket size={16} style={{ color: "#fbbf24" }} />
             <span className="aov-ticket-num" style={isAdmin ? { color: "#fbbf24", fontWeight: 800 } : undefined}>
               {isAdmin ? "9999" : tickets}
             </span>
@@ -72,7 +72,7 @@ export default function AovTaskbar({
             title="Xem kho tài khoản đã trúng thưởng"
           >
             <Package size={16} />
-            <span className="hidden-xs">Kho Acc</span>
+            <span className="vsc-hide-xs">Kho Acc</span>
             <span className="aov-inv-count">{inventoryCount}</span>
           </button>
         </div>

@@ -87,13 +87,32 @@ export async function POST(req: Request) {
         }
       } catch (cfErr) {
         console.error("Lỗi xác minh Turnstile API:", cfErr);
+        return NextResponse.json(
+          { ok: false, error: "Không thể kết nối xác minh Cloudflare Turnstile. Vui lòng thử lại." },
+          { status: 503 }
+        );
       }
     }
 
     const scan = body.scanResult;
-    if (!scan) {
+    if (
+      !scan ||
+      typeof scan !== "object" ||
+      typeof scan.passed !== "boolean" ||
+      typeof scan.botScore !== "number" ||
+      !Number.isFinite(scan.botScore) ||
+      !scan.details ||
+      typeof scan.details !== "object"
+    ) {
       return NextResponse.json(
-        { ok: false, error: "Thiếu dữ liệu phân tích môi trường trình duyệt." },
+        { ok: false, error: "Dữ liệu phân tích môi trường trình duyệt không hợp lệ." },
+        { status: 400 }
+      );
+    }
+
+    if (typeof scan.timestamp === "number" && Math.abs(Date.now() - scan.timestamp) > 10 * 60_000) {
+      return NextResponse.json(
+        { ok: false, error: "Phiên kiểm tra trình duyệt đã hết hạn. Vui lòng quét lại." },
         { status: 400 }
       );
     }

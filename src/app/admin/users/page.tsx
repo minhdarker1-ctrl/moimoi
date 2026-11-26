@@ -225,12 +225,12 @@ export default async function AdminUsersPage({ searchParams }: Props) {
   function renderDeviceIcon(deviceStr: string) {
     const s = deviceStr.toLowerCase();
     if (s.includes("iphone") || s.includes("mobile") || s.includes("android")) {
-      return <Smartphone size={14} className="text-emerald-500" />;
+      return <Smartphone size={14} style={{ color: "#4ec9b0" }} />;
     }
     if (s.includes("mac") || s.includes("laptop")) {
-      return <Laptop size={14} className="text-sky-500" />;
+      return <Laptop size={14} style={{ color: "#38bdf8" }} />;
     }
-    return <Monitor size={14} className="text-indigo-500" />;
+    return <Monitor size={14} style={{ color: "#4fc1ff" }} />;
   }
 
   function renderServiceBadge(type: string, name: string) {
@@ -847,7 +847,7 @@ export default async function AdminUsersPage({ searchParams }: Props) {
                         <form action={updateUserCoins} style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
                           <input type="hidden" name="userId" value={u.id} />
                           <div style={{ display: "flex", alignItems: "center", gap: 3 }} title="Coins">
-                            <Coins size={13} className="text-amber-500" />
+                            <Coins size={13} style={{ color: "#f59e0b" }} />
                             <input
                               type="number"
                               name="coins"
@@ -865,7 +865,7 @@ export default async function AdminUsersPage({ searchParams }: Props) {
                             />
                           </div>
                           <div style={{ display: "flex", alignItems: "center", gap: 3 }} title="Vé quay">
-                            <Ticket size={13} className="text-pink-500" />
+                            <Ticket size={13} style={{ color: "#ec4899" }} />
                             <input
                               type="number"
                               name="spinTickets"

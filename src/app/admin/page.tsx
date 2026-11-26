@@ -238,7 +238,7 @@ export default async function AdminHome({
       {/* 1. SYSTEM HEALTH BAR (TRẠNG THÁI HỆ THỐNG PHÂN TÁN) */}
       <div className="admin-health-bar">
         <div className="health-item">
-          <div className="health-icon bg-indigo-500/10 text-indigo-400">
+          <div className="health-icon" style={{ backgroundColor: "rgba(0, 122, 204, 0.14)", color: "#4fc1ff" }}>
             <Cpu size={16} />
           </div>
           <div className="health-info">
@@ -251,7 +251,7 @@ export default async function AdminHome({
         </div>
 
         <div className="health-item">
-          <div className="health-icon bg-amber-500/10 text-amber-400">
+          <div className="health-icon" style={{ backgroundColor: "rgba(245, 158, 11, 0.14)", color: "#fbbf24" }}>
             <Database size={16} />
           </div>
           <div className="health-info">
@@ -264,7 +264,7 @@ export default async function AdminHome({
         </div>
 
         <div className="health-item">
-          <div className="health-icon bg-emerald-500/10 text-emerald-400">
+          <div className="health-icon" style={{ backgroundColor: "rgba(78, 201, 176, 0.14)", color: "#4ec9b0" }}>
             <Bot size={16} />
           </div>
           <div className="health-info">
@@ -395,7 +395,7 @@ export default async function AdminHome({
       <div className="vt-card" style={{ marginTop: 24 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
           <h2 style={{ fontSize: 16, margin: 0, display: "flex", alignItems: "center", gap: 10, color: "var(--vi-text)" }}>
-            <Activity size={18} className="text-indigo-400" />
+            <Activity size={18} style={{ color: "#4fc1ff" }} />
             <span>Hoạt Động Dịch Vụ Mới Nhất (Live Activity)</span>
           </h2>
           <span style={{ fontSize: 12, color: "var(--vi-muted)" }}>10 giao dịch gần nhất</span>
@@ -453,14 +453,14 @@ export default async function AdminHome({
         )}
       </div>
 
-      {/* 6. FORM TÙY CHỈNH THÔNG SỐ LƯỢT TRUY CẬP (STATSBAR LIVE) */}
+      {/* 6. FORM TÙY CHỈNH THÔNG SỐ LƯỢT TRUY CẬP */}
       <div className="vt-card" style={{ marginTop: 24 }}>
         <h2 style={{ fontSize: 17, marginTop: 0, marginBottom: 8, display: "flex", alignItems: "center", gap: 10, color: "#3b82f6" }}>
           <TrendingUp size={20} />
-          <span>Tùy Chỉnh Thông Số Lượt Truy Cập (StatsBar Live)</span>
+          <span>Điều Chỉnh Thống Kê Lượt Truy Cập</span>
         </h2>
         <p className="vt-hint" style={{ marginBottom: 18 }}>
-          Điều chỉnh trực tiếp số lượt <strong>Tổng truy cập</strong> và <strong>Hôm nay</strong> hiển thị trên thanh thống kê LIVE ngoài trang chủ. Hệ thống sẽ tiếp tục đếm tăng dần dựa trên các mốc bạn đã lưu.
+          Điều chỉnh trực tiếp mốc <strong>Tổng truy cập</strong> và <strong>Hôm nay</strong> hiển thị trong thống kê Admin. Hệ thống sẽ tiếp tục đếm tăng dần dựa trên các mốc bạn đã lưu.
         </p>
 
         <form action={updateCounter} className="vt-form">
@@ -475,7 +475,7 @@ export default async function AdminHome({
                 min={0}
                 required
               />
-              <small className="vt-hint">Hiển thị ở cột &quot;Tổng Truy Cập&quot; ngoài trang chủ.</small>
+              <small className="vt-hint">Hiển thị tại thẻ KPI Tổng Lượt Truy Cập.</small>
             </label>
 
             <label className="vt-field">
@@ -488,13 +488,13 @@ export default async function AdminHome({
                 min={0}
                 required
               />
-              <small className="vt-hint">Hiển thị ở cột &quot;+ Hôm Nay&quot; ngoài trang chủ.</small>
+              <small className="vt-hint">Hiển thị tại thẻ KPI Lượt Truy Cập Hôm Nay.</small>
             </label>
           </div>
 
           <div style={{ marginTop: 16, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
             <div style={{ fontSize: 13, color: "var(--vi-muted)" }}>
-              💡 Lưu ý: Cài đặt này có hiệu lực ngay tức thì trên giao diện trang chủ mà không cần khởi động lại web.
+              💡 Lưu ý: Cài đặt này được cập nhật ngay trong hệ thống báo cáo thống kê.
             </div>
             <button
               className="vt-btn-primary"

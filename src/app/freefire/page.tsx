@@ -1,8 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { db } from "@/lib/db";
-import DesktopHeader from "@/components/DesktopHeader";
+import SiteHeader from "@/components/SiteHeader";
 import FreeFireContainer from "@/components/FreeFireContainer";
 import AppCard from "@/components/AppCard";
 
@@ -46,7 +45,9 @@ export default async function FreeFirePage() {
 
   return (
     <>
-      <DesktopHeader
+      <SiteHeader
+        variant="subpage"
+        pageTitle="Free Fire"
         siteName={site.name}
         avatarUrl={site.avatarUrl}
         verified={site.verified}
@@ -56,25 +57,9 @@ export default async function FreeFirePage() {
           body: n.body,
           createdAt: n.createdAt.toISOString(),
         }))}
-        groups={groups.map((g) => ({
-          id: g.id,
-          title: g.title,
-          slug: g.slug,
-          icon: g.icon,
-          badge: g.badge,
-        }))}
       />
 
       <main style={{ maxWidth: 860, margin: "0 auto", padding: "76px 16px 60px" }}>
-        {/* Nút quay lại trang chủ */}
-        <div style={{ textAlign: "left", marginBottom: 16 }}>
-          <Link
-            href="/#services"
-            className="cyber-back-btn"
-          >
-            <span>← QUAY LẠI DỊCH VỤ</span>
-          </Link>
-        </div>
 
         {/* Component Công cụ Free Fire (Độ Nhạy & Unlock ID) */}
         <Suspense fallback={<div style={{ textAlign: "center", padding: "40px 0", color: "var(--vi-muted)" }}><i className="fa-solid fa-spinner fa-spin" /> Đang tải dữ liệu Free Fire...</div>}>

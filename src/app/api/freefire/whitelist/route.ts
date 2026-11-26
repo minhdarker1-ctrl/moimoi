@@ -1,16 +1,25 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { isAdmin } from "@/lib/auth";
+import { verifyWorkerSecret } from "@/lib/serverUtils";
 
 export const dynamic = "force-dynamic";
 
 /**
- * API Xuất danh sách Whitelist UID (Dành cho Admin hoặc File Mod đồng bộ)
+ * API Xuất danh sách Whitelist UID (Yêu cầu Admin session hoặc Worker Secret)
  * Query params:
  * - port / server: "kipas" | "astute" (mặc định lấy tất cả)
  * - format: "txt" | "json" | "download"
  */
 export async function GET(req: Request) {
   try {
+    if (!verifyWorkerSecret(req) && !(await isAdmin())) {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
     const { searchParams } = new URL(req.url);
     const portParam = (searchParams.get("port") || searchParams.get("server") || "").toLowerCase().trim();
     const format = (searchParams.get("format") || "txt").toLowerCase().trim();

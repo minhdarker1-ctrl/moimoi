@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { db } from "@/lib/db";
-import DesktopHeader from "@/components/DesktopHeader";
+import SiteHeader from "@/components/SiteHeader";
 import OtherPageClient from "@/components/other/OtherPageClient";
 
 export const revalidate = 60;
@@ -33,7 +32,9 @@ export default async function OtherPage() {
 
   return (
     <>
-      <DesktopHeader
+      <SiteHeader
+        variant="subpage"
+        pageTitle="Other & Quiz"
         siteName={site.name}
         avatarUrl={site.avatarUrl}
         verified={site.verified}
@@ -43,25 +44,9 @@ export default async function OtherPage() {
           body: n.body,
           createdAt: n.createdAt.toISOString(),
         }))}
-        groups={groups.map((g) => ({
-          id: g.id,
-          title: g.title,
-          slug: g.slug,
-          icon: g.icon,
-          badge: g.badge,
-        }))}
       />
 
       <main style={{ maxWidth: 1240, margin: "0 auto", padding: "76px 16px 60px" }}>
-        {/* Nút quay lại trang chủ */}
-        <div style={{ textAlign: "left", marginBottom: 16 }}>
-          <Link
-            href="/#services"
-            className="cyber-back-btn"
-          >
-            <span>← QUAY LẠI DỊCH VỤ</span>
-          </Link>
-        </div>
 
         {/* Tabs và Nội dung: Quiz Master + Kho Công Cụ */}
         <OtherPageClient

@@ -1,6 +1,4 @@
-// TRƯỚC KHI DEPLOY VERCEL: đổi provider dưới thành "postgresql".
-// Prisma không cho dùng env() ở provider nên phải sửa tay đúng 1 dòng.
-// Vercel không chạy được SQLite (filesystem ephemeral) — dùng Neon hoặc Supabase.
+// Cấu hình Prisma cho PostgreSQL (Neon / Supabase).
 generator client {
   provider = "prisma-client-js"
   // rhel-openssl-3.0.x: runtime của Vercel. Thiếu dòng này thì build xong

@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import Link from "next/link";
-import CyberHeader from "@/components/CyberHeader";
+import SiteHeader from "@/components/SiteHeader";
 import TypedText from "@/components/TypedText";
 import CyberAvatar from "@/components/CyberAvatar";
 import DinoRunnerWidget from "@/components/DinoRunnerWidget";
@@ -53,9 +53,12 @@ export default async function Home() {
 
   return (
     <>
-      {/* TOP NAVIGATION TỐI GIẢN */}
-      <CyberHeader
+      {/* TOP NAVIGATION VS CODE DARK+ */}
+      <SiteHeader
+        variant="home"
         siteName={site.name}
+        avatarUrl={site.avatarUrl}
+        verified={site.verified}
         notices={notices.map((n) => ({
           id: n.id,
           title: n.title,

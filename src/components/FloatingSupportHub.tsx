@@ -82,7 +82,31 @@ const FAQS: FaqItem[] = [
   },
 ];
 
-export default function FloatingSupportHub() {
+interface SupportSocialItem {
+  url: string;
+  iconUrl?: string;
+}
+
+interface FloatingSupportHubProps {
+  siteName?: string;
+  socials?: SupportSocialItem[];
+}
+
+export default function FloatingSupportHub({
+  siteName = "MinSr",
+  socials = [],
+}: FloatingSupportHubProps) {
+  const findSocialUrl = (needle: string, fallback: string) => {
+    const found = socials.find(
+      (s) => s.url && s.url.toLowerCase().includes(needle)
+    );
+    return found?.url || fallback;
+  };
+
+  const telegramUrl = findSocialUrl("t.me", findSocialUrl("telegram", "https://t.me/thedarker1"));
+  const facebookUrl = findSocialUrl("facebook", "https://www.facebook.com/oncyber");
+  const youtubeUrl = findSocialUrl("youtube", findSocialUrl("youtu.be", "https://youtube.com/@oncyberr"));
+  const tiktokUrl = findSocialUrl("tiktok", "https://www.tiktok.com/@oncyberr");
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"channels" | "faq" | "ticket">("channels");
   const [selectedFaq, setSelectedFaq] = useState<number | null>(null);
@@ -112,11 +136,12 @@ export default function FloatingSupportHub() {
     if (!ticketMessage.trim()) return;
     const currentUrl = typeof window !== "undefined" ? window.location.href : "https://minsr.vercel.app";
     const text = encodeURIComponent(
-      `🆘 [YÊU CẦU HỖ TRỢ MINSR]\n` +
+      `🆘 [YÊU CẦU HỖ TRỢ ${siteName.toUpperCase()}]\n` +
       `🌐 Trang gặp sự cố: ${currentUrl}\n` +
       `📝 Nội dung: ${ticketMessage.trim()}`
     );
-    window.open(`https://t.me/thedarker1?text=${text}`, "_blank");
+    const sep = telegramUrl.includes("?") ? "&" : "?";
+    window.open(`${telegramUrl}${sep}text=${text}`, "_blank", "noopener,noreferrer");
     setTicketSent(true);
     setTimeout(() => {
       setTicketSent(false);
@@ -216,7 +241,7 @@ export default function FloatingSupportHub() {
                 <div className="fsd-channels-grid">
                   {/* TELEGRAM ADMIN (ƯU TIÊN SỐ 1) */}
                   <a
-                    href="https://t.me/thedarker1"
+                    href={telegramUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="fsd-channel-card fsd-ch-telegram"
@@ -236,7 +261,7 @@ export default function FloatingSupportHub() {
 
                   {/* GROUP TELEGRAM */}
                   <a
-                    href="https://t.me/thedarker1"
+                    href={telegramUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="fsd-channel-card"
@@ -256,7 +281,7 @@ export default function FloatingSupportHub() {
 
                   {/* FACEBOOK FANPAGE */}
                   <a
-                    href="https://www.facebook.com/oncyber"
+                    href={facebookUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="fsd-channel-card"
@@ -276,7 +301,7 @@ export default function FloatingSupportHub() {
 
                   {/* YOUTUBE CHANNEL */}
                   <a
-                    href="https://youtube.com/@oncyberr"
+                    href={youtubeUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="fsd-channel-card"
@@ -286,7 +311,7 @@ export default function FloatingSupportHub() {
                     </div>
                     <div className="fsd-ch-content">
                       <div className="fsd-ch-name-row">
-                        <span className="fsd-ch-name">Kênh YouTube MinSr</span>
+                        <span className="fsd-ch-name">Kênh YouTube {siteName}</span>
                         <span className="fsd-ch-tag">Video Guide</span>
                       </div>
                       <p className="fsd-ch-desc">Xem clip hướng dẫn trực quan từng bước không lo làm sai</p>
@@ -296,7 +321,7 @@ export default function FloatingSupportHub() {
 
                   {/* TIKTOK */}
                   <a
-                    href="https://www.tiktok.com/@oncyberr"
+                    href={tiktokUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="fsd-channel-card"
@@ -306,7 +331,7 @@ export default function FloatingSupportHub() {
                     </div>
                     <div className="fsd-ch-content">
                       <div className="fsd-ch-name-row">
-                        <span className="fsd-ch-name">Kênh TikTok @oncyberr</span>
+                        <span className="fsd-ch-name">Kênh TikTok {siteName}</span>
                         <span className="fsd-ch-tag">Mẹo Hay</span>
                       </div>
                       <p className="fsd-ch-desc">Clip ngắn chia sẻ mẹo kéo tâm Free Fire &amp; thủ thuật iOS</p>
@@ -316,7 +341,7 @@ export default function FloatingSupportHub() {
                 </div>
 
                 <div className="fsd-tip-box">
-                  <ShieldCheck size={18} className="text-emerald-400" />
+                  <ShieldCheck size={18} style={{ color: "#4ec9b0", flexShrink: 0 }} />
                   <span>
                     <strong>Cam kết hỗ trợ:</strong> MinSr là dịch vụ hoàn toàn miễn phí &amp; an toàn, không bao giờ yêu cầu mật khẩu iCloud hay mã OTP ngân hàng của bạn.
                   </span>
@@ -408,7 +433,7 @@ export default function FloatingSupportHub() {
                 <div className="fsd-faq-footer">
                   <span>Chưa giải quyết được vấn đề?</span>
                   <a
-                    href="https://t.me/thedarker1"
+                    href={telegramUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="fsd-link-bold"
@@ -439,7 +464,7 @@ export default function FloatingSupportHub() {
                         className="fsd-ticket-copy-btn"
                         title="Sao chép đường dẫn"
                       >
-                        {copiedLink ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
+                        {copiedLink ? <Check size={14} style={{ color: "#4ec9b0" }} /> : <Copy size={14} />}
                         <span>{copiedLink ? "Đã copy" : "Copy URL"}</span>
                       </button>
                     </div>

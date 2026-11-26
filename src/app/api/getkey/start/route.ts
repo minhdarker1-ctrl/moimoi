@@ -5,23 +5,17 @@ import { fingerprint, sessionToken, verifyAntiBotToken, generateKey, hashKey } f
 import { shortenWithFallback, usableShorteners } from "@/lib/getkey";
 import { clientIp, rateLimit, maybeCleanup } from "@/lib/guard";
 import { parseUserAgent, extractLocation } from "@/lib/user-agent";
+import { getBaseUrl } from "@/lib/serverUtils";
 
 const SESSION_TTL_MIN = 30;
 export const maxDuration = 30;
 export const dynamic = "force-dynamic";
 
-function baseUrl(req: Request): string {
-  const env = process.env.NEXT_PUBLIC_SITE_URL;
-  if (env) return env.replace(/\/$/, "");
-  const url = new URL(req.url);
-  return `${url.protocol}//${url.host}`;
-}
-
 function fail(req: Request, msg: string, isJson: boolean = false) {
   if (isJson) {
     return NextResponse.json({ ok: false, error: msg }, { status: 400 });
   }
-  const url = new URL("/key/error", baseUrl(req));
+  const url = new URL("/key/error", getBaseUrl(req));
   url.searchParams.set("m", msg);
   return NextResponse.redirect(url, 302);
 }
@@ -58,7 +52,7 @@ export async function GET(req: Request) {
       if (Number.isInteger(targetAppId) && targetAppId > 0) {
         const appRecord = await db.app.findUnique({ where: { id: targetAppId } });
         if (appRecord) {
-          const directUrl = appRecord.downloadUrl || appRecord.getKeyUrl || baseUrl(req);
+          const directUrl = appRecord.downloadUrl || appRecord.getKeyUrl || getBaseUrl(req);
           if (isJson) {
             return NextResponse.json({
               ok: true,
@@ -75,7 +69,7 @@ export async function GET(req: Request) {
 
     // 2. Nhánh Free Fire (Độ Nhạy & Mã HUD)
     if (scope === "freefire") {
-      const directUrl = `${baseUrl(req)}/freefire/result?unlocked=true`;
+      const directUrl = `${getBaseUrl(req)}/freefire/result?unlocked=true`;
       if (isJson) {
         return NextResponse.json({
           ok: true,
@@ -90,7 +84,7 @@ export async function GET(req: Request) {
 
     // 3. Nhánh Đấu Trường Liên Quân AOV
     if (scope === "aov" || scope === "lienquan") {
-      const directUrl = `${baseUrl(req)}/aov`;
+      const directUrl = `${getBaseUrl(req)}/aov`;
       if (isJson) {
         return NextResponse.json({
           ok: true,
@@ -119,7 +113,7 @@ export async function GET(req: Request) {
           expiresAt,
         },
       });
-      const directUrl = `${baseUrl(req)}/freefire/result?unlocked=true&key=${keyVal}`;
+      const directUrl = `${getBaseUrl(req)}/freefire/result?unlocked=true&key=${keyVal}`;
       if (isJson) {
         return NextResponse.json({
           ok: true,
@@ -138,11 +132,11 @@ export async function GET(req: Request) {
       return NextResponse.json({
         ok: true,
         isDirect: true,
-        url: baseUrl(req),
+        url: getBaseUrl(req),
         message: "Đặc quyền Admin: Bỏ qua vượt link thành công!",
       });
     }
-    return NextResponse.redirect(baseUrl(req), 302);
+    return NextResponse.redirect(getBaseUrl(req), 302);
   }
 
   // Chỉ yêu cầu xác minh Anti-Bot & thiết bị cho riêng trang Free Fire
@@ -267,10 +261,10 @@ export async function GET(req: Request) {
 
   const steps = Math.max(1, Math.min(kt.steps, 8));
   const token = sessionToken();
-  const base = baseUrl(req);
+  const base = getBaseUrl(req);
 
   const isAov = scope === "aov" || scope === "lienquan";
-  const finalDest = isAov ? `${base}/key/${token}?scope=aov` : `${base}/key/${token}`;
+  const finalDest = isAov ? `${base}/api/aov/claim?token=${token}` : `${base}/key/${token}`;
   const targets = Array.from({ length: steps }, (_, i) =>
     i === steps - 1 ? finalDest : `${base}/hop/${token}/${i + 1}`,
   );

@@ -3,9 +3,16 @@ import { test } from "node:test";
 
 process.env.SESSION_SECRET = "0".repeat(64);
 
-const { encryptToken, decryptToken, generateKey, hashKey, normalizeKey, vnDate } = await import(
-  "./crypto.ts"
-);
+const {
+  encryptToken,
+  decryptToken,
+  generateKey,
+  hashKey,
+  normalizeKey,
+  vnDate,
+  signAovTickets,
+  verifyAovTickets,
+} = await import("./crypto.ts");
 
 test("mã hoá rồi giải mã ra đúng token gốc", () => {
   const t = "abc123-def456-token";
@@ -60,4 +67,14 @@ test("vnDate trả YYYY-MM-DD theo giờ VN", () => {
   assert.equal(vnDate(new Date("2026-01-01T00:30:00Z")), "2026-01-01");
   // 2025-12-31T18:00Z = 01:00 ngày 2026-01-01 ở VN
   assert.equal(vnDate(new Date("2025-12-31T18:00:00Z")), "2026-01-01");
+});
+
+test("signAovTickets và verifyAovTickets xác thực chữ ký HMAC chính xác", () => {
+  const signed = signAovTickets(3);
+  assert.equal(verifyAovTickets(signed), 3);
+
+  const [count, sig] = signed.split(".");
+  assert.equal(verifyAovTickets(`${Number(count) + 5}.${sig}`), 0);
+  assert.equal(verifyAovTickets("invalid-cookie"), 0);
+  assert.equal(verifyAovTickets(undefined), 0);
 });

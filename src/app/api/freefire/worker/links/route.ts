@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { safeEqual } from "@/lib/crypto";
+import { verifyWorkerSecret } from "@/lib/serverUtils";
 
 export const dynamic = "force-dynamic";
 
@@ -12,32 +12,6 @@ const corsHeaders = {
 
 export async function OPTIONS() {
   return new NextResponse(null, { status: 204, headers: corsHeaders });
-}
-
-function verifyWorkerSecret(req: Request): boolean {
-  const expectedSecret =
-    process.env.WORKER_SECRET || "xdarker_worker_token_2026_moimoi";
-
-  const headerSecret = req.headers.get("x-worker-secret");
-  if (headerSecret && safeEqual(headerSecret.trim(), expectedSecret.trim())) {
-    return true;
-  }
-
-  const authHeader = req.headers.get("authorization") || "";
-  if (authHeader.startsWith("Bearer ")) {
-    const bearerToken = authHeader.slice(7).trim();
-    if (safeEqual(bearerToken, expectedSecret.trim())) {
-      return true;
-    }
-  }
-
-  // Chấp nhận request từ localhost trong môi trường dev
-  const host = req.headers.get("host") || "";
-  if (host.includes("localhost") || host.includes("127.0.0.1")) {
-    return true;
-  }
-
-  return false;
 }
 
 export async function POST(req: Request) {

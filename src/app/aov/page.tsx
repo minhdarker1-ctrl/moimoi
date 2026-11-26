@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import DesktopHeader from "@/components/DesktopHeader";
+import { AOV_TICKET_COOKIE, verifyAovTickets } from "@/lib/crypto";
+import SiteHeader from "@/components/SiteHeader";
 import AovArenaClient from "./AovArenaClient";
 
 export const dynamic = "force-dynamic";
@@ -27,16 +28,11 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function AovPage() {
   const cookieStore = await cookies();
-  const ticketCount = Math.max(0, parseInt(cookieStore.get("aov_tickets")?.value || "0", 10) || 0);
+  const ticketCount = verifyAovTickets(cookieStore.get(AOV_TICKET_COOKIE)?.value);
 
-  const [site, groups, notices, aovConfig, availableStock, claimedStock, currentUser] =
+  const [site, notices, aovConfig, availableStock, claimedStock, currentUser] =
     await Promise.all([
       db.site.findUnique({ where: { id: 1 } }),
-      db.group.findMany({
-        where: { visible: true },
-        orderBy: { order: "asc" },
-        include: { apps: { where: { visible: true }, orderBy: { order: "asc" } } },
-      }),
       db.notice.findMany({ where: { visible: true }, orderBy: { createdAt: "desc" }, take: 10 }),
       db.aovConfig.findUnique({ where: { id: 1 } }),
       db.gameAccount.count({ where: { game: "AOV", status: "AVAILABLE" } }),
@@ -50,7 +46,9 @@ export default async function AovPage() {
 
   return (
     <>
-      <DesktopHeader
+      <SiteHeader
+        variant="subpage"
+        pageTitle="Đấu Trường AOV"
         siteName={site.name}
         avatarUrl={site.avatarUrl}
         verified={site.verified}
@@ -59,13 +57,6 @@ export default async function AovPage() {
           title: n.title,
           body: n.body,
           createdAt: n.createdAt.toISOString(),
-        }))}
-        groups={groups.map((g) => ({
-          id: g.id,
-          title: g.title,
-          slug: g.slug,
-          icon: g.icon,
-          badge: g.badge,
         }))}
       />
 

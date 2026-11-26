@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { QuizQuestion, QuizMode, QuizTopic, QuizResult } from "@/types/quiz";
 import { QUIZ_TOPICS, MECHANICAL_QUIZ_QUESTIONS } from "@/data/quizBank";
 import { TTSSettings, TTSSpeed, TTSStatus } from "@/types/tts";
@@ -8,12 +8,22 @@ import { quizTTS, DEFAULT_TTS_SETTINGS } from "@/lib/ttsClient";
 import QuizLeaderboardModal from "./QuizLeaderboardModal";
 import { LeaderboardSubmitPayload } from "@/types/leaderboard";
 
+let sharedAudioCtx: AudioContext | null = null;
+
 // Helper audio synthesizer (Zero external asset dependencies)
 function playSound(type: "correct" | "wrong" | "finish" | "click") {
   try {
-    const AudioContext = window.AudioContext || (window as unknown as { webkitAudioContext: typeof window.AudioContext }).webkitAudioContext;
-    if (!AudioContext) return;
-    const ctx = new AudioContext();
+    const AudioCtx =
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext: typeof window.AudioContext }).webkitAudioContext;
+    if (!AudioCtx) return;
+    if (!sharedAudioCtx || sharedAudioCtx.state === "closed") {
+      sharedAudioCtx = new AudioCtx();
+    }
+    const ctx = sharedAudioCtx;
+    if (ctx.state === "suspended") {
+      void ctx.resume().catch(() => {});
+    }
 
     if (type === "click") {
       const osc = ctx.createOscillator();
@@ -108,11 +118,20 @@ export default function QuizMaster() {
   const [reviewFilter, setReviewFilter] = useState<"all" | "wrong" | "correct">("all");
   const [showMatrixModal, setShowMatrixModal] = useState<boolean>(false);
 
-  // TTS Edge-TTS States
+  // TTS Google Tiếng Việt States & Timers
   const [ttsSettings, setTtsSettings] = useState<TTSSettings>(DEFAULT_TTS_SETTINGS);
   const [ttsStatus, setTtsStatus] = useState<TTSStatus>("idle");
   const [showTtsModal, setShowTtsModal] = useState<boolean>(false);
   const [ttsToast, setTtsToast] = useState<string | null>(null);
+  const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const ttsNoticeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clearFeedbackTimer = useCallback(() => {
+    if (feedbackTimerRef.current) {
+      clearTimeout(feedbackTimerRef.current);
+      feedbackTimerRef.current = null;
+    }
+  }, []);
 
   // Leaderboard (Bảng Vàng) States
   const [userName, setUserName] = useState<string>("");
@@ -139,7 +158,8 @@ export default function QuizMaster() {
         setUserName(savedName);
       }
       if (savedTts) {
-        setTtsSettings({ ...DEFAULT_TTS_SETTINGS, ...JSON.parse(savedTts) });
+        const parsed = JSON.parse(savedTts);
+        setTtsSettings({ ...DEFAULT_TTS_SETTINGS, ...parsed, voice: "google-vi" });
       }
     } catch {}
   }, []);
@@ -151,17 +171,23 @@ export default function QuizMaster() {
       const detail = (e as CustomEvent<{ message: string }>).detail;
       if (detail?.message) {
         setTtsToast(detail.message);
-        setTimeout(() => setTtsToast(null), 6000);
+        if (ttsNoticeTimerRef.current) clearTimeout(ttsNoticeTimerRef.current);
+        ttsNoticeTimerRef.current = setTimeout(() => setTtsToast(null), 6000);
       }
     };
     window.addEventListener("minsr_tts_notice", handleNotice);
 
     return () => {
       unsub();
+      clearFeedbackTimer();
+      if (ttsNoticeTimerRef.current) {
+        clearTimeout(ttsNoticeTimerRef.current);
+        ttsNoticeTimerRef.current = null;
+      }
       quizTTS.stop();
       window.removeEventListener("minsr_tts_notice", handleNotice);
     };
-  }, []);
+  }, [clearFeedbackTimer]);
 
   const updateTtsSettings = (partial: Partial<TTSSettings>) => {
     setTtsSettings((prev) => {
@@ -257,6 +283,8 @@ export default function QuizMaster() {
         });
       }
 
+      clearFeedbackTimer();
+      quizTTS.stop();
       setActiveQuestionList(pool);
       setCurrentIndex(0);
       setUserAnswers({});
@@ -277,21 +305,26 @@ export default function QuizMaster() {
 
       if (soundEnabled) playSound("click");
     },
-    [availableQuestions, shuffleQuestions, shuffleOptions, questionCount, mode, soundEnabled]
+    [availableQuestions, shuffleQuestions, shuffleOptions, questionCount, mode, soundEnabled, clearFeedbackTimer]
   );
 
-  // Timer countdown for Exam Mode
+  const finishQuizRef = useRef<() => void>(() => {});
+
+  // Timer countdown for Exam Mode (stable interval independent of remaining seconds)
   useEffect(() => {
     if (!isPlaying || isFinished || mode !== "exam") return;
-    if (examSecondsLeft <= 0) {
-      finishQuiz();
-      return;
-    }
     const timer = setInterval(() => {
-      setExamSecondsLeft((prev) => prev - 1);
+      setExamSecondsLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          setTimeout(() => finishQuizRef.current(), 0);
+          return 0;
+        }
+        return prev - 1;
+      });
     }, 1000);
     return () => clearInterval(timer);
-  }, [isPlaying, isFinished, mode, examSecondsLeft]);
+  }, [isPlaying, isFinished, mode]);
 
   // Current Question
   const currentQ = activeQuestionList[currentIndex];
@@ -299,37 +332,39 @@ export default function QuizMaster() {
   // TTS Play / Stop Triggers
   const togglePlayCurrentQuestion = useCallback(() => {
     if (!currentQ) return;
+    clearFeedbackTimer();
     if (ttsStatus === "playing" || ttsStatus === "loading") {
       quizTTS.stop();
     } else {
       quizTTS.speakQuestion(currentQ, ttsSettings.scope, ttsSettings);
     }
-  }, [currentQ, ttsStatus, ttsSettings]);
+  }, [currentQ, ttsStatus, ttsSettings, clearFeedbackTimer]);
 
   const playExplanationAudio = useCallback(() => {
     if (!currentQ || !currentQ.explanation) return;
+    clearFeedbackTimer();
     if (ttsStatus === "playing" || ttsStatus === "loading") {
       quizTTS.stop();
     } else {
       quizTTS.speakExplanation(currentQ.explanation, ttsSettings);
     }
-  }, [currentQ, ttsStatus, ttsSettings]);
+  }, [currentQ, ttsStatus, ttsSettings, clearFeedbackTimer]);
 
-  const handleTestTtsVoice = (overrideVoice?: "vi-VN-HoaiMyNeural" | "vi-VN-NamMinhNeural") => {
+  const handleTestTtsVoice = () => {
+    clearFeedbackTimer();
     if (ttsStatus === "playing" || ttsStatus === "loading") {
       quizTTS.stop();
       return;
     }
-    const activeSettings = overrideVoice ? { ...ttsSettings, voice: overrideVoice } : ttsSettings;
-    const voiceName = activeSettings.voice === "vi-VN-NamMinhNeural" ? "Nam Minh, giọng nam" : "Hoài My, giọng nữ";
     quizTTS.speakText(
-      `Xin chào, đây là ${voiceName} trên hệ thống trắc nghiệm MinSr.`,
-      activeSettings
+      "Xin chào, đây là giọng đọc Tiếng Việt của chị Google trên hệ thống trắc nghiệm MinSr.",
+      ttsSettings
     );
   };
 
   // Auto-read question on navigation (if enabled)
   useEffect(() => {
+    clearFeedbackTimer();
     if (!isPlaying || isFinished || !currentQ) {
       quizTTS.stop();
       return;
@@ -342,9 +377,10 @@ export default function QuizMaster() {
     }
 
     return () => {
+      clearFeedbackTimer();
       quizTTS.stop();
     };
-  }, [currentIndex, isPlaying, isFinished, ttsSettings.autoReadQuestion, ttsSettings.scope, ttsSettings.voice, ttsSettings.speed]);
+  }, [currentIndex, isPlaying, isFinished, ttsSettings.autoReadQuestion, ttsSettings.scope, ttsSettings.speed, clearFeedbackTimer]);
 
   // Select Option Handler
   const handleSelectOption = (optIndex: number) => {
@@ -372,9 +408,17 @@ export default function QuizMaster() {
         }
       }
 
-      // Auto-read feedback & explanation if enabled
+      // Auto-read feedback & explanation after short chime delay so sounds never overlap
       if (ttsSettings.autoReadExplanation) {
-        quizTTS.speakFeedback(isCorrect, optIndex, currentQ, ttsSettings);
+        clearFeedbackTimer();
+        quizTTS.stop();
+        const qSnapshot = currentQ;
+        const sSnapshot = ttsSettings;
+        const delayMs = soundEnabled ? 260 : 0;
+        feedbackTimerRef.current = setTimeout(() => {
+          feedbackTimerRef.current = null;
+          quizTTS.speakFeedback(isCorrect, optIndex, qSnapshot, sSnapshot);
+        }, delayMs);
       }
     } else if (mode === "exam") {
       // In exam mode, can freely change answers until submit
@@ -385,6 +429,7 @@ export default function QuizMaster() {
 
   // Next / Prev controls
   const handleNext = () => {
+    clearFeedbackTimer();
     if (currentIndex < activeQuestionList.length - 1) {
       if (soundEnabled) playSound("click");
       setCurrentIndex((prev) => prev + 1);
@@ -395,11 +440,27 @@ export default function QuizMaster() {
   };
 
   const handlePrev = () => {
+    clearFeedbackTimer();
     if (currentIndex > 0) {
       if (soundEnabled) playSound("click");
       setCurrentIndex((prev) => prev - 1);
       setIsCardFlipped(false);
     }
+  };
+
+  const kbHandlersRef = useRef({
+    handleSelectOption,
+    handleNext,
+    handlePrev,
+    togglePlayCurrentQuestion,
+    playExplanationAudio,
+  });
+  kbHandlersRef.current = {
+    handleSelectOption,
+    handleNext,
+    handlePrev,
+    togglePlayCurrentQuestion,
+    playExplanationAudio,
   };
 
   // Keyboard Shortcuts Handler
@@ -418,7 +479,7 @@ export default function QuizMaster() {
         e.preventDefault();
         const optIdx = parseInt(key, 10) - 1;
         if (mode === "practice" || mode === "exam") {
-          handleSelectOption(optIdx);
+          kbHandlersRef.current.handleSelectOption(optIdx);
         }
         return;
       }
@@ -428,7 +489,7 @@ export default function QuizMaster() {
         e.preventDefault();
         const map: Record<string, number> = { a: 0, b: 1, c: 2, d: 3 };
         if (mode === "practice" || mode === "exam") {
-          handleSelectOption(map[key]);
+          kbHandlersRef.current.handleSelectOption(map[key]);
         }
         return;
       }
@@ -436,24 +497,24 @@ export default function QuizMaster() {
       // Key R: Toggle TTS read/stop question
       if (key === "r") {
         e.preventDefault();
-        togglePlayCurrentQuestion();
+        kbHandlersRef.current.togglePlayCurrentQuestion();
         return;
       }
 
       // Key E: Play explanation
       if (key === "e") {
         e.preventDefault();
-        playExplanationAudio();
+        kbHandlersRef.current.playExplanationAudio();
         return;
       }
 
-      // Navigation: Right Arrow / Enter / Space (for next or flip)
+      // Navigation: Right Arrow / Left Arrow / Space (flashcard)
       if (e.key === "ArrowRight") {
         e.preventDefault();
-        handleNext();
+        kbHandlersRef.current.handleNext();
       } else if (e.key === "ArrowLeft") {
         e.preventDefault();
-        handlePrev();
+        kbHandlersRef.current.handlePrev();
       } else if (e.key === " " && mode === "flashcard") {
         e.preventDefault();
         setIsCardFlipped((prev) => !prev);
@@ -462,10 +523,11 @@ export default function QuizMaster() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isPlaying, isFinished, mode, currentIndex, activeQuestionList.length, revealedQuestions, currentQ]);
+  }, [isPlaying, isFinished, mode]);
 
   // Finish Quiz Handler
   const finishQuiz = () => {
+    clearFeedbackTimer();
     quizTTS.stop();
     setQuizEndTime(Date.now());
     setIsFinished(true);
@@ -485,8 +547,11 @@ export default function QuizMaster() {
     }
   };
 
+  finishQuizRef.current = finishQuiz;
+
   // Exit back to lobby
   const exitToLobby = () => {
+    clearFeedbackTimer();
     quizTTS.stop();
     if (soundEnabled) playSound("click");
     setIsPlaying(false);
@@ -589,7 +654,7 @@ export default function QuizMaster() {
     return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
   };
 
-  // Reusable Edge-TTS Audio Settings Modal
+  // Reusable Google TTS Audio Settings Modal
   const renderTtsModal = () => {
     if (!showTtsModal) return null;
     return (
@@ -598,7 +663,7 @@ export default function QuizMaster() {
           <div className="quiz-tts-modal-header">
             <div className="quiz-tts-modal-title">
               <i className="fa-solid fa-sliders" />
-              <span>Cài Đặt Giọng Đọc AI (Edge TTS)</span>
+              <span>Cài Đặt Giọng Đọc (Google Tiếng Việt)</span>
             </div>
             <button
               type="button"
@@ -611,36 +676,20 @@ export default function QuizMaster() {
           </div>
 
           <div className="quiz-tts-modal-body">
-            {/* Voice selection */}
+            {/* Voice Info */}
             <div className="quiz-tts-field-group">
               <div className="quiz-tts-field-label">
-                <span>Giọng đọc Tiếng Việt Neural</span>
-                <span className="quiz-tts-field-hint">Miễn phí · Tự nhiên</span>
+                <span>Giọng đọc mặc định</span>
+                <span className="quiz-tts-field-hint">Chuẩn Tiếng Việt · Ổn định</span>
               </div>
-              <div className="quiz-tts-voice-grid">
-                <button
-                  type="button"
-                  className={`quiz-tts-voice-card ${ttsSettings.voice === "vi-VN-HoaiMyNeural" ? "selected" : ""}`}
-                  onClick={() => updateTtsSettings({ voice: "vi-VN-HoaiMyNeural" })}
-                >
+              <div className="quiz-tts-voice-grid" style={{ gridTemplateColumns: "1fr" }}>
+                <div className="quiz-tts-voice-card selected" style={{ cursor: "default" }}>
                   <span className="voice-icon">👩</span>
                   <div className="quiz-tts-voice-info">
-                    <span className="quiz-tts-voice-name">Hoài My (Nữ)</span>
-                    <span className="quiz-tts-voice-desc">Truyền cảm, nhẹ nhàng</span>
+                    <span className="quiz-tts-voice-name">Chị Google (Tiếng Việt)</span>
+                    <span className="quiz-tts-voice-desc">Tự nhiên, rõ chữ, không bị đọc nhầm ngôn ngữ</span>
                   </div>
-                </button>
-
-                <button
-                  type="button"
-                  className={`quiz-tts-voice-card ${ttsSettings.voice === "vi-VN-NamMinhNeural" ? "selected" : ""}`}
-                  onClick={() => updateTtsSettings({ voice: "vi-VN-NamMinhNeural" })}
-                >
-                  <span className="voice-icon">👨</span>
-                  <div className="quiz-tts-voice-info">
-                    <span className="quiz-tts-voice-name">Nam Minh (Nam)</span>
-                    <span className="quiz-tts-voice-desc">Dứt khoát, đĩnh đạc</span>
-                  </div>
-                </button>
+                </div>
               </div>
             </div>
 
@@ -737,9 +786,7 @@ export default function QuizMaster() {
             >
               <i className={ttsStatus === "playing" ? "fa-solid fa-stop" : "fa-solid fa-play"} />
               <span>
-                {ttsStatus === "playing"
-                  ? "Dừng phát"
-                  : `Nghe thử: ${ttsSettings.voice === "vi-VN-NamMinhNeural" ? "Nam Minh (Nam)" : "Hoài My (Nữ)"}`}
+                {ttsStatus === "playing" ? "Dừng phát" : "Nghe thử: Chị Google"}
               </span>
             </button>
 
@@ -1120,7 +1167,7 @@ export default function QuizMaster() {
               type="button"
               className={`quiz-tool-btn ${ttsStatus === "playing" ? "active tts-active" : ""}`}
               onClick={togglePlayCurrentQuestion}
-              title={ttsStatus === "playing" ? "Dừng đọc (Phím R)" : "Đọc câu hỏi bằng AI Edge-TTS (Phím R)"}
+              title={ttsStatus === "playing" ? "Dừng đọc (Phím R)" : "Đọc câu hỏi bằng Google TTS (Phím R)"}
               aria-label="Đọc câu hỏi"
             >
               {ttsStatus === "loading" ? (
@@ -1137,7 +1184,7 @@ export default function QuizMaster() {
               type="button"
               className={`quiz-tool-btn ${showTtsModal ? "active" : ""}`}
               onClick={() => setShowTtsModal(true)}
-              title="Cài đặt giọng đọc AI (Edge TTS)"
+              title="Cài đặt giọng đọc Google Tiếng Việt"
               aria-label="Cài đặt giọng đọc"
             >
               <i className="fa-solid fa-sliders" />
@@ -1301,7 +1348,7 @@ export default function QuizMaster() {
                     type="button"
                     className={`quiz-tts-play-btn ${ttsStatus === "playing" ? "playing" : ttsStatus === "loading" ? "loading" : ""}`}
                     onClick={togglePlayCurrentQuestion}
-                    title={ttsStatus === "playing" ? "Dừng đọc (Phím R)" : "Đọc đề bằng AI Edge-TTS (Phím R)"}
+                    title={ttsStatus === "playing" ? "Dừng đọc (Phím R)" : "Đọc đề bằng Google TTS (Phím R)"}
                   >
                     {ttsStatus === "loading" ? (
                       <>
@@ -1762,7 +1809,7 @@ export default function QuizMaster() {
                   type="button"
                   className="quiz-tool-btn"
                   onClick={() => setShowTtsModal(true)}
-                  title="Cài đặt giọng đọc AI (Edge TTS)"
+                  title="Cài đặt giọng đọc Google Tiếng Việt"
                   style={{ width: "auto", padding: "4px 10px", fontSize: "12px", gap: "6px" }}
                 >
                   <i className="fa-solid fa-volume-high text-blue" />

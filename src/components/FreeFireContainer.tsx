@@ -71,7 +71,7 @@ export default function FreeFireContainer({
         <div className="ff-select-hub">
           <div className="ff-select-header">
             <div className="ff-select-badge">
-              <Sparkles size={14} className="text-amber-400" />
+              <Sparkles size={14} style={{ color: "#fbbf24" }} />
               <span>FREE FIRE PRO SUITE</span>
             </div>
             <h1 className="ff-select-title">
@@ -84,11 +84,10 @@ export default function FreeFireContainer({
 
           <div className="ff-cards-grid">
             {/* CARD 1: ĐỘ NHẠY KÉO TÂM */}
-            <div
+            <button
+              type="button"
               className="ff-choice-card sens"
               onClick={() => selectTool("sens")}
-              role="button"
-              tabIndex={0}
             >
               <div className="ff-card-top">
                 <div className="ff-card-icon-wrap sens">
@@ -120,19 +119,18 @@ export default function FreeFireContainer({
               </div>
 
               <div className="ff-card-footer">
-                <button type="button" className="ff-card-btn sens">
+                <span className="ff-card-btn sens">
                   <span>Mở Bảng Độ Nhạy</span>
                   <ArrowRight size={16} />
-                </button>
+                </span>
               </div>
-            </div>
+            </button>
 
             {/* CARD 2: UNLOCK ID WHITELIST */}
-            <div
+            <button
+              type="button"
               className="ff-choice-card unlock"
               onClick={() => selectTool("unlock")}
-              role="button"
-              tabIndex={0}
             >
               <div className="ff-card-top">
                 <div className="ff-card-icon-wrap unlock">
@@ -164,12 +162,12 @@ export default function FreeFireContainer({
               </div>
 
               <div className="ff-card-footer">
-                <button type="button" className="ff-card-btn unlock">
+                <span className="ff-card-btn unlock">
                   <span>Kích Hoạt Unlock ID</span>
                   <ArrowRight size={16} />
-                </button>
+                </span>
               </div>
-            </div>
+            </button>
           </div>
         </div>
       )}
@@ -191,7 +189,7 @@ export default function FreeFireContainer({
                 </button>
 
                 <div className="ff-current-tool-pill">
-                  <Crosshair size={14} className="text-orange-400" />
+                  <Crosshair size={14} style={{ color: "#fb923c" }} />
                   <span>Độ Nhạy Kéo Tâm</span>
                 </div>
               </div>

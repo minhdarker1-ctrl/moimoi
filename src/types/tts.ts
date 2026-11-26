@@ -1,4 +1,4 @@
-export type TTSVoice = "vi-VN-HoaiMyNeural" | "vi-VN-NamMinhNeural";
+export type TTSVoice = "google-vi";
 
 export type TTSSpeed = "0.8x" | "1.0x" | "1.25x" | "1.5x";
 

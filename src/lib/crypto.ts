@@ -8,13 +8,17 @@ import {
   timingSafeEqual,
 } from "node:crypto";
 
-function secret(): Buffer {
+export function getSessionSecret(): string {
   const s = process.env.SESSION_SECRET;
   if (!s || s.length < 32) {
     throw new Error("SESSION_SECRET chưa đặt hoặc ngắn hơn 32 ký tự");
   }
+  return s;
+}
+
+function secret(): Buffer {
   // scrypt để chuỗi hex/text bất kỳ thành đúng 32 byte key.
-  return scryptSync(s, "moimoi-token-enc", 32);
+  return scryptSync(getSessionSecret(), "moimoi-token-enc", 32);
 }
 
 /** Mã hoá token cổng rút gọn trước khi lưu DB. */
@@ -80,7 +84,7 @@ export function vnDate(at: Date = new Date()): string {
 
 /** Ký token bảo mật xác minh thiết bị (Anti-Bot) */
 export function signAntiBotToken(data: { vid: string; ip: string; exp: number }): string {
-  const secretKey = process.env.SESSION_SECRET || "moimoi-default-secret-key-min-32-chars";
+  const secretKey = getSessionSecret();
   const body = Buffer.from(JSON.stringify(data)).toString("base64url");
   const sig = createHmac("sha256", secretKey).update(body).digest("base64url");
   return `${body}.${sig}`;
@@ -91,7 +95,7 @@ export function verifyAntiBotToken(
   token: string
 ): { valid: boolean; vid?: string; ip?: string; error?: string } {
   if (!token) return { valid: false, error: "Thiếu mã xác minh" };
-  const secretKey = process.env.SESSION_SECRET || "moimoi-default-secret-key-min-32-chars";
+  const secretKey = getSessionSecret();
   const parts = token.split(".");
   if (parts.length !== 2) return { valid: false, error: "Token sai định dạng" };
   const [body, sig] = parts;
@@ -109,5 +113,35 @@ export function verifyAntiBotToken(
     return { valid: true, vid: data.vid, ip: data.ip };
   } catch {
     return { valid: false, error: "Không giải mã được dữ liệu" };
+  }
+}
+
+export const AOV_TICKET_COOKIE = "aov_tickets";
+
+/** Ký số vé AOV bằng HMAC-SHA256 để chống chỉnh sửa cookie */
+export function signAovTickets(tickets: number): string {
+  const safeCount = Math.max(0, Math.floor(Number.isFinite(tickets) ? tickets : 0));
+  const body = Buffer.from(JSON.stringify({ tickets: safeCount, iat: Date.now() })).toString("base64url");
+  const sig = createHmac("sha256", getSessionSecret()).update(body).digest("base64url");
+  return `${body}.${sig}`;
+}
+
+/** Giải mã và xác thực cookie vé AOV; trả 0 nếu cookie giả mạo hoặc không hợp lệ */
+export function verifyAovTickets(cookieVal?: string): number {
+  if (!cookieVal) return 0;
+  const parts = cookieVal.split(".");
+  if (parts.length !== 2) return 0;
+  const [body, sig] = parts;
+  if (!body || !sig) return 0;
+
+  try {
+    const expectedSig = createHmac("sha256", getSessionSecret()).update(body).digest("base64url");
+    if (!safeEqual(sig, expectedSig)) return 0;
+    const parsed = JSON.parse(Buffer.from(body, "base64url").toString("utf8"));
+    const count = Number(parsed?.tickets);
+    if (!Number.isInteger(count) || count < 0 || count > 100_000) return 0;
+    return count;
+  } catch {
+    return 0;
   }
 }

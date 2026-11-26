@@ -46,6 +46,8 @@ export default function AdminCharts({ lineData, barData, donutData }: AdminChart
   const plotW = chartW - padX * 2;
   const plotH = chartH - padY * 2;
 
+  const lineSlotW = plotW / Math.max(lineData.length - 1, 1);
+
   const getX = (idx: number) => {
     if (lineData.length <= 1) return padX;
     return padX + (idx / (lineData.length - 1)) * plotW;
@@ -84,8 +86,8 @@ export default function AdminCharts({ lineData, barData, donutData }: AdminChart
     <div className="admin-charts-wrapper">
       {/* HEADER SECTION */}
       <div className="admin-section-header">
-        <div className="flex items-center gap-2">
-          <span className="admin-section-dot bg-indigo-500" />
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span className="admin-section-dot" style={{ backgroundColor: "#007acc" }} />
           <h2 className="admin-section-title">📊 Trung Tâm Phân Tích &amp; Biểu Đồ Hiệu Suất</h2>
         </div>
         <span className="admin-section-badge">Dữ liệu thời gian thực</span>
@@ -165,15 +167,15 @@ export default function AdminCharts({ lineData, barData, donutData }: AdminChart
               return (
                 <g
                   key={d.fullDate}
-                  className="cursor-pointer"
+                  style={{ cursor: "pointer" }}
                   onMouseEnter={() => setActiveLinePoint(d)}
                   onMouseLeave={() => setActiveLinePoint(null)}
                 >
                   {/* Invisible hit target for smooth mobile touch & mouse hover */}
                   <rect
-                    x={cx - barSlotW / 2}
+                    x={cx - lineSlotW / 2}
                     y={padY}
-                    width={barSlotW}
+                    width={lineSlotW}
                     height={plotH}
                     fill="transparent"
                   />
@@ -183,7 +185,7 @@ export default function AdminCharts({ lineData, barData, donutData }: AdminChart
                       y1={padY}
                       x2={cx}
                       y2={chartH - padY}
-                      stroke="#818cf8"
+                      stroke="#569cd6"
                       strokeWidth="1.5"
                       strokeDasharray="3 3"
                     />
@@ -192,10 +194,10 @@ export default function AdminCharts({ lineData, barData, donutData }: AdminChart
                     cx={cx}
                     cy={cy}
                     r={isHovered ? 6 : 4}
-                    fill={isHovered ? "#ffffff" : "#6366f1"}
-                    stroke="#4338ca"
+                    fill={isHovered ? "#ffffff" : "#007acc"}
+                    stroke="#3794ff"
                     strokeWidth="2"
-                    className="transition-all duration-150"
+                    style={{ transition: "all 0.15s ease" }}
                   />
                   <text
                     x={cx}
@@ -216,7 +218,7 @@ export default function AdminCharts({ lineData, barData, donutData }: AdminChart
           {activeLinePoint && (
             <div className="admin-chart-tooltip" style={{ left: "50%", transform: "translateX(-50%)" }}>
               <span className="tooltip-date">📅 Ngày {activeLinePoint.fullDate}</span>
-              <span className="tooltip-value font-bold text-indigo-400">
+              <span className="tooltip-value" style={{ fontWeight: 700, color: "#4fc1ff" }}>
                 {activeLinePoint.hits.toLocaleString()} lượt truy cập
               </span>
             </div>
@@ -234,9 +236,9 @@ export default function AdminCharts({ lineData, barData, donutData }: AdminChart
               <p className="admin-chart-subtitle">Số yêu cầu Free Fire, Locket &amp; Liên Quân theo ngày</p>
             </div>
             <div className="admin-chart-legend">
-              <span className="legend-item"><span className="legend-dot bg-amber-500" /> FF</span>
-              <span className="legend-item"><span className="legend-dot bg-purple-500" /> Locket</span>
-              <span className="legend-item"><span className="legend-dot bg-cyan-500" /> AOV</span>
+              <span className="legend-item"><span className="legend-dot" style={{ backgroundColor: "#f59e0b" }} /> FF</span>
+              <span className="legend-item"><span className="legend-dot" style={{ backgroundColor: "#8b5cf6" }} /> Locket</span>
+              <span className="legend-item"><span className="legend-dot" style={{ backgroundColor: "#06b6d4" }} /> AOV</span>
             </div>
           </div>
 
@@ -274,7 +276,7 @@ export default function AdminCharts({ lineData, barData, donutData }: AdminChart
                 return (
                   <g
                     key={d.fullDate}
-                    className="cursor-pointer"
+                    style={{ cursor: "pointer" }}
                     onMouseEnter={() => setActiveBarDay(d)}
                     onMouseLeave={() => setActiveBarDay(null)}
                   >
@@ -371,11 +373,11 @@ export default function AdminCharts({ lineData, barData, donutData }: AdminChart
             {activeBarDay && (
               <div className="admin-chart-tooltip" style={{ left: "50%", transform: "translateX(-50%)" }}>
                 <span className="tooltip-date">📅 {activeBarDay.fullDate}</span>
-                <div className="flex gap-3 text-xs mt-1">
-                  <span className="text-amber-400">FF: {activeBarDay.freefire}</span>
-                  <span className="text-purple-400">Locket: {activeBarDay.locket}</span>
-                  <span className="text-cyan-400">AOV: {activeBarDay.aov}</span>
-                  <span className="font-bold text-white">Tổng: {activeBarDay.total}</span>
+                <div style={{ display: "flex", gap: 12, fontSize: 12, marginTop: 4 }}>
+                  <span style={{ color: "#fbbf24" }}>FF: {activeBarDay.freefire}</span>
+                  <span style={{ color: "#c084fc" }}>Locket: {activeBarDay.locket}</span>
+                  <span style={{ color: "#22d3ee" }}>AOV: {activeBarDay.aov}</span>
+                  <span style={{ fontWeight: 700, color: "#ffffff" }}>Tổng: {activeBarDay.total}</span>
                 </div>
               </div>
             )}
@@ -424,8 +426,12 @@ export default function AdminCharts({ lineData, barData, donutData }: AdminChart
                       strokeDasharray={dashArray}
                       strokeDashoffset={dashOffset}
                       strokeLinecap="round"
-                      className="cursor-pointer transition-all duration-200"
-                      style={{ transformOrigin: "center", transform: "rotate(-90deg)" }}
+                      style={{
+                        cursor: "pointer",
+                        transition: "all 0.2s ease",
+                        transformOrigin: "center",
+                        transform: "rotate(-90deg)",
+                      }}
                       onMouseEnter={() => setActiveDonutSegment(seg)}
                       onMouseLeave={() => setActiveDonutSegment(null)}
                     />
@@ -467,11 +473,11 @@ export default function AdminCharts({ lineData, barData, donutData }: AdminChart
                     onMouseEnter={() => setActiveDonutSegment(seg)}
                     onMouseLeave={() => setActiveDonutSegment(null)}
                   >
-                    <div className="flex items-center gap-2">
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                       <span className="legend-color-box" style={{ background: seg.color }} />
                       <span className="legend-name">{seg.name}</span>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                       <span className="legend-count">{seg.count.toLocaleString()}</span>
                       <span className="legend-pct">({pct}%)</span>
                     </div>

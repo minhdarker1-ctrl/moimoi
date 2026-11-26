@@ -342,7 +342,7 @@ export default function FreeFireHub({ adminNote }: { adminNote?: FreeFireNoteDat
           fontWeight: 800,
           fontSize: 16
         }}>
-          <i className="fa-solid fa-book-bookmark text-orange-500" />
+          <i className="fa-solid fa-book-bookmark" style={{ color: "#f97316" }} />
           <span>CẨM NANG KÉO TÂM PRO &amp; MẸO TỐI ƯU THIẾT BỊ</span>
         </div>
 
@@ -421,7 +421,7 @@ export default function FreeFireHub({ adminNote }: { adminNote?: FreeFireNoteDat
           fontSize: 13
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--vi-text)" }}>
-            <i className="fa-brands fa-telegram text-sky-400" style={{ fontSize: 18 }} />
+            <i className="fa-brands fa-telegram" style={{ color: "#38bdf8", fontSize: 18 }} />
             <span>Chưa thấy ưng ý hoặc cần chỉnh theo thói quen bắn của bạn?</span>
           </div>
           <a

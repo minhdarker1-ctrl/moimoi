@@ -47,16 +47,16 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-// Đặt data-theme trước khi paint để không flash màu sáng khi đang ở dark mode.
-const themeScript = `try{if(localStorage.getItem("vt-theme")==="dark")document.documentElement.dataset.theme="dark"}catch(e){}`;
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const [site, socials] = await Promise.all([
+    db.site.findUnique({ where: { id: 1 } }).catch(() => null),
+    db.social.findMany({ where: { visible: true }, orderBy: { order: "asc" } }).catch(() => []),
+  ]);
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    // suppressHydrationWarning: themeScript đặt data-theme trước khi React hydrate,
-    // nên attribute trên client khác server. Đây là chủ ý, không phải bug.
-    <html lang="vi" className={quicksand.variable} suppressHydrationWarning>
+    <html lang="vi" className={`${quicksand.variable} dark`} data-theme="dark">
       <head>
-        {/* Bản gốc dùng cả 2 bộ icon; preconnect để không chặn render. */}
+        {/* Bộ icon FontAwesome & Bootstrap Icons; preconnect để không chặn render. */}
         <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossOrigin="" />
         <link
           rel="stylesheet"
@@ -66,16 +66,21 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
           href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
         />
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body>
+      <body className="vthangios-dark">
         <ScenicBackground />
         <SnowEffect />
         <MusicPlayer />
         <div className="app-page-wrapper" style={{ position: "relative", zIndex: 1, minHeight: "100vh" }}>
           {children}
         </div>
-        <FloatingSupportHub />
+        <FloatingSupportHub
+          siteName={site?.name || "MinSr"}
+          socials={socials.map((s) => ({
+            url: s.url,
+            iconUrl: s.iconUrl,
+          }))}
+        />
       </body>
     </html>
   );

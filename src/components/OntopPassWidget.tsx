@@ -62,7 +62,7 @@ export default function OntopPassWidget({
           <div className="ontop-mini-tag-wrap">
             <span className="ontop-mini-icon">👑</span>
             <div className="ontop-mini-text">
-              <span className="ontop-mini-label text-amber-400 font-bold" style={{ color: "#fbbf24" }}>
+              <span className="ontop-mini-label" style={{ color: "#fbbf24", fontWeight: 700 }}>
                 ĐẶC QUYỀN ADMIN: KHÔNG GIỚI HẠN
               </span>
               <small className="ontop-mini-sub" style={{ color: "#fef3c7" }}>

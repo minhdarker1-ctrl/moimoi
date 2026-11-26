@@ -45,11 +45,25 @@ export async function rateLimit(
 export async function maybeCleanup(): Promise<void> {
   if (Math.random() > 0.01) return;
   const now = new Date();
+  const oneHourAgo = new Date(now.getTime() - 3600_000);
+  const oneDayAgo = new Date(now.getTime() - 86400_000);
+  const sevenDaysAgo = new Date(now.getTime() - 7 * 86400_000);
+  const thirtyDaysAgo = new Date(now.getTime() - 30 * 86400_000);
   try {
     await Promise.all([
-      db.rateHit.deleteMany({ where: { windowAt: { lt: new Date(now.getTime() - 3600_000) } } }),
-      db.keySession.deleteMany({ where: { expiresAt: { lt: new Date(now.getTime() - 86400_000) } } }),
-      db.loginAttempt.deleteMany({ where: { lastAt: { lt: new Date(now.getTime() - 86400_000) } } }),
+      db.rateHit.deleteMany({ where: { windowAt: { lt: oneHourAgo } } }),
+      db.keySession.deleteMany({ where: { expiresAt: { lt: oneDayAgo } } }),
+      db.loginAttempt.deleteMany({ where: { lastAt: { lt: oneDayAgo } } }),
+      db.ontopPendingSession.deleteMany({ where: { expiresAt: { lt: oneDayAgo } } }),
+      db.ontopLinkBuffer.deleteMany({
+        where: {
+          status: { in: ["EXPIRED", "COMPLETED"] },
+          createdAt: { lt: sevenDaysAgo },
+        },
+      }),
+      db.ontopDailyPass.deleteMany({ where: { expiresAt: { lt: sevenDaysAgo } } }),
+      db.serviceUsageLog.deleteMany({ where: { createdAt: { lt: thirtyDaysAgo } } }),
+      db.freeFireKeyLog.deleteMany({ where: { createdAt: { lt: thirtyDaysAgo } } }),
     ]);
   } catch {
     // Dọn rác thất bại không được làm request chính fail.

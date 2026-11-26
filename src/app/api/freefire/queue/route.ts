@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { refundCreditTx } from "@/lib/ontop";
 import { sweepStaleTasks } from "@/lib/queue-sweeper";
-import { safeEqual } from "@/lib/crypto";
+import { isAdmin } from "@/lib/auth";
+import { verifyWorkerSecret } from "@/lib/serverUtils";
 
 export const dynamic = "force-dynamic";
 
@@ -14,32 +15,6 @@ const corsHeaders = {
 
 export async function OPTIONS() {
   return new NextResponse(null, { status: 204, headers: corsHeaders });
-}
-
-function verifyWorkerSecret(req: Request): boolean {
-  const expectedSecret =
-    process.env.WORKER_SECRET || "xdarker_worker_token_2026_moimoi";
-
-  const headerSecret = req.headers.get("x-worker-secret");
-  if (headerSecret && safeEqual(headerSecret.trim(), expectedSecret.trim())) {
-    return true;
-  }
-
-  const authHeader = req.headers.get("authorization") || "";
-  if (authHeader.startsWith("Bearer ")) {
-    const bearerToken = authHeader.slice(7).trim();
-    if (safeEqual(bearerToken, expectedSecret.trim())) {
-      return true;
-    }
-  }
-
-  // Chấp nhận request từ localhost trong môi trường dev
-  const host = req.headers.get("host") || "";
-  if (host.includes("localhost") || host.includes("127.0.0.1")) {
-    return true;
-  }
-
-  return false;
 }
 
 /**
@@ -139,7 +114,14 @@ export async function GET(req: Request) {
       );
     }
 
-    // LIST QUEUE: Xem danh sách hàng đợi gần đây
+    // LIST QUEUE: Yêu cầu Worker Secret hoặc Admin (tránh lộ toàn bộ UID công khai)
+    if (!verifyWorkerSecret(req) && !(await isAdmin())) {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401, headers: corsHeaders }
+      );
+    }
+
     const limit = Math.min(
       50,
       Math.max(1, Number(searchParams.get("limit") || "10"))

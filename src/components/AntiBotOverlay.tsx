@@ -185,21 +185,21 @@ export default function AntiBotOverlay({
         fontFamily: "var(--font-quicksand), system-ui, sans-serif",
       }}
     >
-      {/* 1. PRE-CHECK MODAL (Chuẩn TrafficVN) */}
+      {/* 1. PRE-CHECK MODAL (VS Code Dark+) */}
       {state === "precheck" && (
         <div
           style={{
-            backgroundColor: "#ffffff",
-            color: "#1e293b",
-            borderRadius: 16,
+            backgroundColor: "#252526",
+            color: "#cccccc",
+            borderRadius: 10,
             width: "100%",
             maxWidth: 380,
-            boxShadow: "0 20px 40px rgba(0,0,0,0.25)",
-            border: "1px solid rgba(226, 232, 240, 0.9)",
+            boxShadow: "0 16px 36px rgba(0,0,0,0.45)",
+            border: "1px solid #3c3c3c",
             overflow: "hidden",
           }}
         >
-          <div style={{ height: 4, background: "linear-gradient(90deg, #10b981, #059669)" }} />
+          <div style={{ height: 3, backgroundColor: "#007acc" }} />
 
           <div
             style={{
@@ -208,7 +208,7 @@ export default function AntiBotOverlay({
               alignItems: "center",
               justifyContent: "space-between",
               gap: 12,
-              borderBottom: "1px solid #f1f5f9",
+              borderBottom: "1px solid #3c3c3c",
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -216,23 +216,24 @@ export default function AntiBotOverlay({
                 style={{
                   width: 40,
                   height: 40,
-                  borderRadius: 10,
-                  backgroundColor: "#ecfdf5",
-                  color: "#059669",
+                  borderRadius: 8,
+                  backgroundColor: "rgba(0, 122, 204, 0.16)",
+                  border: "1px solid rgba(0, 122, 204, 0.35)",
+                  color: "#4ec9b0",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  fontSize: 20,
+                  fontSize: 18,
                   flexShrink: 0,
                 }}
               >
                 <i className="fa-solid fa-shield-halved" />
               </div>
               <div>
-                <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#0f172a" }}>
+                <h3 style={{ margin: 0, fontSize: 15.5, fontWeight: 700, color: "#ffffff" }}>
                   Xác minh thiết bị
                 </h3>
-                <p style={{ margin: "2px 0 0", fontSize: 12, color: "#64748b" }}>
+                <p style={{ margin: "2px 0 0", fontSize: 12, color: "#9d9d9d" }}>
                   Chỉ mất 1-2 giây để tự nhận diện & bảo vệ phiên lấy Key
                 </p>
               </div>
@@ -245,7 +246,7 @@ export default function AntiBotOverlay({
                 style={{
                   background: "transparent",
                   border: "none",
-                  color: "#94a3b8",
+                  color: "#9d9d9d",
                   fontSize: 18,
                   cursor: "pointer",
                   padding: "4px 8px",
@@ -262,25 +263,25 @@ export default function AntiBotOverlay({
           <div style={{ padding: "16px 20px" }}>
             <div
               style={{
-                backgroundColor: "#f0fdf4",
-                border: "1px solid #bbf7d0",
-                borderRadius: 10,
+                backgroundColor: "#1e1e1e",
+                border: "1px solid #3c3c3c",
+                borderRadius: 8,
                 padding: "12px 14px",
                 display: "flex",
                 gap: 10,
                 alignItems: "flex-start",
                 fontSize: 13,
                 lineHeight: 1.5,
-                color: "#166534",
+                color: "#cccccc",
               }}
             >
-              <i className="fa-solid fa-circle-info" style={{ marginTop: 2, flexShrink: 0 }} />
+              <i className="fa-solid fa-circle-info" style={{ marginTop: 2, flexShrink: 0, color: "#007acc" }} />
               <div>
                 Nhấn nút bên dưới để hệ thống quét phần cứng WebGL, tự nhận diện thiết bị và xác minh tính toàn vẹn.
               </div>
             </div>
 
-            <div style={{ marginTop: 14, fontSize: 11, color: "#94a3b8", lineHeight: 1.5 }}>
+            <div style={{ marginTop: 14, fontSize: 11.5, color: "#9d9d9d", lineHeight: 1.5 }}>
               <i className="fa-solid fa-lock" style={{ marginRight: 5 }} />
               Ngăn chặn công cụ bot tự động và phần mềm giả lập trái phép.
             </div>
@@ -292,11 +293,11 @@ export default function AntiBotOverlay({
               onClick={startAudit}
               style={{
                 width: "100%",
-                height: 44,
-                backgroundColor: "#059669",
+                height: 42,
+                backgroundColor: "#007acc",
                 color: "#ffffff",
-                border: "none",
-                borderRadius: 10,
+                border: "1px solid #0e639c",
+                borderRadius: 8,
                 fontWeight: 700,
                 fontSize: 14,
                 cursor: "pointer",
@@ -304,8 +305,6 @@ export default function AntiBotOverlay({
                 alignItems: "center",
                 justifyContent: "center",
                 gap: 8,
-                boxShadow: "0 4px 12px rgba(5, 150, 105, 0.3)",
-                transition: "all 0.15s ease",
               }}
             >
               <i className="fa-solid fa-play" />
@@ -319,24 +318,24 @@ export default function AntiBotOverlay({
       {state === "scanning" && (
         <div
           style={{
-            backgroundColor: "#ffffff",
-            color: "#1e293b",
-            borderRadius: 16,
+            backgroundColor: "#252526",
+            color: "#cccccc",
+            borderRadius: 10,
             width: "100%",
             maxWidth: 320,
             padding: "28px 24px",
             textAlign: "center",
-            boxShadow: "0 20px 40px rgba(0,0,0,0.25)",
-            border: "1px solid rgba(226, 232, 240, 0.9)",
+            boxShadow: "0 16px 36px rgba(0,0,0,0.45)",
+            border: "1px solid #3c3c3c",
           }}
         >
-          <div style={{ fontSize: 36, color: "#059669", marginBottom: 16 }}>
+          <div style={{ fontSize: 34, color: "#007acc", marginBottom: 16 }}>
             <i className="fa-solid fa-circle-notch fa-spin" />
           </div>
-          <h3 style={{ margin: "0 0 6px", fontSize: 16, fontWeight: 800, color: "#0f172a" }}>
+          <h3 style={{ margin: "0 0 6px", fontSize: 16, fontWeight: 700, color: "#ffffff" }}>
             Đang xác minh...
           </h3>
-          <p style={{ margin: "0 0 14px", fontSize: 12, color: "#64748b" }}>
+          <p style={{ margin: "0 0 14px", fontSize: 12, color: "#9d9d9d" }}>
             Vui lòng chờ một chút trước khi bắt đầu nhé
           </p>
           <div
@@ -344,9 +343,9 @@ export default function AntiBotOverlay({
               display: "inline-flex",
               alignItems: "center",
               gap: 6,
-              backgroundColor: "#f0fdf4",
-              border: "1px solid #bbf7d0",
-              color: "#059669",
+              backgroundColor: "#1e1e1e",
+              border: "1px solid #3c3c3c",
+              color: "#4ec9b0",
               borderRadius: 99,
               padding: "4px 12px",
               fontSize: 12,
@@ -363,17 +362,17 @@ export default function AntiBotOverlay({
       {state === "blocked" && (
         <div
           style={{
-            backgroundColor: "#ffffff",
-            color: "#1e293b",
-            borderRadius: 16,
+            backgroundColor: "#252526",
+            color: "#cccccc",
+            borderRadius: 10,
             width: "100%",
             maxWidth: 420,
-            boxShadow: "0 20px 40px rgba(0,0,0,0.35)",
-            border: "1px solid #fecaca",
+            boxShadow: "0 20px 40px rgba(0,0,0,0.5)",
+            border: "1px solid #5a1d1d",
             overflow: "hidden",
           }}
         >
-          <div style={{ height: 4, backgroundColor: "#dc2626" }} />
+          <div style={{ height: 3, backgroundColor: "#f44747" }} />
 
           <div
             style={{
@@ -381,30 +380,31 @@ export default function AntiBotOverlay({
               display: "flex",
               alignItems: "center",
               gap: 12,
-              borderBottom: "1px solid #fee2e2",
+              borderBottom: "1px solid #3c3c3c",
             }}
           >
             <div
               style={{
                 width: 42,
                 height: 42,
-                borderRadius: 10,
-                backgroundColor: "#fee2e2",
-                color: "#dc2626",
+                borderRadius: 8,
+                backgroundColor: "rgba(244, 71, 71, 0.14)",
+                border: "1px solid rgba(244, 71, 71, 0.35)",
+                color: "#f44747",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                fontSize: 22,
+                fontSize: 20,
                 flexShrink: 0,
               }}
             >
               <i className="fa-solid fa-shield-xmark" />
             </div>
             <div>
-              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: "#991b1b" }}>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#f48771" }}>
                 Truy cập bị từ chối
               </h3>
-              <p style={{ margin: "2px 0 0", fontSize: 12, color: "#b91c1c" }}>
+              <p style={{ margin: "2px 0 0", fontSize: 12, color: "#9d9d9d" }}>
                 Môi trường không đáp ứng yêu cầu bảo mật
               </p>
             </div>
@@ -416,9 +416,9 @@ export default function AntiBotOverlay({
                 <div
                   key={i}
                   style={{
-                    backgroundColor: "#fef2f2",
-                    border: "1px solid #fecaca",
-                    borderRadius: 10,
+                    backgroundColor: "#1e1e1e",
+                    border: "1px solid rgba(244, 71, 71, 0.3)",
+                    borderRadius: 8,
                     padding: "10px 12px",
                     display: "flex",
                     gap: 10,
@@ -430,8 +430,8 @@ export default function AntiBotOverlay({
                       width: 28,
                       height: 28,
                       borderRadius: 6,
-                      backgroundColor: "#fee2e2",
-                      color: "#dc2626",
+                      backgroundColor: "rgba(244, 71, 71, 0.14)",
+                      color: "#f44747",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
@@ -442,8 +442,8 @@ export default function AntiBotOverlay({
                     <i className="fa-solid fa-triangle-exclamation" />
                   </div>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: "#991b1b" }}>{v.title}</div>
-                    <div style={{ fontSize: 11.5, color: "#7f1d1d", marginTop: 2, lineHeight: 1.4 }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: "#f48771" }}>{v.title}</div>
+                    <div style={{ fontSize: 11.5, color: "#cccccc", marginTop: 2, lineHeight: 1.4 }}>
                       {v.desc}
                     </div>
                   </div>
@@ -453,12 +453,12 @@ export default function AntiBotOverlay({
 
             <div
               style={{
-                backgroundColor: "#fffbeb",
-                border: "1px solid #fde68a",
+                backgroundColor: "#1e1e1e",
+                border: "1px solid rgba(204, 167, 0, 0.35)",
                 borderRadius: 8,
                 padding: "10px 12px",
                 fontSize: 12,
-                color: "#92400e",
+                color: "#dcdcaa",
                 lineHeight: 1.5,
               }}
             >
@@ -473,11 +473,11 @@ export default function AntiBotOverlay({
               onClick={() => window.location.reload()}
               style={{
                 flex: 1,
-                height: 42,
-                backgroundColor: "#dc2626",
+                height: 40,
+                backgroundColor: "#c53030",
                 color: "#ffffff",
                 border: "none",
-                borderRadius: 10,
+                borderRadius: 8,
                 fontWeight: 700,
                 fontSize: 13,
                 cursor: "pointer",
@@ -485,7 +485,6 @@ export default function AntiBotOverlay({
                 alignItems: "center",
                 justifyContent: "center",
                 gap: 8,
-                boxShadow: "0 4px 12px rgba(220, 38, 38, 0.3)",
               }}
             >
               <i className="fa-solid fa-rotate-right" />
@@ -496,12 +495,12 @@ export default function AntiBotOverlay({
                 type="button"
                 onClick={onClose}
                 style={{
-                  height: 42,
+                  height: 40,
                   padding: "0 16px",
-                  backgroundColor: "#f1f5f9",
-                  color: "#475569",
-                  border: "none",
-                  borderRadius: 10,
+                  backgroundColor: "#2d2d2d",
+                  color: "#cccccc",
+                  border: "1px solid #3c3c3c",
+                  borderRadius: 8,
                   fontWeight: 600,
                   fontSize: 13,
                   cursor: "pointer",

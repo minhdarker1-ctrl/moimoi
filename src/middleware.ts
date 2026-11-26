@@ -28,6 +28,13 @@ export async function middleware(req: NextRequest) {
   const token = req.cookies.get(SESSION_COOKIE)?.value || req.cookies.get(LEGACY_COOKIE)?.value;
   const auth = await verifyAuth(token);
 
+  // Bảo vệ API quản trị /api/admin/*
+  if (pathname.startsWith("/api/admin")) {
+    if (auth?.role !== "ADMIN") {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+  }
+
   // Bảo vệ route /admin (yêu cầu quyền ADMIN, chưa đăng nhập chuyển về /admin/login)
   if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
     if (auth?.role !== "ADMIN") {

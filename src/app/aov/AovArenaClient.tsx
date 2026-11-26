@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import Link from "next/link";
 import {
   Sparkles,
   Ticket,
@@ -110,6 +109,18 @@ export default function AovArenaClient({
   const [copiedMap, setCopiedMap] = useState<{ [key: string]: boolean }>({});
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const confettiRafRef = useRef<number | null>(null);
+  const timersRef = useRef<Array<ReturnType<typeof setTimeout>>>([]);
+
+  useEffect(() => {
+    return () => {
+      if (confettiRafRef.current !== null) {
+        cancelAnimationFrame(confettiRafRef.current);
+      }
+      timersRef.current.forEach((t) => clearTimeout(t));
+      timersRef.current = [];
+    };
+  }, []);
 
   // Hiệu ứng pháo hoa Confetti Canvas
   const triggerConfetti = () => {
@@ -148,7 +159,11 @@ export default function AovArenaClient({
       });
     }
 
-    let animationFrameId: number;
+    if (confettiRafRef.current !== null) {
+      cancelAnimationFrame(confettiRafRef.current);
+      confettiRafRef.current = null;
+    }
+
     const render = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       let alive = false;
@@ -174,8 +189,9 @@ export default function AovArenaClient({
       });
 
       if (alive) {
-        animationFrameId = requestAnimationFrame(render);
+        confettiRafRef.current = requestAnimationFrame(render);
       } else {
+        confettiRafRef.current = null;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
       }
     };
@@ -254,23 +270,29 @@ export default function AovArenaClient({
       const { accounts, remainingTickets } = res.data;
 
       // Phase 2: Tearing (sau 1.1s)
-      setTimeout(() => {
-        setBagStage("tearing");
-      }, 1100);
+      timersRef.current.push(
+        setTimeout(() => {
+          setBagStage("tearing");
+        }, 1100)
+      );
 
       // Phase 3: Bursting (sau 2.1s)
-      setTimeout(() => {
-        setBagStage("bursting");
-        triggerConfetti();
-      }, 2100);
+      timersRef.current.push(
+        setTimeout(() => {
+          setBagStage("bursting");
+          triggerConfetti();
+        }, 2100)
+      );
 
       // Phase 4: Revealed (sau 2.8s)
-      setTimeout(() => {
-        setBagResultAccounts(accounts);
-        setCurrentTickets(isAdmin ? 9999 : remainingTickets);
-        saveToInventory(accounts);
-        setBagStage("revealed");
-      }, 2800);
+      timersRef.current.push(
+        setTimeout(() => {
+          setBagResultAccounts(accounts);
+          setCurrentTickets(isAdmin ? 9999 : remainingTickets);
+          saveToInventory(accounts);
+          setBagStage("revealed");
+        }, 2800)
+      );
     } catch {
       setBagError("Đã có lỗi xảy ra trong quá trình mở túi mù!");
       setBagStage("idle");
@@ -308,19 +330,21 @@ export default function AovArenaClient({
       setWheelRotation(targetDeg);
 
       // Đợi hết animation 4.5s
-      setTimeout(() => {
-        setIsSpinning(false);
-        setCurrentTickets(isAdmin ? 9999 : remainingTickets);
-        if (accounts.length > 0) {
-          saveToInventory(accounts);
-          triggerConfetti();
-        }
-        setSpinResultModal({
-          open: true,
-          count,
-          accounts,
-        });
-      }, 4600);
+      timersRef.current.push(
+        setTimeout(() => {
+          setIsSpinning(false);
+          setCurrentTickets(isAdmin ? 9999 : remainingTickets);
+          if (accounts.length > 0) {
+            saveToInventory(accounts);
+            triggerConfetti();
+          }
+          setSpinResultModal({
+            open: true,
+            count,
+            accounts,
+          });
+        }, 4600)
+      );
     } catch {
       setSpinError("Lỗi kết nối khi quay thưởng. Vui lòng thử lại!");
       setIsSpinning(false);
@@ -354,13 +378,6 @@ export default function AovArenaClient({
       />
 
       <div style={{ maxWidth: 1040, margin: "0 auto", padding: "16px 16px 60px" }}>
-        {/* Nút quay lại trang chủ */}
-        <div style={{ textAlign: "left", marginBottom: 18 }}>
-          <Link href="/#services" className="cyber-back-btn">
-            <span>← QUAY LẠI TRANG CHỦ</span>
-          </Link>
-        </div>
-
         {/* HERO BANNER ĐẤU TRƯỜNG */}
         <section className="aov-hero-banner">
           <div className="aov-hero-badge">
@@ -380,9 +397,9 @@ export default function AovArenaClient({
             <div className="aov-hype-card gold">
               <div className="aov-hype-icon">🔥</div>
               <div className="aov-hype-content">
-                <div className="aov-hype-title">TỶ LỆ NỔ 5 ACC ~30%</div>
+                <div className="aov-hype-title">SĂN TỚI 5 ACC / LƯỢT</div>
                 <div className="aov-hype-desc">
-                  Tỷ lệ nổ siêu phẩm Jackpot cực cao, tùy thuộc vào độ may mắn &amp; nhân phẩm!
+                  Vòng quay thử vận may có thể nhận từ 0 đến 5 tài khoản Garena trắng thông tin!
                 </div>
               </div>
             </div>
@@ -416,7 +433,7 @@ export default function AovArenaClient({
               disabled={isStartingHop}
               className="aov-btn-get-ticket"
             >
-              <Ticket size={20} className="text-amber-300" />
+              <Ticket size={20} style={{ color: "#fcd34d" }} />
               <span>
                 {isStartingHop
                   ? "ĐANG KHỞI TẠO NHIỆM VỤ..."
@@ -699,7 +716,7 @@ export default function AovArenaClient({
               onClick={handleSpinWheel}
               className="aov-game-action-btn wheel-btn"
             >
-              <RotateCw size={18} className={isSpinning ? "animate-spin" : ""} />
+              <RotateCw size={18} className={isSpinning ? "fa-spin" : ""} />
               <span>{isSpinning ? "ĐANG QUAY THẦN TỐC..." : "QUAY VÒNG QUAY (TỐN 2 VÉ)"}</span>
             </button>
           </div>
@@ -808,7 +825,7 @@ export default function AovArenaClient({
             <div className="aov-inventory-modal" onClick={(e) => e.stopPropagation()}>
               <div className="aov-inventory-modal-head">
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <Package size={22} className="text-sky-400" />
+                  <Package size={22} style={{ color: "#38bdf8" }} />
                   <div>
                     <h3 style={{ margin: 0, fontSize: 18, color: "var(--vi-text)" }}>
                       TÚI ĐỒ CỦA TÔI
@@ -829,7 +846,7 @@ export default function AovArenaClient({
 
               {inventory.length === 0 ? (
                 <div className="aov-inventory-empty">
-                  <Package size={48} className="text-slate-600" />
+                  <Package size={48} style={{ color: "#64748b" }} />
                   <p>Túi đồ của bạn hiện đang trống!</p>
                   <span>Hãy nạp vé để Xé Túi Mù hoặc Quay Vòng Quay nhận acc ngay nhé.</span>
                 </div>
@@ -885,7 +902,7 @@ export default function AovArenaClient({
         {/* LƯU Ý & HƯỚNG DẪN */}
         <section className="aov-guide-card">
           <h3 className="aov-guide-title">
-            <HelpCircle size={18} className="text-sky-400" />
+            <HelpCircle size={18} style={{ color: "#38bdf8" }} />
             <span>Quy Trình & Hướng Dẫn Tham Gia</span>
           </h3>
           <div className="aov-steps-row">

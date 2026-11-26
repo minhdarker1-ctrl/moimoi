@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { getBaseUrl, verifyWorkerSecret } from "@/lib/serverUtils";
 
 export const dynamic = "force-dynamic";
 
@@ -13,22 +14,15 @@ export async function OPTIONS() {
   return new NextResponse(null, { status: 204, headers: corsHeaders });
 }
 
-function getBaseUrl(req: Request): string {
-  const host = req.headers.get("x-forwarded-host") || req.headers.get("host");
-  const proto = req.headers.get("x-forwarded-proto") || "https";
-  if (host && !host.includes("localhost") && !host.includes("127.0.0.1")) {
-    return `${proto}://${host}`.replace(/\/$/, "");
-  }
-  const env = process.env.NEXT_PUBLIC_SITE_URL;
-  if (env && !env.includes("thedarker")) return env.replace(/\/$/, "");
-  if (host) return `${proto}://${host}`.replace(/\/$/, "");
-  const url = new URL(req.url);
-  return `${url.protocol}//${url.host}`.replace(/\/$/, "");
-}
-
-
 export async function POST(req: Request) {
   try {
+    if (!verifyWorkerSecret(req)) {
+      return NextResponse.json(
+        { success: false, error: "Mã bí mật Worker không hợp lệ." },
+        { status: 401, headers: corsHeaders }
+      );
+    }
+
     const body = await req.json().catch(() => ({}));
     const now = new Date();
 

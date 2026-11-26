@@ -1,11 +1,10 @@
 import { db } from "./db.ts";
-import { decryptToken, vnDate, sessionToken, safeEqual } from "./crypto.ts";
+import { decryptToken, vnDate, sessionToken, safeEqual, getSessionSecret } from "./crypto.ts";
 import { createHmac } from "node:crypto";
 import { shorten, isProvider } from "./shorteners.ts";
 
 
 const VIETUSER_API_ENDPOINT = "https://vietuser.com/api-shorten/v2";
-const VIETUSER_DEFAULT_TOKEN = "b839edac1a32d13613b8a4248379d1d0a9794b2b1944b5f53e1ffea7409fcfa3";
 const ONTOPS_API_ENDPOINT = "https://api-management.ontops.link/api/public/create-short-link";
 const ONTOPS_DOMAIN = "https://ontops.link";
 export const ONTOP_COOKIE_NAME = "ontop_daily_pass";
@@ -38,7 +37,7 @@ export function signPassPayload(data: {
   usedCount: number;
   availableCredits: number;
 }): string {
-  const secret = process.env.SESSION_SECRET || "moimoi-default-secret-key-min-32-chars";
+  const secret = getSessionSecret();
   const body = Buffer.from(JSON.stringify(data)).toString("base64url");
   const sig = createHmac("sha256", secret).update(body).digest("base64url");
   return `${body}.${sig}`;
@@ -60,7 +59,7 @@ export function verifyPassPayload(
   if (parts.length !== 2) return { valid: false };
   const [body, sig] = parts;
 
-  const secret = process.env.SESSION_SECRET || "moimoi-default-secret-key-min-32-chars";
+  const secret = getSessionSecret();
   const expectedSig = createHmac("sha256", secret).update(body).digest("base64url");
   if (!safeEqual(sig, expectedSig)) return { valid: false };
 
@@ -203,21 +202,20 @@ export async function consumeCredit(
   const parsed = verifyPassPayload(cookieToken);
   const pass = await getOrCreateDailyPass(ip, parsed.passToken);
 
-  // Atomic Update: Chỉ tăng usedCount khi count > usedCount (tức availableCredits > 0)
-  const updateResult = await db.ontopDailyPass.updateMany({
-    where: {
-      id: pass.id,
-      date: today,
-      count: { gt: pass.usedCount },
-    },
-    data: {
-      usedCount: { increment: 1 },
-    },
-  });
+  // Atomic Row-Lock Update trên PostgreSQL: đảm bảo count > usedCount trong cùng câu lệnh SQL
+  const updatedRows = await db.$queryRaw<Array<{ id: number; count: number; usedCount: number; token: string }>>`
+    UPDATE "OntopDailyPass"
+    SET "usedCount" = "usedCount" + 1,
+        "updatedAt" = NOW()
+    WHERE id = ${pass.id}
+      AND date = ${today}
+      AND count > "usedCount"
+    RETURNING id, count, "usedCount", token
+  `;
 
-  if (updateResult.count === 0) {
+  if (!updatedRows || updatedRows.length === 0) {
     const fresh = await db.ontopDailyPass.findUnique({ where: { id: pass.id } });
-    const credits = fresh ? Math.max(0, fresh.count - fresh.usedCount) : 0;
+    const credits = fresh && fresh.date === today ? Math.max(0, fresh.count - fresh.usedCount) : 0;
     return {
       success: false,
       remainingCredits: credits,
@@ -227,14 +225,14 @@ export async function consumeCredit(
     };
   }
 
-  const updatedPass = await db.ontopDailyPass.findUnique({ where: { id: pass.id } });
-  const remaining = updatedPass ? Math.max(0, updatedPass.count - updatedPass.usedCount) : 0;
+  const row = updatedRows[0];
+  const remaining = Math.max(0, row.count - row.usedCount);
 
   return {
     success: true,
     remainingCredits: remaining,
-    passId: pass.id,
-    passToken: pass.token,
+    passId: row.id,
+    passToken: row.token,
   };
 }
 
@@ -301,7 +299,7 @@ export async function getVietUserApiKey(): Promise<string | null> {
     }
   }
 
-  return process.env.VIETUSER_API_KEY || VIETUSER_DEFAULT_TOKEN;
+  return process.env.VIETUSER_API_KEY?.trim() || null;
 }
 
 /** Lấy API key của cổng OnTop.link (Dự phòng) */
@@ -539,7 +537,7 @@ export async function createPassLink({
 /** Tương thích ngược: Alias cho createPassLink */
 export const createOntopLink = createPassLink;
 
-/** Xác minh sau khi vượt link chuyển hướng về callback */
+/** Xác minh sau khi vượt link chuyển hướng về callback (Atomic Transaction chống trùng lượt) */
 export async function verifyOntopCallback(token: string): Promise<{
   success: boolean;
   error?: string;
@@ -556,95 +554,105 @@ export async function verifyOntopCallback(token: string): Promise<{
     return { success: false, error: "Thiếu mã xác thực phiên vượt link." };
   }
 
-  const pending = await db.ontopPendingSession.findUnique({
-    where: { token },
-  });
+  const now = new Date();
+  const today = vnDate(now);
+  const endOfDay = getEndOfVnDay(today);
 
-  if (!pending) {
+  const txResult = await db.$transaction(async (tx) => {
+    const pending = await tx.ontopPendingSession.findUnique({
+      where: { token },
+    });
+
+    if (!pending) {
+      return {
+        success: false as const,
+        error: "Phiên vượt link không tồn tại hoặc đã hết hạn.",
+      };
+    }
+
+    if (pending.expiresAt < now) {
+      return {
+        success: false as const,
+        error: "Phiên vượt link đã quá thời gian 30 phút. Vui lòng thực hiện lại!",
+      };
+    }
+
+    // Atomic claim: chỉ 1 request đầu tiên được phép đánh dấu used = true
+    const claimed = await tx.ontopPendingSession.updateMany({
+      where: {
+        id: pending.id,
+        used: false,
+        expiresAt: { gt: now },
+      },
+      data: { used: true },
+    });
+
+    if (claimed.count === 0) {
+      return {
+        success: false as const,
+        error: "Phiên vượt link này đã được xác nhận trước đó. Vui lòng bấm nhận lượt mới!",
+      };
+    }
+
+    const updatedPasses = await tx.$queryRaw<
+      Array<{ id: number; count: number; usedCount: number; currentGateway: string; token: string; ip: string }>
+    >`
+      UPDATE "OntopDailyPass"
+      SET "count" = CASE WHEN date = ${today} THEN "count" + 1 ELSE 1 END,
+          "usedCount" = CASE WHEN date = ${today} THEN "usedCount" ELSE 0 END,
+          date = ${today},
+          "currentGateway" = CASE WHEN (CASE WHEN date = ${today} THEN "count" + 1 ELSE 1 END) >= 2 THEN 'LINK4M' ELSE 'VIETUSER' END,
+          "isUnlimited" = false,
+          "expiresAt" = ${endOfDay},
+          "updatedAt" = NOW()
+      WHERE token = ${pending.passToken}
+      RETURNING id, count, "usedCount", "currentGateway", token, ip
+    `;
+
+    const updatedPass = updatedPasses?.[0];
+    if (!updatedPass) {
+      return {
+        success: false as const,
+        error: "Không tìm thấy thông tin thẻ ngày của bạn.",
+      };
+    }
+
+    const newEarned = updatedPass.count;
+    const currentUsed = updatedPass.usedCount;
+    const newCredits = Math.max(0, newEarned - currentUsed);
+    const nextGateway = updatedPass.currentGateway;
+
+    await tx.serviceUsageLog
+      .create({
+        data: {
+          serviceType: "ONTOP_PASS",
+          serviceName: `Link Pass (${pending.service.toUpperCase()})`,
+          targetUser: updatedPass.ip,
+          ip: updatedPass.ip,
+          status: "SUCCESS",
+          metadata: JSON.stringify({
+            earnedCount: newEarned,
+            availableCredits: newCredits,
+            service: pending.service,
+            gateway: nextGateway,
+            date: today,
+          }),
+        },
+      })
+      .catch(() => {});
+
     return {
-      success: false,
-      error: "Phiên vượt link không tồn tại hoặc đã hết hạn.",
-    };
-  }
-
-  if (pending.used) {
-    return {
-      success: false,
-      error: "Phiên vượt link này đã được xác nhận trước đó. Vui lòng bấm nhận lượt mới!",
-    };
-  }
-
-  if (pending.expiresAt < new Date()) {
-    return {
-      success: false,
-      error: "Phiên vượt link đã quá thời gian 30 phút. Vui lòng thực hiện lại!",
-    };
-  }
-
-  // Đánh dấu đã dùng
-  await db.ontopPendingSession.update({
-    where: { id: pending.id },
-    data: { used: true },
-  });
-
-  const today = vnDate();
-  const pass = await db.ontopDailyPass.findUnique({
-    where: { token: pending.passToken },
-  });
-
-  if (!pass) {
-    return {
-      success: false,
-      error: "Không tìm thấy thông tin thẻ ngày của bạn.",
-    };
-  }
-
-  // Tăng số lượt đã vượt
-  const currentEarned = pass.date === today ? pass.count : 0;
-  const currentUsed = pass.date === today ? pass.usedCount : 0;
-  const newEarned = currentEarned + 1;
-  const newCredits = Math.max(0, newEarned - currentUsed);
-  const nextGateway = newEarned >= 2 ? "LINK4M" : "VIETUSER";
-
-  await db.ontopDailyPass.update({
-    where: { id: pass.id },
-    data: {
-      date: today,
-      count: newEarned,
+      success: true as const,
+      service: pending.service,
+      targetUser: pending.targetUser || "",
+      step: newEarned,
+      earnedCount: newEarned,
       usedCount: currentUsed,
-      currentGateway: nextGateway,
-      isUnlimited: false,
-      expiresAt: getEndOfVnDay(today),
-    },
+      availableCredits: newCredits,
+      passToken: updatedPass.token,
+      date: today,
+    };
   });
 
-  // Ghi nhật ký sử dụng hệ thống
-  await db.serviceUsageLog.create({
-    data: {
-      serviceType: "ONTOP_PASS",
-      serviceName: `Link Pass (${pending.service.toUpperCase()})`,
-      targetUser: pass.ip,
-      ip: pass.ip,
-      status: "SUCCESS",
-      metadata: JSON.stringify({
-        earnedCount: newEarned,
-        availableCredits: newCredits,
-        service: pending.service,
-        gateway: nextGateway,
-        date: today,
-      }),
-    },
-  }).catch(() => {});
-
-  return {
-    success: true,
-    service: pending.service,
-    targetUser: pending.targetUser || "",
-    step: newEarned,
-    earnedCount: newEarned,
-    usedCount: currentUsed,
-    availableCredits: newCredits,
-    passToken: pass.token,
-    date: today,
-  };
+  return txResult;
 }

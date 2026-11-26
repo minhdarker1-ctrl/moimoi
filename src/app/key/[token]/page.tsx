@@ -1,10 +1,10 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { headers, cookies } from "next/headers";
 import { db } from "@/lib/db";
-import { fingerprint, generateKey, hashKey } from "@/lib/crypto";
+import { AOV_TICKET_COOKIE, fingerprint, generateKey, hashKey, verifyAovTickets } from "@/lib/crypto";
 import { clientIp } from "@/lib/guard";
 import CopyKey from "@/components/CopyKey";
-import CopyAovAccount from "@/components/CopyAovAccount";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +31,7 @@ export default async function KeyPage({
 }) {
   const { token } = await params;
   const sp = searchParams ? await searchParams : {};
+  const spTyped = sp as { scope?: string; already?: string };
 
   const s = await db.keySession.findUnique({
     where: { token },
@@ -39,10 +40,10 @@ export default async function KeyPage({
   if (!s) return <Fail msg="Phiên không tồn tại hoặc đã hết hạn." />;
   if (s.expiresAt < new Date()) return <Fail msg="Phiên đã hết hạn. Vui lòng bấm nhận lại." />;
 
-  const isAov = sp.scope === "aov" || s.hopUrls.includes("scope=aov");
+  const isAov = spTyped.scope === "aov" || s.hopUrls.includes("scope=aov") || s.hopUrls.includes("/api/aov/claim");
 
-  // Nếu là phiên AOV và đã hoàn thành trước đó:
-  if (isAov && s.doneAt) {
+  // Nếu là phiên AOV và đã từng claim trước đó (?already=1):
+  if (isAov && s.doneAt && spTyped.already === "1") {
     return (
       <main>
         <div className="vt-key-card" style={{ maxWidth: 540, textAlign: "center" }}>
@@ -66,7 +67,7 @@ export default async function KeyPage({
                 fontSize: 15,
                 fontWeight: 700,
                 borderRadius: 12,
-                background: "linear-gradient(135deg, #0284c7, #2563eb)",
+                background: "#007acc",
               }}
             >
               <span>⚔️ VÀO ĐẤU TRƯỜNG AOV DÙNG VÉ</span>
@@ -91,32 +92,13 @@ export default async function KeyPage({
 
   // === NHÁNH 1: NHẬN VÉ LIÊN QUÂN (AOV TICKET) ===
   if (isAov) {
-    const cookieStore = await cookies();
-    const prevTickets = Math.max(0, parseInt(cookieStore.get("aov_tickets")?.value || "0", 10) || 0);
-    const updatedTickets = prevTickets + 1;
-    cookieStore.set("aov_tickets", String(updatedTickets), {
-      path: "/",
-      maxAge: 86400 * 30,
-      httpOnly: true,
-      sameSite: "lax",
-    });
+    // Next.js 15 không cho set cookie trực tiếp trong Server Component render -> chuyển sang Route Handler claim
+    if (!s.doneAt) {
+      redirect(`/api/aov/claim?token=${encodeURIComponent(token)}`);
+    }
 
-    await db.$transaction([
-      db.keySession.update({ where: { id: s.id }, data: { doneAt: new Date() } }),
-      db.serviceUsageLog.create({
-        data: {
-          serviceType: "AOV_TICKET",
-          serviceName: "Nạp Vé Đấu Trường AOV",
-          targetUser: ip,
-          ip,
-          status: "SUCCESS",
-          metadata: JSON.stringify({
-            ticketsAwarded: 1,
-            totalTickets: updatedTickets,
-          }),
-        },
-      }),
-    ]);
+    const cookieStore = await cookies();
+    const updatedTickets = verifyAovTickets(cookieStore.get(AOV_TICKET_COOKIE)?.value);
 
     return (
       <main>
@@ -125,28 +107,25 @@ export default async function KeyPage({
           style={{
             maxWidth: 540,
             textAlign: "center",
-            background: "linear-gradient(145deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95))",
-            border: "1.5px solid rgba(56, 189, 248, 0.4)",
-            boxShadow: "0 10px 40px rgba(0,0,0,0.4), 0 0 30px rgba(56, 189, 248, 0.2)",
-            borderRadius: 24,
+            background: "#252526",
+            border: "1px solid #3c3c3c",
+            borderRadius: 12,
             padding: "36px 24px",
           }}
         >
-          <div style={{ fontSize: 56, marginBottom: 12, filter: "drop-shadow(0 0 16px rgba(245, 158, 11, 0.6))" }}>
-            🎟️
-          </div>
-          <h1 style={{ fontSize: 24, fontWeight: 900, margin: "0 0 8px", color: "#38bdf8" }}>
+          <div style={{ fontSize: 52, marginBottom: 12 }}>🎟️</div>
+          <h1 style={{ fontSize: 22, fontWeight: 800, margin: "0 0 8px", color: "#4ec9b0" }}>
             NHẬN VÉ AOV THÀNH CÔNG!
           </h1>
-          <p style={{ fontSize: 15, color: "#cbd5e1", lineHeight: 1.6, margin: "0 0 20px" }}>
+          <p style={{ fontSize: 14, color: "#d4d4d4", lineHeight: 1.6, margin: "0 0 20px" }}>
             Bạn đã vượt link xuất sắc! Hệ thống đã tự động cộng <b>+1 Vé Tham Gia</b> vào phiên của bạn.
           </p>
 
           <div
             style={{
-              background: "rgba(56, 189, 248, 0.08)",
-              border: "1px dashed rgba(56, 189, 248, 0.3)",
-              borderRadius: 16,
+              background: "#1e1e1e",
+              border: "1px solid #3c3c3c",
+              borderRadius: 8,
               padding: "16px 20px",
               marginBottom: 24,
               display: "flex",
@@ -155,12 +134,12 @@ export default async function KeyPage({
             }}
           >
             <div>
-              <div style={{ fontSize: 12, color: "#94a3b8", fontWeight: 600 }}>VÉ VỪA NHẬN</div>
-              <div style={{ fontSize: 20, fontWeight: 900, color: "#10b981" }}>+1 Vé</div>
+              <div style={{ fontSize: 12, color: "#858585", fontWeight: 600 }}>VÉ VỪA NHẬN</div>
+              <div style={{ fontSize: 20, fontWeight: 800, color: "#4ec9b0" }}>+1 Vé</div>
             </div>
             <div>
-              <div style={{ fontSize: 12, color: "#94a3b8", fontWeight: 600 }}>TỔNG VÉ HIỆN TẠI</div>
-              <div style={{ fontSize: 20, fontWeight: 900, color: "#f59e0b" }}>{updatedTickets} Vé</div>
+              <div style={{ fontSize: 12, color: "#858585", fontWeight: 600 }}>TỔNG VÉ HIỆN TẠI</div>
+              <div style={{ fontSize: 20, fontWeight: 800, color: "#dcdcaa" }}>{updatedTickets} Vé</div>
             </div>
           </div>
 
@@ -174,12 +153,11 @@ export default async function KeyPage({
                 alignItems: "center",
                 justifyContent: "center",
                 gap: 10,
-                padding: "14px 28px",
-                fontSize: 16,
-                fontWeight: 800,
-                borderRadius: 14,
-                background: "linear-gradient(135deg, #0284c7, #2563eb)",
-                boxShadow: "0 4px 20px rgba(37, 99, 235, 0.4)",
+                padding: "12px 24px",
+                fontSize: 15,
+                fontWeight: 700,
+                borderRadius: 8,
+                background: "#007acc",
               }}
             >
               <span>⚔️ VÀO ĐẤU TRƯỜNG AOV DÙNG VÉ NGAY</span>
@@ -194,8 +172,14 @@ export default async function KeyPage({
   const plain = generateKey();
   const expiresAt = new Date(Date.now() + s.keyType.ttlHours * 3600_000);
 
-  await db.$transaction([
-    db.appKey.create({
+  const keyIssued = await db.$transaction(async (tx) => {
+    const claimed = await tx.keySession.updateMany({
+      where: { id: s.id, doneAt: null },
+      data: { doneAt: new Date() },
+    });
+    if (claimed.count === 0) return false;
+
+    await tx.appKey.create({
       data: {
         keyHash: hashKey(plain),
         prefix: plain.slice(0, 4),
@@ -204,10 +188,17 @@ export default async function KeyPage({
         expiresAt,
         maxUses: s.keyType.maxUses,
       },
-    }),
-    db.keySession.update({ where: { id: s.id }, data: { doneAt: new Date() } }),
-    db.freeFireKeyLog.updateMany({ where: { token: s.token }, data: { status: "completed" } }),
-  ]);
+    });
+    await tx.freeFireKeyLog.updateMany({
+      where: { token: s.token },
+      data: { status: "completed" },
+    });
+    return true;
+  });
+
+  if (!keyIssued) {
+    return <Fail msg="Phiên này đã lấy key rồi. Bấm Get Key để lấy key mới." />;
+  }
   return (
     <main>
       <div className="vt-key-card">

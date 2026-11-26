@@ -6,158 +6,146 @@ import {
   getEndOfVnDay,
 } from "@/lib/ontop";
 import { vnDate } from "@/lib/crypto";
+import { getBaseUrl } from "@/lib/serverUtils";
 
 export const dynamic = "force-dynamic";
-
-function getBaseUrl(req: Request): string {
-  const host = req.headers.get("x-forwarded-host") || req.headers.get("host");
-  const proto = req.headers.get("x-forwarded-proto") || "https";
-  if (host && !host.includes("localhost") && !host.includes("127.0.0.1")) {
-    return `${proto}://${host}`.replace(/\/$/, "");
-  }
-  const env = process.env.NEXT_PUBLIC_SITE_URL;
-  if (env && !env.includes("thedarker")) return env.replace(/\/$/, "");
-  if (host) return `${proto}://${host}`.replace(/\/$/, "");
-  const url = new URL(req.url);
-  return `${url.protocol}//${url.host}`.replace(/\/$/, "");
-}
-
 
 export async function GET(req: Request) {
   const reqUrl = new URL(req.url);
   const slotId = reqUrl.searchParams.get("slot") || "";
   const baseUrl = getBaseUrl(req);
 
+  const errorRedirect = (msg: string) => {
+    const errorUrl = new URL("/key/error", baseUrl);
+    errorUrl.searchParams.set("m", msg);
+    return NextResponse.redirect(errorUrl, 302);
+  };
+
   if (!slotId) {
-    const errorUrl = new URL("/key/error", baseUrl);
-    errorUrl.searchParams.set("m", "Thiếu mã định danh slot vượt link.");
-    return NextResponse.redirect(errorUrl, 302);
+    return errorRedirect("Thiếu mã định danh slot vượt link.");
   }
 
-  // 1. Tra cứu slot trong bảng OntopLinkBuffer
-  const slot = await db.ontopLinkBuffer.findUnique({
-    where: { slotId },
+  const now = new Date();
+  const today = vnDate(now);
+  const endOfDay = getEndOfVnDay(today);
+
+  const claimOutcome = await db.$transaction(async (tx) => {
+    const slot = await tx.ontopLinkBuffer.findUnique({ where: { slotId } });
+
+    if (!slot) {
+      return { ok: false as const, error: "Phiên vượt link không tồn tại hoặc đã bị xóa." };
+    }
+    if (slot.status === "COMPLETED") {
+      return { ok: false as const, error: "Phiên vượt link này đã được xác nhận trước đó. Vui lòng nhận link mới!" };
+    }
+    if (slot.status !== "RESERVED" || !slot.passToken) {
+      return { ok: false as const, error: "Phiên vượt link chưa được kích hoạt hợp lệ. Vui lòng thử lại!" };
+    }
+    if (slot.expiresAt && slot.expiresAt < now) {
+      return { ok: false as const, error: "Phiên vượt link đã quá thời hạn 30 phút. Vui lòng bấm nhận link mới!" };
+    }
+
+    // Atomic claim slot (chỉ request đầu tiên cập nhật được)
+    const claimed = await tx.ontopLinkBuffer.updateMany({
+      where: {
+        id: slot.id,
+        status: "RESERVED",
+      },
+      data: {
+        status: "COMPLETED",
+        completedAt: now,
+      },
+    });
+
+    if (claimed.count === 0) {
+      return { ok: false as const, error: "Phiên vượt link này đã được xác nhận trước đó. Vui lòng nhận link mới!" };
+    }
+
+    const updatedPasses = await tx.$queryRaw<
+      Array<{ id: number; count: number; usedCount: number; token: string; ip: string }>
+    >`
+      UPDATE "OntopDailyPass"
+      SET "count" = CASE WHEN date = ${today} THEN "count" + 1 ELSE 1 END,
+          "usedCount" = CASE WHEN date = ${today} THEN "usedCount" ELSE 0 END,
+          date = ${today},
+          "currentGateway" = CASE WHEN (CASE WHEN date = ${today} THEN "count" + 1 ELSE 1 END) >= 2 THEN 'LINK4M' ELSE 'ONTOPS' END,
+          "isUnlimited" = false,
+          "expiresAt" = ${endOfDay},
+          "updatedAt" = NOW()
+      WHERE token = ${slot.passToken}
+      RETURNING id, count, "usedCount", token, ip
+    `;
+
+    const pass = updatedPasses?.[0];
+    if (!pass) {
+      throw new Error("PASS_NOT_FOUND");
+    }
+
+    const newEarned = pass.count;
+    const currentUsed = pass.usedCount;
+    const newCredits = Math.max(0, newEarned - currentUsed);
+    const service = slot.service || "freefire";
+
+    await tx.serviceUsageLog
+      .create({
+        data: {
+          serviceType: "ONTOP_PASS",
+          serviceName: `Link Pass OnTop (${service.toUpperCase()})`,
+          targetUser: pass.ip,
+          ip: pass.ip,
+          status: "SUCCESS",
+          metadata: JSON.stringify({
+            slotId: slot.slotId,
+            earnedCount: newEarned,
+            availableCredits: newCredits,
+            service,
+            gateway: "ONTOPS",
+            targetUser: slot.targetUser || "",
+            date: today,
+          }),
+        },
+      })
+      .catch(() => {});
+
+    return {
+      ok: true as const,
+      passToken: pass.token,
+      newEarned,
+      currentUsed,
+      newCredits,
+      service,
+      targetUser: slot.targetUser || "",
+    };
+  }).catch((e) => {
+    if (e instanceof Error && e.message === "PASS_NOT_FOUND") {
+      return { ok: false as const, error: "Không tìm thấy thông tin thẻ ngày của bạn." };
+    }
+    throw e;
   });
 
-  if (!slot) {
-    const errorUrl = new URL("/key/error", baseUrl);
-    errorUrl.searchParams.set(
-      "m",
-      "Phiên vượt link không tồn tại hoặc đã bị xóa."
-    );
-    return NextResponse.redirect(errorUrl, 302);
+  if (!claimOutcome.ok) {
+    return errorRedirect(claimOutcome.error);
   }
 
-  if (slot.status === "COMPLETED") {
-    const errorUrl = new URL("/key/error", baseUrl);
-    errorUrl.searchParams.set(
-      "m",
-      "Phiên vượt link này đã được xác nhận trước đó. Vui lòng nhận link mới!"
-    );
-    return NextResponse.redirect(errorUrl, 302);
-  }
-
-  if (slot.status !== "RESERVED" || !slot.passToken) {
-    const errorUrl = new URL("/key/error", baseUrl);
-    errorUrl.searchParams.set(
-      "m",
-      "Phiên vượt link chưa được kích hoạt hợp lệ. Vui lòng thử lại!"
-    );
-    return NextResponse.redirect(errorUrl, 302);
-  }
-
-  if (slot.expiresAt && slot.expiresAt < new Date()) {
-    const errorUrl = new URL("/key/error", baseUrl);
-    errorUrl.searchParams.set(
-      "m",
-      "Phiên vượt link đã quá thời hạn 30 phút. Vui lòng bấm nhận link mới!"
-    );
-    return NextResponse.redirect(errorUrl, 302);
-  }
-
-  // 2. Đổi trạng thái slot thành COMPLETED
-  await db.ontopLinkBuffer.update({
-    where: { id: slot.id },
-    data: {
-      status: "COMPLETED",
-      completedAt: new Date(),
-    },
-  });
-
-  // 3. Tra cứu thẻ ngày của người dùng
-  const today = vnDate();
-  const pass = await db.ontopDailyPass.findUnique({
-    where: { token: slot.passToken },
-  });
-
-  if (!pass) {
-    const errorUrl = new URL("/key/error", baseUrl);
-    errorUrl.searchParams.set(
-      "m",
-      "Không tìm thấy thông tin thẻ ngày của bạn."
-    );
-    return NextResponse.redirect(errorUrl, 302);
-  }
-
-  // 4. Cộng +1 lượt đã vượt
-  const currentEarned = pass.date === today ? pass.count : 0;
-  const currentUsed = pass.date === today ? pass.usedCount : 0;
-  const newEarned = currentEarned + 1;
-  const newCredits = Math.max(0, newEarned - currentUsed);
-  const nextGateway = newEarned >= 2 ? "LINK4M" : "ONTOPS";
-
-  await db.ontopDailyPass.update({
-    where: { id: pass.id },
-    data: {
-      date: today,
-      count: newEarned,
-      usedCount: currentUsed,
-      currentGateway: nextGateway,
-      isUnlimited: false,
-      expiresAt: getEndOfVnDay(today),
-    },
-  });
-
-  // 5. Ghi nhật ký hệ thống
-  const service = slot.service || "freefire";
-  await db.serviceUsageLog.create({
-    data: {
-      serviceType: "ONTOP_PASS",
-      serviceName: `Link Pass OnTop (${service.toUpperCase()})`,
-      targetUser: pass.ip,
-      ip: pass.ip,
-      status: "SUCCESS",
-      metadata: JSON.stringify({
-        slotId: slot.slotId,
-        earnedCount: newEarned,
-        availableCredits: newCredits,
-        service,
-        gateway: "ONTOPS",
-        targetUser: slot.targetUser || "",
-        date: today,
-      }),
-    },
-  }).catch(() => {});
-
-  // 6. Xây dựng URL điều hướng quay về kèm UID đã lưu
   let returnPath = "/";
-  const targetUserParam = slot.targetUser ? encodeURIComponent(slot.targetUser) : "";
-  if (service === "freefire") {
-    returnPath = `/freefire?tab=unlock&ontop=success&step=${newEarned}&credits=${newCredits}${targetUserParam ? `&uid=${targetUserParam}` : ""}`;
-  } else if (service === "locket") {
-    returnPath = `/locket?ontop=success&step=${newEarned}&credits=${newCredits}${targetUserParam ? `&target=${targetUserParam}` : ""}`;
+  const targetUserParam = claimOutcome.targetUser
+    ? encodeURIComponent(claimOutcome.targetUser)
+    : "";
+  if (claimOutcome.service === "freefire") {
+    returnPath = `/freefire?tab=unlock&ontop=success&step=${claimOutcome.newEarned}&credits=${claimOutcome.newCredits}${targetUserParam ? `&uid=${targetUserParam}` : ""}`;
+  } else if (claimOutcome.service === "locket") {
+    returnPath = `/locket?ontop=success&step=${claimOutcome.newEarned}&credits=${claimOutcome.newCredits}${targetUserParam ? `&target=${targetUserParam}` : ""}`;
   }
 
   const redirectUrl = new URL(returnPath, baseUrl);
   const response = NextResponse.redirect(redirectUrl, 302);
 
-  // 7. Ký và lưu cookie xác nhận
   const signedCookie = signPassPayload({
-    passToken: pass.token,
+    passToken: claimOutcome.passToken,
     date: today,
-    earnedCount: newEarned,
-    usedCount: currentUsed,
-    availableCredits: newCredits,
+    earnedCount: claimOutcome.newEarned,
+    usedCount: claimOutcome.currentUsed,
+    availableCredits: claimOutcome.newCredits,
   });
 
   response.cookies.set(ONTOP_COOKIE_NAME, signedCookie, {

@@ -113,14 +113,25 @@ export default async function HopPage({
     return <HopClient type="error" message="Không tìm thấy bước tiếp theo trong phiên." />;
   }
 
-  // Cập nhật session đã qua bước này
-  await db.keySession.update({
-    where: { id: s.id },
+  // Cập nhật session nguyên tử theo step hiện tại để tránh double-step
+  const stepUpdate = await db.keySession.updateMany({
+    where: {
+      id: s.id,
+      step: s.step,
+      doneAt: null,
+    },
     data: {
       step,
       stepAt: JSON.stringify([...stepAt, now]),
     },
   });
+
+  if (stepUpdate.count === 0) {
+    const latest = await db.keySession.findUnique({ where: { id: s.id } });
+    if (!latest || latest.doneAt) {
+      return <HopClient type="error" message="Phiên vượt link này đã hoàn tất trước đó." />;
+    }
+  }
 
   return (
     <HopClient
