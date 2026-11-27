@@ -5,20 +5,22 @@ import { db } from "@/lib/db";
 import { AOV_TICKET_COOKIE, fingerprint, generateKey, hashKey, verifyAovTickets } from "@/lib/crypto";
 import { clientIp } from "@/lib/guard";
 import CopyKey from "@/components/CopyKey";
+import FocusedFlowShell from "@/components/FocusedFlowShell";
 
 export const dynamic = "force-dynamic";
 
 function Fail({ msg }: { msg: string }) {
   return (
-    <main>
-      <div className="vt-key-card">
-        <h1 style={{ fontSize: 19, margin: "0 0 8px" }}>Thông báo</h1>
-        <p className="vt-hint">{msg}</p>
-        <Link className="vt-btn-ghost" href="/" style={{ marginTop: 14 }}>
-          Về trang chính
+    <FocusedFlowShell title="Thông báo" backHref="/" backLabel="Trang chủ" maxWidth={440}>
+      <div style={{ textAlign: "center" }}>
+        <p className="vt-hint" style={{ marginBottom: 18 }}>
+          {msg}
+        </p>
+        <Link className="pro-btn-secondary" href="/">
+          <span>Về trang chính</span>
         </Link>
       </div>
-    </main>
+    </FocusedFlowShell>
   );
 }
 
@@ -101,70 +103,49 @@ export default async function KeyPage({
     const updatedTickets = verifyAovTickets(cookieStore.get(AOV_TICKET_COOKIE)?.value);
 
     return (
-      <main>
-        <div
-          className="vt-key-card"
-          style={{
-            maxWidth: 540,
-            textAlign: "center",
-            background: "#252526",
-            border: "1px solid #3c3c3c",
-            borderRadius: 12,
-            padding: "36px 24px",
-          }}
-        >
-          <div style={{ fontSize: 52, marginBottom: 12 }}>🎟️</div>
-          <h1 style={{ fontSize: 22, fontWeight: 800, margin: "0 0 8px", color: "#4ec9b0" }}>
-            NHẬN VÉ AOV THÀNH CÔNG!
+      <FocusedFlowShell backHref="/aov" backLabel="Đấu trường AOV" maxWidth={520}>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontSize: 40, marginBottom: 10 }}>🎟️</div>
+          <h1 style={{ fontSize: 20, fontWeight: 700, margin: "0 0 8px", color: "#4ec9b0" }}>
+            Nhận vé AOV thành công!
           </h1>
-          <p style={{ fontSize: 14, color: "#d4d4d4", lineHeight: 1.6, margin: "0 0 20px" }}>
-            Bạn đã vượt link xuất sắc! Hệ thống đã tự động cộng <b>+1 Vé Tham Gia</b> vào phiên của bạn.
+          <p style={{ fontSize: 13.5, color: "#cccccc", lineHeight: 1.6, margin: "0 0 18px" }}>
+            Bạn đã vượt link hoàn tất. Hệ thống đã cộng <b>+1 Vé Tham Gia</b> vào phiên của bạn.
           </p>
 
           <div
             style={{
-              background: "#1e1e1e",
-              border: "1px solid #3c3c3c",
+              background: "#181818",
+              border: "1px solid #333333",
               borderRadius: 8,
-              padding: "16px 20px",
-              marginBottom: 24,
+              padding: "14px 18px",
+              marginBottom: 20,
               display: "flex",
               justifyContent: "space-around",
               alignItems: "center",
             }}
           >
             <div>
-              <div style={{ fontSize: 12, color: "#858585", fontWeight: 600 }}>VÉ VỪA NHẬN</div>
-              <div style={{ fontSize: 20, fontWeight: 800, color: "#4ec9b0" }}>+1 Vé</div>
+              <div style={{ fontSize: 11.5, color: "#9d9d9d", fontWeight: 600 }}>VÉ VỪA NHẬN</div>
+              <div style={{ fontSize: 18, fontWeight: 700, color: "#4ec9b0" }}>+1 Vé</div>
             </div>
             <div>
-              <div style={{ fontSize: 12, color: "#858585", fontWeight: 600 }}>TỔNG VÉ HIỆN TẠI</div>
-              <div style={{ fontSize: 20, fontWeight: 800, color: "#dcdcaa" }}>{updatedTickets} Vé</div>
+              <div style={{ fontSize: 11.5, color: "#9d9d9d", fontWeight: 600 }}>TỔNG VÉ HIỆN TẠI</div>
+              <div style={{ fontSize: 18, fontWeight: 700, color: "#dcdcaa" }}>{updatedTickets} Vé</div>
             </div>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <Link
               href="/aov"
-              className="vt-btn-primary"
-              style={{
-                textDecoration: "none",
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 10,
-                padding: "12px 24px",
-                fontSize: 15,
-                fontWeight: 700,
-                borderRadius: 8,
-                background: "#007acc",
-              }}
+              className="pro-btn-primary"
+              style={{ width: "100%", boxSizing: "border-box" }}
             >
-              <span>⚔️ VÀO ĐẤU TRƯỜNG AOV DÙNG VÉ NGAY</span>
+              <span>Vào Đấu Trường AOV dùng vé ngay</span>
             </Link>
           </div>
         </div>
-      </main>
+      </FocusedFlowShell>
     );
   }
 
@@ -200,45 +181,43 @@ export default async function KeyPage({
     return <Fail msg="Phiên này đã lấy key rồi. Bấm Get Key để lấy key mới." />;
   }
   return (
-    <main>
-      <div className="vt-key-card">
-        <h1 style={{ fontSize: 19, margin: "0 0 4px" }}>Key của bạn</h1>
-        <p className="vt-hint">
-          {s.keyType.name}
-          {s.app ? ` — ${s.app.name}` : ""}
-        </p>
+    <FocusedFlowShell
+      title="Key của bạn"
+      subtitle={`${s.keyType.name}${s.app ? ` — ${s.app.name}` : ""}`}
+      backHref={s.app ? "/" : "/freefire"}
+      backLabel={s.app ? "Trang chủ" : "Free Fire"}
+      maxWidth={480}
+    >
+      <CopyKey value={plain} />
 
-        <CopyKey value={plain} />
+      <p className="vt-hint" style={{ marginTop: 12, lineHeight: 1.6 }}>
+        Hạn sống (TTL): {expiresAt.toLocaleString("vi-VN", { timeZone: "Asia/Ho_Chi_Minh" })}
+        <br />
+        {s.keyType.maxUses > 0
+          ? `Số lượt dùng: Tối đa ${s.keyType.maxUses} lần (chạy song song với TTL, hết hạn hoặc hết lượt là Key hết hiệu lực).`
+          : "Số lượt dùng: Không giới hạn (trong thời hạn TTL)."}
+        <br />
+        <strong>Lưu ý: Hãy sao chép lại mã Key để sử dụng.</strong>
+      </p>
 
-        <p className="vt-hint">
-          Hạn sống (TTL): {expiresAt.toLocaleString("vi-VN", { timeZone: "Asia/Ho_Chi_Minh" })}
-          <br />
-          {s.keyType.maxUses > 0
-            ? `Số lượt dùng: Tối đa ${s.keyType.maxUses} lần (chạy song song với TTL, hết hạn hoặc hết lượt là Key die).`
-            : "Số lượt dùng: Không giới hạn (trong thời hạn TTL)."}
-          <br />
-          <strong>Lưu ý: Bạn hãy sao chép lại mã Key để sử dụng!</strong>
-        </p>
-
-        {s.app ? (
-          <Link className="vt-btn-primary" href="/" style={{ marginTop: 8 }}>
-            Về trang chính nhập key
+      {s.app ? (
+        <Link className="pro-btn-primary" href="/" style={{ marginTop: 14, width: "100%", boxSizing: "border-box" }}>
+          Về trang chính nhập key
+        </Link>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 14 }}>
+          <Link
+            className="pro-btn-primary"
+            href={`/freefire/result?unlockedKey=${encodeURIComponent(plain)}`}
+            style={{ width: "100%", boxSizing: "border-box" }}
+          >
+            Mở Khóa &amp; Xem Độ Nhạy Free Fire Ngay
           </Link>
-        ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 12 }}>
-            <Link
-              className="vt-btn-primary"
-              href={`/freefire/result?unlockedKey=${encodeURIComponent(plain)}`}
-              style={{ textDecoration: "none", padding: "12px 18px", textAlign: "center" }}
-            >
-              👉 Mở Khóa & Xem Độ Nhạy Free Fire Ngay
-            </Link>
-            <Link className="vt-btn-ghost" href="/freefire" style={{ textAlign: "center" }}>
-              Về trang tra cứu Free Fire
-            </Link>
-          </div>
-        )}
-      </div>
-    </main>
+          <Link className="pro-btn-secondary" href="/freefire" style={{ width: "100%", boxSizing: "border-box" }}>
+            Về trang tra cứu Free Fire
+          </Link>
+        </div>
+      )}
+    </FocusedFlowShell>
   );
 }

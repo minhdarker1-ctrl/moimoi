@@ -23,6 +23,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import AovTaskbar from "./AovTaskbar";
+import PageHeader from "@/components/PageHeader";
 import {
   openBlindBagAction,
   spinWheelAction,
@@ -367,91 +368,31 @@ export default function AovArenaClient({
         }}
       />
 
-      {/* TASKBAR BÊN TRÊN */}
-      <AovTaskbar
-        tickets={currentTickets}
-        inventoryCount={inventory.length}
-        onOpenInventory={() => setIsInventoryOpen(true)}
-        onGetTicketClick={handleGetTicket}
-        isStartingHop={isStartingHop}
-        isAdmin={isAdmin}
-      />
+      <div className="pro-subpage-main" style={{ maxWidth: 1080 }}>
+        <PageHeader
+          badge="Garena AOV Arena"
+          title="Đấu Trường Liên Quân"
+          description="Nhận vé qua hệ thống vượt link để mở Túi Mù (1–3 acc) hoặc Vòng Quay (0–5 acc) Garena trắng thông tin."
+        />
 
-      <div style={{ maxWidth: 1040, margin: "0 auto", padding: "16px 16px 60px" }}>
-        {/* HERO BANNER ĐẤU TRƯỜNG */}
-        <section className="aov-hero-banner">
-          <div className="aov-hero-badge">
-            <Sparkles size={14} />
-            <span>ĐẤU TRƯỜNG GARENA AOV 2026</span>
+        {/* CONTROL BAR BÊN TRÊN */}
+        <AovTaskbar
+          tickets={currentTickets}
+          inventoryCount={inventory.length}
+          availableStock={availableStock}
+          claimedStock={claimedStock}
+          onOpenInventory={() => setIsInventoryOpen(true)}
+          onGetTicketClick={handleGetTicket}
+          isStartingHop={isStartingHop}
+          isAdmin={isAdmin}
+        />
+
+        {hopError && (
+          <div className="aov-auth-alert error" style={{ maxWidth: 520, margin: "0 auto 16px" }}>
+            <AlertTriangle size={16} />
+            <span>{hopError}</span>
           </div>
-
-          <h1 className="aov-hero-title">
-            ĐẤU TRƯỜNG LIÊN QUÂN MOBILE
-          </h1>
-          <p className="aov-hero-subtitle">
-            Vượt link nhận vé tham gia <b>Xé Túi Mù (1 - 3 acc)</b> hoặc thử vận may với <b>Vòng Quay May Mắn (0 - 5 acc)</b> 100% trắng thông tin!
-          </p>
-
-          {/* HYPE CARDS: TÂM PHÁP GACHA & ĐẶC QUYỀN AOV */}
-          <div className="aov-hype-grid">
-            <div className="aov-hype-card gold">
-              <div className="aov-hype-icon">🔥</div>
-              <div className="aov-hype-content">
-                <div className="aov-hype-title">SĂN TỚI 5 ACC / LƯỢT</div>
-                <div className="aov-hype-desc">
-                  Vòng quay thử vận may có thể nhận từ 0 đến 5 tài khoản Garena trắng thông tin!
-                </div>
-              </div>
-            </div>
-
-            <div className="aov-hype-card cyan">
-              <div className="aov-hype-icon">🤝</div>
-              <div className="aov-hype-content">
-                <div className="aov-hype-title">ACC CÀY CHUNG SỨC</div>
-                <div className="aov-hype-desc">
-                  Nick Garena trắng TT 100%, tha hồ cày sự kiện Chung Sức, kéo rank &amp; test tướng.
-                </div>
-              </div>
-            </div>
-
-            <div className="aov-hype-card purple">
-              <div className="aov-hype-icon">🎰</div>
-              <div className="aov-hype-content">
-                <div className="aov-hype-title">BẤT BẠI TÂM PHÁP</div>
-                <div className="aov-hype-desc">
-                  99% con bạc thường dừng lại ngay trước khi thắng lớn! Hãy kiên trì tới cùng.
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* CTA: NẠP VÉ / LẤY TICKET */}
-          <div className="aov-ticket-cta-wrap">
-            <button
-              type="button"
-              onClick={handleGetTicket}
-              disabled={isStartingHop}
-              className="aov-btn-get-ticket"
-            >
-              <Ticket size={20} style={{ color: "#fcd34d" }} />
-              <span>
-                {isStartingHop
-                  ? "ĐANG KHỞI TẠO NHIỆM VỤ..."
-                  : "LẤY TICKET (VƯỢT LINK 1 CHẠM)"}
-              </span>
-              <ArrowRight size={18} />
-            </button>
-            <p className="aov-ticket-hint">
-              Mỗi lượt vượt link thành công = Nhận ngay <b>+1 Vé</b> vào tài khoản. Vé không bị giới hạn thời gian sử dụng!
-            </p>
-            {hopError && (
-              <div className="aov-auth-alert error" style={{ maxWidth: 480, margin: "10px auto 0" }}>
-                <AlertTriangle size={16} />
-                <span>{hopError}</span>
-              </div>
-            )}
-          </div>
-        </section>
+        )}
 
         {/* LƯỚI 2 MINI-GAMES TIÊU VÉ */}
         <section className="aov-games-grid">
@@ -943,44 +884,22 @@ export default function AovArenaClient({
         </div>
 
         {/* HỖ TRỢ TRỰC TUYẾN AOV */}
-        <div style={{
-          marginTop: 16,
-          padding: "14px 20px",
-          background: "rgba(2, 132, 199, 0.1)",
-          border: "1px solid rgba(56, 189, 248, 0.3)",
-          borderRadius: 16,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          flexWrap: "wrap",
-          gap: 12,
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <span style={{ fontSize: 22 }}>💬</span>
+        <div className="pro-support-banner">
+          <div className="pro-support-banner-left">
+            <i className="fa-brands fa-telegram" aria-hidden="true" />
             <div>
-              <strong style={{ display: "block", color: "#f8fafc", fontSize: 13.5 }}>Gặp sự cố đăng nhập acc nhận được?</strong>
-              <span style={{ fontSize: 12, color: "#94a3b8" }}>Nhắn tin cho Admin để được đổi acc khác hoặc hỗ trợ tức thì</span>
+              <strong>Gặp sự cố đăng nhập tài khoản nhận được?</strong>
+              <span>Nhắn Admin qua Telegram để được kiểm tra và hỗ trợ đổi acc.</span>
             </div>
           </div>
           <a
             href="https://t.me/thedarker1"
             target="_blank"
             rel="noopener noreferrer"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 8,
-              padding: "8px 16px",
-              background: "linear-gradient(135deg, #0284c7, #2563eb)",
-              borderRadius: 12,
-              color: "#fff",
-              fontWeight: 700,
-              fontSize: 12.5,
-              textDecoration: "none",
-            }}
+            className="pro-btn-secondary"
           >
-            <i className="fa-brands fa-telegram" />
-            <span>Hỗ Trợ Đổi Acc 1:1</span>
+            <span>Hỗ trợ @thedarker1</span>
+            <i className="fa-solid fa-arrow-up-right-from-square" aria-hidden="true" />
           </a>
         </div>
       </div>

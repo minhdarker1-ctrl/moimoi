@@ -6,14 +6,15 @@ interface CyberAvatarProps {
   avatarUrl?: string | null;
   avatarFrameUrl?: string | null;
   name: string;
+  size?: number;
 }
 
 export default function CyberAvatar({
   avatarUrl,
   avatarFrameUrl,
   name,
+  size = 76,
 }: CyberAvatarProps) {
-  // Normalize legacy external URLs to local fast asset
   const normalizedFrame = avatarFrameUrl?.includes("vthangios.xyz")
     ? "/frame.png"
     : avatarFrameUrl;
@@ -24,28 +25,30 @@ export default function CyberAvatar({
   const hasValidFrame = Boolean(normalizedFrame && !frameError);
 
   return (
-    <div className="cyber-avatar-container">
-      {/* Dynamic ambient aura glow */}
-      <div className={`cyber-avatar-aura ${hasValidFrame ? "has-frame" : ""}`} aria-hidden="true" />
-
-      <div className={`cyber-avatar-ring ${hasValidFrame ? "has-frame" : ""}`}>
+    <div
+      className="pro-avatar-container"
+      style={{ width: size, height: size }}
+    >
+      <div className={`pro-avatar-ring ${hasValidFrame ? "has-frame" : ""}`}>
         {avatarUrl ? (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
-            className="cyber-avatar-img"
+            className="pro-avatar-img"
             src={avatarUrl}
             alt={`Ảnh đại diện ${name}`}
             fetchPriority="high"
-            width={320}
-            height={320}
+            width={size}
+            height={size}
           />
         ) : (
-          <div className="cyber-avatar-fallback">MS</div>
+          <div className="pro-avatar-fallback">
+            {name.slice(0, 2).toUpperCase() || "MS"}
+          </div>
         )}
         {normalizedFrame && !frameError && (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
-            className="cyber-avatar-frame-overlay"
+            className="pro-avatar-frame-overlay"
             src={normalizedFrame}
             alt=""
             aria-hidden="true"

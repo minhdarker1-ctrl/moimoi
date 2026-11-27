@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { db } from "@/lib/db";
 import SiteHeader from "@/components/SiteHeader";
+import SiteFooter from "@/components/SiteFooter";
 import FreeFireContainer from "@/components/FreeFireContainer";
 import AppCard from "@/components/AppCard";
 
@@ -59,7 +60,7 @@ export default async function FreeFirePage() {
         }))}
       />
 
-      <main style={{ maxWidth: 860, margin: "0 auto", padding: "76px 16px 60px" }}>
+      <main className="pro-subpage-main" style={{ maxWidth: 1080 }}>
 
         {/* Component Công cụ Free Fire (Độ Nhạy & Unlock ID) */}
         <Suspense fallback={<div style={{ textAlign: "center", padding: "40px 0", color: "var(--vi-muted)" }}><i className="fa-solid fa-spinner fa-spin" /> Đang tải dữ liệu Free Fire...</div>}>
@@ -69,9 +70,9 @@ export default async function FreeFirePage() {
         {/* Nếu có app / mod Free Fire thì hiển thị thêm ở đây */}
         {ffApps.length > 0 && (
           <section style={{ marginTop: 40, textAlign: "left" }}>
-            <h3 style={{ fontSize: 18, marginBottom: 16, color: "var(--vi-text)" }}>
-              🔥 Bản Mod & Menu Free Fire Mới Nhất
-            </h3>
+            <h2 className="pro-section-title" style={{ marginBottom: 16 }}>
+              Tài nguyên &amp; Tiện ích Free Fire
+            </h2>
             <div className="mdarker-app-list">
               {ffApps.map((a) => (
                 <AppCard key={a.id} app={a} />
@@ -79,11 +80,9 @@ export default async function FreeFirePage() {
             </div>
           </section>
         )}
-
-        <footer className="mdarker-footer" style={{ marginTop: 40 }}>
-          {site.footerText}
-        </footer>
       </main>
+
+      <SiteFooter siteName={site.name} footerText={site.footerText} />
     </>
   );
 }

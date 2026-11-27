@@ -11,28 +11,37 @@ export default function GlobalError({ reset }: { error: Error; reset: () => void
           minHeight: "100vh",
           display: "grid",
           placeItems: "center",
-          background: "#0b0f19",
-          color: "#e8ecf4",
+          background: "#1e1e1e",
+          color: "#cccccc",
           fontFamily: "system-ui, -apple-system, sans-serif",
           padding: 20,
         }}
       >
-        <div style={{ textAlign: "center", maxWidth: 420 }}>
-          <h1 style={{ fontSize: 20, marginBottom: 8 }}>Hệ thống đang bảo trì</h1>
-          <p style={{ opacity: 0.7, fontSize: 14, lineHeight: 1.6 }}>
+        <div
+          style={{
+            textAlign: "center",
+            maxWidth: 420,
+            padding: 28,
+            borderRadius: 12,
+            background: "#252526",
+            border: "1px solid #333333",
+          }}
+        >
+          <h1 style={{ fontSize: 20, margin: "0 0 8px", color: "#ffffff" }}>Hệ thống đang bảo trì</h1>
+          <p style={{ color: "#9d9d9d", fontSize: 14, lineHeight: 1.6, margin: 0 }}>
             Vui lòng thử lại sau vài phút.
           </p>
           <button
             type="button"
             onClick={reset}
             style={{
-              marginTop: 16,
-              padding: "10px 22px",
-              borderRadius: 10,
-              border: 0,
-              background: "linear-gradient(90deg,#7c5cff,#22d3ee)",
-              color: "#fff",
-              fontWeight: 700,
+              marginTop: 18,
+              padding: "9px 20px",
+              borderRadius: 8,
+              border: "1px solid rgba(55, 148, 255, 0.45)",
+              background: "#007acc",
+              color: "#ffffff",
+              fontWeight: 600,
               cursor: "pointer",
             }}
           >

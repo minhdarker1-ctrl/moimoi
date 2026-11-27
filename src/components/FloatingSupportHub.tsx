@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import {
   Headphones,
   X,
@@ -96,6 +97,15 @@ export default function FloatingSupportHub({
   siteName = "MinSr",
   socials = [],
 }: FloatingSupportHubProps) {
+  const pathname = usePathname();
+  const isHiddenRoute = Boolean(
+    pathname &&
+      (pathname.startsWith("/admin") ||
+        pathname.startsWith("/getkey") ||
+        pathname.startsWith("/hop") ||
+        pathname.startsWith("/key"))
+  );
+
   const findSocialUrl = (needle: string, fallback: string) => {
     const found = socials.find(
       (s) => s.url && s.url.toLowerCase().includes(needle)
@@ -153,9 +163,13 @@ export default function FloatingSupportHub({
   const filteredFaqs =
     faqFilter === "all" ? FAQS : FAQS.filter((f) => f.category === faqFilter);
 
+  if (isHiddenRoute) {
+    return null;
+  }
+
   return (
     <>
-      {/* NÚT KÍCH HOẠT NỔI HÌNH TRÒN Ở GÓC MÀN HÌNH */}
+      {/* NÚT TRỢ GIÚP GÓC MÀN HÌNH */}
       <div className="floating-support-wrap" aria-label="Nút trợ giúp trực tuyến MinSr">
         <button
           type="button"
@@ -165,9 +179,8 @@ export default function FloatingSupportHub({
           aria-haspopup="dialog"
           title="Trợ giúp & Hỗ trợ 24/7"
         >
-          <div className="floating-support-pulse" aria-hidden="true" />
           <div className="floating-support-icon">
-            {open ? <X size={22} /> : <Headphones size={22} />}
+            {open ? <X size={20} /> : <Headphones size={20} />}
           </div>
           <span className="floating-support-badge-dot" title="Admin online 24/7" />
         </button>

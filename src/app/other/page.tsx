@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { db } from "@/lib/db";
 import SiteHeader from "@/components/SiteHeader";
+import SiteFooter from "@/components/SiteFooter";
+import PageHeader from "@/components/PageHeader";
 import OtherPageClient from "@/components/other/OtherPageClient";
 
 export const revalidate = 60;
@@ -46,18 +48,21 @@ export default async function OtherPage() {
         }))}
       />
 
-      <main style={{ maxWidth: 1240, margin: "0 auto", padding: "76px 16px 60px" }}>
+      <main className="pro-subpage-main" style={{ maxWidth: 1200 }}>
+        <PageHeader
+          badge="Học tập & Công cụ"
+          title="Trắc nghiệm Kỹ thuật & Kho Ứng dụng"
+          description="Ngân hàng 335 câu hỏi Công nghệ kim loại tích hợp giọng đọc Google Tiếng Việt, Bảng Vàng xếp hạng và kho tiện ích chọn lọc."
+        />
 
         {/* Tabs và Nội dung: Quiz Master + Kho Công Cụ */}
         <OtherPageClient
           groups={groups}
           otherGroupId={otherGroupId}
         />
-
-        <footer className="mdarker-footer" style={{ marginTop: 50 }}>
-          {site.footerText}
-        </footer>
       </main>
+
+      <SiteFooter siteName={site.name} footerText={site.footerText} />
     </>
   );
 }

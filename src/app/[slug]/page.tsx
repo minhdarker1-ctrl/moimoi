@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import SiteHeader from "@/components/SiteHeader";
+import SiteFooter from "@/components/SiteFooter";
+import PageHeader from "@/components/PageHeader";
 import AppCatalog from "@/components/AppCatalog";
 import FreeFireHub from "@/components/FreeFireHub";
 
@@ -70,7 +72,12 @@ export default async function DynamicGroupPage({ params }: PageProps) {
         }))}
       />
 
-      <main style={{ maxWidth: 1240, margin: "0 auto", padding: "76px 16px 60px" }}>
+      <main className="pro-subpage-main" style={{ maxWidth: 1200 }}>
+        <PageHeader
+          badge={currentGroup.badge || "Danh mục"}
+          title={currentGroup.title}
+          description={currentGroup.desc || "Kho ứng dụng và tiện ích được chọn lọc."}
+        />
 
         {isFreeFire ? (
           <FreeFireHub adminNote={ffConfig} />
@@ -82,11 +89,9 @@ export default async function DynamicGroupPage({ params }: PageProps) {
             hideCategoryMenu={true}
           />
         )}
-
-        <footer className="mdarker-footer" style={{ marginTop: 50 }}>
-          {site.footerText}
-        </footer>
       </main>
+
+      <SiteFooter siteName={site.name} footerText={site.footerText} />
     </>
   );
 }

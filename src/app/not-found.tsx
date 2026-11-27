@@ -1,15 +1,21 @@
 import Link from "next/link";
+import FocusedFlowShell from "@/components/FocusedFlowShell";
 
 export default function NotFound() {
   return (
-    <main>
-      <div className="vt-key-card">
-        <h1 style={{ fontSize: 40, margin: "0 0 4px" }}>404</h1>
-        <p className="vt-hint">Trang này không tồn tại.</p>
-        <Link className="vt-btn-primary" href="/" style={{ marginTop: 14 }}>
-          Về trang chính
+    <FocusedFlowShell maxWidth={440}>
+      <div style={{ textAlign: "center" }}>
+        <div style={{ fontSize: 44, fontWeight: 700, color: "#ffffff", letterSpacing: "-0.03em", lineHeight: 1.1 }}>
+          404
+        </div>
+        <p className="vt-hint" style={{ marginTop: 8, marginBottom: 18 }}>
+          Trang này không tồn tại hoặc đường dẫn đã được thay đổi.
+        </p>
+        <Link className="pro-btn-primary" href="/">
+          <i className="fa-solid fa-house" aria-hidden="true" />
+          <span>Về trang chính</span>
         </Link>
       </div>
-    </main>
+    </FocusedFlowShell>
   );
 }

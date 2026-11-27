@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import PageHeader from "@/components/PageHeader";
 
 interface ActivateResult {
   success: boolean;
@@ -81,7 +82,7 @@ export default function LocketClient() {
   }
 
   async function handleCopyInfo() {
-    const timeStr = completedAt || "13:22:45 · 04/10/2026";
+    const timeStr = completedAt || "Vừa xong";
     const returningNote =
       customerType === "returning"
         ? `🔄 LƯU Ý CHO KHÁCH CŨ:\n• Vào Cài đặt → Cài đặt chung → VPN & Quản lý thiết bị → Xóa cấu hình DNS Locket cũ trước khi cài file DNS mới.\n\n`
@@ -191,297 +192,17 @@ Cài DNS khi Gold chưa xuất hiện sẽ chỉ giữ trạng thái chưa có G
   }
 
   return (
-    <div className="locket-page-container" style={{ paddingTop: 68 }}>
-      <main className="locket-main-content">
-        {/* HERO SECTION */}
-        <div className="locket-hero-section">
-          <div className="locket-badge-glow">
-            <span className="locket-badge-icon">👑</span>
-            <span className="locket-badge-text">MINSR TOOL • PREMIUM ACTIVE</span>
-          </div>
-          <h1 className="locket-title">
-            Kích Hoạt <span className="locket-gold-gradient">Locket Gold</span>
-          </h1>
-          <p className="locket-subtitle">
-            Mở khóa trọn bộ tính năng Locket Gold 1 năm hoàn toàn miễn phí. Hỗ trợ kích hoạt qua Username,
-            Link hồ sơ cá nhân hoặc Link mời bạn bè!
-          </p>
-        </div>
+    <div className="locket-page-container">
+      <div className="pro-subpage-main" style={{ maxWidth: 1120 }}>
+        <PageHeader
+          badge="iOS Utility"
+          title="Kích hoạt Locket Gold"
+          description="Mở khóa Locket Gold 1 năm miễn phí qua Username, Link hồ sơ hoặc Link mời bạn bè, kèm cấu hình DNS đóng băng."
+        />
 
-        {/* BENEFIT PILLS */}
-        <div className="locket-features-grid">
-          <div className="locket-feature-item">
-            <i className="fas fa-crown locket-feat-icon gold" />
-            <div>
-              <strong>Huy hiệu Gold</strong>
-              <p>Hiển thị viền vàng độc quyền</p>
-            </div>
-          </div>
-          <div className="locket-feature-item">
-            <i className="fas fa-camera-retro locket-feat-icon cyan" />
-            <div>
-              <strong>Ảnh & Video HD</strong>
-              <p>Độ nét cao không bị nén</p>
-            </div>
-          </div>
-          <div className="locket-feature-item">
-            <i className="fas fa-user-friends locket-feat-icon purple" />
-            <div>
-              <strong>Mở rộng bạn bè</strong>
-              <p>Kết nối không giới hạn</p>
-            </div>
-          </div>
-          <div className="locket-feature-item">
-            <i className="fas fa-shield-alt locket-feat-icon green" />
-            <div>
-              <strong>An Toàn 100%</strong>
-              <p>Bản quyền chính thức Apple</p>
-            </div>
-          </div>
-        </div>
-
-        {/* WORKFLOW GUIDE WITH INTERACTIVE CUSTOMER SEGMENT SELECTOR */}
-        {!result?.success && (
-          <div className="locket-workflow-box">
-            {/* MONTHLY SHARED DNS NOTICE BANNER */}
-            <div className="locket-wf-dns-banner">
-              <div className="locket-wf-dns-badge">
-                <i className="fas fa-globe" /> DNS ĐÓNG BĂNG GOLD DÙNG CHUNG
-              </div>
-              <p className="locket-wf-dns-text">
-                DNS Đóng Băng Gold Locket dùng chung được thay theo tháng. Hồ sơ <code>.mobileconfig</code> đã cài không tự cập nhật; hãy cài phiên bản mới khi nhận nhắc hạn.
-              </p>
-            </div>
-
-            {/* CUSTOMER SEGMENT SELECTOR */}
-            <div className="locket-segment-box">
-              <div className="locket-segment-header">
-                <span className="locket-segment-tag">
-                  <i className="fas fa-question-circle" /> CÂU HỎI XÁC ĐỊNH THIẾT BỊ
-                </span>
-                <h3 className="locket-segment-title">
-                  Bạn đã từng cài đặt cấu hình DNS Locket trên thiết bị này chưa?
-                </h3>
-                <p className="locket-segment-subtitle">
-                  Chọn đúng trạng thái để hiển thị hướng dẫn chuẩn xác nhất cho máy của bạn:
-                </p>
-              </div>
-
-              <div className="locket-segment-grid">
-                <button
-                  type="button"
-                  className={`locket-segment-card ${customerType === "new" ? "active" : ""}`}
-                  onClick={() => setCustomerType("new")}
-                >
-                  <div className="locket-segment-icon new-icon">
-                    <i className="fas fa-sparkles" />
-                  </div>
-                  <div className="locket-segment-content">
-                    <span className="locket-segment-name">Tôi là Khách Mới</span>
-                    <span className="locket-segment-desc">Chưa từng cài DNS Locket trên thiết bị này</span>
-                  </div>
-                  <div className="locket-segment-radio">
-                    <span className="locket-radio-circle" />
-                  </div>
-                </button>
-
-                <button
-                  type="button"
-                  className={`locket-segment-card ${customerType === "returning" ? "active" : ""}`}
-                  onClick={() => setCustomerType("returning")}
-                >
-                  <div className="locket-segment-icon return-icon">
-                    <i className="fas fa-sync-alt" />
-                  </div>
-                  <div className="locket-segment-content">
-                    <span className="locket-segment-name">Tôi là Khách Cũ</span>
-                    <span className="locket-segment-desc">Đã từng cài DNS Locket trước đây</span>
-                  </div>
-                  <div className="locket-segment-radio">
-                    <span className="locket-radio-circle" />
-                  </div>
-                </button>
-              </div>
-            </div>
-
-            {/* CONDITIONAL WORKFLOW ACCORDING TO CUSTOMER TYPE */}
-            {customerType === "new" ? (
-              /* NEW CUSTOMER: 5 STEPS AS REQUESTED COMBINED WITH COOLDOWN & ORDER WARNINGS */
-              <div className="locket-new-customer-section">
-                <div className="locket-wf-header">
-                  <span className="locket-wf-badge">
-                    <i className="fas fa-list-ol" /> QUY TRÌNH THỰC HIỆN
-                  </span>
-                  <h2 className="locket-wf-title">5 Bước Kích Hoạt Locket Gold</h2>
-                  <p className="locket-wf-desc">
-                    Vui lòng đọc kỹ và thực hiện đúng theo các bước dưới đây để tài khoản nhận gói Gold chuẩn xác nhất:
-                  </p>
-                </div>
-
-                <div className="locket-wf-steps">
-                  <div className="locket-wf-step">
-                    <span className="locket-wf-num">1</span>
-                    <div className="locket-wf-text">
-                      <strong>Bước 1:</strong> Mở Locket và đăng xuất tài khoản <em>(nếu chưa đăng xuất)</em>.
-                    </div>
-                  </div>
-
-                  <div className="locket-wf-step">
-                    <span className="locket-wf-num">2</span>
-                    <div className="locket-wf-text">
-                      <strong>Bước 2:</strong> Nhập sẵn tên và mật khẩu, <em>tuyệt đối chưa bấm Đăng nhập</em>.
-                    </div>
-                  </div>
-
-                  <div className="locket-wf-step">
-                    <span className="locket-wf-num">3</span>
-                    <div className="locket-wf-text">
-                      <strong>Bước 3:</strong> Nhập link hồ sơ vào ô bên dưới.
-                    </div>
-                  </div>
-
-                  <div className="locket-wf-step">
-                    <span className="locket-wf-num">4</span>
-                    <div className="locket-wf-text">
-                      <strong>Bước 4:</strong> Bấm Đăng nhập vào Locket và kiểm tra xem đã có gói Gold chưa.
-                      <p>Mở Locket ngay khi hệ thống báo thành công. Nếu chưa thấy Gold, hãy đăng xuất/đăng nhập lại hoặc cài lại ứng dụng rồi kiểm tra lại.</p>
-                    </div>
-                  </div>
-
-                  <div className="locket-wf-step">
-                    <span className="locket-wf-num">5</span>
-                    <div className="locket-wf-text">
-                      <strong>Bước 5:</strong> Cài đặt file DNS do Admin cung cấp.
-                      <p>Sau khi đã nhìn thấy Gold, tải tệp <code>.mobileconfig</code> bên dưới và vào <strong>Cài đặt &gt; Cài đặt chung &gt; VPN &amp; Quản lý thiết bị</strong> để bật profile DNS.</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* IMPORTANT COOLDOWN RULE & ORDER WARNING */}
-                <div className="locket-main-wf" style={{ marginTop: "16px" }}>
-                  <div className="locket-wf-rule-banner">
-                    <i className="fas fa-stopwatch" />
-                    <span>
-                      <strong>Kiểm tra Gold rồi mới cài DNS:</strong> Thời gian hồi sau mỗi lượt chính là khoảng thời gian để bạn kiểm tra Gold và hoàn tất đóng băng trước khi token được dùng cho tài khoản khác.
-                    </span>
-                  </div>
-
-                  <div className="locket-warning-callout">
-                    <div className="locket-warn-head">
-                      <i className="fas fa-ban" />
-                      <strong>KHÔNG LÀM NGƯỢC THỨ TỰ</strong>
-                    </div>
-                    <p>
-                      Cài DNS khi Gold chưa xuất hiện sẽ chỉ giữ trạng thái <em>chưa có Gold</em>. DNS là lớp đóng băng, không phải lần kích hoạt thứ hai.
-                    </p>
-                  </div>
-
-                  <div className="locket-fast-summary">
-                    <span className="locket-summary-label">
-                      <i className="fas fa-bolt" /> KÍCH HOẠT THEO USERNAME (Web hoặc Bot):
-                    </span>
-                    <ol className="locket-summary-list">
-                      <li>Kiểm tra username và gửi yêu cầu.</li>
-                      <li>Chờ thông báo thành công rồi mở Locket kiểm tra Gold.</li>
-                      <li>Cài DNS được bàn giao ngay trong thời gian hồi.</li>
-                    </ol>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              /* RETURNING CUSTOMER: SEPARATE DNS REMOVAL STEP + NEW DNS SETUP */
-              <div className="locket-returning-customer-section">
-                <div className="locket-returning-box">
-                  <div className="locket-returning-header">
-                    <span className="locket-returning-badge">
-                      <i className="fas fa-exclamation-triangle" /> BƯỚC BẮT BUỘC DÀNH CHO KHÁCH CŨ
-                    </span>
-                    <h4 className="locket-returning-title">
-                      Gỡ Hoàn Toàn Cấu Hình DNS Cũ Trước Khi Kích Hoạt
-                    </h4>
-                    <p className="locket-returning-desc">
-                      Nếu máy từng cài DNS Locket, hãy xóa cấu hình cũ trước khi kích hoạt để thiết bị nhận được gói Gold mới:
-                    </p>
-                  </div>
-                  <div className="locket-returning-steps">
-                    <div className="locket-ret-step">
-                      <span className="locket-ret-num">1</span>
-                      <span>Vào <strong>Cài đặt</strong> trên iPhone &gt; <strong>Cài đặt chung</strong> &gt; <strong>VPN &amp; Quản lý thiết bị</strong>.</span>
-                    </div>
-                    <div className="locket-ret-step">
-                      <span className="locket-ret-num">2</span>
-                      <span>Nhấn chọn cấu hình <strong>DNS Locket cũ</strong> đã cài trước đây.</span>
-                    </div>
-                    <div className="locket-ret-step">
-                      <span className="locket-ret-num">3</span>
-                      <span>Bấm <strong>Xóa cấu hình</strong> (Remove Profile) để khôi phục kết nối mạng mặc định.</span>
-                    </div>
-                    <div className="locket-ret-step">
-                      <span className="locket-ret-num">4</span>
-                      <span>Sau khi gỡ sạch DNS cũ, nhập username vào ô bên dưới và gửi yêu cầu kích hoạt.</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="locket-main-wf">
-                  <div className="locket-wf-rule-banner">
-                    <i className="fas fa-stopwatch" />
-                    <span>
-                      <strong>Kiểm tra Gold rồi mới cài DNS:</strong> Thời gian hồi sau mỗi lượt chính là khoảng thời gian để bạn kiểm tra Gold và hoàn tất đóng băng trước khi token được dùng cho tài khoản khác.
-                    </span>
-                  </div>
-
-                  <div className="locket-wf-steps">
-                    <div className="locket-wf-step">
-                      <span className="locket-wf-num">1</span>
-                      <div className="locket-wf-text">
-                        <strong>Bước 1: Xác nhận Gold đã hiển thị</strong>
-                        <p>Mở Locket ngay khi hệ thống báo thành công. Nếu chưa thấy Gold, hãy đăng xuất/đăng nhập lại hoặc cài lại ứng dụng rồi kiểm tra lại.</p>
-                      </div>
-                    </div>
-
-                    <div className="locket-wf-step">
-                      <span className="locket-wf-num">2</span>
-                      <div className="locket-wf-text">
-                        <strong>Bước 2: Cài DNS được bàn giao</strong>
-                        <p>Sau khi đã nhìn thấy Gold, tải đúng link hoặc tệp <code>.mobileconfig</code> do Web/Bot gửi cho yêu cầu đó.</p>
-                      </div>
-                    </div>
-
-                    <div className="locket-wf-step">
-                      <span className="locket-wf-num">3</span>
-                      <div className="locket-wf-text">
-                        <strong>Bước 3: Bật profile ngay</strong>
-                        <p>Vào <strong>Cài đặt &gt; Cài đặt chung &gt; VPN &amp; Quản lý thiết bị</strong>, chọn profile DNS và hoàn tất cài đặt, không để gián đoạn mạng.</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="locket-warning-callout">
-                    <div className="locket-warn-head">
-                      <i className="fas fa-ban" />
-                      <strong>KHÔNG LÀM NGƯỢC THỨ TỰ</strong>
-                    </div>
-                    <p>
-                      Cài DNS khi Gold chưa xuất hiện sẽ chỉ giữ trạng thái <em>chưa có Gold</em>. DNS là lớp đóng băng, không phải lần kích hoạt thứ hai.
-                    </p>
-                  </div>
-
-                  <div className="locket-fast-summary">
-                    <span className="locket-summary-label">
-                      <i className="fas fa-bolt" /> KÍCH HOẠT THEO USERNAME (Web hoặc Bot):
-                    </span>
-                    <ol className="locket-summary-list">
-                      <li>Kiểm tra username và gửi yêu cầu.</li>
-                      <li>Chờ thông báo thành công rồi mở Locket kiểm tra Gold.</li>
-                      <li>Cài DNS được bàn giao ngay trong thời gian hồi.</li>
-                    </ol>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
+        {/* ACTION-FIRST 2-COLUMN WORKSPACE */}
+        <div className="locket-workspace-grid">
+          <div className="locket-workspace-primary">
 
         {/* ACTIVATION FORM CARD */}
         <div className="locket-card">
@@ -731,6 +452,134 @@ Cài DNS khi Gold chưa xuất hiện sẽ chỉ giữ trạng thái chưa có G
             </div>
           )}
         </div>
+          </div>{/* End primary workspace column */}
+
+          {/* RIGHT ASIDE: COMPACT BENEFIT STRIP + CONTEXTUAL WORKFLOW GUIDE */}
+          <aside className="locket-workspace-aside">
+            <div className="locket-features-grid">
+              <div className="locket-feature-item">
+                <i className="fas fa-crown locket-feat-icon gold" />
+                <div>
+                  <strong>Huy hiệu Gold</strong>
+                  <p>Viền vàng độc quyền</p>
+                </div>
+              </div>
+              <div className="locket-feature-item">
+                <i className="fas fa-camera-retro locket-feat-icon cyan" />
+                <div>
+                  <strong>Ảnh &amp; Video HD</strong>
+                  <p>Không nén chất lượng</p>
+                </div>
+              </div>
+              <div className="locket-feature-item">
+                <i className="fas fa-user-friends locket-feat-icon purple" />
+                <div>
+                  <strong>Bạn bè không giới hạn</strong>
+                  <p>Kết nối thoải mái</p>
+                </div>
+              </div>
+              <div className="locket-feature-item">
+                <i className="fas fa-shield-alt locket-feat-icon green" />
+                <div>
+                  <strong>An toàn tài khoản</strong>
+                  <p>Kích hoạt trực tiếp</p>
+                </div>
+              </div>
+            </div>
+
+            {!result?.success && (
+              <div className="locket-workflow-box">
+                <div className="locket-segment-box">
+                  <div className="locket-segment-header">
+                    <span className="locket-segment-tag">
+                      <i className="fas fa-question-circle" /> XÁC ĐỊNH THIẾT BỊ
+                    </span>
+                    <h3 className="locket-segment-title">
+                      Máy đã từng cài DNS Locket chưa?
+                    </h3>
+                  </div>
+
+                  <div className="locket-segment-grid">
+                    <button
+                      type="button"
+                      className={`locket-segment-card ${customerType === "new" ? "active" : ""}`}
+                      onClick={() => setCustomerType("new")}
+                    >
+                      <div className="locket-segment-icon new-icon">
+                        <i className="fas fa-sparkles" />
+                      </div>
+                      <div className="locket-segment-content">
+                        <span className="locket-segment-name">Khách Mới</span>
+                        <span className="locket-segment-desc">Chưa từng cài DNS</span>
+                      </div>
+                    </button>
+
+                    <button
+                      type="button"
+                      className={`locket-segment-card ${customerType === "returning" ? "active" : ""}`}
+                      onClick={() => setCustomerType("returning")}
+                    >
+                      <div className="locket-segment-icon return-icon">
+                        <i className="fas fa-sync-alt" />
+                      </div>
+                      <div className="locket-segment-content">
+                        <span className="locket-segment-name">Khách Cũ</span>
+                        <span className="locket-segment-desc">Đã cài DNS trước đây</span>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+
+                {customerType === "returning" && (
+                  <div className="locket-returning-box">
+                    <div className="locket-returning-header">
+                      <span className="locket-returning-badge">
+                        <i className="fas fa-exclamation-triangle" /> BẮT BUỘC VỚI KHÁCH CŨ
+                      </span>
+                      <h4 className="locket-returning-title">
+                        Xóa cấu hình DNS cũ trước khi kích hoạt
+                      </h4>
+                      <p className="locket-returning-desc">
+                        Vào <strong>Cài đặt &gt; Cài đặt chung &gt; VPN &amp; Quản lý thiết bị</strong>, chọn profile DNS Locket cũ và bấm <strong>Xóa cấu hình</strong>.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                <div className="locket-wf-steps">
+                  <div className="locket-wf-step">
+                    <span className="locket-wf-num">1</span>
+                    <div className="locket-wf-text">
+                      <strong>Đăng xuất Locket &amp; điền sẵn mật khẩu:</strong> Khoan bấm Đăng nhập trên app.
+                    </div>
+                  </div>
+                  <div className="locket-wf-step">
+                    <span className="locket-wf-num">2</span>
+                    <div className="locket-wf-text">
+                      <strong>Gửi yêu cầu ở khung bên cạnh:</strong> Dán Username hoặc link hồ sơ Locket và chờ báo thành công.
+                    </div>
+                  </div>
+                  <div className="locket-wf-step">
+                    <span className="locket-wf-num">3</span>
+                    <div className="locket-wf-text">
+                      <strong>Kiểm tra Gold rồi mới cài DNS:</strong> Mở Locket xác nhận đã có Gold trước, sau đó tải tệp <code>.mobileconfig</code> để đóng băng trong thời gian hồi.
+                    </div>
+                  </div>
+                </div>
+
+                <div className="locket-warning-callout">
+                  <div className="locket-warn-head">
+                    <i className="fas fa-ban" />
+                    <strong>NGUYÊN TẮC ĐÓNG BĂNG DNS</strong>
+                  </div>
+                  <p>
+                    Chỉ cài DNS sau khi thấy Gold (cài trước sẽ giữ trạng thái chưa có Gold). Hồ sơ DNS dùng chung được thay theo tháng và không tự cập nhật — cài lại bản mới khi hết hạn.
+                  </p>
+                </div>
+              </div>
+            )}
+          </aside>
+        </div>
 
         {/* FAQ SECTION */}
         <section className="locket-faq-section" aria-label="Câu hỏi thường gặp">
@@ -771,60 +620,32 @@ Cài DNS khi Gold chưa xuất hiện sẽ chỉ giữ trạng thái chưa có G
             <div className="locket-faq-card">
               <h3>Gặp lỗi không rõ nguyên nhân hoặc cần hỗ trợ?</h3>
               <p>
-                Đội ngũ Admin MinSr luôn trực tuyến hỗ trợ miễn phí. Nhắn tin trực tiếp qua Telegram <a href="https://t.me/thedarker1" target="_blank" rel="noopener noreferrer" style={{ color: "#38bdf8", fontWeight: "bold" }}>@thedarker1</a> để được hỗ trợ trong 1-2 phút.
+                Đội ngũ Admin MinSr luôn trực tuyến hỗ trợ miễn phí. Nhắn tin trực tiếp qua Telegram <a href="https://t.me/thedarker1" target="_blank" rel="noopener noreferrer" style={{ color: "#3794ff", fontWeight: "bold" }}>@thedarker1</a> để được hỗ trợ trong 1-2 phút.
               </p>
             </div>
           </div>
 
           {/* ADMIN DIRECT SUPPORT CALLOUT */}
-          <div style={{
-            marginTop: 24,
-            padding: "16px 20px",
-            background: "linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(14, 165, 233, 0.15))",
-            border: "1px solid rgba(56, 189, 248, 0.35)",
-            borderRadius: 16,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            flexWrap: "wrap",
-            gap: 12
-          }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <span style={{ fontSize: 24 }}>🛟</span>
+          <div className="pro-support-banner">
+            <div className="pro-support-banner-left">
+              <i className="fa-brands fa-telegram" aria-hidden="true" />
               <div>
-                <strong style={{ display: "block", color: "#f8fafc", fontSize: 14 }}>Bạn cần hỗ trợ cài đặt hoặc kích hoạt?</strong>
-                <span style={{ fontSize: 12, color: "#94a3b8" }}>Admin trực tuyến 24/7 giải đáp mọi thắc mắc hoàn toàn miễn phí</span>
+                <strong>Cần hỗ trợ cài đặt DNS hoặc kích hoạt?</strong>
+                <span>Admin trực tuyến hỗ trợ miễn phí qua Telegram.</span>
               </div>
             </div>
             <a
               href="https://t.me/thedarker1"
               target="_blank"
               rel="noopener noreferrer"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 8,
-                padding: "9px 18px",
-                background: "linear-gradient(135deg, #0284c7, #2563eb)",
-                borderRadius: 12,
-                color: "#fff",
-                fontWeight: 700,
-                fontSize: 13,
-                textDecoration: "none",
-                boxShadow: "0 4px 12px rgba(2, 132, 199, 0.35)"
-              }}
+              className="pro-btn-secondary"
             >
-              <i className="fa-brands fa-telegram" />
-              <span>Nhắn Admin Telegram</span>
+              <span>Nhắn Admin @thedarker1</span>
+              <i className="fa-solid fa-arrow-up-right-from-square" aria-hidden="true" />
             </a>
           </div>
         </section>
-
-        {/* FOOTER */}
-        <footer className="locket-footer">
-          <p>© 2026 MinSr • Locket Gold Automation Service</p>
-        </footer>
-      </main>
+      </div>
     </div>
   );
 }

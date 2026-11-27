@@ -20,20 +20,17 @@ export interface SiteHeaderProps {
 const timeFormatter = new Intl.DateTimeFormat("vi-VN", {
   hour: "2-digit",
   minute: "2-digit",
-  second: "2-digit",
-  day: "2-digit",
-  month: "2-digit",
-  year: "numeric",
   hour12: false,
   timeZone: "Asia/Ho_Chi_Minh",
 });
 
-const SUBPAGE_LINKS = [
-  { href: "/freefire", label: "Free Fire", icon: "fa-solid fa-fire" },
-  { href: "/aov", label: "AOV", icon: "fas fa-shield-alt" },
-  { href: "/locket", label: "Locket", icon: "fas fa-crown" },
-  { href: "/other", label: "Other & Quiz", icon: "fa-solid fa-graduation-cap" },
-  { href: "/donate", label: "Nuôi tôi", icon: "fas fa-heart" },
+const MAIN_NAV_LINKS = [
+  { href: "/", label: "Trang chủ", exact: true },
+  { href: "/freefire", label: "Free Fire", exact: false },
+  { href: "/aov", label: "Liên Quân", exact: false },
+  { href: "/locket", label: "Locket Gold", exact: false },
+  { href: "/other", label: "Quiz & Tiện ích", exact: false },
+  { href: "/donate", label: "Ủng hộ", exact: false },
 ];
 
 export default function SiteHeader({
@@ -42,8 +39,6 @@ export default function SiteHeader({
   verified = false,
   notices = [],
   variant = "subpage",
-  backHref = "/#services",
-  backLabel = "Dịch vụ",
   pageTitle,
 }: SiteHeaderProps) {
   const { user } = useCurrentUser();
@@ -54,7 +49,7 @@ export default function SiteHeader({
   useEffect(() => {
     const tick = () => setTime(timeFormatter.format(new Date()));
     tick();
-    const id = setInterval(tick, 1000);
+    const id = setInterval(tick, 30000);
     return () => clearInterval(id);
   }, []);
 
@@ -72,15 +67,8 @@ export default function SiteHeader({
     <>
       <header className="vsc-header" aria-label="Thanh điều hướng chính">
         <div className="vsc-header-inner">
-          {/* LEFT: BACK + BRAND + BREADCRUMB */}
+          {/* LEFT: BRAND & BREADCRUMB */}
           <div className="vsc-header-left">
-            {variant === "subpage" && (
-              <Link href={backHref} className="vsc-back-pill" aria-label={`Quay lại ${backLabel}`}>
-                <i className="fa-solid fa-arrow-left" aria-hidden="true" />
-                <span className="vsc-hide-xs">{backLabel}</span>
-              </Link>
-            )}
-
             {pathname === "/" ? (
               <button
                 type="button"
@@ -90,7 +78,7 @@ export default function SiteHeader({
               >
                 {avatarUrl ? (
                   /* eslint-disable-next-line @next/next/no-img-element */
-                  <img src={avatarUrl} alt={siteName} width={28} height={28} className="vsc-brand-avatar" />
+                  <img src={avatarUrl} alt={siteName} width={26} height={26} className="vsc-brand-avatar" />
                 ) : (
                   <span className="vsc-brand-mark" aria-hidden="true">
                     <i className="fa-solid fa-terminal" />
@@ -99,14 +87,14 @@ export default function SiteHeader({
                 <span className="vsc-brand-name">{siteName}</span>
                 {verified && (
                   /* eslint-disable-next-line @next/next/no-img-element */
-                  <img src="/verify.svg" alt="Đã xác minh" width={15} height={15} />
+                  <img src="/verify.svg" alt="Đã xác minh" width={14} height={14} />
                 )}
               </button>
             ) : (
               <Link href="/" className="vsc-brand-btn" title="Về trang chủ">
                 {avatarUrl ? (
                   /* eslint-disable-next-line @next/next/no-img-element */
-                  <img src={avatarUrl} alt={siteName} width={28} height={28} className="vsc-brand-avatar" />
+                  <img src={avatarUrl} alt={siteName} width={26} height={26} className="vsc-brand-avatar" />
                 ) : (
                   <span className="vsc-brand-mark" aria-hidden="true">
                     <i className="fa-solid fa-terminal" />
@@ -115,12 +103,12 @@ export default function SiteHeader({
                 <span className="vsc-brand-name">{siteName}</span>
                 {verified && (
                   /* eslint-disable-next-line @next/next/no-img-element */
-                  <img src="/verify.svg" alt="Đã xác minh" width={15} height={15} />
+                  <img src="/verify.svg" alt="Đã xác minh" width={14} height={14} />
                 )}
               </Link>
             )}
 
-            {pageTitle && (
+            {variant === "subpage" && pageTitle && (
               <span className="vsc-breadcrumb" title={pageTitle}>
                 <span className="vsc-breadcrumb-sep">/</span>
                 <span>{pageTitle}</span>
@@ -128,29 +116,22 @@ export default function SiteHeader({
             )}
           </div>
 
-          {/* CENTER: COMPACT VS CODE TABS */}
-          <nav className="vsc-header-nav" aria-label="Điều hướng nhanh">
-            {variant === "home" ? (
-              <>
-                <Link href="/" className="vsc-nav-tab active">Trang chủ</Link>
-                <a href="#services" className="vsc-nav-tab">Dịch vụ</a>
-                <Link href="/other" className="vsc-nav-tab">Quiz &amp; Other</Link>
-                <a href="#contact" className="vsc-nav-tab">Liên hệ</a>
-              </>
-            ) : (
-              SUBPAGE_LINKS.map((item) => {
-                const isActive = pathname === item.href || pathname?.startsWith(`${item.href}/`);
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`vsc-nav-tab ${isActive ? "active" : ""}`}
-                  >
-                    {item.label}
-                  </Link>
-                );
-              })
-            )}
+          {/* CENTER: UNIFIED NAVIGATION TABS */}
+          <nav className="vsc-header-nav" aria-label="Điều hướng phân hệ">
+            {MAIN_NAV_LINKS.map((item) => {
+              const isActive = item.exact
+                ? pathname === "/"
+                : pathname === item.href || pathname?.startsWith(`${item.href}/`);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`vsc-nav-tab ${isActive ? "active" : ""}`}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
           </nav>
 
           {/* RIGHT: ADMIN + CLOCK + BELL + MOBILE MENU */}
@@ -158,10 +139,10 @@ export default function SiteHeader({
             {user?.role === "ADMIN" && (
               <Link
                 href="/admin"
-                className="cyber-admin-indicator"
-                title="Đặc quyền Admin: Bấm để vào Bảng Quản Trị"
+                className="pro-admin-badge"
+                title="Mở Bảng Quản Trị Admin"
               >
-                <span>👑 ADMIN</span>
+                <span>ADMIN</span>
               </Link>
             )}
 
@@ -197,7 +178,7 @@ export default function SiteHeader({
           />
           <div className="cyber-mobile-drawer" role="dialog" aria-modal="true" aria-label="Menu điều hướng">
             <div className="cyber-mobile-drawer-header">
-              <span className="cyber-mobile-drawer-title">Điều Hướng {siteName}</span>
+              <span className="cyber-mobile-drawer-title">Điều hướng {siteName}</span>
               <button
                 type="button"
                 className="cyber-mobile-drawer-close"
@@ -215,8 +196,8 @@ export default function SiteHeader({
                     <i className="fas fa-home" />
                   </div>
                   <div className="cyber-m-link-text">
-                    <strong>Trang Chủ</strong>
-                    <span>Giới thiệu {siteName} &amp; Mạng xã hội</span>
+                    <strong>Trang chủ</strong>
+                    <span>Tổng quan hệ sinh thái {siteName}</span>
                   </div>
                 </Link>
 
@@ -226,7 +207,7 @@ export default function SiteHeader({
                   </div>
                   <div className="cyber-m-link-text">
                     <strong>Free Fire Pro</strong>
-                    <span>Độ nhạy kéo tâm &amp; Unlock ID</span>
+                    <span>Độ nhạy kéo tâm &amp; Unlock ID Whitelist</span>
                   </div>
                 </Link>
 
@@ -235,8 +216,8 @@ export default function SiteHeader({
                     <i className="fas fa-shield-alt" />
                   </div>
                   <div className="cyber-m-link-text">
-                    <strong>Đấu Trường AOV</strong>
-                    <span>Xé Túi Mù &amp; Vòng Quay nhận nick</span>
+                    <strong>Liên Quân AOV</strong>
+                    <span>Túi Mù &amp; Vòng Quay nhận tài khoản</span>
                   </div>
                 </Link>
 
@@ -245,8 +226,8 @@ export default function SiteHeader({
                     <i className="fas fa-crown" />
                   </div>
                   <div className="cyber-m-link-text">
-                    <strong>Locket Gold</strong>
-                    <span>Kích hoạt Gold 1 năm &amp; DNS</span>
+                    <strong>Locket Gold iOS</strong>
+                    <span>Kích hoạt Gold 1 năm &amp; cấu hình DNS</span>
                   </div>
                 </Link>
 
@@ -255,8 +236,8 @@ export default function SiteHeader({
                     <i className="fa-solid fa-graduation-cap" />
                   </div>
                   <div className="cyber-m-link-text">
-                    <strong>Trắc Nghiệm &amp; Other</strong>
-                    <span>Ngân hàng câu hỏi &amp; Kho công cụ</span>
+                    <strong>Quiz &amp; Tiện ích</strong>
+                    <span>Ngân hàng 335 câu hỏi &amp; Kho ứng dụng</span>
                   </div>
                 </Link>
 
@@ -265,8 +246,8 @@ export default function SiteHeader({
                     <i className="fas fa-heart" />
                   </div>
                   <div className="cyber-m-link-text">
-                    <strong>Nuôi Tôi (Donate)</strong>
-                    <span>Ủng hộ cà phê duy trì server</span>
+                    <strong>Ủng hộ (Nuôi tôi)</strong>
+                    <span>Đồng hành duy trì máy chủ 24/7</span>
                   </div>
                 </Link>
               </div>

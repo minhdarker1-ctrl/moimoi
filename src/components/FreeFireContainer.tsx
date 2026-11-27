@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import { ArrowRight, ChevronLeft, Sparkles, Crosshair, Zap } from "lucide-react";
+import { Crosshair, Zap } from "lucide-react";
+import PageHeader from "./PageHeader";
 import FreeFireHub from "./FreeFireHub";
 import FreeFireUnlockHub from "./FreeFireUnlockHub";
 import type { FreeFireNoteData } from "./FreeFireAdminNote";
@@ -15,13 +16,19 @@ export default function FreeFireContainer({
   const searchParams = useSearchParams();
   const tabParam = searchParams.get("tab") || searchParams.get("mode");
   const serverParam = searchParams.get("server") || searchParams.get("port");
+  const ontopParam = searchParams.get("ontop");
+  const uidParam = searchParams.get("uid");
 
-  const [activeMode, setActiveMode] = useState<"select" | "sens" | "unlock">(
-    tabParam === "unlock" || serverParam === "kipas" || serverParam === "astute"
-      ? "unlock"
-      : tabParam === "sens"
-      ? "sens"
-      : "select"
+  const initialUnlock = Boolean(
+    tabParam === "unlock" ||
+      serverParam === "kipas" ||
+      serverParam === "astute" ||
+      ontopParam ||
+      uidParam
+  );
+
+  const [activeMode, setActiveMode] = useState<"sens" | "unlock">(
+    initialUnlock ? "unlock" : "sens"
   );
 
   const [selectedServer, setSelectedServer] = useState<"kipas" | "astute">(
@@ -31,34 +38,33 @@ export default function FreeFireContainer({
   useEffect(() => {
     const p = searchParams.get("tab") || searchParams.get("mode");
     const s = searchParams.get("server") || searchParams.get("port");
+    const o = searchParams.get("ontop");
+    const u = searchParams.get("uid");
 
     if (s === "kipas" || s === "astute") {
       setSelectedServer(s);
       setActiveMode("unlock");
-    } else if (p === "unlock" || p === "sens") {
-      setActiveMode(p);
-    } else if (!p) {
-      setActiveMode("select");
+    } else if (p === "unlock" || o || u) {
+      setActiveMode("unlock");
+    } else if (p === "sens") {
+      setActiveMode("sens");
     }
   }, [searchParams]);
 
-  function selectTool(mode: "select" | "sens" | "unlock", serverChoice?: "kipas" | "astute") {
+  function selectTool(mode: "sens" | "unlock", serverChoice?: "kipas" | "astute") {
     setActiveMode(mode);
     if (serverChoice) {
       setSelectedServer(serverChoice);
     }
     try {
       const url = new URL(window.location.href);
-      if (mode === "select") {
-        url.searchParams.delete("tab");
-        url.searchParams.delete("mode");
+      url.searchParams.set("tab", mode);
+      url.searchParams.delete("mode");
+      if (serverChoice) {
+        url.searchParams.set("server", serverChoice);
+      } else if (mode === "sens") {
         url.searchParams.delete("server");
         url.searchParams.delete("port");
-      } else {
-        url.searchParams.set("tab", mode);
-        if (serverChoice) {
-          url.searchParams.set("server", serverChoice);
-        }
       }
       window.history.replaceState({}, "", url.toString());
     } catch {}
@@ -66,143 +72,44 @@ export default function FreeFireContainer({
 
   return (
     <div className="mdarker-ff-wrapper">
-      {/* 1. MÀN HÌNH CHỌN CÔNG CỤ (2 CARDS) */}
-      {activeMode === "select" && (
-        <div className="ff-select-hub">
-          <div className="ff-select-header">
-            <div className="ff-select-badge">
-              <Sparkles size={14} style={{ color: "#fbbf24" }} />
-              <span>FREE FIRE PRO SUITE</span>
-            </div>
-            <h1 className="ff-select-title">
-              CÔNG CỤ HỖ TRỢ <span className="ff-gradient-fire">FREE FIRE</span>
-            </h1>
-            <p className="ff-select-desc">
-              Chọn dịch vụ bạn muốn sử dụng để tối ưu trải nghiệm và kỹ năng chiến đấu trong game.
-            </p>
-          </div>
-
-          <div className="ff-cards-grid">
-            {/* CARD 1: ĐỘ NHẠY KÉO TÂM */}
+      <PageHeader
+        badge="Free Fire Pro Suite"
+        title="Độ nhạy & Unlock ID Whitelist"
+        description="Tra cứu thông số kéo tâm chuẩn theo từng dòng máy hoặc kích hoạt Whitelist UID trực tiếp qua cổng FF Kipas & Astute."
+        rightSlot={
+          <div className="pro-segmented" role="tablist" aria-label="Chuyển đổi công cụ Free Fire">
             <button
               type="button"
-              className="ff-choice-card sens"
+              role="tab"
+              aria-selected={activeMode === "sens"}
               onClick={() => selectTool("sens")}
+              className={`pro-seg-btn ${activeMode === "sens" ? "active" : ""}`}
             >
-              <div className="ff-card-top">
-                <div className="ff-card-icon-wrap sens">
-                  <Crosshair size={28} />
-                </div>
-                <div className="ff-card-tag sens">
-                  <span>KÉO TÂM AUTO HEADSHOT</span>
-                </div>
-              </div>
-
-              <h2 className="ff-card-title">Độ Nhạy Kéo Tâm Pro</h2>
-              <p className="ff-card-desc">
-                Cung cấp chỉ số độ nhạy chuẩn xác theo từng thiết bị iOS &amp; Android, tối ưu vuốt tâm mượt mà.
-              </p>
-
-              <div className="ff-card-bullets">
-                <div className="ff-bullet-item">
-                  <span className="ff-bullet-check">✓</span>
-                  <span>Tự động nhận diện thiết bị &amp; tính thông số vàng</span>
-                </div>
-                <div className="ff-bullet-item">
-                  <span className="ff-bullet-check">✓</span>
-                  <span>Cẩm nang vuốt tâm chữ J &amp; đặt vị trí nút bắn</span>
-                </div>
-                <div className="ff-bullet-item">
-                  <span className="ff-bullet-check">✓</span>
-                  <span>Chia sẻ mã HUD 2, 3, 4 ngón tay độc quyền</span>
-                </div>
-              </div>
-
-              <div className="ff-card-footer">
-                <span className="ff-card-btn sens">
-                  <span>Mở Bảng Độ Nhạy</span>
-                  <ArrowRight size={16} />
-                </span>
-              </div>
+              <Crosshair size={15} />
+              <span>Độ nhạy &amp; Mã HUD</span>
             </button>
-
-            {/* CARD 2: UNLOCK ID WHITELIST */}
             <button
               type="button"
-              className="ff-choice-card unlock"
+              role="tab"
+              aria-selected={activeMode === "unlock"}
               onClick={() => selectTool("unlock")}
+              className={`pro-seg-btn ${activeMode === "unlock" ? "active" : ""}`}
             >
-              <div className="ff-card-top">
-                <div className="ff-card-icon-wrap unlock">
-                  <Zap size={28} />
-                </div>
-                <div className="ff-card-tag unlock">
-                  <span>HOT • MÁY CHỦ</span>
-                </div>
-              </div>
-
-              <h2 className="ff-card-title">Unlock ID Whitelist</h2>
-              <p className="ff-card-desc">
-                Kích hoạt Whitelist UID trực tiếp cho cả 2 cổng: FF Kipas &amp; Astute.
-              </p>
-
-              <div className="ff-card-bullets">
-                <div className="ff-bullet-item">
-                  <span className="ff-bullet-check">✓</span>
-                  <span>Phân luồng 2 cổng: FF Kipas &amp; Astute</span>
-                </div>
-                <div className="ff-bullet-item">
-                  <span className="ff-bullet-check">✓</span>
-                  <span>Tự động nạp Whitelist và kích hoạt quyền ingame</span>
-                </div>
-                <div className="ff-bullet-item">
-                  <span className="ff-bullet-check">✓</span>
-                  <span>Kích hoạt an toàn, hỗ trợ bot Telegram phụ trợ</span>
-                </div>
-              </div>
-
-              <div className="ff-card-footer">
-                <span className="ff-card-btn unlock">
-                  <span>Kích Hoạt Unlock ID</span>
-                  <ArrowRight size={16} />
-                </span>
-              </div>
+              <Zap size={15} />
+              <span>Unlock ID Whitelist</span>
             </button>
           </div>
-        </div>
-      )}
+        }
+      />
 
-      {/* 2. GIAO DIỆN CÔNG CỤ ĐÃ CHỌN (KÈM NÚT QUAY LẠI CHỌN) */}
-      {activeMode !== "select" && (
-        <div className="ff-active-tool-wrap">
-          {/* HIỂN THỊ NỘI DUNG TƯƠNG ỨNG */}
-          {activeMode === "sens" ? (
-            <>
-              <div className="ff-top-nav-bar">
-                <button
-                  type="button"
-                  onClick={() => selectTool("select")}
-                  className="ff-back-to-cards-btn"
-                >
-                  <ChevronLeft size={16} />
-                  <span>← Chọn Công Cụ Khác</span>
-                </button>
-
-                <div className="ff-current-tool-pill">
-                  <Crosshair size={14} style={{ color: "#fb923c" }} />
-                  <span>Độ Nhạy Kéo Tâm</span>
-                </div>
-              </div>
-              <FreeFireHub adminNote={ffConfig} />
-            </>
-          ) : (
-            <FreeFireUnlockHub
-              config={ffConfig}
-              initialServer={selectedServer}
-              onBack={() => selectTool("select")}
-            />
-          )}
-        </div>
+      {activeMode === "sens" ? (
+        <FreeFireHub adminNote={ffConfig} />
+      ) : (
+        <FreeFireUnlockHub
+          config={ffConfig}
+          initialServer={selectedServer}
+          onBack={() => selectTool("sens")}
+        />
       )}
     </div>
   );

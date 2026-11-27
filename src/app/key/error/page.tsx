@@ -1,4 +1,5 @@
 import Link from "next/link";
+import FocusedFlowShell from "@/components/FocusedFlowShell";
 
 export default async function KeyError({
   searchParams,
@@ -9,29 +10,30 @@ export default async function KeyError({
   const message = m?.slice(0, 300) || "Đã xảy ra lỗi không xác định trong quá trình vượt link.";
 
   return (
-    <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 20 }}>
-      <div className="vt-key-card" style={{ textAlign: "center", maxWidth: 480 }}>
-        <div style={{ margin: "10px auto 16px" }}>
+    <FocusedFlowShell
+      title="Không thể hoàn tất phiên Get Key"
+      backHref="/"
+      backLabel="Trang chủ"
+      maxWidth={480}
+    >
+      <div style={{ textAlign: "center" }}>
+        <div style={{ margin: "4px auto 14px" }}>
           <i
             className="fas fa-exclamation-triangle"
-            style={{ fontSize: 48, color: "#f59e0b" }}
+            style={{ fontSize: 38, color: "#f59e0b" }}
           />
         </div>
 
-        <h1 style={{ fontSize: 20, margin: "0 0 10px", fontWeight: 800 }}>
-          Không thể hoàn tất phiên Get Key
-        </h1>
-
         <div
           style={{
-            padding: "12px 16px",
-            background: "rgba(239, 68, 68, 0.1)",
-            border: "1px solid rgba(239, 68, 68, 0.25)",
-            borderRadius: 12,
-            color: "#ef4444",
-            fontSize: 14,
+            padding: "12px 14px",
+            background: "rgba(244, 135, 113, 0.1)",
+            border: "1px solid rgba(244, 135, 113, 0.28)",
+            borderRadius: 8,
+            color: "#f48771",
+            fontSize: 13.5,
             fontWeight: 600,
-            margin: "0 0 18px",
+            margin: "0 0 16px",
             lineHeight: 1.5,
           }}
         >
@@ -42,16 +44,17 @@ export default async function KeyError({
           style={{
             textAlign: "left",
             fontSize: 13,
-            color: "var(--vi-muted)",
-            background: "var(--vi-bg)",
+            color: "#9d9d9d",
+            background: "#181818",
+            border: "1px solid #333333",
             padding: "14px 16px",
-            borderRadius: 12,
-            marginBottom: 22,
+            borderRadius: 8,
+            marginBottom: 20,
             lineHeight: 1.6,
           }}
         >
-          <strong style={{ color: "var(--vi-text)", display: "block", marginBottom: 6 }}>
-            💡 Hướng dẫn khắc phục:
+          <strong style={{ color: "#ffffff", display: "block", marginBottom: 6 }}>
+            Hướng dẫn khắc phục:
           </strong>
           <ul style={{ margin: 0, paddingLeft: 18 }}>
             <li>Không dùng VPN, Proxy hoặc phần mềm chặn quảng cáo khi vượt link.</li>
@@ -61,12 +64,12 @@ export default async function KeyError({
         </div>
 
         <div className="vt-actions" style={{ justifyContent: "center", gap: 10 }}>
-          <Link href="/" className="vt-btn-primary">
+          <Link href="/" className="pro-btn-primary">
             <i className="fas fa-home" />
             <span>Về trang chính</span>
           </Link>
         </div>
       </div>
-    </main>
+    </FocusedFlowShell>
   );
 }

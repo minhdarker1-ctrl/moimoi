@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
+import FocusedFlowShell from "@/components/FocusedFlowShell";
 
 export default function Error({
   error,
@@ -15,27 +16,40 @@ export default function Error({
   }, [error]);
 
   return (
-    <main>
-      <div className="vt-key-card">
-        <h1 style={{ fontSize: 19, margin: "0 0 8px" }}>Có lỗi xảy ra</h1>
-        <p className="vt-hint">
-          Hệ thống đang gặp sự cố tạm thời. Thử tải lại trang sau vài giây.
-        </p>
+    <FocusedFlowShell
+      title="Có lỗi xảy ra"
+      subtitle="Hệ thống đang gặp sự cố tạm thời. Vui lòng thử tải lại trang."
+      maxWidth={460}
+    >
+      <div style={{ textAlign: "center" }}>
         {process.env.NODE_ENV !== "production" && error?.message && (
-          <p style={{ fontSize: 12, color: "#ef4444", fontFamily: "monospace", marginTop: 8 }}>
+          <p
+            style={{
+              fontSize: 12,
+              color: "#f48771",
+              fontFamily: "monospace",
+              marginBottom: 14,
+              background: "#181818",
+              border: "1px solid #333333",
+              borderRadius: 8,
+              padding: "10px 12px",
+              wordBreak: "break-word",
+            }}
+          >
             {error.message}
           </p>
         )}
-        <div className="vt-actions" style={{ marginTop: 14, justifyContent: "center" }}>
-          <button className="vt-btn-primary" type="button" onClick={reset}>
-            Thử lại
+        <div className="vt-actions" style={{ justifyContent: "center" }}>
+          <button className="pro-btn-primary" type="button" onClick={reset}>
+            <i className="fa-solid fa-rotate-right" aria-hidden="true" />
+            <span>Thử lại</span>
           </button>
-          <Link className="vt-btn-ghost" href="/">
-            Về trang chính
+          <Link className="pro-btn-secondary" href="/">
+            <span>Về trang chính</span>
           </Link>
         </div>
       </div>
-    </main>
+    </FocusedFlowShell>
   );
 }
 

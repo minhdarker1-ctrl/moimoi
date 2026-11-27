@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { db } from "@/lib/db";
 import SiteHeader from "@/components/SiteHeader";
+import SiteFooter from "@/components/SiteFooter";
 import DonateClient from "./DonateClient";
 
 export const revalidate = 60;
@@ -53,6 +54,7 @@ export default async function DonatePage() {
         }))}
       />
       <DonateClient />
+      <SiteFooter siteName={site?.name || "MinSr"} footerText={site?.footerText} />
     </>
   );
 }
