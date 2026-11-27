@@ -386,13 +386,13 @@ export default function FreeFireResultView({
             <span>YÊU CẦU MỞ KHÓA</span>
           </div>
 
-          <h2 style={{ fontSize: 22, fontWeight: 700, margin: "0 0 10px", color: "var(--vi-text)" }}>
-            Mở Khóa Độ Nhạy: <span style={{ color: "#3794ff" }}>{activeDevice}</span>
+          <h2 style={{ fontSize: 22, fontWeight: 800, margin: "0 0 10px", color: "var(--vi-text)" }}>
+            Mở Khóa Độ Nhạy: <span style={{ color: "#ff6b00" }}>{activeDevice}</span>
           </h2>
-          <p style={{ fontSize: 13.5, color: "var(--vi-muted)", margin: "0 auto 20px", maxWidth: 480, lineHeight: 1.6 }}>
+          <p style={{ fontSize: 13, color: "var(--vi-muted)", margin: "0 auto 20px", maxWidth: 480, lineHeight: 1.6 }}>
             Bảng thông số độ nhạy kéo tâm và mã setting HUD cho dòng máy này đang được bảo vệ.
             <br />
-            Mã Key áp dụng cơ chế <b>số lượt sử dụng</b> và <b>thời hạn sống (TTL)</b> chạy song song. Hết thời hạn hoặc dùng đủ số lượt thì Key sẽ tự động hết hiệu lực.
+            Mã Key áp dụng cơ chế <b>số lượt sử dụng</b> và <b>thời hạn sống (TTL)</b> chạy song song. Hết thời hạn hoặc dùng đủ số lượt thì Key sẽ tự động vô hiệu hóa (die). Web không lưu Key trên trình duyệt.
           </p>
 
           {/* Nút Lấy Key */}
@@ -402,16 +402,22 @@ export default function FreeFireResultView({
               target="_blank"
               rel="noopener noreferrer"
               onClick={handleGetKeyClick}
-              className="pro-btn-primary"
+              className="mdarker-ff-submit-btn"
               style={{
-                padding: "11px 22px",
-                fontSize: 14,
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 8,
+                padding: "14px 28px",
+                fontSize: 15,
                 textDecoration: "none",
+                borderRadius: 12,
+                boxShadow: "0 8px 24px rgba(255, 107, 0, 0.35)",
               }}
             >
               <i className="fa-solid fa-key" />
-              <span>Lấy Key Miễn Phí Ngay</span>
-              <i className="fa-solid fa-arrow-up-right-from-square" style={{ fontSize: 11, marginLeft: 2 }} />
+              <span>LẤY KEY MIỄN PHÍ NGAY</span>
+              <i className="fa-solid fa-arrow-up-right-from-square" style={{ fontSize: 12, marginLeft: 2 }} />
             </a>
           </div>
 

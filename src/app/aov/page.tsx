@@ -4,7 +4,6 @@ import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { AOV_TICKET_COOKIE, verifyAovTickets } from "@/lib/crypto";
 import SiteHeader from "@/components/SiteHeader";
-import SiteFooter from "@/components/SiteFooter";
 import AovArenaClient from "./AovArenaClient";
 
 export const dynamic = "force-dynamic";
@@ -61,7 +60,7 @@ export default async function AovPage() {
         }))}
       />
 
-      <main className="pro-subpage-main" style={{ maxWidth: 1080 }}>
+      <main style={{ minHeight: "100vh", paddingTop: 56 }}>
         <AovArenaClient
           initialTickets={isAdmin ? 9999 : ticketCount}
           availableStock={availableStock}
@@ -70,9 +69,11 @@ export default async function AovPage() {
           notice={aovConfig?.notice ?? ""}
           isAdmin={isAdmin}
         />
-      </main>
 
-      <SiteFooter siteName={site.name} footerText={site.footerText} />
+        <footer className="mdarker-footer" style={{ marginTop: 40, paddingBottom: 40 }}>
+          {site.footerText}
+        </footer>
+      </main>
     </>
   );
 }

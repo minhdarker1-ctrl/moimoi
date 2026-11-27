@@ -64,7 +64,7 @@ export default function AppCard({ app }: { app: AppData }) {
         {app.iconUrl && (
           <div className="vthangios-app-icon-wrap mdarker-app-icon-wrap">
             {/* eslint-disable-next-line @next/next/no-img-element -- URL do admin dán */}
-            <img src={app.iconUrl} alt={app.name} width={56} height={56} loading="lazy" />
+            <img src={app.iconUrl} alt={app.name} width={78} height={78} loading="lazy" />
           </div>
         )}
         <div className="vthangios-app-text mdarker-app-text">

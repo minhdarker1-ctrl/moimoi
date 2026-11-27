@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { DONATE_CONFIG, PresetOption } from "@/config/donate";
-import PageHeader from "@/components/PageHeader";
 
 export default function DonateClient() {
   const [selectedPreset, setSelectedPreset] = useState<number>(DONATE_CONFIG.defaultAmount);
@@ -75,13 +74,23 @@ Cảm ơn bạn rất nhiều vì đã tiếp thêm động lực cho mình! ✨
   }
 
   return (
-    <div className="donate-page-container">
-      <div className="pro-subpage-main" style={{ maxWidth: 1080 }}>
-        <PageHeader
-          badge="Community Support"
-          title="Đồng Hành &amp; Duy Trì Máy Chủ"
-          description="Mọi công cụ trên MinSr đều miễn phí. Sự ủng hộ của bạn giúp duy trì hạ tầng máy chủ vận hành ổn định 24/7."
-        />
+    <div className="donate-page-container" style={{ paddingTop: 68 }}>
+      <main className="donate-main-content">
+        {/* HERO SECTION */}
+        <div className="donate-hero-section">
+          <div className="donate-badge-glow">
+            <span className="donate-badge-icon">💖</span>
+            <span className="donate-badge-text">DỰ ÁN CỘNG ĐỒNG • NUÔI TÔI</span>
+          </div>
+          <h1 className="donate-title">
+            Ủng Hộ Tác Giả <span className="donate-pink-gradient">Nuôi Tôi</span> ☕
+          </h1>
+          <p className="donate-subtitle">
+            Mọi công cụ trên MinSr đều hoàn toàn miễn phí. Nếu bạn yêu quý hệ thống, hãy mời mình
+            một cốc trà đá hay ly cà phê để tiếp thêm kinh phí duy trì máy chủ &amp; phát triển thêm nhiều
+            tính năng hữu ích nhé!
+          </p>
+        </div>
 
         {/* 2-COLUMN INTERACTIVE VIETQR GRID */}
         <div className="donate-grid">
@@ -313,7 +322,12 @@ Cảm ơn bạn rất nhiều vì đã tiếp thêm động lực cho mình! ✨
             </p>
           </div>
         </section>
-      </div>
+
+        {/* FOOTER */}
+        <footer className="donate-footer">
+          <p>© 2026 MinSr • Dự Án Nuôi Tôi • Cảm ơn sự đồng hành của bạn</p>
+        </footer>
+      </main>
     </div>
   );
 }

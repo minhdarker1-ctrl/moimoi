@@ -582,18 +582,42 @@ export default function FreeFireUnlockHub({
   const teleLink = config?.teleBotLink || "https://t.me/mdarker_bot";
 
   return (
-    <div className="ff-unlock-grid" aria-label="Xác minh UID Free Fire">
-      {/* CỘT TRÁI: THẺ XÁC MINH UID CHÍNH */}
-      <div className="ff-unlock-main">
-        <div className="kps-verify-card">
-          <div className="kps-verify-header" style={{ textAlign: "left" }}>
-            <h2 className="kps-verify-title" style={{ fontSize: 20 }}>
-              Kích hoạt Whitelist <span>UID</span>
-            </h2>
-            <p className="kps-verify-desc">
-              Chọn máy chủ tương ứng và nhập UID Free Fire. Thời gian xử lý dự kiến: 1–2 phút.
-            </p>
-          </div>
+    <div className="kps-verify-wrapper" aria-label="Xác minh UID Free Fire">
+      {/* 1. HEADER THƯƠNG HIỆU THỐNG NHẤT */}
+      <header className="kps-verify-topbar">
+        <div className="kps-topbar-brand">
+          <span className="kps-brand-badge">MS</span>
+          <span className="kps-brand-title">MINSR UID VERIFY</span>
+          <span className="kps-brand-port-tag">
+            Cổng hiện tại: {server === "astute" ? "ASTUTE" : "FF KIPAS"}
+          </span>
+        </div>
+
+        {onBack && (
+          <button
+            type="button"
+            onClick={onBack}
+            className="kps-topbar-back-btn"
+          >
+            ← Chọn công cụ khác
+          </button>
+        )}
+      </header>
+
+      {/* 2. THẺ XÁC MINH TRUNG TÂM (CENTERED CARD) */}
+      <main className="kps-verify-card">
+        {/* Dải sáng Neon Cyan ở đỉnh thẻ */}
+        <div className="kps-card-glow-bar" aria-hidden="true" />
+
+        {/* TIÊU ĐỀ CHÍNH & MÔ TẢ */}
+        <div className="kps-verify-header">
+          <h1 className="kps-verify-title">
+            VERIFY YOUR <span>UID</span>
+          </h1>
+          <p className="kps-verify-desc">
+            Nhập UID Free Fire để bắt đầu xác minh. Thời gian xử lý dự kiến: 1–2 phút.
+          </p>
+        </div>
 
         {/* 3. BỘ CHỌN CỔNG CHUYỂN ĐỔI (SEGMENTED PILL SWITCHER) */}
         <div className="kps-port-section">
@@ -988,60 +1012,46 @@ export default function FreeFireUnlockHub({
           </div>
         )}
 
-        {/* Tuyên bố dịch vụ */}
+        {/* TÙY CHỌN HỖ TRỢ TELEGRAM BOT */}
+        <div className="kps-tele-bridge-wrap">
+          <div className="kps-divider">
+            <span>HOẶC SỬ DỤNG BOT TELEGRAM</span>
+          </div>
+
+          <a
+            href={teleLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="kps-tele-btn"
+          >
+            <div className="kps-tele-icon-circle">
+              <i className="fa-brands fa-telegram" />
+            </div>
+            <div className="kps-tele-text">
+              <strong>Kích hoạt qua Telegram Bot @mdarker_bot</strong>
+              <small>Nhận kết quả tự động &amp; lưu thông báo riêng tư</small>
+            </div>
+            <i className="fa-solid fa-arrow-up-right-from-square kps-tele-arrow" />
+          </a>
+        </div>
+
+        {/* TUYÊN BỐ MIỄN TRỪ PHÁP LÝ CHUẨN KIỂM DUYỆT */}
         <p className="kps-disclaimer">
           Dịch vụ độc lập, không thuộc sở hữu hoặc liên kết với Garena.
         </p>
-      </div>
-    </div>
+      </main>
 
-    {/* CỘT PHẢI: SIDEBAR TRẠNG THÁI & LỊCH SỬ HOẠT ĐỘNG */}
-    <aside className="ff-unlock-side" aria-label="Trạng thái máy chủ và lịch sử">
-      <div className="pro-side-card">
-        <div className="pro-side-card-title">
-          <i className="fa-solid fa-server" aria-hidden="true" />
-          <span>Trạng thái Worker tự động</span>
-        </div>
-        <div className={`pro-worker-pill ${workerStatus?.isOnline ? "online" : "offline"}`}>
-          <span className="pro-status-dot" aria-hidden="true" />
-          <span>
-            {workerStatus === null
-              ? "Đang kiểm tra kết nối..."
-              : workerStatus.isOnline
-              ? `Đang hoạt động (${workerStatus.lastSeenSeconds}s trước)`
-              : "Worker đang tạm nghỉ"}
-          </span>
-        </div>
-        <p className="pro-side-card-desc">
-          Cổng đang chọn: <strong>{server === "astute" ? "Astute" : "FF Kipas"}</strong>. Hỗ trợ đổi cổng nhanh nếu máy chủ đang bận.
-        </p>
-      </div>
+      {/* 6. CHÂN TRANG BẢN QUYỀN */}
+      <footer className="kps-footer">
+        © 2026 MinSr Verify System. All rights reserved.
+      </footer>
 
-      <div className="pro-side-card">
-        <div className="pro-side-card-title">
-          <i className="fa-brands fa-telegram" aria-hidden="true" />
-          <span>Kích hoạt qua Telegram Bot</span>
-        </div>
-        <p className="pro-side-card-desc">
-          Sử dụng bot tự động để nhận kết quả trực tiếp và lưu lịch sử riêng tư.
-        </p>
-        <a
-          href={teleLink}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="pro-btn-secondary"
-          style={{ width: "100%", justifyContent: "center", fontSize: 13 }}
-        >
-          <span>Mở Bot @mdarker_bot</span>
-          <i className="fa-solid fa-arrow-up-right-from-square" aria-hidden="true" />
-        </a>
-      </div>
-
+      {/* 7. LIVE RECENT UNLOCK TICKER */}
       {recentLogs.length > 0 && (
-        <div className="kps-recent-box" style={{ marginTop: 0 }} aria-label="Hoạt động kích hoạt gần đây">
+        <aside className="kps-recent-box" aria-label="Hoạt động kích hoạt gần đây">
           <div className="kps-recent-title">
             <span className="live-dot" />
-            <span>Kích hoạt gần đây</span>
+            <span>KÍCH HOẠT GẦN ĐÂY TRÊN HỆ THỐNG</span>
           </div>
 
           <div className="kps-recent-list">
@@ -1054,7 +1064,7 @@ export default function FreeFireUnlockHub({
                   {item.server}
                   {item.source === "TELEGRAM" && (
                     <span className="kps-source-tele" title="Kích hoạt từ Telegram Bot @mdarker_bot">
-                      Tele
+                      ⚡ Tele
                     </span>
                   )}
                 </span>
@@ -1062,9 +1072,8 @@ export default function FreeFireUnlockHub({
               </div>
             ))}
           </div>
-        </div>
+        </aside>
       )}
-    </aside>
-  </div>
+    </div>
   );
 }

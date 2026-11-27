@@ -3,7 +3,6 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import SiteHeader from "@/components/SiteHeader";
-import SiteFooter from "@/components/SiteFooter";
 import FreeFireResultView from "@/components/FreeFireResultView";
 
 export const dynamic = "force-dynamic";
@@ -97,13 +96,20 @@ export default async function FreeFireResultPage({
         }))}
       />
 
-      <main className="pro-subpage-main" style={{ maxWidth: 860 }}>
+      <main style={{ maxWidth: 860, margin: "0 auto", padding: "20px 16px 60px" }}>
         {/* Nút điều hướng */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
           <Link
             href="/freefire"
-            className="pro-btn-secondary"
-            style={{ padding: "8px 14px", fontSize: 13 }}
+            className="mdarker-empty-btn"
+            style={{
+              textDecoration: "none",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "8px 16px",
+              fontSize: 13,
+            }}
           >
             <i className="fa-solid fa-arrow-left" aria-hidden="true" />
             <span>Tra cứu dòng máy khác</span>
@@ -111,8 +117,15 @@ export default async function FreeFireResultPage({
 
           <Link
             href="/"
-            className="pro-btn-secondary"
-            style={{ padding: "8px 14px", fontSize: 13 }}
+            className="mdarker-empty-btn"
+            style={{
+              textDecoration: "none",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "8px 16px",
+              fontSize: 13,
+            }}
           >
             <i className="fa-solid fa-house" aria-hidden="true" />
             <span>Trang chủ</span>
@@ -126,9 +139,11 @@ export default async function FreeFireResultPage({
           config={configProps}
           isAdmin={isAdmin}
         />
-      </main>
 
-      <SiteFooter siteName={site.name} footerText={site.footerText} />
+        <footer className="mdarker-footer" style={{ marginTop: 40 }}>
+          {site.footerText}
+        </footer>
+      </main>
     </>
   );
 }

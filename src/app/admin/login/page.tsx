@@ -1,9 +1,9 @@
 "use client";
 
 import { Suspense, useState, useTransition } from "react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { ShieldCheck, UserCheck, Lock, Eye, EyeOff, LogIn } from "lucide-react";
-import FocusedFlowShell from "@/components/FocusedFlowShell";
+import { ShieldCheck, UserCheck, Lock, Eye, EyeOff, ArrowLeft, LogIn } from "lucide-react";
 import { login } from "../actions";
 
 function AdminLoginForm() {
@@ -34,23 +34,22 @@ function AdminLoginForm() {
   };
 
   return (
-    <div>
+    <div className="auth-card" style={{ maxWidth: 440, margin: "40px auto" }}>
       <div className="auth-header">
         <div
           className="auth-badge"
           style={{
-            background: "rgba(0, 122, 204, 0.14)",
-            border: "1px solid rgba(55, 148, 255, 0.3)",
-            color: "#3794ff",
+            background: "linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(168, 85, 247, 0.2))",
+            color: "#ef4444",
           }}
         >
-          <ShieldCheck size={28} />
+          <ShieldCheck size={32} />
         </div>
-        <h1 className="auth-title" style={{ fontSize: 21, marginTop: 8 }}>
+        <h1 className="auth-title" style={{ fontSize: 22, marginTop: 8 }}>
           Đăng Nhập Quản Trị
         </h1>
         <p className="auth-subtitle">
-          Nhập tài khoản và mật khẩu quản trị viên để truy cập Control Panel.
+          Vui lòng nhập tài khoản và mật khẩu quản trị viên để truy cập Control Panel.
         </p>
       </div>
 
@@ -114,7 +113,7 @@ function AdminLoginForm() {
           className="auth-submit-btn"
           disabled={isPending || !password}
           style={{
-            background: "#007acc",
+            background: "linear-gradient(135deg, #6366f1, #a855f7)",
             marginTop: 8,
           }}
         >
@@ -128,17 +127,28 @@ function AdminLoginForm() {
           )}
         </button>
       </form>
+
+      <div className="auth-footer" style={{ marginTop: 20 }}>
+        <Link href="/" style={{ color: "var(--vi-muted)", fontSize: 13 }}>
+          ← Về lại trang chủ người dùng
+        </Link>
+      </div>
     </div>
   );
 }
 
 export default function LoginPage() {
   return (
-    <FocusedFlowShell backHref="/" backLabel="Về trang chủ" maxWidth={440}>
-      <Suspense fallback={<div style={{ textAlign: "center", color: "#9d9d9d", padding: 24 }}>Đang tải...</div>}>
+    <div className="auth-wrapper" style={{ padding: "40px 16px" }}>
+      <Link href="/" className="auth-back-link">
+        <ArrowLeft size={16} />
+        <span>Về trang chủ</span>
+      </Link>
+
+      <Suspense fallback={<div className="auth-card" style={{ maxWidth: 440, margin: "40px auto" }}>Đang tải...</div>}>
         <AdminLoginForm />
       </Suspense>
-    </FocusedFlowShell>
+    </div>
   );
 }
 
