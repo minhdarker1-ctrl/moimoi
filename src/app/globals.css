@@ -6469,9 +6469,14 @@ position: relative;
 
 .cyber-avatar-container {
 position: relative;
-  width: clamp(140px, 14vw, 185px);
-  height: clamp(140px, 14vw, 185px);
-  margin: 0 auto 6px;
+  width: clamp(148px, 14.5vw, 188px);
+  height: clamp(148px, 14.5vw, 188px);
+  margin: 0 auto 10px;
+  transition: transform 0.3s ease;
+}
+
+.cyber-avatar-container:hover {
+  transform: translateY(-2px);
 }
 
 .cyber-avatar-aura {
@@ -6491,6 +6496,10 @@ position: absolute;
 
 [data-theme="dark"] .cyber-avatar-aura, body.vthangios-dark .cyber-avatar-aura {
 background: radial-gradient(circle, rgba(0, 122, 204, 0.3) 0%, rgba(78, 201, 176, 0.12) 50%, transparent 72%);
+}
+
+[data-theme="dark"] .cyber-avatar-aura.has-frame, body.vthangios-dark .cyber-avatar-aura.has-frame {
+background: radial-gradient(circle, rgba(239, 68, 68, 0.42) 0%, rgba(56, 189, 248, 0.24) 52%, transparent 74%);
 }
 
 @keyframes cyberAuraBreathing {
@@ -6520,6 +6529,10 @@ position: relative;
   background: #ffffff;
 }
 
+.cyber-avatar-ring:not(.has-frame) {
+  overflow: hidden;
+}
+
 [data-theme="dark"] .cyber-avatar-ring, body.vthangios-dark .cyber-avatar-ring {
 background: #1e1e1e;
   border-color: #3c3c3c;
@@ -6541,9 +6554,19 @@ width: 86%;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
 }
 
+.cyber-avatar-ring:not(.has-frame) .cyber-avatar-img {
+  width: 100%;
+  height: 100%;
+  transform: scale(1.24) translateY(7%);
+  box-shadow: none;
+}
+
 .cyber-avatar-ring.has-frame .cyber-avatar-img {
 width: 100%;
   height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #ffffff;
 }
 
 .cyber-avatar-frame-overlay {
@@ -6551,11 +6574,12 @@ position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 124%;
-  height: 124%;
+  width: 120%;
+  height: 120%;
+  object-fit: contain;
   pointer-events: none;
   z-index: 2;
-  filter: drop-shadow(0 14px 30px rgba(0, 0, 0, 0.55));
+  filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.6));
 }
 
 .cyber-avatar-fallback {
@@ -13649,12 +13673,27 @@ background: rgba(255, 255, 255, 0.1);
   font-size: 12px;
 }
 
+.vsc-brand-avatar-wrap {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1.5px solid rgba(56, 189, 248, 0.55);
+  background: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
 .vsc-brand-avatar {
-  width: 26px;
-  height: 26px;
-  border-radius: 6px;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  border: 1px solid #3c3c3c;
+  transform: scale(1.26) translateY(7%);
+  display: block;
+  border: none;
+  border-radius: 0;
 }
 
 .vsc-brand-name {

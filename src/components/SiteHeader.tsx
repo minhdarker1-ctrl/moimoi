@@ -89,8 +89,10 @@ export default function SiteHeader({
                 title="Cuộn lên đầu trang"
               >
                 {avatarUrl ? (
-                  /* eslint-disable-next-line @next/next/no-img-element */
-                  <img src={avatarUrl} alt={siteName} width={28} height={28} className="vsc-brand-avatar" />
+                  <span className="vsc-brand-avatar-wrap">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={avatarUrl} alt={siteName} width={28} height={28} className="vsc-brand-avatar" />
+                  </span>
                 ) : (
                   <span className="vsc-brand-mark" aria-hidden="true">
                     <i className="fa-solid fa-terminal" />
@@ -105,8 +107,10 @@ export default function SiteHeader({
             ) : (
               <Link href="/" className="vsc-brand-btn" title="Về trang chủ">
                 {avatarUrl ? (
-                  /* eslint-disable-next-line @next/next/no-img-element */
-                  <img src={avatarUrl} alt={siteName} width={28} height={28} className="vsc-brand-avatar" />
+                  <span className="vsc-brand-avatar-wrap">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={avatarUrl} alt={siteName} width={28} height={28} className="vsc-brand-avatar" />
+                  </span>
                 ) : (
                   <span className="vsc-brand-mark" aria-hidden="true">
                     <i className="fa-solid fa-terminal" />

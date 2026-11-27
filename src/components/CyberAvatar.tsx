@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface CyberAvatarProps {
   avatarUrl?: string | null;
@@ -19,7 +19,18 @@ export default function CyberAvatar({
     : avatarFrameUrl;
 
   const [frameError, setFrameError] = useState(false);
-  const [frameLoaded, setFrameLoaded] = useState(false);
+  const frameRef = useRef<HTMLImageElement | null>(null);
+
+  useEffect(() => {
+    setFrameError(false);
+    if (
+      frameRef.current &&
+      frameRef.current.complete &&
+      frameRef.current.naturalWidth === 0
+    ) {
+      setFrameError(true);
+    }
+  }, [normalizedFrame]);
 
   const hasValidFrame = Boolean(normalizedFrame && !frameError);
 
@@ -45,16 +56,13 @@ export default function CyberAvatar({
         {normalizedFrame && !frameError && (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
+            ref={frameRef}
             className="cyber-avatar-frame-overlay"
             src={normalizedFrame}
             alt=""
             aria-hidden="true"
-            onLoad={() => setFrameLoaded(true)}
+            fetchPriority="high"
             onError={() => setFrameError(true)}
-            style={{
-              opacity: frameLoaded ? 1 : 0,
-              transition: "opacity 0.25s ease-in-out",
-            }}
           />
         )}
       </div>
